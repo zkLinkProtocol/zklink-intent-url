@@ -4,13 +4,15 @@ import { AppController } from './app.controller';
 import { LoginController } from './login/login.controller';
 import { LoginService } from './login/login.service';
 import { AppService } from './app.service';
+import { ActionsModule } from './actions/actions.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env'
-    })
+      envFilePath: '.env',
+    }),
+    ActionsModule,
   ],
   controllers: [AppController, LoginController],
   providers: [AppService, LoginService],

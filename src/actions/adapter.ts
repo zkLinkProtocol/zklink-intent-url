@@ -12,11 +12,11 @@ export class RegisteredActions {
     this.actions[id] = action;
   }
 
-  get(id: string): Action | undefined {
+  get(id: ActionId): Action | undefined {
     return this.actions[id];
   }
 
-  getAll(): { [id: string]: Action } {
+  getAll(): { [id: ActionId]: Action } {
     return { ...this.actions };
   }
 }
