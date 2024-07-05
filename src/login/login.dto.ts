@@ -1,11 +1,30 @@
-import { IsNotEmpty, IsString, IsNumberString } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
-export class LoginDto {
+// request dto
+export class LoginByPasskeyRequestDto {
   @IsNotEmpty()
-  @IsNumberString()
+  @IsString()
+  publicKey: string;
+
+  @IsNotEmpty()
+  @IsString()
+  message: string;
+
+  @IsNotEmpty()
+  @IsString()
+  signature: string;
+}
+
+export class LoginByPrivatekeyRequestDto extends LoginByPasskeyRequestDto {}
+
+// response dto
+export class LoginByPasskeyResponseDto {
+  @ApiProperty({ description: 'Token name' })
   token: string;
+}
 
-  @IsNotEmpty()
-  @IsNumberString()
-  expireTime: string;
+export class LoginByPrivatekeyResponseDto {
+  @ApiProperty({ description: 'Token name' })
+  token: string;
 }
