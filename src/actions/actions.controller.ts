@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { ActionsService } from './actions.service';
 import { ActionId } from './adapter';
-import { Action } from './interface';
+import { Action, ActionMetadata } from './interface';
 import { Transaction } from 'ethers';
 
 @Controller('actions')
@@ -17,8 +17,18 @@ export class ActionsController {
   constructor(private readonly actionsService: ActionsService) {}
 
   @Get()
-  findAll(): { [id: ActionId]: Action } {
-    return this.actionsService.findAll();
+  findAll(): { [id: ActionId]: ActionMetadata } {
+    const actions = this.actionsService.findAll();
+    const actionsMetadata: { [id: ActionId]: ActionMetadata } = Object.keys(
+      actions,
+    ).reduce(
+      (metadataMap, id) => {
+        metadataMap[id] = actions[id].getMetadata();
+        return metadataMap;
+      },
+      {} as { [id: ActionId]: ActionMetadata },
+    );
+    return actionsMetadata;
   }
 
   @Get(':id')

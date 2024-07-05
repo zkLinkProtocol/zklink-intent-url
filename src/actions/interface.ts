@@ -1,6 +1,6 @@
-import { Transaction } from "ethers";
+import { Transaction } from 'ethers';
 
-export interface Action {
+export interface ActionMetadata {
   title: string;
   description: string;
   metadata: {
@@ -29,13 +29,17 @@ export interface Action {
       type: 'input' | 'searchSelect' | 'searchSelectErc20' | 'text';
       regex: string;
       regexDesc: string;
-      options: () => {
+      options: {
         label: string;
         value: string;
       }[];
     }[];
     humanize: string;
   };
+}
+
+export interface Action {
+  getMetadata(): ActionMetadata;
   generateTransaction(parameters: any[]): Transaction;
   postTransaction(signedTransaction: Transaction): boolean;
 }

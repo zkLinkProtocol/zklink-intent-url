@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { Action } from './interface';
+import { Action, ActionMetadata } from './interface';
 import { ActionId, RegisteredActions } from './adapter';
 import { REGISTERED_ACTIONS } from './adapter.provider';
 import { Transaction } from 'ethers';
