@@ -1,6 +1,6 @@
 import { Transaction } from 'ethers';
 
-export class ActionMetadata {
+export interface ActionMetadata {
   title: string;
   description: string;
   metadata: {
