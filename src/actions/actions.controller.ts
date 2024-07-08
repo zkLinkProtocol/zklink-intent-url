@@ -14,6 +14,7 @@ import { Transaction } from 'ethers';
 import { BaseController } from 'src/common/base.controller';
 import { ResponseDto } from 'src/common/response.dto';
 import { CommonApiOperation } from 'src/common/base.decorators';
+import { ActionResponseDto } from './actions.dto';
 
 @Controller('actions')
 export class ActionsController extends BaseController {
@@ -23,23 +24,14 @@ export class ActionsController extends BaseController {
 
   @Get()
   @CommonApiOperation('Get all actions.')
-  findAll(): Promise<ResponseDto<{ [id: ActionId]: ActionMetadata }>> {
+  findAll(): Promise<ResponseDto<ActionResponseDto[]>> {
     const actions = this.actionsService.findAll();
-    const actionsMetadata: { [id: ActionId]: ActionMetadata } = Object.keys(
-      actions,
-    ).reduce(
-      (metadataMap, id) => {
-        metadataMap[id] = actions[id].getMetadata();
-        return metadataMap;
-      },
-      {} as { [id: ActionId]: ActionMetadata },
-    );
-    return this.success(actionsMetadata);
+    return this.success(actions);
   }
 
   @Get(':id')
   @CommonApiOperation('Get action by Id.')
-  find(@Param('id') id: ActionId): Promise<ResponseDto<Action>> {
+  find(@Param('id') id: ActionId): Promise<ResponseDto<ActionResponseDto>> {
     return this.success(this.actionsService.find(id));
   }
 
