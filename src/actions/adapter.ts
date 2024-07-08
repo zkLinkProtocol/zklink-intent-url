@@ -24,7 +24,7 @@ export class RegisteredActions {
   }
 }
 
-const logger = new Logger('adapter');
+const logger = new Logger('action-adapter');
 
 export function loadActions(): RegisteredActions {
   function isAction(obj: any): obj is Action {
