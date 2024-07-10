@@ -3,19 +3,24 @@ import { Action, ActionMetadata } from './interface';
 import { ActionId, RegisteredActions } from './adapter';
 import { REGISTERED_ACTIONS } from './adapter.provider';
 import { Transaction } from 'ethers';
+import { ActionResponseDto } from './actions.dto';
 
 @Injectable()
 export class ActionsService {
   constructor(
     @Inject(REGISTERED_ACTIONS) private registeredActions: RegisteredActions,
-  ) {}
+  ) { }
 
-  findAll(): { [id: ActionId]: Action } {
-    return this.registeredActions.getAll();
+  findAll(): ActionResponseDto[] {
+    const actions = this.registeredActions.getAll();
+    return Object.keys(actions).map((id) => {
+      return new ActionResponseDto(id, actions[id].getMetadata());
+    });
   }
 
-  find(id: ActionId): Action {
-    return this.registeredActions.get(id);
+  find(id: ActionId): ActionResponseDto | null {
+    const action = this.registeredActions.get(id);
+    return action ? new ActionResponseDto(id, action.getMetadata()) : null;
   }
 
   generateTransaction(id: ActionId, params: any[]): Transaction {
@@ -33,5 +38,4 @@ export class ActionsService {
     }
     return action.postTransaction(tx);
   }
-
 }
