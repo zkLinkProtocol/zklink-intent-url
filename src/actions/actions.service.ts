@@ -9,7 +9,7 @@ import { ActionResponseDto } from './actions.dto';
 export class ActionsService {
   constructor(
     @Inject(REGISTERED_ACTIONS) private registeredActions: RegisteredActions,
-  ) { }
+  ) {}
 
   findAll(): ActionResponseDto[] {
     const actions = this.registeredActions.getAll();
