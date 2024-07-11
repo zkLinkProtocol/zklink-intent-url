@@ -4,7 +4,7 @@ import { AppController } from './app.controller';
 import { LoginController } from './login/login.controller';
 import { LoginService } from './login/login.service';
 import { AppService } from './app.service';
-import { ActionsModule } from './actions/actions.module';
+import { ActionModule } from './action/action.module';
 import { ActionUrlModule } from './action-url/action-url.module';
 
 @Module({
@@ -13,7 +13,7 @@ import { ActionUrlModule } from './action-url/action-url.module';
       isGlobal: true,
       envFilePath: '.env',
     }),
-    ActionsModule,
+    ActionModule,
     ActionUrlModule,
   ],
   controllers: [AppController, LoginController],

@@ -1,12 +1,8 @@
-import {
-  Action,
-  ActionMetadata,
-  GeneratedTransaction,
-} from 'src/actions/interface';
+import type { Action, GeneratedTransaction } from 'src/common/interfaces';
 import { ethers } from 'ethers';
 import { Token, TradeType, Percent, CurrencyAmount } from '@uniswap/sdk-core';
 import { Pool, Route, Trade, SwapRouter } from '@uniswap/v3-sdk';
-import { ERC20Tokens } from '../const';
+import { ERC20Tokens } from './const';
 
 interface Params {
   // fromToken: string;
@@ -187,7 +183,7 @@ const action: Action = {
       });
     const generatedTransaction = {
       tx: tx,
-      should_send: true,
+      shouldSend: true,
     };
     return generatedTransaction;
   },

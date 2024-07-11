@@ -1,4 +1,4 @@
-import { Transaction, TransactionRequest } from 'ethers';
+import type { TransactionRequest } from 'ethers';
 
 export interface ActionMetadata {
   title: string;
@@ -40,11 +40,12 @@ export interface ActionMetadata {
 
 export interface GeneratedTransaction {
   tx: TransactionRequest;
-  should_send: boolean;
+  shouldSend: boolean;
 }
+
+export type ActionId = string;
 
 export interface Action {
   getMetadata(): ActionMetadata;
   generateTransaction(parameters: { [key: string]: any }): GeneratedTransaction;
-  // descriptionAfterTransaction(): { [key: string]: any };
 }
