@@ -1,9 +1,9 @@
-import { Transaction } from 'ethers';
+import { Transaction, TransactionRequest } from 'ethers';
 
 export interface ActionMetadata {
   title: string;
   description: string;
-  metadata: {
+  metadata?: {
     [key: string]: string;
   };
   network: {
@@ -17,9 +17,9 @@ export interface ActionMetadata {
   };
   author: {
     name: string;
-    x: string;
-    github: string;
-    discord: string;
+    x?: string;
+    github?: string;
+    discord?: string;
   };
   intent: {
     components: {
@@ -29,17 +29,22 @@ export interface ActionMetadata {
       type: 'input' | 'searchSelect' | 'searchSelectErc20' | 'text';
       regex: string;
       regexDesc: string;
-      options: {
+      options?: {
         label: string;
         value: string;
       }[];
     }[];
-    humanize: string;
+    humanize?: string;
   };
+}
+
+export interface GeneratedTransaction {
+  tx: TransactionRequest;
+  should_send: boolean;
 }
 
 export interface Action {
   getMetadata(): ActionMetadata;
-  generateTransaction(parameters: any[]): Transaction;
-  postTransaction(signedTransaction: Transaction): boolean;
+  generateTransaction(parameters: { [key: string]: any }): GeneratedTransaction;
+  // descriptionAfterTransaction(): { [key: string]: any };
 }

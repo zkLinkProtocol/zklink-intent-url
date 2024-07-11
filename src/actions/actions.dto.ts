@@ -5,7 +5,7 @@ export class ActionResponseDto {
   id: ActionId;
   title: string;
   description: string;
-  metadata: {
+  metadata?: {
     [key: string]: string;
   };
   network: {
@@ -19,9 +19,9 @@ export class ActionResponseDto {
   };
   author: {
     name: string;
-    x: string;
-    github: string;
-    discord: string;
+    x?: string;
+    github?: string;
+    discord?: string;
   };
   intent: {
     components: {
@@ -31,12 +31,12 @@ export class ActionResponseDto {
       type: 'input' | 'searchSelect' | 'searchSelectErc20' | 'text';
       regex: string;
       regexDesc: string;
-      options: {
+      options?: {
         label: string;
         value: string;
       }[];
     }[];
-    humanize: string;
+    humanize?: string;
   };
 
   constructor(id: ActionId, metadata: ActionMetadata) {

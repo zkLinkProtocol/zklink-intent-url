@@ -1,9 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { Action, ActionMetadata } from './interface';
 import { ActionId, RegisteredActions } from './adapter';
 import { REGISTERED_ACTIONS } from './adapter.provider';
-import { Transaction } from 'ethers';
+import { Transaction, TransactionRequest } from 'ethers';
 import { ActionResponseDto } from './actions.dto';
+import { GeneratedTransaction } from './interface';
 
 @Injectable()
 export class ActionsService {
@@ -23,19 +23,14 @@ export class ActionsService {
     return action ? new ActionResponseDto(id, action.getMetadata()) : null;
   }
 
-  generateTransaction(id: ActionId, params: any[]): Transaction {
+  generateTransaction(
+    id: ActionId,
+    params: { [key: string]: any },
+  ): GeneratedTransaction {
     const action = this.registeredActions.get(id);
     if (!action) {
       throw new Error(`Action with id '${id}' not found.`);
     }
     return action.generateTransaction(params);
-  }
-
-  postTransaction(id: ActionId, tx: Transaction): boolean {
-    const action = this.registeredActions.get(id);
-    if (!action) {
-      throw new Error(`Action with id '${id}' not found.`);
-    }
-    return action.postTransaction(tx);
   }
 }
