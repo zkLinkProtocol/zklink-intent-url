@@ -1,38 +1,29 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-} from '@nestjs/common';
-import { ActionsService } from './actions.service';
-import { ActionId } from './adapter';
-import { Transaction, TransactionRequest } from 'ethers';
+import { Controller, Get, Post, Body, Param } from '@nestjs/common';
 import { BaseController } from 'src/common/base.controller';
 import { ResponseDto } from 'src/common/response.dto';
 import { CommonApiOperation } from 'src/common/base.decorators';
-import { ActionResponseDto } from './actions.dto';
-import { GeneratedTransaction } from './interface';
 
-@Controller('actions')
-export class ActionsController extends BaseController {
-  constructor(private readonly actionsService: ActionsService) {
+import { ActionService } from './action.service';
+import { ActionResponseDto } from './dto/actions.dto';
+import type { GeneratedTransaction, ActionId } from 'src/common/interfaces';
+
+@Controller('action')
+export class ActionController extends BaseController {
+  constructor(private readonly actionStoreService: ActionService) {
     super();
   }
 
   @Get()
   @CommonApiOperation('Get all actions.')
   findAll(): Promise<ResponseDto<ActionResponseDto[]>> {
-    const actions = this.actionsService.findAll();
+    const actions = this.actionStoreService.getActions();
     return this.success(actions);
   }
 
   @Get(':id')
   @CommonApiOperation('Get action by Id.')
   find(@Param('id') id: ActionId): Promise<ResponseDto<ActionResponseDto>> {
-    return this.success(this.actionsService.find(id));
+    return this.success(this.actionStoreService.getAction(id));
   }
 
   @Post(':id/transaction/generate')
@@ -41,6 +32,6 @@ export class ActionsController extends BaseController {
     @Param('id') id: ActionId,
     @Body() body: any[],
   ): Promise<ResponseDto<GeneratedTransaction>> {
-    return this.success(this.actionsService.generateTransaction(id, body));
+    return this.success(this.actionStoreService.generateTransaction(id, body));
   }
 }

@@ -1,4 +1,4 @@
-import { ActionId } from 'src/actions/adapter';
+import { ActionId } from 'src/common/interfaces';
 import {
   IsNotEmpty,
   IsDecimal,
