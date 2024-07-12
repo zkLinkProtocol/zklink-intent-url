@@ -17,6 +17,17 @@
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
+    "paths": {
+      "@action/example": [
+        "libs/example/src"
+      ],
+      "@action/example/*": [
+        "libs/example/src/*"
+      ]
+    }
   },
-  "include": ["src/**/*"]
+  // "include": [
+  //   "src/**/*",
+  //   "libs/swap"
+  // ]
 }
