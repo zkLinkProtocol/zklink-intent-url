@@ -3,6 +3,18 @@
   "collection": "@nestjs/schematics",
   "sourceRoot": "src",
   "compilerOptions": {
-    "deleteOutDir": true
+    "deleteOutDir": true,
+    "webpack": true
+  },
+  "projects": {
+    "example": {
+      "type": "library",
+      "root": "libs/example",
+      "entryFile": "index",
+      "sourceRoot": "libs/example/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/example/tsconfig.lib.json"
+      }
+    }
   }
 }
