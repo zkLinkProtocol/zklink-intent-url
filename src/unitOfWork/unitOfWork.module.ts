@@ -1,6 +1,6 @@
-import { Module } from "@nestjs/common";
-import { MetricsModule } from "../metrics";
-import { UnitOfWork } from "./unitOfWork.provider";
+import { Module } from '@nestjs/common';
+import { MetricsModule } from '../metrics';
+import { UnitOfWork } from './unitOfWork.provider';
 
 @Module({
   imports: [MetricsModule],
