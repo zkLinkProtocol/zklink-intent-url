@@ -10,13 +10,13 @@ export class BaseController {
     if (!meta) {
       return {
         code: 200,
-        message: '',
+        message: 'succdess',
         data: data,
       };
     } else {
       return {
         code: 200,
-        message: '',
+        message: 'succdess',
         meta: meta,
         data: data,
       };
@@ -25,7 +25,7 @@ export class BaseController {
 
   protected async error(
     errmsg: string,
-    code: number = 400,
+    code: number = 500,
   ): Promise<ResponseDto<null>> {
     return {
       code,

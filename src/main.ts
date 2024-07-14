@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import logger from './logger';
 import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { ExceptionsFilter } from './exceptions.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { logger });
@@ -27,8 +28,9 @@ async function bootstrap() {
 
   app.enableShutdownHooks();
   app.setGlobalPrefix('api');
+  app.useGlobalFilters(new ExceptionsFilter());
 
-  const port = configService.get<string>('PORT');
+  const port = configService.get<string>('port');
   await app.listen(port);
   logger.log(`App was listend port : ${port}`);
 }

@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-// import { Type } from "class-transformer";
 
 export class PagingMetaDto {
   @ApiProperty({
@@ -8,13 +7,6 @@ export class PagingMetaDto {
     example: '1',
   })
   public readonly currentPage: number;
-
-  @ApiProperty({
-    type: Number,
-    description: 'item count',
-    example: '1',
-  })
-  public readonly itemCount: number;
 
   @ApiProperty({
     type: Number,
@@ -72,6 +64,5 @@ export class ResponseDto<T> {
       'if errno is 0, it will be the response data, otherwise it will be null',
     example: {},
   })
-  //@Type(() => T)
   data: T | null;
 }
