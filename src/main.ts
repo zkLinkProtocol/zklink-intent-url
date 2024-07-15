@@ -16,24 +16,24 @@ async function bootstrap() {
 
   const configService = app.get(ConfigService);
 
+  app.enableShutdownHooks();
+  app.setGlobalPrefix('api');
+  app.useGlobalFilters(new ExceptionsFilter());
+
   const swaggerConfig = new DocumentBuilder()
     .setTitle('zkIntent API DOCS')
     .setDescription('zkIntent api document.')
     .setVersion('1.0')
     .addTag('API')
+    .setBasePath('api')
     .addBearerAuth()
     .build();
 
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('docs', app, document, {
     jsonDocumentUrl: 'swagger/json',
-    useGlobalPrefix: true,
     customSiteTitle: 'zkIntent docs',
   });
-
-  app.enableShutdownHooks();
-  app.setGlobalPrefix('api');
-  app.useGlobalFilters(new ExceptionsFilter());
 
   const port = configService.get<string>('port');
   await app.listen(port);
