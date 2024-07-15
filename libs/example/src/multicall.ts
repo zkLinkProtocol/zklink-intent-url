@@ -49,6 +49,8 @@ async function constructTransaction() {
   return tx;
 }
 
+console.log(constructTransaction);
+
 class MulticallAction implements Action {
   getMetadata(): ActionMetadata {
     return {
