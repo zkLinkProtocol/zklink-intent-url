@@ -5,6 +5,8 @@ import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ExceptionsFilter } from './exceptions.filter';
 
+const API_PREFIX = 'api';
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { logger });
   app.enableCors({
@@ -17,15 +19,14 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
 
   app.enableShutdownHooks();
-  app.setGlobalPrefix('api');
+  app.setGlobalPrefix(API_PREFIX);
   app.useGlobalFilters(new ExceptionsFilter());
 
   const swaggerConfig = new DocumentBuilder()
-    .setTitle('zkIntent API DOCS')
-    .setDescription('zkIntent api document.')
+    .setTitle('zkIntent api docs')
+    .setDescription('zkIntent API documentation, using RESTful style API')
     .setVersion('1.0')
-    .addTag('API')
-    .setBasePath('api')
+    .setBasePath(API_PREFIX)
     .addBearerAuth()
     .build();
 
