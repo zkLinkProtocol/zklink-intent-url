@@ -14,7 +14,13 @@ const multicall = new Contract(
   provider,
 );
 
-// https://github.com/mds1/multicall/blob/main/examples/typescript/ethers.ts
+/**
+ * The function constructs a transaction that aggregates multiple calls and includes commission fees to a developer and a
+ * KOL.
+ * @returns The `constructTransaction` function is returning a populated transaction object that includes multiple calls to
+ * different addresses and contracts. The transaction includes a call to a contract address with specific call data, a
+ * transfer of 100 wei to the developer address, and a transfer of 100 wei to the KOL address.
+ */
 async function constructTransaction() {
   const developerAddress = '0x...';
   const kolAddress = '0x...';
