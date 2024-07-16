@@ -13,7 +13,7 @@ export interface ActionMetadata {
   };
   dApp: {
     name: string;
-    url: string;
+    url?: string;
   };
   author: {
     name: string;
