@@ -11,6 +11,7 @@ import config from './config';
 import { Creator } from './entities/creator.entity';
 import { ActionUrlModule } from './actionUrl/actionUrl.module';
 import { ActionUrl } from './entities/actionUrl.entity';
+import { ActionModule } from './action/action.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { ActionUrl } from './entities/actionUrl.entity';
     UnitOfWorkModule,
     AuthModule,
     ActionUrlModule,
+    ActionModule,
   ],
 
   controllers: [AppController],

@@ -1,10 +1,6 @@
 import { Contract, JsonRpcProvider } from 'ethers';
 import { MULTICALL_ADDRESS, MULTICALL_ABI_ETHERS } from './const';
-import {
-  Action,
-  ActionMetadata,
-  GeneratedTransaction,
-} from 'src/common/interfaces';
+import { Action, ActionMetadata, GeneratedTransaction } from 'src/common/dto';
 
 // Setup the provider (in viem, this is called a client).
 const MAINNET_RPC_URL = process.env.MAINNET_RPC_URL;
