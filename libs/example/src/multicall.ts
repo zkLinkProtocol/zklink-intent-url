@@ -1,12 +1,21 @@
 import { Contract, JsonRpcProvider } from 'ethers';
-import { MULTICALL_ADDRESS, MULTICALL_ABI_ETHERS } from './const';
 import { Action, ActionMetadata, GeneratedTransaction } from 'src/common/dto';
+import configFactory from './config';
+
+const config = configFactory();
+const MULTICALL_ADDRESS = config.multicallAddress;
 
 // Setup the provider (in viem, this is called a client).
 const MAINNET_RPC_URL = process.env.MAINNET_RPC_URL;
 if (!MAINNET_RPC_URL)
   throw new Error('Please set the MAINNET_RPC_URL environment variable.');
 const provider = new JsonRpcProvider(MAINNET_RPC_URL);
+
+const MULTICALL_ABI_ETHERS = [
+  // https://github.com/mds1/multicall
+  'function aggregate(tuple(address target, bytes callData)[] calls) payable returns (uint256 blockNumber, bytes[] returnData)',
+  'function aggregate3(tuple(address target, bool allowFailure, bytes callData)[] calls) payable returns (tuple(bool success, bytes returnData)[] returnData)',
+];
 
 const multicall = new Contract(
   MULTICALL_ADDRESS,
