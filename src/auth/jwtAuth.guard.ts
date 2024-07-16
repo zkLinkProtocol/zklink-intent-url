@@ -1,15 +1,11 @@
 import { AuthGuard } from '@nestjs/passport';
-import {
-  ExecutionContext,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
-  handleRequest(err, user, info, context: ExecutionContext) {
+  handleRequest(err, user, info) {
     if (err || !user) {
-      let errorResponse = {
+      const errorResponse = {
         code: 401,
         message: 'Unauthorized access',
         data: null,

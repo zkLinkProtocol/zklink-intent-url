@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsJSON, IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsObject, IsString } from 'class-validator';
 
 class Creator {
   @ApiProperty({
@@ -68,7 +68,8 @@ export class ActionUrlAddRequestDto {
     example: '{params1: 1, type: "input"}',
   })
   @IsNotEmpty()
-  settings: string;
+  @IsObject()
+  settings: object;
 }
 
 export class ActionUrlUpdateRequestDto extends ActionUrlAddRequestDto {}

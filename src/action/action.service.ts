@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ActionResponseDto } from './dto/actions.dto';
 import { Action, ActionId, GeneratedTransaction } from 'src/common/interfaces';
+import { BusinessException } from 'src/exception/business.exception';
 
 @Injectable()
 export class ActionService {
@@ -29,7 +30,7 @@ export class ActionService {
   ): GeneratedTransaction {
     const action = this.actions.get(id);
     if (!action) {
-      throw new Error(`Action with id '${id}' not found.`);
+      throw new BusinessException(`Action with id '${id}' not found.`);
     }
     return action.generateTransaction(params);
   }

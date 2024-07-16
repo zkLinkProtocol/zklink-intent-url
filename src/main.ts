@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import logger from './logger';
 import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { ExceptionsFilter } from './exceptions.filter';
+import { ExceptionsFilter } from './exception/exceptions.filter';
 
 const API_PREFIX = 'api';
 

@@ -12,4 +12,8 @@ export class CreatorRepository extends BaseRepository<Creator> {
   async findByPublicKey(publicKey: string): Promise<Creator> {
     return this.findOneBy([{ publickey: publicKey }, { address: publicKey }]);
   }
+
+  async findByPublicId(publicId: string): Promise<Creator> {
+    return this.findOneBy([{ publicid: publicId }]);
+  }
 }

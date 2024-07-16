@@ -14,6 +14,9 @@ export class Creator extends BaseEntity {
   @PrimaryColumn({ type: 'int' })
   public readonly id: bigint;
 
+  @Column({ type: 'varchar' })
+  public publicid: string;
+
   @Column({ type: 'bytea', transformer: hexTransformer })
   public publickey: string;
 

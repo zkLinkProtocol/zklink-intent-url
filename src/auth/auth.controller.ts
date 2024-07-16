@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, Get } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import {
@@ -6,12 +6,12 @@ import {
   LoginByPasskeyResponseDto,
   LoginByPrivatekeyRequestDto,
   LoginByPrivatekeyResponseDto,
+  RegisterByPrivatekeyRequestDto,
 } from './auth.dto';
 import { BaseController } from 'src/common/base.controller';
 import { ResponseDto } from 'src/common/response.dto';
 import { CommonApiOperation } from 'src/common/base.decorators';
-import { JwtAuthGuard } from './jwtAuth.guard';
-import { GetCreator } from './creator.decorators';
+import { sign_message } from 'src/constants';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -20,14 +20,31 @@ export class AuthController extends BaseController {
     super();
   }
 
+  @Post('register')
+  @CommonApiOperation('Register creator by eoa address.')
+  async registerCreator(
+    @Body() params: RegisterByPrivatekeyRequestDto,
+  ): Promise<ResponseDto<LoginByPasskeyResponseDto>> {
+    const restult = await this.authService.register(
+      params.id,
+      params.publickey,
+      params.passkeySignature,
+      params.address,
+      params.privatekeySignature,
+    );
+    return this.success({
+      accessToken: restult.accessToken,
+      expiresIn: restult.expiresIn,
+    });
+  }
+
   @Post('login/passkey')
   @CommonApiOperation('Login dashbord by passkey.')
   async loginByPasskey(
     @Body() params: LoginByPasskeyRequestDto,
   ): Promise<ResponseDto<LoginByPasskeyResponseDto>> {
     const restult = await this.authService.login(
-      params.publickey,
-      params.message,
+      params.id,
       params.signature,
       'passkey',
     );
@@ -43,8 +60,7 @@ export class AuthController extends BaseController {
     @Body() params: LoginByPrivatekeyRequestDto,
   ): Promise<ResponseDto<LoginByPrivatekeyResponseDto>> {
     const restult = await this.authService.login(
-      params.publickey,
-      params.message,
+      params.address,
       params.signature,
       'privatekey',
     );
@@ -54,9 +70,9 @@ export class AuthController extends BaseController {
     });
   }
 
-  @Get('creator')
-  @UseGuards(JwtAuthGuard)
-  async getUser(@GetCreator() creator) {
-    return creator;
+  @Get('message')
+  @CommonApiOperation('Returns the sign message .')
+  async getSignMessage(): Promise<ResponseDto<string>> {
+    return this.success(sign_message);
   }
 }

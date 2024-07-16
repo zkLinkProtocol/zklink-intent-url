@@ -4,6 +4,7 @@ import { Histogram } from 'prom-client';
 import { DataSource, EntityManager, QueryRunner } from 'typeorm';
 import { DB_COMMIT_DURATION_METRIC_NAME } from '../metrics';
 import { AsyncLocalStorage } from 'node:async_hooks';
+import { BusinessException } from 'src/exception/business.exception';
 
 export declare type IsolationLevel =
   | 'READ UNCOMMITTED'
@@ -60,7 +61,7 @@ export class UnitOfWork {
 
     const commit = async () => {
       if (isReleased) {
-        throw new Error(
+        throw new BusinessException(
           'The transaction cannot be committed as it connection is released',
         );
       }

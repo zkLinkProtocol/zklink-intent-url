@@ -2,7 +2,16 @@ import { IsNotEmpty, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 // request dto
-export class LoginByPasskeyRequestDto {
+export class RegisterByPrivatekeyRequestDto {
+  @ApiProperty({
+    name: 'id',
+    description: "Passkey's id or public address.",
+    example: '123456',
+  })
+  @IsNotEmpty()
+  @IsString()
+  id: string;
+
   @ApiProperty({
     name: 'publickey',
     description: "Passkey's public key or public address.",
@@ -13,13 +22,42 @@ export class LoginByPasskeyRequestDto {
   publickey: string;
 
   @ApiProperty({
-    name: 'message',
-    description: 'Sign message.',
-    example: 'hello intent',
+    name: 'passkeySignature',
+    description: 'Signed id by passkey.',
+    example: '0x1234567890abcdef1234567890abcdef12345678',
   })
   @IsNotEmpty()
   @IsString()
-  message: string;
+  passkeySignature: string;
+
+  @ApiProperty({
+    name: 'address',
+    description: 'Address.',
+    example: '0x1234567890abcdef1234567890abcdef12345678',
+  })
+  @IsNotEmpty()
+  @IsString()
+  address: string;
+
+  @ApiProperty({
+    name: 'privatekeySignature',
+    description: 'Signed string by private key.',
+    example: '0x1234567890abcdef1234567890abcdef12345678',
+  })
+  @IsNotEmpty()
+  @IsString()
+  privatekeySignature: string;
+}
+
+export class LoginByPrivatekeyRequestDto {
+  @ApiProperty({
+    name: 'address',
+    description: 'Address.',
+    example: '0x1234567890abcdef1234567890abcdef12345678',
+  })
+  @IsNotEmpty()
+  @IsString()
+  address: string;
 
   @ApiProperty({
     name: 'signature',
@@ -31,7 +69,25 @@ export class LoginByPasskeyRequestDto {
   signature: string;
 }
 
-export class LoginByPrivatekeyRequestDto extends LoginByPasskeyRequestDto {}
+export class LoginByPasskeyRequestDto {
+  @ApiProperty({
+    name: 'id',
+    description: "Passkey's id or public address.",
+    example: '123456',
+  })
+  @IsNotEmpty()
+  @IsString()
+  id: string;
+
+  @ApiProperty({
+    name: 'signature',
+    description: 'Signed string.',
+    example: '0x1234567890abcdef1234567890abcdef12345678',
+  })
+  @IsNotEmpty()
+  @IsString()
+  signature: string;
+}
 
 // response dto
 export class LoginByPasskeyResponseDto {
@@ -42,3 +98,14 @@ export class LoginByPasskeyResponseDto {
 }
 
 export class LoginByPrivatekeyResponseDto extends LoginByPasskeyResponseDto {}
+
+export class SignMessageResponseDto {
+  @ApiProperty({
+    name: 'message',
+    description: 'Sign message.',
+    example: 'hello intent',
+  })
+  @IsNotEmpty()
+  @IsString()
+  message: string;
+}

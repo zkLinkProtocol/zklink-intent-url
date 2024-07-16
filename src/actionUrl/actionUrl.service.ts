@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { off } from 'process';
+import { ActionService } from 'src/action/action.service';
 import { ActionUrl } from 'src/entities/actionUrl.entity';
+import { BusinessException } from 'src/exception/business.exception';
 import { ActionUrlRepository } from 'src/repositories/actionUrl.repository';
 
 @Injectable()
@@ -9,6 +10,7 @@ export class ActionUrlService {
   constructor(
     logger: Logger,
     private readonly actionUrlRespository: ActionUrlRepository,
+    private readonly actionService: ActionService,
   ) {
     this.logger = new Logger(ActionUrlService.name);
   }
@@ -48,6 +50,10 @@ export class ActionUrlService {
 
   async add(params: any, creatorId: bigint): Promise<string> {
     const actionUrl = { ...params } as ActionUrl;
+    const action = this.actionService.getAction(actionUrl.actionId);
+    if (!action) {
+      throw new BusinessException('Action not found');
+    }
     actionUrl.creatorId = creatorId;
     const code = Math.random().toString(36).substring(2, 15);
     actionUrl.code = code;
@@ -55,7 +61,7 @@ export class ActionUrlService {
       await this.actionUrlRespository.add(actionUrl);
     } catch (error) {
       this.logger.error(error);
-      throw new Error('Failed to add actionUrl');
+      throw new BusinessException('Failed to add actionUrl');
     }
     return code;
   }
@@ -63,10 +69,10 @@ export class ActionUrlService {
   async updateByCode(code: string, params: any, creatorId: bigint) {
     const actionUrl = await this.findOneByCode(code);
     if (!actionUrl) {
-      throw new Error('ActionUrl not found');
+      throw new BusinessException('ActionUrl not found');
     }
     if (actionUrl.creatorId !== creatorId) {
-      throw new Error('ActionUrl not found');
+      throw new BusinessException('ActionUrl not found');
     }
     actionUrl.title = params.title;
     actionUrl.description = params.description;
@@ -78,7 +84,7 @@ export class ActionUrlService {
       await this.actionUrlRespository.updateByCode(code, actionUrl);
     } catch (error) {
       this.logger.error(error);
-      throw new Error('Failed to update actionUrl');
+      throw new BusinessException('Failed to update actionUrl');
     }
     return code;
   }
@@ -86,16 +92,16 @@ export class ActionUrlService {
   async deleteByCode(code: string, creatorId: bigint) {
     const actionUrl = await this.findOneByCode(code);
     if (!actionUrl) {
-      throw new Error('ActionUrl not found');
+      throw new BusinessException('ActionUrl not found');
     }
     if (actionUrl.creatorId !== creatorId) {
-      throw new Error('ActionUrl not found');
+      throw new BusinessException('ActionUrl not found');
     }
     try {
       await this.actionUrlRespository.deleteByCode(code);
     } catch (error) {
       this.logger.error(error);
-      throw new Error('Failed to delete actionUrl');
+      throw new BusinessException('Failed to delete actionUrl');
     }
     return true;
   }

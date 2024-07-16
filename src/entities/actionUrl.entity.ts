@@ -8,6 +8,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { Creator } from './creator.entity';
+import { jsonStringTransformer } from '../transformers/jsonString.transformer';
 
 @Entity({ name: 'intent_actionUrl' })
 @Index(['creatorId'])
@@ -34,9 +35,9 @@ export class ActionUrl extends BaseEntity {
   @Column({ type: 'varchar' })
   public metadata: string;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'text' })
   public content: string;
 
-  @Column({ type: 'varchar' })
-  public settings: string;
+  @Column({ type: 'text', transformer: jsonStringTransformer })
+  public settings: object;
 }

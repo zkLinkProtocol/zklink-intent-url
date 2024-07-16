@@ -12,7 +12,9 @@ export function CommonApiOperation(summary: string) {
         exceptionFactory: (errors) => {
           return new BadRequestException({
             code: 400,
-            message: 'invalid argument',
+            message: errors
+              .map((error) => Object.values(error.constraints))
+              .join(','),
             data: null,
           });
         },

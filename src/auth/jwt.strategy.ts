@@ -8,7 +8,7 @@ import { ConfigService } from '@nestjs/config';
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor(
     private readonly authService: AuthService,
-    private readonly configService: ConfigService,
+    readonly configService: ConfigService,
   ) {
     const secret = configService.get('jwt')?.secret ?? '';
     super({

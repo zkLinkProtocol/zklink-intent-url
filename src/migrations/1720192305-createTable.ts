@@ -9,12 +9,13 @@ export class CreateTable1720192305000 implements MigrationInterface {
     await queryRunner.query(
       `CREATE TABLE "intent_creator" (
         id SERIAL PRIMARY KEY,
-        "publickey" bytea UNIQUE ,
-        "address" bytea UNIQUE ,
+        "publicid" varchar(100) UNIQUE,
+        "publickey" bytea UNIQUE,
+        "address" bytea UNIQUE,
         "status" "creatorStatus" NOT NULL,
         "createdAt" TIMESTAMP NOT NULL DEFAULT now(),
         "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), 
-        "deletedAt" TIMESTAMP DEFAULT null -- not null is deleted
+        "deletedAt" TIMESTAMP DEFAULT null -- soft deleted
       )`,
     );
 
@@ -30,7 +31,7 @@ export class CreateTable1720192305000 implements MigrationInterface {
         "settings" text NOT NULL,
         "createdAt" TIMESTAMP NOT NULL DEFAULT now(),
         "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), 
-        "deletedAt" TIMESTAMP DEFAULT null -- not null is deleted
+        "deletedAt" TIMESTAMP DEFAULT null -- soft deleted
       )`,
     );
     await queryRunner.query(

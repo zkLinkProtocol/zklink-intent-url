@@ -1,9 +1,11 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
+  Put,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -21,8 +23,8 @@ import { PagingMetaDto, ResponseDto } from 'src/common/response.dto';
 import { BaseController } from 'src/common/base.controller';
 import { PagingOptionsDto } from 'src/common/pagingOptionsDto.param';
 
-@Controller('actionurl')
-@ApiTags('actionurl')
+@Controller('action-url')
+@ApiTags('action-url')
 export class ActionUrlController extends BaseController {
   constructor(private readonly actionUrlService: ActionUrlService) {
     super();
@@ -39,9 +41,14 @@ export class ActionUrlController extends BaseController {
     if (!result) {
       return this.error('ActionUrl not found');
     }
-    const { createdAt, updatedAt, deletedAt, creatorId, ...rest } = result;
     const response = {
-      ...rest,
+      code: result.code,
+      actionId: result.actionId,
+      title: result.title,
+      description: result.description,
+      metadata: result.metadata,
+      content: result.content,
+      settings: result.settings,
       creator: {
         publickey: result.creator.publickey,
         address: result.creator.address,
@@ -83,9 +90,14 @@ export class ActionUrlController extends BaseController {
     if ((result?.creatorId ?? '') !== creator.id) {
       return this.error('ActionUrl not found');
     }
-    const { createdAt, updatedAt, deletedAt, creatorId, ...rest } = result;
     const response = {
-      ...rest,
+      code: result.code,
+      actionId: result.actionId,
+      title: result.title,
+      description: result.description,
+      metadata: result.metadata,
+      content: result.content,
+      settings: result.settings,
       creator: {
         id: result.creator.id,
         publickey: result.creator.publickey,
@@ -95,7 +107,7 @@ export class ActionUrlController extends BaseController {
     return this.success(response);
   }
 
-  @Post('add')
+  @Post('')
   @CommonApiOperation('Create a new actionUrl.')
   @UseGuards(JwtAuthGuard)
   async create(
@@ -106,7 +118,7 @@ export class ActionUrlController extends BaseController {
     return this.success(result);
   }
 
-  @Post('edit/:code')
+  @Put(':code')
   @CommonApiOperation('Edit the actionUrl created by oneself.')
   @UseGuards(JwtAuthGuard)
   async edit(
@@ -122,7 +134,7 @@ export class ActionUrlController extends BaseController {
     return this.success(result);
   }
 
-  @Post('delete/:code')
+  @Delete(':code')
   @CommonApiOperation('Delete the actionUrl created by oneself.')
   @UseGuards(JwtAuthGuard)
   async delete(
