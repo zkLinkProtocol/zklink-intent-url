@@ -5,6 +5,8 @@
     "removeComments": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "target": "ES2021",
     "sourceMap": true,
@@ -23,11 +25,13 @@
       ],
       "@action/example/*": [
         "libs/example/src/*"
+      ],
+      "@action/novaswap": [
+        "libs/novaswap/src"
+      ],
+      "@action/novaswap/*": [
+        "libs/novaswap/src/*"
       ]
     }
-  },
-  // "include": [
-  //   "src/**/*",
-  //   "libs/swap"
-  // ]
+  }
 }
