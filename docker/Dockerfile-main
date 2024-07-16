@@ -16,8 +16,10 @@ FROM 475911326710.dkr.ecr.ap-northeast-1.amazonaws.com/node:20.11.1-slim
 
 RUN mkdir /zklink-intent-url
 
+RUN npm install -g npm@10.8.2
+
 COPY --from=build /zklink-intent-url /zklink-intent-url
 
 WORKDIR /zklink-intent-url
 
-CMD ["/bin/sh", "-c", "npm run start"]
+CMD ["/bin/sh", "-c", "npm run migration:run && npm run start"]
