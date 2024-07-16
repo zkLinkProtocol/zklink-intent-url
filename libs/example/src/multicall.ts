@@ -18,39 +18,6 @@ const multicall = new Contract(
   provider,
 );
 
-/**
- * The function constructs a transaction that aggregates multiple calls and includes commission fees to a developer and a
- * KOL.
- * @returns The `constructTransaction` function is returning a populated transaction object that includes multiple calls to
- * different addresses and contracts. The transaction includes a call to a contract address with specific call data, a
- * transfer of 100 wei to the developer address, and a transfer of 100 wei to the KOL address.
- */
-async function constructTransaction() {
-  const developerAddress = '0x...';
-  const kolAddress = '0x...';
-  const contractAddress = '0x...';
-  const multicallArgs = [
-    {
-      target: contractAddress,
-      allowFailure: false, // We allow failure for all calls.
-      callData: '0x...',
-    },
-    {
-      to: developerAddress, // commission fee to developer
-      value: 100,
-    },
-    {
-      to: kolAddress, // commission fee to KOL
-      value: 100,
-    },
-  ];
-
-  const tx = await multicall.aggregate3.populateTransaction(multicallArgs);
-  return tx;
-}
-
-console.log(constructTransaction);
-
 class MulticallAction implements Action {
   getMetadata(): ActionMetadata {
     return {
