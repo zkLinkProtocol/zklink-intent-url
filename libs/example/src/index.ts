@@ -1,10 +1,10 @@
 import { ethers } from 'ethers';
 import { NOVA_SWAP_ABI as abi } from './const';
 import {
-  Action as ActionInterface,
+  Action as ActionDto,
   ActionMetadata,
   GeneratedTransaction,
-} from 'src/common/interfaces';
+} from 'src/common/dto';
 
 const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
 
@@ -23,7 +23,7 @@ interface Params {
   sqrtPriceLimitX96?: number;
 }
 
-class Action implements ActionInterface {
+class Action implements ActionDto {
   getMetadata(): ActionMetadata {
     return {
       title: 'Swap',

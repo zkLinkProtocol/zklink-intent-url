@@ -1,7 +1,7 @@
 import { Module, OnModuleInit } from '@nestjs/common';
 import { ActionService } from './action.service';
 import { ActionController } from './action.controller';
-import { Action, ActionId } from 'src/common/interfaces';
+import { Action, ActionId } from 'src/common/dto';
 import * as exampleAction from '@action/example';
 
 @Module({

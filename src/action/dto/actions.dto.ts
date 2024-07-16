@@ -1,5 +1,11 @@
-import type { ActionId, ActionMetadata } from 'src/common/interfaces';
+import { ApiProperty } from '@nestjs/swagger';
+import { ActionMetadata } from 'src/common/dto';
 
-export interface ActionResponseDto extends ActionMetadata {
-  id: ActionId;
+export class ActionResponseDto extends ActionMetadata {
+  @ApiProperty({
+    type: String,
+    description: 'action id',
+    example: 'example',
+  })
+  public readonly id: string;
 }

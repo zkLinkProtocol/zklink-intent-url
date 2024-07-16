@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ActionResponseDto } from './dto/actions.dto';
-import { Action, ActionId, GeneratedTransaction } from 'src/common/interfaces';
+import { Action, ActionId, GeneratedTransaction } from 'src/common/dto';
 import { BusinessException } from 'src/exception/business.exception';
 
 @Injectable()

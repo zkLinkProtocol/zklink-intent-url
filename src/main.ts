@@ -4,6 +4,7 @@ import logger from './logger';
 import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ExceptionsFilter } from './exception/exceptions.filter';
+import { ResponseDto } from './common/response.dto';
 
 const API_PREFIX = 'api';
 
@@ -30,7 +31,9 @@ async function bootstrap() {
     .addBearerAuth()
     .build();
 
-  const document = SwaggerModule.createDocument(app, swaggerConfig);
+  const document = SwaggerModule.createDocument(app, swaggerConfig, {
+    extraModels: [ResponseDto],
+  });
   SwaggerModule.setup('docs', app, document, {
     jsonDocumentUrl: 'swagger/json',
     customSiteTitle: 'zkIntent docs',
