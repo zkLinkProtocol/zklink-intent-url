@@ -1,4 +1,4 @@
-FROM 475911326710.dkr.ecr.ap-northeast-1.amazonaws.com/node:20.11.1-slim as build
+FROM 475911326710.dkr.ecr.ap-northeast-1.amazonaws.com/node:20.13.1-slim as build
 
 WORKDIR /zklink-intent-url
 
@@ -12,11 +12,11 @@ RUN npm install
 
 RUN npm run build && cd -
 
-FROM 475911326710.dkr.ecr.ap-northeast-1.amazonaws.com/node:20.11.1-slim
+FROM 475911326710.dkr.ecr.ap-northeast-1.amazonaws.com/node:20.13.1-slim
 
 RUN mkdir /zklink-intent-url
 
-RUN npm install -g npm@10.8.2
+#RUN npm install -g npm@10.8.2
 
 COPY --from=build /zklink-intent-url /zklink-intent-url
 
