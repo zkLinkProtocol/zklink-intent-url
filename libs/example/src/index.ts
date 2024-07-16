@@ -1,15 +1,19 @@
 import { ethers } from 'ethers';
-import { NOVA_SWAP_ABI as abi } from './const';
 import {
   Action as ActionDto,
   ActionMetadata,
   GeneratedTransaction,
 } from 'src/common/dto';
-
-const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
-
-const routerAddress = 'ROUTER_ADDRESS';
-const routerContract = new ethers.Contract(routerAddress, abi, provider);
+import configFactory from './config';
+import ROUTER_ABI from './abis/router.json';
+const config = configFactory();
+const ROUTER_ADDRESS = config.routerAddress;
+const provider = new ethers.JsonRpcProvider(config.rpcUrl);
+const routerContract = new ethers.Contract(
+  ROUTER_ADDRESS,
+  ROUTER_ABI,
+  provider,
+);
 
 interface Params {
   tokenIn: string;

@@ -9,17 +9,17 @@ import {
   ActionMetadata,
   GeneratedTransaction,
 } from 'src/common/dto';
-import 'dotenv/config';
 
+import configFactory from './config';
+
+const config = configFactory();
 // Deployment Addresses
-const POOL_FACTORY_CONTRACT_ADDRESS =
-  '0x0c283f1a3C6981eE623cb4E8AcC4f450f39D0815';
-const QUOTER_CONTRACT_ADDRESS = '0xa73A1d496dd147e68F557Dd73A28Ad6330777350';
-const SWAP_ROUTER_CONTRACT_ADDRESS =
-  '0x2c98143431993e4CBD5eFD4B93c099432cacEBcE';
+const POOL_FACTORY_CONTRACT_ADDRESS = config.poolFactoryContractAddress;
+const QUOTER_CONTRACT_ADDRESS = config.quoterContractAddress;
+const SWAP_ROUTER_CONTRACT_ADDRESS = config.poolFactoryContractAddress;
+const RPC_URL = config.rpcUrl;
 
-// Provider, Contract & Signer Instances
-const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
+const provider = new ethers.JsonRpcProvider(RPC_URL);
 const factoryContract = new ethers.Contract(
   POOL_FACTORY_CONTRACT_ADDRESS,
   FACTORY_ABI,
@@ -30,7 +30,6 @@ const quoterContract = new ethers.Contract(
   QUOTER_ABI,
   provider,
 );
-const signer = new ethers.Wallet(process.env.WALLET_PRIVATE_KEY, provider);
 
 async function getPoolInfo(
   factoryContract,
@@ -125,7 +124,7 @@ async function swapToken(params: Params) {
   const swapRouter = new ethers.Contract(
     SWAP_ROUTER_CONTRACT_ADDRESS,
     SWAP_ROUTER_ABI,
-    signer,
+    provider,
   );
   const transaction =
     await swapRouter.exactInputSingle.populateTransaction(swapParams);
