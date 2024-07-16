@@ -5,7 +5,9 @@
   "compilerOptions": {
     "deleteOutDir": true,
     "webpack": true,
-    "plugins": ["@nestjs/swagger"]
+    "plugins": [
+      "@nestjs/swagger"
+    ]
   },
   "projects": {
     "example": {
@@ -15,6 +17,15 @@
       "sourceRoot": "libs/example/src",
       "compilerOptions": {
         "tsConfigPath": "libs/example/tsconfig.lib.json"
+      }
+    },
+    "novaswap": {
+      "type": "library",
+      "root": "libs/novaswap",
+      "entryFile": "index",
+      "sourceRoot": "libs/novaswap/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/novaswap/tsconfig.lib.json"
       }
     }
   }

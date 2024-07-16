@@ -23,11 +23,13 @@
       ],
       "@action/example/*": [
         "libs/example/src/*"
+      ],
+      "@action/novaswap": [
+        "libs/novaswap/src"
+      ],
+      "@action/novaswap/*": [
+        "libs/novaswap/src/*"
       ]
     }
-  },
-  // "include": [
-  //   "src/**/*",
-  //   "libs/swap"
-  // ]
+  }
 }
