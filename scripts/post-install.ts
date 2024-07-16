@@ -9,7 +9,7 @@ fs.readdirSync(libsDir).forEach((dir) => {
   const fullPath = path.join(libsDir, dir);
   if (fs.statSync(fullPath).isDirectory()) {
     console.log(`Installing dependencies for ${dir}...`);
-    execSync('yarn install', { stdio: 'inherit', cwd: fullPath });
+    execSync('npm install', { stdio: 'inherit', cwd: fullPath });
   }
 });
 
