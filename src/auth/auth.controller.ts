@@ -6,7 +6,6 @@ import {
   LoginByPasskeyResponseDto,
   LoginByPrivatekeyRequestDto,
   LoginByPrivatekeyResponseDto,
-  RegisterByPrivatekeyRequestDto,
 } from './auth.dto';
 import { BaseController } from 'src/common/base.controller';
 import { ResponseDto } from 'src/common/response.dto';
@@ -20,33 +19,14 @@ export class AuthController extends BaseController {
     super();
   }
 
-  @Post('register')
-  @CommonApiOperation('Register creator by eoa address.')
-  async registerCreator(
-    @Body() params: RegisterByPrivatekeyRequestDto,
-  ): Promise<ResponseDto<LoginByPasskeyResponseDto>> {
-    const restult = await this.authService.register(
-      params.id,
-      params.publickey,
-      params.passkeySignature,
-      params.address,
-      params.privatekeySignature,
-    );
-    return this.success({
-      accessToken: restult.accessToken,
-      expiresIn: restult.expiresIn,
-    });
-  }
-
   @Post('login/passkey')
   @CommonApiOperation('Login dashbord by passkey.')
   async loginByPasskey(
     @Body() params: LoginByPasskeyRequestDto,
   ): Promise<ResponseDto<LoginByPasskeyResponseDto>> {
-    const restult = await this.authService.login(
+    const restult = await this.authService.loginByPasskey(
       params.id,
       params.signature,
-      'passkey',
     );
     return this.success({
       accessToken: restult.accessToken,
@@ -59,10 +39,9 @@ export class AuthController extends BaseController {
   async loginByPrivatekey(
     @Body() params: LoginByPrivatekeyRequestDto,
   ): Promise<ResponseDto<LoginByPrivatekeyResponseDto>> {
-    const restult = await this.authService.login(
+    const restult = await this.authService.loginByAddress(
       params.address,
       params.signature,
-      'privatekey',
     );
     return this.success({
       accessToken: restult.accessToken,

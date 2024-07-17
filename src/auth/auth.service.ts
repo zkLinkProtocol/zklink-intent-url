@@ -19,40 +19,32 @@ export class AuthService {
     this.signMessage = sign_message;
   }
 
-  async register(
-    publicId,
-    publickey: string,
-    passkeySignature: string,
-    address: string,
-    privatekeySignature: string,
-  ) {
-    const validatePasskeyStatus = await this.validatePasskey(
+  async loginByPasskey(publicId: string, signature: string) {
+    const message = this.signMessage;
+    const publickey = await this.getPublicKey(publicId);
+    const validateStatus = await this.validatePasskey(
       publickey,
-      publicId,
-      passkeySignature,
+      message,
+      signature,
     );
-    const validatePrivatekeyStatus = await this.validatePrivatekey(
-      address,
-      this.signMessage,
-      privatekeySignature,
-    );
-    if (!validatePasskeyStatus || !validatePrivatekeyStatus) {
-      throw new BusinessException('Invalid publickey');
+    if (!validateStatus) {
+      throw new BusinessException('Invalid id');
     }
 
-    const creatorExist =
-      await this.creatorRepository.findByPublicKey(publickey);
-    if (creatorExist) {
-      throw new BusinessException('Creator already exist');
-    }
-    const creator = {
-      publicid: publicId,
-      publickey: publickey,
-      address: address,
-      status: 'active',
-    } as Creator;
+    const creator = await this.creatorRepository.findByPublicId(publicId);
+    if (!creator) {
+      const creator = {
+        publicid: publicId,
+        publickey: publickey,
+        status: 'active',
+      } as Creator;
 
-    await this.creatorRepository.add(creator);
+      try {
+        await this.creatorRepository.add(creator);
+      } catch (err) {
+        throw new BusinessException('Create creator failed');
+      }
+    }
 
     const payload = { publickey: publickey };
     const jwt = this.configService.get('jwt');
@@ -65,35 +57,32 @@ export class AuthService {
     };
   }
 
-  async login(publicid: string, signature: string, type: string) {
-    const creator = await this.creatorRepository.findByPublicId(publicid);
-    if (!creator) {
-      throw new BusinessException('Creator not exist');
-    }
-    const publickey = creator.publickey;
-    let validateStatus = false;
+  async loginByAddress(address: string, signature: string) {
     const message = this.signMessage;
-    if (type === 'passkey') {
-      validateStatus = await this.validatePasskey(
-        publickey,
-        message,
-        signature,
-      );
-      if (!validateStatus) {
-        throw new BusinessException('Invalid id');
-      }
-    } else {
-      validateStatus = await this.validatePrivatekey(
-        publickey,
-        message,
-        signature,
-      );
-      if (!validateStatus) {
-        throw new BusinessException('Invalid address');
+    const validateStatus = await this.validatePrivatekey(
+      address,
+      message,
+      signature,
+    );
+    if (!validateStatus) {
+      throw new BusinessException('Invalid address');
+    }
+
+    const creator = await this.creatorRepository.findByAddress(address);
+    if (!creator) {
+      const creator = {
+        address: address,
+        status: 'active',
+      } as Creator;
+
+      try {
+        await this.creatorRepository.add(creator);
+      } catch (err) {
+        throw new BusinessException('Create creator failed');
       }
     }
 
-    const payload = { publickey: publickey };
+    const payload = { publickey: address };
     const jwt = this.configService.get('jwt');
     return {
       accessToken: this.jwtService.sign(payload, {
@@ -112,6 +101,10 @@ export class AuthService {
       throw new BusinessException('Invalid token');
     }
     return user;
+  }
+
+  async getPublicKey(publicId: string): Promise<string> {
+    return publicId;
   }
 
   async validatePasskey(
