@@ -1,5 +1,6 @@
+import { Column, Entity, Index, PrimaryColumn } from 'typeorm';
+
 import { BaseEntity } from './base.entity';
-import { Entity, Column, PrimaryColumn, Index } from 'typeorm';
 import { hexTransformer } from '../transformers/hex.transformer';
 
 export enum CreatorStatus {

@@ -1,7 +1,7 @@
 import { Provider } from '@nestjs/common';
 import {
-  makeHistogramProvider,
   makeGaugeProvider,
+  makeHistogramProvider,
 } from '@willsoto/nestjs-prometheus';
 
 export const BLOCKS_BATCH_PROCESSING_DURATION_METRIC_NAME =

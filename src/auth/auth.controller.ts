@@ -1,16 +1,18 @@
-import { Controller, Post, Body, Get } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { AuthService } from './auth.service';
+
+import { BaseController } from 'src/common/base.controller';
+import { CommonApiOperation } from 'src/common/base.decorators';
+import { ResponseDto } from 'src/common/response.dto';
+import { sign_message } from 'src/constants';
+
 import {
   LoginByPasskeyRequestDto,
   LoginByPasskeyResponseDto,
   LoginByPrivatekeyRequestDto,
   LoginByPrivatekeyResponseDto,
 } from './auth.dto';
-import { BaseController } from 'src/common/base.controller';
-import { ResponseDto } from 'src/common/response.dto';
-import { CommonApiOperation } from 'src/common/base.decorators';
-import { sign_message } from 'src/constants';
+import { AuthService } from './auth.service';
 
 @Controller('auth')
 @ApiTags('auth')
