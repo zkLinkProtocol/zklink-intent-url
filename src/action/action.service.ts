@@ -11,23 +11,27 @@ export class ActionService {
     this.actions = actions;
   }
 
-  getActions(): ActionResponseDto[] {
+  async getActions(): Promise<ActionResponseDto[]> {
     console.log(Array.from(this.actions.keys()));
-    return Array.from(this.actions.keys()).map((id) => {
-      console.log(this.actions.get(id));
-      return { id, ...this.actions.get(id).getMetadata() };
+    const actions = Array.from(this.actions.keys()).map(async (id) => {
+      const action = this.actions.get(id);
+      console.log(action);
+      const metadata = await action.getMetadata();
+      return { id, ...metadata };
     });
+    return Promise.all(actions);
   }
 
-  getAction(id: ActionId): ActionResponseDto | null {
+  async getAction(id: ActionId): Promise<ActionResponseDto | null> {
     const action = this.actions.get(id);
-    return action ? { id, ...action.getMetadata() } : null;
+    const metadata = await action.getMetadata();
+    return action ? { id, ...metadata } : null;
   }
 
-  generateTransaction(
+  async generateTransaction(
     id: ActionId,
     params: { [key: string]: any },
-  ): GeneratedTransaction {
+  ): Promise<GeneratedTransaction> {
     const action = this.actions.get(id);
     if (!action) {
       throw new BusinessException(`Action with id '${id}' not found.`);
