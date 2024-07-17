@@ -117,10 +117,10 @@ export class ActionMetadata {
   };
 
   @ApiProperty({
-    type: NetworkDto,
+    type: [NetworkDto],
     description: 'Network details',
   })
-  network: NetworkDto;
+  networks: NetworkDto[];
 
   @ApiProperty({
     type: DAppDto,
@@ -128,11 +128,11 @@ export class ActionMetadata {
   })
   dApp: DAppDto;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     type: AuthorDto,
     description: 'Author details',
   })
-  author: AuthorDto;
+  author?: AuthorDto;
 
   @ApiProperty({
     type: IntentDto,
