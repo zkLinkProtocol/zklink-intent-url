@@ -136,11 +136,13 @@ class Action implements ActionDto {
     return {
       title: 'NovaSwap',
       description: 'Swap tokens',
-      network: {
-        name: 'Ethereum',
-        chainId: '1',
-        contractAddress: '0x',
-      },
+      networks: [
+        {
+          name: 'Ethereum',
+          chainId: '1',
+          contractAddress: '0x',
+        },
+      ],
       dApp: { name: 'NovaSwap' },
       author: { name: 'zkLink' },
       intent: {

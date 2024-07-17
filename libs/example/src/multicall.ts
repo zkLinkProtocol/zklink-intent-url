@@ -28,11 +28,13 @@ class MulticallAction implements Action {
     return {
       title: 'Multicall',
       description: 'Multicall contract',
-      network: {
-        name: 'Ethereum',
-        chainId: '1',
-        contractAddress: MULTICALL_ADDRESS,
-      },
+      networks: [
+        {
+          name: 'Ethereum',
+          chainId: '1',
+          contractAddress: MULTICALL_ADDRESS,
+        },
+      ],
       dApp: {
         name: 'Multicall',
         url: 'https://...',
