@@ -24,7 +24,7 @@ const multicall = new Contract(
 );
 
 class MulticallAction implements Action {
-  getMetadata(): ActionMetadata {
+  async getMetadata(): Promise<ActionMetadata> {
     return {
       title: 'Multicall',
       description: 'Multicall contract',
@@ -45,7 +45,7 @@ class MulticallAction implements Action {
       },
     };
   }
-  generateTransaction(): GeneratedTransaction {
+  async generateTransaction(): Promise<GeneratedTransaction> {
     const developerAddress = '0x...';
     const kolAddress = '0x...';
     const contractAddress = '0x...';
@@ -64,23 +64,11 @@ class MulticallAction implements Action {
         value: 100,
       },
     ];
-
-    let tx = null;
-    multicall.aggregate3
-      .populateTransaction(multicallArgs)
-      .then((result) => {
-        tx = result;
-      })
-      .catch((error) => {
-        console.error(error);
-        return null;
-      });
-
-    const generatedTransaction = {
+    const tx = await multicall.aggregate3.populateTransaction(multicallArgs);
+    return {
       tx: tx,
       shouldSend: true,
     };
-    return generatedTransaction;
   }
 }
 

@@ -41,8 +41,8 @@ export class ActionController extends BaseController {
       ],
     },
   })
-  findAll(): Promise<ResponseDto<ActionResponseDto[]>> {
-    const actions = this.actionStoreService.getActions();
+  async findAll(): Promise<ResponseDto<ActionResponseDto[]>> {
+    const actions = await this.actionStoreService.getActions();
     return this.success(actions);
   }
 
@@ -62,8 +62,9 @@ export class ActionController extends BaseController {
       ],
     },
   })
-  find(@Param('id') id: string): Promise<ResponseDto<ActionResponseDto>> {
-    return this.success(this.actionStoreService.getAction(id));
+  async find(@Param('id') id: string): Promise<ResponseDto<ActionResponseDto>> {
+    const action = await this.actionStoreService.getAction(id);
+    return this.success(action);
   }
 
   @Post(':id/transaction')
@@ -83,10 +84,14 @@ export class ActionController extends BaseController {
       ],
     },
   })
-  generateTransaction(
+  async generateTransaction(
     @Param('id') id: string,
     @Body() body: any[],
   ): Promise<ResponseDto<GeneratedTransaction>> {
-    return this.success(this.actionStoreService.generateTransaction(id, body));
+    const response = await this.actionStoreService.generateTransaction(
+      id,
+      body,
+    );
+    return this.success(response);
   }
 }

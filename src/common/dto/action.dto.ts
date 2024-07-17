@@ -4,9 +4,9 @@ import { GeneratedTransaction } from './transaction.dto';
 export type ActionId = string;
 
 export abstract class Action {
-  abstract getMetadata(): ActionMetadata;
+  abstract getMetadata(): Promise<ActionMetadata>;
 
   abstract generateTransaction(parameters: {
     [key: string]: any;
-  }): GeneratedTransaction;
+  }): Promise<GeneratedTransaction>;
 }

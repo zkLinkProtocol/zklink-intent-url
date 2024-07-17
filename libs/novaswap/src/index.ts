@@ -132,7 +132,7 @@ async function swapToken(params: Params) {
 }
 
 class Action implements ActionDto {
-  getMetadata(): ActionMetadata {
+  async getMetadata(): Promise<ActionMetadata> {
     return {
       title: 'NovaSwap',
       description: 'Swap tokens',
@@ -198,21 +198,14 @@ class Action implements ActionDto {
     };
   }
 
-  generateTransaction(_params: { [key: string]: any }): GeneratedTransaction {
-    let tx = null;
-    swapToken(_params as Params)
-      .then((transaction) => {
-        tx = transaction;
-      })
-      .catch((error) => {
-        console.error(error);
-        return null;
-      });
-    const generatedTransaction = {
+  async generateTransaction(params: {
+    [key: string]: any;
+  }): Promise<GeneratedTransaction> {
+    const tx = await swapToken(params as Params);
+    return {
       tx: tx,
       shouldSend: true,
     };
-    return generatedTransaction;
   }
 }
 

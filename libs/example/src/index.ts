@@ -28,7 +28,7 @@ interface Params {
 }
 
 class Action implements ActionDto {
-  getMetadata(): ActionMetadata {
+  async getMetadata(): Promise<ActionMetadata> {
     return {
       title: 'Swap',
       description: 'Swap tokens',
@@ -69,9 +69,10 @@ class Action implements ActionDto {
       },
     };
   }
-  generateTransaction(parameters: {
+
+  async generateTransaction(parameters: {
     [key: string]: any;
-  }): GeneratedTransaction {
+  }): Promise<GeneratedTransaction> {
     const params = parameters as Params;
 
     const exactInputSingleParams = {
@@ -86,22 +87,13 @@ class Action implements ActionDto {
       sqrtPriceLimitX96: 0,
     };
 
-    let tx = null;
-    routerContract.exactInputSingle
-      .populateTransaction(exactInputSingleParams)
-      .then((result) => {
-        tx = result;
-      })
-      .catch((error) => {
-        console.error(error);
-        return null;
-      });
-
-    const generatedTransaction = {
+    const tx = await routerContract.exactInputSingle.populateTransaction(
+      exactInputSingleParams,
+    );
+    return {
       tx: tx,
       shouldSend: true,
     };
-    return generatedTransaction;
   }
 }
 
