@@ -1,15 +1,19 @@
 import { ethers } from 'ethers';
-import { NOVA_SWAP_ABI as abi } from './const';
 import {
   Action as ActionDto,
   ActionMetadata,
   GeneratedTransaction,
 } from 'src/common/dto';
-
-const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
-
-const routerAddress = 'ROUTER_ADDRESS';
-const routerContract = new ethers.Contract(routerAddress, abi, provider);
+import configFactory from './config';
+import ROUTER_ABI from './abis/router.json';
+const config = configFactory();
+const ROUTER_ADDRESS = config.routerAddress;
+const provider = new ethers.JsonRpcProvider(config.rpcUrl);
+const routerContract = new ethers.Contract(
+  ROUTER_ADDRESS,
+  ROUTER_ABI,
+  provider,
+);
 
 interface Params {
   tokenIn: string;
@@ -17,7 +21,7 @@ interface Params {
   fee: number; // fee level, 0.3% fee is 3000
   recipient: string;
 
-  deadlineDurationInSec: number; // in seconds
+  deadlineDurationInMinute: number;
   amountIn: bigint; // must be the real value after ethers.parseUnits
   amountOutMinimum: bigint;
   sqrtPriceLimitX96?: number;
@@ -76,7 +80,7 @@ class Action implements ActionDto {
       fee: params.fee,
       recipient: params.recipient,
       deadline:
-        Math.floor(Date.now() / 1000) + 60 * params.deadlineDurationInSec,
+        Math.floor(Date.now() / 1000) + 60 * params.deadlineDurationInMinute,
       amountIn: params.amountIn,
       amountOutMinimum: params.amountOutMinimum,
       sqrtPriceLimitX96: 0,
