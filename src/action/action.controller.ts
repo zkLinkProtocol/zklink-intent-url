@@ -69,7 +69,15 @@ export class ActionController extends BaseController {
 
   @Post(':id/transaction')
   @CommonApiOperation('Generate transaction by action Id.')
-  @ApiBody({ type: [Object], description: 'Array of transaction parameters' })
+  @ApiBody({
+    description: 'parameters to generate transaction',
+    schema: {
+      type: 'object',
+      additionalProperties: {
+        type: 'any',
+      },
+    },
+  })
   @ApiResponse({
     status: 200,
     description: 'Return generated transaction',
@@ -86,7 +94,7 @@ export class ActionController extends BaseController {
   })
   async generateTransaction(
     @Param('id') id: string,
-    @Body() body: any[],
+    @Body() body: { [key: string]: any },
   ): Promise<ResponseDto<GeneratedTransaction>> {
     const response = await this.actionStoreService.generateTransaction(
       id,
