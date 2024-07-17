@@ -104,7 +104,6 @@
       "<rootDir>/libs/"
     ],
     "moduleNameMapper": {
-      "^@action/example(|/.*)$": "<rootDir>/libs/example/src/$1",
       "^@action/novaswap(|/.*)$": "<rootDir>/libs/novaswap/src/$1"
     }
   }
