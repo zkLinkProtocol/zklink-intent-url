@@ -10,15 +10,6 @@
     ]
   },
   "projects": {
-    "example": {
-      "type": "library",
-      "root": "libs/example",
-      "entryFile": "index",
-      "sourceRoot": "libs/example/src",
-      "compilerOptions": {
-        "tsConfigPath": "libs/example/tsconfig.lib.json"
-      }
-    },
     "novaswap": {
       "type": "library",
       "root": "libs/novaswap",

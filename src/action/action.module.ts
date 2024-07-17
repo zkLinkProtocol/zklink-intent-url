@@ -11,7 +11,7 @@ import * as novaSwapAction from '@action/novaswap';
 })
 export class ActionModule implements OnModuleInit {
   private readonly actionModules = [
-    { key: 'example', module: novaSwapAction.default },
+    { key: 'novaswap', module: novaSwapAction.default },
   ];
 
   constructor(private readonly actionStoreService: ActionService) {}
