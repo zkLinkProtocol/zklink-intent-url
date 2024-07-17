@@ -156,7 +156,7 @@ class Action implements ActionDto {
             regexDesc: 'Address',
           },
           {
-            name: 'TokenOutAddress',
+            name: 'tokenOutAddress',
             label: 'Token Out Address',
             desc: 'The address of the token you want to receive',
             type: 'input',
