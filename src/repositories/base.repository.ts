@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { EntityTarget, FindOptionsWhere, FindManyOptions } from 'typeorm';
+import { EntityTarget, FindManyOptions, FindOptionsWhere } from 'typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
+
 import { UnitOfWork } from '../unitOfWork';
 
 const BATCH_SIZE = 1000;

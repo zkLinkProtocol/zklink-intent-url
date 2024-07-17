@@ -1,10 +1,10 @@
-import { Contract, ethers, Provider } from 'ethers';
+import { Contract, Provider, ethers } from 'ethers';
 
+import ERC20_ABI from './abis/erc20.json';
 import FACTORY_ABI from './abis/factory.json';
+import POOL_ABI from './abis/pool.json';
 import QUOTER_ABI from './abis/quoter.json';
 import SWAP_ROUTER_ABI from './abis/swaprouter.json';
-import POOL_ABI from './abis/pool.json';
-import ERC20_ABI from './abis/erc20.json';
 import { Params } from './interface';
 
 export class NovaSwap {

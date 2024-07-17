@@ -1,8 +1,10 @@
 import { Module, OnModuleInit } from '@nestjs/common';
-import { ActionService } from './action.service';
-import { ActionController } from './action.controller';
-import { Action, ActionId } from 'src/common/dto';
+
 import * as novaSwapAction from '@action/novaswap';
+import { Action, ActionId } from 'src/common/dto';
+
+import { ActionController } from './action.controller';
+import { ActionService } from './action.service';
 
 @Module({
   controllers: [ActionController],

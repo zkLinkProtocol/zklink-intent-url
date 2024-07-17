@@ -1,17 +1,18 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+
+import { ActionModule } from './action/action.module';
+import { ActionUrlModule } from './actionUrl/actionUrl.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { typeOrmModuleOptions } from './typeorm.config';
-import { MetricsModule } from './metrics';
-import { UnitOfWorkModule } from './unitOfWork';
 import { AuthModule } from './auth/auth.module';
 import config from './config';
-import { Creator } from './entities/creator.entity';
-import { ActionUrlModule } from './actionUrl/actionUrl.module';
 import { ActionUrl } from './entities/actionUrl.entity';
-import { ActionModule } from './action/action.module';
+import { Creator } from './entities/creator.entity';
+import { MetricsModule } from './metrics';
+import { typeOrmModuleOptions } from './typeorm.config';
+import { UnitOfWorkModule } from './unitOfWork';
 
 @Module({
   imports: [

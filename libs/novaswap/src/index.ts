@@ -4,14 +4,15 @@ import {
   ActionMetadata,
   GeneratedTransaction,
 } from 'src/common/dto';
-import { Params } from './interface';
+
 import {
+  METADATA,
   POOL_FACTORY_CONTRACT_ADDRESS,
   QUOTER_CONTRACT_ADDRESS,
-  SWAP_ROUTER_CONTRACT_ADDRESS,
   RPC_URL,
-  METADATA,
+  SWAP_ROUTER_CONTRACT_ADDRESS,
 } from './config';
+import { Params } from './interface';
 import { NovaSwap } from './swap';
 
 const provider = new ethers.JsonRpcProvider(RPC_URL);

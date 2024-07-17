@@ -1,10 +1,11 @@
-import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
-import logger from './logger';
+import { NestFactory } from '@nestjs/core';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+
 import { AppModule } from './app.module';
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { ExceptionsFilter } from './exception/exceptions.filter';
 import { ResponseDto } from './common/response.dto';
+import { ExceptionsFilter } from './exception/exceptions.filter';
+import logger from './logger';
 
 const API_PREFIX = 'api';
 

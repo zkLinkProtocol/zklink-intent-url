@@ -1,5 +1,5 @@
-import { utilities, WinstonModule } from 'nest-winston';
-import { format, transports, Logform } from 'winston';
+import { WinstonModule, utilities } from 'nest-winston';
+import { Logform, format, transports } from 'winston';
 
 const { NODE_ENV, LOG_LEVEL } = process.env;
 
