@@ -108,7 +108,8 @@
       "<rootDir>/libs/"
     ],
     "moduleNameMapper": {
-      "^@action/novaswap(|/.*)$": "<rootDir>/libs/novaswap/src/$1"
+      "^@action/novaswap(|/.*)$": "<rootDir>/libs/novaswap/src/$1",
+      "^@action/utils(|/.*)$": "<rootDir>/libs/utils/src/$1"
     }
   }
 }
