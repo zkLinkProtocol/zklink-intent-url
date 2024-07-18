@@ -117,6 +117,10 @@ export class ActionMetadata {
   @IsString()
   title: string;
 
+  @ApiProperty({ type: String, description: 'Action logo' })
+  @IsString()
+  logo: string;
+
   @ApiProperty({
     type: String,
     readOnly: true,
