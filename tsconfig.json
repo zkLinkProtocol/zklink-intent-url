@@ -25,6 +25,12 @@
       ],
       "@action/novaswap/*": [
         "libs/novaswap/src/*"
+      ],
+      "@action/utils": [
+        "libs/utils/src"
+      ],
+      "@action/utils/*": [
+        "libs/utils/src/*"
       ]
     }
   }
