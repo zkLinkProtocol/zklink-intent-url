@@ -2,9 +2,9 @@ name: Check
 
 on:
   push:
-    branches: [main]
+    branches: [main, dev, preview]
   pull_request:
-    branches: [main]
+    branches: [main, dev, preview]
 
 jobs:
   check:
