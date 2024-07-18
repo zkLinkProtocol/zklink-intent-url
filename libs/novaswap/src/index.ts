@@ -34,6 +34,7 @@ class Action implements ActionDto {
     const tx = await novaswap.swapToken(params as Params);
     return {
       tx: tx,
+      provider: provider,
       shouldSend: true,
     };
   }
