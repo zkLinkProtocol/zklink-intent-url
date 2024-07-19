@@ -1,0 +1,37 @@
+import {
+  ValidationArguments,
+  ValidationOptions,
+  registerDecorator,
+} from 'class-validator';
+
+export function ValidateOptions(validationOptions?: ValidationOptions) {
+  return function (object: object, propertyName: string) {
+    registerDecorator({
+      name: 'validateOptions',
+      target: object.constructor,
+      propertyName: propertyName,
+      options: validationOptions,
+      validator: {
+        validate(value: any, args: ValidationArguments) {
+          const type = (args.object as any).type;
+          if (['searchSelect', 'searchSelectErc20'].includes(type)) {
+            return (
+              Array.isArray(value) &&
+              value.every((item) => typeof item === 'object')
+            );
+          } else {
+            return value === undefined || value === null;
+          }
+        },
+        defaultMessage(args: ValidationArguments) {
+          const type = (args.object as any).type;
+          if (['searchSelect', 'searchSelectErc20'].includes(type)) {
+            return `options must be an array of objects when type is 'select' or 'searchSelectErc20'`;
+          } else {
+            return `options must be empty or not provided when type is not 'select' or 'searchSelectErc20'`;
+          }
+        },
+      },
+    });
+  };
+}

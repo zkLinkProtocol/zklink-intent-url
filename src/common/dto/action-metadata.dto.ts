@@ -1,12 +1,20 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  ApiProperty,
+  ApiPropertyOptional,
+  getSchemaPath,
+} from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
   IsArray,
   IsEnum,
   IsObject,
   IsOptional,
   IsString,
+  ValidateIf,
   ValidateNested,
 } from 'class-validator';
+
+import { ValidateOptions } from '../decorators';
 
 class NetworkDto {
   @ApiProperty({ type: String, description: 'Network name' })
@@ -54,6 +62,16 @@ class AuthorDto {
   discord?: string;
 }
 
+export class OptionDto {
+  @ApiProperty({ description: 'Option label' })
+  @IsString()
+  label: string;
+
+  @ApiProperty({ description: 'Option value' })
+  @IsString()
+  value: string;
+}
+
 class ComponentDto {
   @ApiProperty({ type: String, description: 'Component name' })
   @IsString()
@@ -83,21 +101,22 @@ class ComponentDto {
   @IsString()
   regexDesc: string;
 
+  @ApiPropertyOptional({ type: String, description: 'default value' })
+  @IsString()
+  defaultValue?: string;
+
   @ApiPropertyOptional({
     type: 'array',
-    items: {
-      type: 'object',
-      properties: {
-        label: { type: 'string', description: 'Option label' },
-        value: { type: 'string', description: 'Option value' },
-      },
-    },
+    items: { $ref: getSchemaPath(OptionDto) },
     description: 'Component options (optional)',
   })
   @IsOptional()
   @IsArray()
+  @Type(() => OptionDto)
   @ValidateNested({ each: true })
-  options?: { label: string; value: string }[];
+  @ValidateIf((o) => ['select', 'searchSelectErc20'].includes(o.type))
+  @ValidateOptions({ message: 'Invalid options based on type value' })
+  options?: OptionDto[];
 }
 
 class IntentDto {
