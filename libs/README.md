@@ -6,7 +6,7 @@ The following introduces the process of developing an action.
 
 First, in the root directory of the project, execute `npx nest g library my-action`. The `nest` command-line tool will initialize the action directory `libs/my-action` and configure the necessary files for you.
 
-The `Action` class in [`action.dto.ts`](../src/action/dto/actions.dto.ts) represents an action, and its definition is as follows:
+The `Action` class in [`action.dto.ts`](../src/common/dto/action.dto.ts) represents an action, and its definition is as follows:
 
 
 ```ts
@@ -23,4 +23,4 @@ Here, the `getMetadata` method returns metadata describing the action for displa
 
 You need to implement this `Action` abstract class based on your business logic and export its instance as default in the `index.ts` file in your `libs/my-action` (this is required). Our framework will register your action and handle routing and other operations.
 
-Check [`novaswap`](./novaswap/) to understand how to implement an real action.
+[`novaswap`](./novaswap/) is a good example of real action implementation.
