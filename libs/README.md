@@ -1,6 +1,6 @@
 This directory `libs` contains the implementation of actions. If you are an action developer, you need to initialize your action project in this directory, implement it with code, and submit a PR. We will review your code and consider whether to accept it.
 
-## Develop a Action
+## Develop an Action
 
 The following introduces the process of developing an action.
 
