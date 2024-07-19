@@ -27,6 +27,15 @@
       "compilerOptions": {
         "tsConfigPath": "libs/novaswap/tsconfig.lib.json"
       }
+    },
+    "buy-me-a-coffee": {
+      "type": "library",
+      "root": "libs/buy-me-a-coffee",
+      "entryFile": "index",
+      "sourceRoot": "libs/buy-me-a-coffee/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/buy-me-a-coffee/tsconfig.lib.json"
+      }
     }
   }
 }

@@ -20,17 +20,23 @@
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
+      "@action/utils": [
+        "libs/utils/src"
+      ],
+      "@action/utils/*": [
+        "libs/utils/src/*"
+      ],
       "@action/novaswap": [
         "libs/novaswap/src"
       ],
       "@action/novaswap/*": [
         "libs/novaswap/src/*"
       ],
-      "@action/utils": [
-        "libs/utils/src"
+      "@action/buy-me-a-coffee": [
+        "libs/buy-me-a-coffee/src"
       ],
-      "@action/utils/*": [
-        "libs/utils/src/*"
+      "@action/buy-me-a-coffee/*": [
+        "libs/buy-me-a-coffee/src/*"
       ]
     }
   }

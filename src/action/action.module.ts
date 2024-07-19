@@ -1,5 +1,6 @@
 import { Module, OnModuleInit } from '@nestjs/common';
 
+import * as buyMeACoffeeAction from '@action/buy-me-a-coffee';
 import * as novaSwapAction from '@action/novaswap';
 import { Action, ActionId } from 'src/common/dto';
 
@@ -14,6 +15,7 @@ import { ActionService } from './action.service';
 export class ActionModule implements OnModuleInit {
   private readonly actionModules = [
     { key: 'novaswap', module: novaSwapAction.default },
+    { key: 'buyMeACoffee', module: buyMeACoffeeAction.default },
   ];
 
   constructor(private readonly actionStoreService: ActionService) {}
