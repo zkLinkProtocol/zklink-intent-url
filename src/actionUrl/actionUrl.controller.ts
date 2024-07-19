@@ -7,7 +7,9 @@ import {
   Post,
   Put,
   Query,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ActionUrlService } from './actionUrl.service';
@@ -22,6 +24,7 @@ import {
 import { PagingMetaDto, ResponseDto } from 'src/common/response.dto';
 import { BaseController } from 'src/common/base.controller';
 import { PagingOptionsDto } from 'src/common/pagingOptionsDto.param';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('action-url')
 @ApiTags('action-url')
@@ -142,6 +145,17 @@ export class ActionUrlController extends BaseController {
     @GetCreator() creator,
   ): Promise<ResponseDto<boolean>> {
     const result = await this.actionUrlService.deleteByCode(path, creator.id);
+    return this.success(result);
+  }
+
+  @Post('upload')
+  @CommonApiOperation('Upload image.')
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadImage(
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<ResponseDto<string>> {
+    const result = await this.actionUrlService.uploadMetadata(file);
     return this.success(result);
   }
 }

@@ -3,6 +3,7 @@ import { ActionService } from 'src/action/action.service';
 import { ActionUrl } from 'src/entities/actionUrl.entity';
 import { BusinessException } from 'src/exception/business.exception';
 import { ActionUrlRepository } from 'src/repositories/actionUrl.repository';
+import { Aws } from 'src/utils/aws';
 
 @Injectable()
 export class ActionUrlService {
@@ -11,6 +12,7 @@ export class ActionUrlService {
     logger: Logger,
     private readonly actionUrlRespository: ActionUrlRepository,
     private readonly actionService: ActionService,
+    private readonly aws: Aws,
   ) {
     this.logger = new Logger(ActionUrlService.name);
   }
@@ -104,5 +106,18 @@ export class ActionUrlService {
       throw new BusinessException('Failed to delete actionUrl');
     }
     return true;
+  }
+
+  async uploadMetadata(file: Express.Multer.File) {
+    const fileName = `${Date.now()}-${file.originalname}`;
+    const MAX_SIZE = 1 * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
+      throw new BusinessException('File size must not exceed 1MB.');
+    }
+    try {
+      return await this.aws.uploadImg(file, fileName);
+    } catch (error) {
+      throw new BusinessException(error.message);
+    }
   }
 }
