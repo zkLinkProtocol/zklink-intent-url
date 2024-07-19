@@ -22,7 +22,7 @@ class Action implements ActionDto {
     const params = _params as Params;
 
     const tx = {
-      value: params.to,
+      value: params.value,
       to: params.recipient,
       data: '0x',
     };
