@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { verifyMessage } from 'ethers';
 
 import { sign_message } from 'src/constants';
 import { Creator } from 'src/entities/creator.entity';
@@ -29,7 +30,7 @@ export class AuthService {
       signature,
     );
     if (!validateStatus) {
-      throw new BusinessException('Invalid id');
+      throw new BusinessException('Invalid signature');
     }
 
     const creator = await this.creatorRepository.findByPublicId(publicId);
@@ -66,7 +67,7 @@ export class AuthService {
       signature,
     );
     if (!validateStatus) {
-      throw new BusinessException('Invalid address');
+      throw new BusinessException('Invalid signature');
     }
 
     const creator = await this.creatorRepository.findByAddress(address);
@@ -123,6 +124,11 @@ export class AuthService {
     signature: string,
   ): Promise<boolean> {
     this.logger.log(`validatePrivatekey: ${address} ${message} ${signature}`);
-    return true;
+    try {
+      const recoveredAddress = verifyMessage(message, signature);
+      return recoveredAddress.toLowerCase() === address.toLowerCase();
+    } catch (error) {
+      return false;
+    }
   }
 }
