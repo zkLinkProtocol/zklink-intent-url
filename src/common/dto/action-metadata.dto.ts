@@ -164,7 +164,7 @@ export class ActionMetadata {
 
   @ApiProperty({ type: DAppDto, description: 'DApp details' })
   @ValidateNested()
-  dApp?: DAppDto;
+  dApp: DAppDto;
 
   @ApiPropertyOptional({ type: AuthorDto, description: 'Author details' })
   @IsOptional()
