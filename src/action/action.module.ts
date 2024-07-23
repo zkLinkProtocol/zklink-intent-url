@@ -1,4 +1,4 @@
-import { Module, OnModuleInit } from '@nestjs/common';
+import { Global, Module, OnModuleInit } from '@nestjs/common';
 
 import * as buyMeACoffeeAction from '@action/buy-me-a-coffee';
 import * as novaSwapAction from '@action/novaswap';
@@ -7,6 +7,7 @@ import { Action, ActionId } from 'src/common/dto';
 import { ActionController } from './action.controller';
 import { ActionService } from './action.service';
 
+@Global()
 @Module({
   controllers: [ActionController],
   providers: [ActionService],
