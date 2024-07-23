@@ -34,7 +34,7 @@ export class Aws {
         'File type must be an image (JPEG, PNG, GIF, BMP, WEBP, TIFF, SVG, ICO).',
       );
     }
-    return this.uploadFile(file, fileName);
+    return await this.uploadFile(file, fileName);
   }
 
   public async uploadFile(file: any, fileName: string) {
@@ -43,8 +43,8 @@ export class Aws {
       Key: fileName,
       Body: file.buffer,
     };
-    const result = await this.s3.upload(params).promise();
-    return result.Location;
+    await this.s3.putObject(params).promise();
+    return 'https://zklink-intent.s3.amazonaws.com/' + fileName;
   }
 
   public async deleteFile(fileName: string) {
