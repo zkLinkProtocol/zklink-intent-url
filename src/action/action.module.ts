@@ -1,18 +1,19 @@
-import { Module, OnModuleInit } from '@nestjs/common';
-import { ActionService } from './action.service';
-import { ActionController } from './action.controller';
-import { Action, ActionId } from 'src/common/dto';
-import * as novaSwapAction from '@action/novaswap';
+import { Global, Module, OnModuleInit } from '@nestjs/common';
 
+import { Action, ActionId } from 'src/common/dto';
+
+import { ActionController } from './action.controller';
+import { ActionService } from './action.service';
+import { registeredActions } from './registeredActions';
+
+@Global()
 @Module({
   controllers: [ActionController],
   providers: [ActionService],
   exports: [ActionService],
 })
 export class ActionModule implements OnModuleInit {
-  private readonly actionModules = [
-    { key: 'example', module: novaSwapAction.default },
-  ];
+  private readonly actionModules = registeredActions;
 
   constructor(private readonly actionStoreService: ActionService) {}
 

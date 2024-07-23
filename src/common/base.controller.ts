@@ -1,4 +1,5 @@
 import { Controller } from '@nestjs/common';
+
 import { PagingMetaDto, ResponseDto } from 'src/common/response.dto';
 
 @Controller()
@@ -10,13 +11,13 @@ export class BaseController {
     if (!meta) {
       return {
         code: 200,
-        message: 'succdess',
+        message: 'success',
         data: data,
       };
     } else {
       return {
         code: 200,
-        message: 'succdess',
+        message: 'success',
         meta: meta,
         data: data,
       };

@@ -10,13 +10,13 @@
     ]
   },
   "projects": {
-    "example": {
+    "utils": {
       "type": "library",
-      "root": "libs/example",
+      "root": "libs/utils",
       "entryFile": "index",
-      "sourceRoot": "libs/example/src",
+      "sourceRoot": "libs/utils/src",
       "compilerOptions": {
-        "tsConfigPath": "libs/example/tsconfig.lib.json"
+        "tsConfigPath": "libs/utils/tsconfig.lib.json"
       }
     },
     "novaswap": {
@@ -26,6 +26,15 @@
       "sourceRoot": "libs/novaswap/src",
       "compilerOptions": {
         "tsConfigPath": "libs/novaswap/tsconfig.lib.json"
+      }
+    },
+    "buy-me-a-coffee": {
+      "type": "library",
+      "root": "libs/buy-me-a-coffee",
+      "entryFile": "index",
+      "sourceRoot": "libs/buy-me-a-coffee/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/buy-me-a-coffee/tsconfig.lib.json"
       }
     }
   }

@@ -1,5 +1,4 @@
-import { ValueTransformer } from 'typeorm';
-import { FindOperator } from 'typeorm';
+import { FindOperator, ValueTransformer } from 'typeorm';
 
 export const hexTransformer: ValueTransformer = {
   to(

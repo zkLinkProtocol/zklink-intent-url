@@ -29,7 +29,7 @@ export class Aws {
       'image/svg+xml',
       'image/x-icon',
     ];
-    if (!allowedTypes.includes(mimeType)) {
+    if (!mimeType || !allowedTypes.includes(mimeType)) {
       throw new Error(
         'File type must be an image (JPEG, PNG, GIF, BMP, WEBP, TIFF, SVG, ICO).',
       );

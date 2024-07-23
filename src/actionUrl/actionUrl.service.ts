@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+
 import { ActionService } from 'src/action/action.service';
 import { ActionUrl } from 'src/entities/actionUrl.entity';
 import { BusinessException } from 'src/exception/business.exception';
@@ -10,7 +11,7 @@ export class ActionUrlService {
   logger: Logger;
   constructor(
     logger: Logger,
-    private readonly actionUrlRespository: ActionUrlRepository,
+    private readonly actionUrlRepository: ActionUrlRepository,
     private readonly actionService: ActionService,
     private readonly aws: Aws,
   ) {
@@ -18,7 +19,7 @@ export class ActionUrlService {
   }
 
   async findOneByCode(code: string) {
-    const actionUrl = await this.actionUrlRespository.findOne({
+    const actionUrl = await this.actionUrlRepository.findOne({
       where: [{ code }],
       relations: ['creator'],
     });
@@ -31,7 +32,7 @@ export class ActionUrlService {
     limit: number = 20,
   ) {
     const offset = Math.max((page - 1) * limit, 0);
-    const [actionUrls, total] = await this.actionUrlRespository.findAndCount({
+    const [actionUrls, total] = await this.actionUrlRepository.findAndCount({
       where: { creatorId },
       select: ['code', 'title', 'description', 'createdAt', 'updatedAt'],
       take: limit,
@@ -60,7 +61,7 @@ export class ActionUrlService {
     const code = Math.random().toString(36).substring(2, 15);
     actionUrl.code = code;
     try {
-      await this.actionUrlRespository.add(actionUrl);
+      await this.actionUrlRepository.add(actionUrl);
     } catch (error) {
       this.logger.error(error);
       throw new BusinessException('Failed to add actionUrl');
@@ -83,7 +84,7 @@ export class ActionUrlService {
     actionUrl.settings = params.settings;
 
     try {
-      await this.actionUrlRespository.updateByCode(code, actionUrl);
+      await this.actionUrlRepository.updateByCode(code, actionUrl);
     } catch (error) {
       this.logger.error(error);
       throw new BusinessException('Failed to update actionUrl');
@@ -100,7 +101,7 @@ export class ActionUrlService {
       throw new BusinessException('ActionUrl not found');
     }
     try {
-      await this.actionUrlRespository.deleteByCode(code);
+      await this.actionUrlRepository.deleteByCode(code);
     } catch (error) {
       this.logger.error(error);
       throw new BusinessException('Failed to delete actionUrl');

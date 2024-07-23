@@ -1,20 +1,16 @@
 import { Logger, Module } from '@nestjs/common';
-import { ActionUrlService } from './actionUrl.service';
-import { ActionUrlController } from './actionUrl.controller';
+
+import { ActionModule } from 'src/action/action.module';
 import { ActionUrlRepository } from 'src/repositories/actionUrl.repository';
 import { UnitOfWorkModule } from 'src/unitOfWork';
-import { ActionService } from 'src/action/action.service';
 import { Aws } from 'src/utils/aws';
 
+import { ActionUrlController } from './actionUrl.controller';
+import { ActionUrlService } from './actionUrl.service';
+
 @Module({
-  imports: [UnitOfWorkModule],
+  imports: [UnitOfWorkModule, ActionModule],
   controllers: [ActionUrlController],
-  providers: [
-    Logger,
-    ActionUrlService,
-    ActionUrlRepository,
-    ActionService,
-    Aws,
-  ],
+  providers: [Logger, ActionUrlService, ActionUrlRepository, Aws],
 })
 export class ActionUrlModule {}

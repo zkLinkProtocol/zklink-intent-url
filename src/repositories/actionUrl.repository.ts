@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { UnitOfWork } from '../unitOfWork';
+
 import { BaseRepository } from './base.repository';
 import { ActionUrl } from '../entities/actionUrl.entity';
+import { UnitOfWork } from '../unitOfWork';
 
 @Injectable()
 export class ActionUrlRepository extends BaseRepository<ActionUrl> {

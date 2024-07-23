@@ -1,16 +1,18 @@
-import { Controller, Post, Body, Get } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { AuthService } from './auth.service';
+
+import { BaseController } from 'src/common/base.controller';
+import { CommonApiOperation } from 'src/common/base.decorators';
+import { ResponseDto } from 'src/common/response.dto';
+import { sign_message } from 'src/constants';
+
 import {
   LoginByPasskeyRequestDto,
   LoginByPasskeyResponseDto,
   LoginByPrivatekeyRequestDto,
   LoginByPrivatekeyResponseDto,
 } from './auth.dto';
-import { BaseController } from 'src/common/base.controller';
-import { ResponseDto } from 'src/common/response.dto';
-import { CommonApiOperation } from 'src/common/base.decorators';
-import { sign_message } from 'src/constants';
+import { AuthService } from './auth.service';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -24,13 +26,13 @@ export class AuthController extends BaseController {
   async loginByPasskey(
     @Body() params: LoginByPasskeyRequestDto,
   ): Promise<ResponseDto<LoginByPasskeyResponseDto>> {
-    const restult = await this.authService.loginByPasskey(
+    const result = await this.authService.loginByPasskey(
       params.id,
       params.signature,
     );
     return this.success({
-      accessToken: restult.accessToken,
-      expiresIn: restult.expiresIn,
+      accessToken: result.accessToken,
+      expiresIn: result.expiresIn,
     });
   }
 
@@ -39,13 +41,13 @@ export class AuthController extends BaseController {
   async loginByPrivatekey(
     @Body() params: LoginByPrivatekeyRequestDto,
   ): Promise<ResponseDto<LoginByPrivatekeyResponseDto>> {
-    const restult = await this.authService.loginByAddress(
+    const result = await this.authService.loginByAddress(
       params.address,
       params.signature,
     );
     return this.success({
-      accessToken: restult.accessToken,
-      expiresIn: restult.expiresIn,
+      accessToken: result.accessToken,
+      expiresIn: result.expiresIn,
     });
   }
 

@@ -7,9 +7,11 @@
     "^.+\\.(t|j)s$": "ts-jest"
   },
   "moduleNameMapper": {
-    "@action/example/(.*)": "<rootDir>/../libs/example/src/$1",
-    "@action/example": "<rootDir>/../libs/example/src",
     "@action/novaswap/(.*)": "<rootDir>/../libs/novaswap/src/$1",
-    "@action/novaswap": "<rootDir>/../libs/novaswap/src"
+    "@action/novaswap": "<rootDir>/../libs/novaswap/src",
+    "@action/utils/(.*)": "<rootDir>/../libs/utils/src/$1",
+    "@action/utils": "<rootDir>/../libs/utils/src",
+    "@action/buy-me-a-coffee/(.*)": "<rootDir>/../libs/buy-me-a-coffee/src/$1",
+    "@action/buy-me-a-coffee": "<rootDir>/../libs/buy-me-a-coffee/src"
   }
 }

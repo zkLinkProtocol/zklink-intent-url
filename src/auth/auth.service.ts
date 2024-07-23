@@ -1,11 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { Creator } from 'src/entities/creator.entity';
-import { CreatorRepository } from 'src/repositories/creator.repository';
-import { BusinessException } from 'src/exception/business.exception';
-import { sign_message } from 'src/constants';
 import { verifyMessage } from 'ethers';
+
+import { sign_message } from 'src/constants';
+import { Creator } from 'src/entities/creator.entity';
+import { BusinessException } from 'src/exception/business.exception';
+import { CreatorRepository } from 'src/repositories/creator.repository';
 
 @Injectable()
 export class AuthService {

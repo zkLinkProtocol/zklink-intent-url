@@ -1,12 +1,13 @@
-import { BaseEntity } from './base.entity';
 import {
-  Entity,
   Column,
-  PrimaryColumn,
+  Entity,
   Index,
-  ManyToOne,
   JoinColumn,
+  ManyToOne,
+  PrimaryColumn,
 } from 'typeorm';
+
+import { BaseEntity } from './base.entity';
 import { Creator } from './creator.entity';
 import { jsonStringTransformer } from '../transformers/jsonString.transformer';
 

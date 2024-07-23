@@ -65,7 +65,7 @@ export class ActionUrlAddRequestDto {
   @ApiProperty({
     name: 'settings',
     description: 'Configuration options for actionUrl.',
-    example: '{params1: 1, type: "input"}',
+    example: { params1: 1, type: 'input' },
   })
   @IsNotEmpty()
   @IsObject()
