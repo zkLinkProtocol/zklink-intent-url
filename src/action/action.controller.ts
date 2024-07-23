@@ -36,7 +36,7 @@ export class ActionController extends BaseController {
           properties: {
             data: {
               type: 'array',
-              items: { $ref: getSchemaPath(ActionMetadata) },
+              items: { $ref: getSchemaPath(ActionResponseDto) },
             },
           },
         },
@@ -58,7 +58,7 @@ export class ActionController extends BaseController {
         { $ref: getSchemaPath(ResponseDto) },
         {
           properties: {
-            data: { $ref: getSchemaPath(ActionMetadata) },
+            data: { $ref: getSchemaPath(ActionResponseDto) },
           },
         },
       ],

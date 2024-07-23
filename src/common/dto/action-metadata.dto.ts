@@ -35,7 +35,7 @@ class DAppDto {
   @IsString()
   name: string;
 
-  @ApiPropertyOptional({ type: String, description: 'DApp URL' })
+  @ApiPropertyOptional({ type: String, description: 'DApp URL (optional)' })
   @IsOptional()
   @IsString()
   url?: string;
@@ -101,7 +101,10 @@ class ComponentDto {
   @IsString()
   regexDesc: string;
 
-  @ApiPropertyOptional({ type: String, description: 'default value' })
+  @ApiPropertyOptional({
+    type: String,
+    description: 'default value (optional)',
+  })
   @IsString()
   defaultValue?: string;
 
@@ -151,7 +154,7 @@ export class ActionMetadata {
   @ApiPropertyOptional({
     type: 'object',
     additionalProperties: { type: 'string' },
-    description: 'Metadata for the action, key-value pairs',
+    description: 'Metadata for the action, key-value pairs (optional)',
   })
   @IsOptional()
   @IsObject()
@@ -166,7 +169,10 @@ export class ActionMetadata {
   @ValidateNested()
   dApp: DAppDto;
 
-  @ApiPropertyOptional({ type: AuthorDto, description: 'Author details' })
+  @ApiPropertyOptional({
+    type: AuthorDto,
+    description: 'Author details (optional)',
+  })
   @IsOptional()
   @ValidateNested()
   author?: AuthorDto;

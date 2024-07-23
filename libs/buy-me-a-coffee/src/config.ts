@@ -28,7 +28,7 @@ export const METADATA: ActionMetadata = {
       {
         name: 'recipient',
         label: 'Recipient',
-        desc: 'The address of sponsee',
+        desc: 'The address that is sponsored',
         type: 'input',
         regex: '^0x[a-fA-F0-9]{40}$',
         regexDesc: 'Address',
