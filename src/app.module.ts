@@ -10,6 +10,7 @@ import { AuthModule } from './auth/auth.module';
 import config from './config';
 import { ActionUrl } from './entities/actionUrl.entity';
 import { Creator } from './entities/creator.entity';
+import { FilesModule } from './files/files.module';
 import { MetricsModule } from './metrics';
 import { typeOrmModuleOptions } from './typeorm.config';
 import { UnitOfWorkModule } from './unitOfWork';
@@ -38,6 +39,7 @@ import { UnitOfWorkModule } from './unitOfWork';
     AuthModule,
     ActionUrlModule,
     ActionModule,
+    FilesModule,
   ],
 
   controllers: [AppController],
