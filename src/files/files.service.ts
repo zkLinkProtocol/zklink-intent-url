@@ -5,11 +5,12 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import AWS from 'aws-sdk';
 import { lookup } from 'mime-types';
 
-import { BusinessException } from 'src/exception/business.exception';
+import { BusinessException } from '../exception/business.exception';
 
 @Injectable()
 export class FilesService {
   private readonly s3: AWS.S3;
+  private keyPrefix: string;
 
   constructor() {
     if (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY) {
@@ -23,6 +24,7 @@ export class FilesService {
         region: process.env.AWS_REGION,
       });
     }
+    this.keyPrefix = process.env.AWS_KEY_PREFIX + '\\';
   }
 
   public async uploadImg(file: Express.Multer.File, fileName: string) {
@@ -38,7 +40,7 @@ export class FilesService {
       'image/x-icon',
     ];
     if (!mimeType || !allowedTypes.includes(mimeType)) {
-      throw new Error(
+      throw new BusinessException(
         'File type must be an image (JPEG, PNG, GIF, BMP, WEBP, TIFF, SVG, ICO).',
       );
     }
@@ -48,17 +50,17 @@ export class FilesService {
   public async uploadFile(file: Express.Multer.File, fileName: string) {
     const params = {
       Bucket: process.env.AWS_BUCKET,
-      Key: fileName,
+      Key: `${this.keyPrefix}${fileName}`,
       Body: file.buffer,
     };
-    await this.s3.putObject(params).promise();
-    return 'https://zklink-intent.s3.amazonaws.com/' + fileName;
+    const result = await this.s3.upload(params).promise();
+    return result.Location;
   }
 
   public async deleteFile(fileName: string) {
     const params = {
       Bucket: process.env.AWS_BUCKET,
-      Key: fileName,
+      Key: `${this.keyPrefix}${fileName}`,
     };
 
     const result = await this.s3.deleteObject(params).promise();
@@ -72,7 +74,7 @@ export class FilesService {
       const fileContent = fs.readFileSync(filePath);
       const params = {
         Bucket: process.env.AWS_BUCKET,
-        Key: `logos/${fileName}`,
+        Key: `${this.keyPrefix}logos/${fileName}`,
         Body: fileContent,
       };
       return this.s3.upload(params).promise();
