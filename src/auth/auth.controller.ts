@@ -26,13 +26,13 @@ export class AuthController extends BaseController {
   async loginByPasskey(
     @Body() params: LoginByPasskeyRequestDto,
   ): Promise<ResponseDto<LoginByPasskeyResponseDto>> {
-    const restult = await this.authService.loginByPasskey(
+    const result = await this.authService.loginByPasskey(
       params.id,
       params.signature,
     );
     return this.success({
-      accessToken: restult.accessToken,
-      expiresIn: restult.expiresIn,
+      accessToken: result.accessToken,
+      expiresIn: result.expiresIn,
     });
   }
 
@@ -41,13 +41,13 @@ export class AuthController extends BaseController {
   async loginByPrivatekey(
     @Body() params: LoginByPrivatekeyRequestDto,
   ): Promise<ResponseDto<LoginByPrivatekeyResponseDto>> {
-    const restult = await this.authService.loginByAddress(
+    const result = await this.authService.loginByAddress(
       params.address,
       params.signature,
     );
     return this.success({
-      accessToken: restult.accessToken,
-      expiresIn: restult.expiresIn,
+      accessToken: result.accessToken,
+      expiresIn: result.expiresIn,
     });
   }
 

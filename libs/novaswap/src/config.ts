@@ -56,6 +56,24 @@ export const METADATA: ActionMetadata = {
         type: 'input',
         regex: '^0x[a-fA-F0-9]{40}$',
         regexDesc: 'Address',
+        options: [
+          {
+            label: 'WETH',
+            value: '0x8280a4e7D5B3B658ec4580d3Bc30f5e50454F169',
+          },
+          {
+            label: 'USDC',
+            value: '0x1a1A3b2ff016332e866787B311fcB63928464509',
+          },
+          {
+            label: 'USDT',
+            value: '0x2F8A25ac62179B31D62D7F80884AE57464699059',
+          },
+          {
+            label: 'WBTC',
+            value: '0xDa4AaEd3A53962c83B35697Cd138cc6df43aF71f',
+          },
+        ],
       },
       {
         name: 'amountIn',

@@ -51,8 +51,8 @@ export class FilesService {
       Key: fileName,
       Body: file.buffer,
     };
-    const result = await this.s3.upload(params).promise();
-    return result.Location;
+    await this.s3.putObject(params).promise();
+    return 'https://zklink-intent.s3.amazonaws.com/' + fileName;
   }
 
   public async deleteFile(fileName: string) {
@@ -72,7 +72,7 @@ export class FilesService {
       const fileContent = fs.readFileSync(filePath);
       const params = {
         Bucket: process.env.AWS_BUCKET,
-        Key: fileName,
+        Key: `logos/${fileName}`,
         Body: fileContent,
       };
       return this.s3.upload(params).promise();
@@ -96,7 +96,7 @@ export class FilesService {
       throw new BusinessException('File size must not exceed 1MB.');
     }
     try {
-      return await this.uploadFile(file, fileName);
+      return await this.uploadImg(file, fileName);
     } catch (error) {
       throw new BusinessException(error.message);
     }
