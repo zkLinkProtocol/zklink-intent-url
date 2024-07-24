@@ -7,11 +7,8 @@ import {
   Post,
   Put,
   Query,
-  UploadedFile,
   UseGuards,
-  UseInterceptors,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags } from '@nestjs/swagger';
 
 import { GetCreator } from 'src/auth/creator.decorators';
@@ -147,17 +144,6 @@ export class ActionUrlController extends BaseController {
     @GetCreator() creator,
   ): Promise<ResponseDto<boolean>> {
     const result = await this.actionUrlService.deleteByCode(path, creator.id);
-    return this.success(result);
-  }
-
-  @Post('upload')
-  @CommonApiOperation('Upload image.')
-  @UseGuards(JwtAuthGuard)
-  @UseInterceptors(FileInterceptor('file'))
-  async uploadImage(
-    @UploadedFile() file: Express.Multer.File,
-  ): Promise<ResponseDto<string>> {
-    const result = await this.actionUrlService.uploadMetadata(file);
     return this.success(result);
   }
 }
