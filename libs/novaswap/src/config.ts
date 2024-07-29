@@ -53,7 +53,7 @@ export const METADATA: ActionMetadata = {
         name: 'tokenOutAddress',
         label: 'Token Out Address',
         desc: 'The address of the token you want to receive',
-        type: 'input',
+        type: 'searchSelect',
         regex: '^0x[a-fA-F0-9]{40}$',
         regexDesc: 'Address',
         options: [
@@ -79,7 +79,7 @@ export const METADATA: ActionMetadata = {
         name: 'amountIn',
         label: 'Amount',
         desc: 'The amount of tokens you want to swap',
-        type: 'text',
+        type: 'input',
         regex: '^[0-9]+$',
         regexDesc: 'Must be a number',
         defaultValue: '1000000',
