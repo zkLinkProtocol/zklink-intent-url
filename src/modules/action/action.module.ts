@@ -29,6 +29,7 @@ export class ActionModule implements OnModuleInit {
     const actions = new Map<ActionId, Action>();
     this.actionModules.forEach((item) => {
       actions.set(item.key, item.module);
+      console.log('Register action:', item.key);
     });
 
     this.actionStoreService.setActions(actions);

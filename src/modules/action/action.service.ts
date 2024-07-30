@@ -40,12 +40,10 @@ export class ActionService {
     id: ActionId,
     params: ActionTransactionParams,
   ): Promise<GeneratedTransaction> {
-    console.log('id', id);
     const action = this.actions.get(id);
     if (!action) {
       throw new BusinessException(`Action with id '${id}' not found.`);
     }
-    console.log('action', action);
     return action.generateTransaction(params);
   }
 }
