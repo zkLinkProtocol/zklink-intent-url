@@ -2,16 +2,16 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { ActionModule } from './action/action.module';
-import { ActionUrlModule } from './actionUrl/actionUrl.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { AuthModule } from './auth/auth.module';
 import config from './config';
 import { ActionUrl } from './entities/actionUrl.entity';
 import { Creator } from './entities/creator.entity';
-import { FilesModule } from './files/files.module';
 import { MetricsModule } from './metrics';
+import { ActionModule } from './modules/action/action.module';
+import { ActionUrlModule } from './modules/actionUrl/actionUrl.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { FilesModule } from './modules/files/files.module';
 import { typeOrmModuleOptions } from './typeorm.config';
 import { UnitOfWorkModule } from './unitOfWork';
 

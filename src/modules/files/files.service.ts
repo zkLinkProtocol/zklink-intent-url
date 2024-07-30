@@ -5,7 +5,7 @@ import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import AWS from 'aws-sdk';
 import { lookup } from 'mime-types';
 
-import { BusinessException } from '../exception/business.exception';
+import { BusinessException } from 'src/exception/business.exception';
 
 @Injectable()
 export class FilesService {
@@ -25,7 +25,7 @@ export class FilesService {
         region: process.env.AWS_REGION,
       });
     }
-    this.keyPrefix = process.env.AWS_KEY_PREFIX + '/';
+    this.keyPrefix = process.env.AWS_KEY_PREFIX;
   }
 
   public async uploadImg(file: Express.Multer.File, fileName: string) {
@@ -51,7 +51,7 @@ export class FilesService {
   public async uploadFile(file: Express.Multer.File, fileName: string) {
     const params = {
       Bucket: process.env.AWS_BUCKET,
-      Key: `${this.keyPrefix}${fileName}`,
+      Key: `${this.keyPrefix}/${fileName}`,
       Body: file.buffer,
     };
     this.logger.log(
@@ -64,7 +64,7 @@ export class FilesService {
   public async deleteFile(fileName: string) {
     const params = {
       Bucket: process.env.AWS_BUCKET,
-      Key: `${this.keyPrefix}${fileName}`,
+      Key: `${this.keyPrefix}/${fileName}`,
     };
     this.logger.log(`deleting file Key:${params.Key}, Bucket:${params.Bucket}`);
 
@@ -79,7 +79,7 @@ export class FilesService {
       const fileContent = fs.readFileSync(filePath);
       const params = {
         Bucket: process.env.AWS_BUCKET,
-        Key: `${this.keyPrefix}logos/${fileName}`,
+        Key: `${this.keyPrefix}/logos/${fileName}`,
         Body: fileContent,
       };
       this.logger.log(
