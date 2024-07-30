@@ -33,19 +33,7 @@ export const METADATA: ActionMetadata = {
         options: [
           {
             label: 'WETH',
-            value: '0x8280a4e7D5B3B658ec4580d3Bc30f5e50454F169',
-          },
-          {
-            label: 'USDC',
-            value: '0x1a1A3b2ff016332e866787B311fcB63928464509',
-          },
-          {
-            label: 'USDT',
-            value: '0x2F8A25ac62179B31D62D7F80884AE57464699059',
-          },
-          {
-            label: 'WBTC',
-            value: '0xDa4AaEd3A53962c83B35697Cd138cc6df43aF71f',
+            value: '0x6e42d10eB474a17b14f3cfeAC2590bfa604313C7',
           },
         ],
       },
@@ -58,20 +46,8 @@ export const METADATA: ActionMetadata = {
         regexDesc: 'Address',
         options: [
           {
-            label: 'WETH',
-            value: '0x8280a4e7D5B3B658ec4580d3Bc30f5e50454F169',
-          },
-          {
             label: 'USDC',
-            value: '0x1a1A3b2ff016332e866787B311fcB63928464509',
-          },
-          {
-            label: 'USDT',
-            value: '0x2F8A25ac62179B31D62D7F80884AE57464699059',
-          },
-          {
-            label: 'WBTC',
-            value: '0xDa4AaEd3A53962c83B35697Cd138cc6df43aF71f',
+            value: '0x461fE851Cd66e82A274570ED5767c873bE9Ae1ff',
           },
         ],
       },
