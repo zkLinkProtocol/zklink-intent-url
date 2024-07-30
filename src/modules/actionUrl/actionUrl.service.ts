@@ -1,9 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { nanoid } from 'nanoid';
 
-import { ActionService } from 'src/action/action.service';
 import { ActionUrl } from 'src/entities/actionUrl.entity';
 import { BusinessException } from 'src/exception/business.exception';
+import { ActionService } from 'src/modules/action/action.service';
 import { ActionUrlRepository } from 'src/repositories/actionUrl.repository';
 
 @Injectable()

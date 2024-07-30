@@ -8,12 +8,12 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags } from '@nestjs/swagger';
 
-import { JwtAuthGuard } from 'src/auth/jwtAuth.guard';
 import { BaseController } from 'src/common/base.controller';
 import { CommonApiOperation } from 'src/common/base.decorators';
 import { ResponseDto } from 'src/common/response.dto';
 
 import { FilesService } from './files.service';
+import { JwtAuthGuard } from '../auth/jwtAuth.guard';
 
 @Controller('files')
 @ApiTags('files')

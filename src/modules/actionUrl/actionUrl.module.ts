@@ -1,6 +1,6 @@
 import { Logger, Module } from '@nestjs/common';
 
-import { ActionModule } from 'src/action/action.module';
+import { ActionModule } from 'src/modules/action/action.module';
 import { ActionUrlRepository } from 'src/repositories/actionUrl.repository';
 import { UnitOfWorkModule } from 'src/unitOfWork';
 
