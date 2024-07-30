@@ -113,7 +113,7 @@ export class ActionController extends BaseController {
   })
   async generateTransaction(
     @Param('id') id: string,
-    @Body() body: { [key: string]: any },
+    @Body() body: { [key: string]: string },
   ): Promise<ResponseDto<GeneratedTransaction>> {
     const response = await this.actionStoreService.generateTransaction(
       id,
