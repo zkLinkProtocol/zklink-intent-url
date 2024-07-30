@@ -15,9 +15,9 @@ export const METADATA: ActionMetadata = {
   description: 'Swap tokens',
   networks: [
     {
-      name: 'Ethereum',
-      chainId: '1',
-      contractAddress: '0x',
+      name: 'zkLink Nova',
+      chainId: '810180',
+      contractAddress: SWAP_ROUTER_CONTRACT_ADDRESS,
     },
   ],
   dApp: { name: 'NovaSwap' },
