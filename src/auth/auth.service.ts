@@ -3,7 +3,6 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { verifyMessage } from 'ethers';
 
-import { sign_message } from 'src/constants';
 import { Creator } from 'src/entities/creator.entity';
 import { BusinessException } from 'src/exception/business.exception';
 import { CreatorRepository } from 'src/repositories/creator.repository';
@@ -11,18 +10,15 @@ import { CreatorRepository } from 'src/repositories/creator.repository';
 @Injectable()
 export class AuthService {
   private readonly logger: Logger;
-  private readonly signMessage: string;
   constructor(
     private readonly jwtService: JwtService,
     private readonly creatorRepository: CreatorRepository,
     private readonly configService: ConfigService,
   ) {
     this.logger = new Logger(AuthService.name);
-    this.signMessage = sign_message;
   }
 
-  async loginByPasskey(publicId: string, signature: string) {
-    const message = this.signMessage;
+  async loginByPasskey(publicId: string, message: string, signature: string) {
     const publickey = await this.getPublicKey(publicId);
     const validateStatus = await this.validatePasskey(
       publickey,
@@ -59,8 +55,7 @@ export class AuthService {
     };
   }
 
-  async loginByAddress(address: string, signature: string) {
-    const message = this.signMessage;
+  async loginByAddress(address: string, message: string, signature: string) {
     const validateStatus = await this.validatePrivatekey(
       address,
       message,

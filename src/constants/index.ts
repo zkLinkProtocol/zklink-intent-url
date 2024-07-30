@@ -1,1 +1,1 @@
-export const sign_message = 'hello intent';
+export const sign_message = 'Hello intent!';

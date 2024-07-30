@@ -28,7 +28,6 @@ async function bootstrap() {
     .setTitle('zkIntent api docs')
     .setDescription('zkIntent API documentation, using RESTful style API')
     .setVersion('1.0')
-    .setBasePath(API_PREFIX)
     .addBearerAuth()
     .build();
 

@@ -14,10 +14,8 @@ export class ActionService {
   }
 
   async getActions(): Promise<ActionResponseDto[]> {
-    console.log(Array.from(this.actions.keys()));
     const actions = Array.from(this.actions.keys()).map(async (id) => {
       const action = this.actions.get(id);
-      console.log(action);
       const metadata = await action.getMetadata();
       return { id, ...metadata };
     });
@@ -26,6 +24,9 @@ export class ActionService {
 
   async getAction(id: ActionId): Promise<ActionResponseDto | null> {
     const action = this.actions.get(id);
+    if (!action) {
+      return null;
+    }
     const metadata = await action.getMetadata();
     return action ? { id, ...metadata } : null;
   }

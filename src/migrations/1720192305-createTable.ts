@@ -21,7 +21,7 @@ export class CreateTable1720192305000 implements MigrationInterface {
 
     await queryRunner.query(
       `CREATE TABLE "intent_actionUrl" (
-        "code" varchar(100) PRIMARY KEY NOT NULL, -- url: https://host/pk/{code}, rule:uuid(0-9a-z,length:8)
+        "code" varchar(100) 5 KEY NOT NULL, -- url: https://host/pk/{code}, rule:uuid(0-9a-z,length:8)
         "creatorId" int NOT NULL,
         "actionId" varchar(100) NOT NULL,
         "title" varchar(100) NOT NULL,

@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { nanoid } from 'nanoid';
 
 import { ActionService } from 'src/action/action.service';
 import { ActionUrl } from 'src/entities/actionUrl.entity';
@@ -51,12 +52,12 @@ export class ActionUrlService {
 
   async add(params: any, creatorId: bigint): Promise<string> {
     const actionUrl = { ...params } as ActionUrl;
-    const action = this.actionService.getAction(actionUrl.actionId);
+    const action = await this.actionService.getAction(actionUrl.actionId);
     if (!action) {
       throw new BusinessException('Action not found');
     }
     actionUrl.creatorId = creatorId;
-    const code = Math.random().toString(36).substring(2, 15);
+    const code = nanoid(8);
     actionUrl.code = code;
     try {
       await this.actionUrlRepository.add(actionUrl);

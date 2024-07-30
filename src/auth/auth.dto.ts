@@ -60,6 +60,15 @@ export class LoginByPrivatekeyRequestDto {
   address: string;
 
   @ApiProperty({
+    name: 'message',
+    description: 'Message.',
+    example: '1234567890abcdef1234567890abcdef12345678',
+  })
+  @IsNotEmpty()
+  @IsString()
+  message: string;
+
+  @ApiProperty({
     name: 'signature',
     description: 'Signed string.',
     example: '0x1234567890abcdef1234567890abcdef12345678',
@@ -78,6 +87,15 @@ export class LoginByPasskeyRequestDto {
   @IsNotEmpty()
   @IsString()
   id: string;
+
+  @ApiProperty({
+    name: 'message',
+    description: 'Message.',
+    example: '1234567890abcdef1234567890abcdef12345678',
+  })
+  @IsNotEmpty()
+  @IsString()
+  message: string;
 
   @ApiProperty({
     name: 'signature',
