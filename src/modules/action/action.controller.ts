@@ -92,7 +92,6 @@ export class ActionController extends BaseController {
           tokenOutAddress: '0x461fE851Cd66e82A274570ED5767c873bE9Ae1ff',
           amountIn: 1,
           recipient: '0xE592427A0AEce92De3Edee1F18E0157C05861564',
-          fee: 3000,
           deadlineDurationInSec: 3600,
         },
       },

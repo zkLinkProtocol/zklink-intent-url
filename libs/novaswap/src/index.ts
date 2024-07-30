@@ -6,6 +6,7 @@ import {
 } from 'src/common/dto';
 
 import {
+  FEE,
   METADATA,
   POOL_FACTORY_CONTRACT_ADDRESS,
   QUOTER_CONTRACT_ADDRESS,
@@ -31,7 +32,7 @@ class Action implements ActionDto {
   async generateTransaction(params: {
     [key: string]: any;
   }): Promise<GeneratedTransaction> {
-    const tx = await novaswap.swapToken(params as Params);
+    const tx = await novaswap.swapToken(params as Params, FEE);
     return {
       tx: tx,
       provider: provider,

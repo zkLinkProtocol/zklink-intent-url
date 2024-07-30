@@ -98,14 +98,14 @@ export class NovaSwap {
     return amountOut;
   }
 
-  public async swapToken(params: Params) {
+  public async swapToken(params: Params, _fee: number) {
     const inputAmount = params.amountIn;
     const amountIn = ethers.parseUnits(inputAmount.toString(), 18);
     const { poolContract, fee } = await this.getPoolInfo(
       this.factoryContract,
       params.tokenInAddress,
       params.tokenOutAddress,
-      params.fee,
+      _fee,
     );
     const quotedAmountOut = await this.quoteAndLogSwap(
       this.quoterContract,
