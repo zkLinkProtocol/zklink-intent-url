@@ -2,6 +2,7 @@ import { ethers } from 'ethers';
 import {
   Action as ActionDto,
   ActionMetadata,
+  ActionTransactionParams,
   GeneratedTransaction,
 } from 'src/common/dto';
 
@@ -13,7 +14,7 @@ import {
   RPC_URL,
   SWAP_ROUTER_CONTRACT_ADDRESS,
 } from './config';
-import { Params } from './interface';
+import { intoParams } from './interface';
 import { NovaSwap } from './swap';
 
 const provider = new ethers.JsonRpcProvider(RPC_URL);
@@ -29,10 +30,10 @@ class Action implements ActionDto {
     return METADATA;
   }
 
-  async generateTransaction(params: {
-    [key: string]: any;
-  }): Promise<GeneratedTransaction> {
-    const tx = await novaswap.swapToken(params as Params, FEE);
+  async generateTransaction(
+    params: ActionTransactionParams,
+  ): Promise<GeneratedTransaction> {
+    const tx = await novaswap.swapToken(intoParams(params), FEE);
     return {
       tx: tx,
       provider: provider,

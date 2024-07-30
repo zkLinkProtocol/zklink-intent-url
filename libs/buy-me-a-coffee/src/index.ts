@@ -3,11 +3,12 @@ import { ethers } from 'ethers';
 import {
   Action as ActionDto,
   ActionMetadata,
+  ActionTransactionParams,
   GeneratedTransaction,
 } from 'src/common/dto';
 
 import { METADATA, RPC_URL } from './config';
-import { Params } from './interface';
+import { intoParams } from './interface';
 
 const provider = new ethers.JsonRpcProvider(RPC_URL);
 
@@ -16,10 +17,10 @@ class Action implements ActionDto {
     return METADATA;
   }
 
-  async generateTransaction(_params: {
-    [key: string]: any;
-  }): Promise<GeneratedTransaction> {
-    const params = _params as Params;
+  async generateTransaction(
+    _params: ActionTransactionParams,
+  ): Promise<GeneratedTransaction> {
+    const params = intoParams(_params);
 
     const tx = {
       value: params.value,

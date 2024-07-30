@@ -7,7 +7,7 @@ export const QUOTER_CONTRACT_ADDRESS =
 export const SWAP_ROUTER_CONTRACT_ADDRESS =
   '0x2c98143431993e4CBD5eFD4B93c099432cacEBcE';
 export const RPC_URL = 'https://sepolia.rpc.zklink.io';
-export const FEE = 3000;
+export const FEE = 3000; // fee level, 0.3% fee is 3000
 
 export const METADATA: ActionMetadata = {
   title: 'NovaSwap',
