@@ -2,30 +2,27 @@ import fs from 'fs';
 import path from 'path';
 
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import AWS from 'aws-sdk';
 import { lookup } from 'mime-types';
 
+import { ConfigType } from 'src/config';
 import { BusinessException } from 'src/exception/business.exception';
 
 @Injectable()
 export class FilesService {
   private logger = new Logger(FilesService.name);
   private readonly s3: AWS.S3;
-  private keyPrefix: string;
+  private awsConfig: ConfigType['aws'];
 
-  constructor() {
-    if (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY) {
-      this.s3 = new AWS.S3({
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-        region: process.env.AWS_REGION,
-      });
-    } else {
-      this.s3 = new AWS.S3({
-        region: process.env.AWS_REGION,
-      });
-    }
-    this.keyPrefix = process.env.AWS_KEY_PREFIX;
+  constructor(private configService: ConfigService<ConfigType>) {
+    this.awsConfig = configService.get('aws', { infer: true });
+
+    this.s3 = new AWS.S3({
+      accessKeyId: this.awsConfig.accessKeyId,
+      secretAccessKey: this.awsConfig.secretAccessKey,
+      region: this.awsConfig.region,
+    });
   }
 
   public async uploadImg(file: Express.Multer.File, fileName: string) {
@@ -50,8 +47,8 @@ export class FilesService {
 
   public async uploadFile(file: Express.Multer.File, fileName: string) {
     const params = {
-      Bucket: process.env.AWS_BUCKET,
-      Key: `${this.keyPrefix}/${fileName}`,
+      Bucket: this.awsConfig.bucket,
+      Key: `${this.awsConfig.keyPrefix}/${fileName}`,
       Body: file.buffer,
     };
     this.logger.log(
@@ -63,8 +60,8 @@ export class FilesService {
 
   public async deleteFile(fileName: string) {
     const params = {
-      Bucket: process.env.AWS_BUCKET,
-      Key: `${this.keyPrefix}/${fileName}`,
+      Bucket: this.awsConfig.bucket,
+      Key: `${this.awsConfig.keyPrefix}/${fileName}`,
     };
     this.logger.log(`deleting file Key:${params.Key}, Bucket:${params.Bucket}`);
 
@@ -78,8 +75,8 @@ export class FilesService {
       const filePath = path.join(folderPath, fileName);
       const fileContent = fs.readFileSync(filePath);
       const params = {
-        Bucket: process.env.AWS_BUCKET,
-        Key: `${this.keyPrefix}/logos/${fileName}`,
+        Bucket: this.awsConfig.bucket,
+        Key: `${this.awsConfig.keyPrefix}/logos/${fileName}`,
         Body: fileContent,
       };
       this.logger.log(
