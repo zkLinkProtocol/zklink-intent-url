@@ -3,5 +3,5 @@ import * as novaSwapAction from '@action/novaswap';
 
 export const registeredActions = [
   { key: 'novaswap', module: novaSwapAction.default },
-  { key: 'buyMeACoffee', module: buyMeACoffeeAction.default },
+  { key: 'buy-me-a-coffee', module: buyMeACoffeeAction.default },
 ];
