@@ -22,9 +22,7 @@ This document primarily describes how developers can create Actions.
 
 We provide a toolkit that allows you to create actions that fulfill users’ intent of achieving an outcome on any of Nova’s connected chains. An action could consist of multiple transactions on multiple chains, interacting with multiple DApps. The complexity of multi-chain transactions is abstracted away from the user experience, and users don’t need to be concerned about having enough funds for a transaction on one specific chain.
 
-
 ### 0. Prepare
-
 
 The toolkit is based on Node.js and NestJS framework, so make sure you have already installed Node.js before developing an action.
 
@@ -66,18 +64,90 @@ We provide an abstract class that you must extend to implement your action.
 The action is described by the `Action` class defined in [`action.dto.ts`](../src/common/dto/action.dto.ts). The abstract class is structured as follows:
 
 ```ts
+type ActionTransactionParams = { [key: string]: string };
+
 abstract class Action {
   abstract getMetadata(): Promise<ActionMetadata>;
 
-  abstract generateTransaction(parameters: {
-    [key: string]: string;
-  }): Promise<GeneratedTransaction>;
+  abstract generateTransaction(
+    params: ActionTransactionParams,
+  ): Promise<GeneratedTransaction>;
 }
 ```
 
-The `getMetadata` method returns metadata that describes the action for display on the frontend. The `generateTransaction` method is responsible for constructing transactions. When a user confirms the action on the interface, this method executes in the background to construct and return the transaction, which will subsequently be added to the blockchain.
+The `getMetadata` method returns metadata (`ActionMetadata`) that describes the action for display on the frontend. The `generateTransaction` method is responsible for constructing transactions. When a user confirms the action in intent url page, this method executes in the background to construct and return the transaction, which will subsequently be sent to the blockchain.
 
-To implement this functionality, you must extend the `Action` abstract class based on your specific business logic. Export an instance of your implementation as the default export in the `index.ts` file within your `libs/my-action` directory. This step is mandatory, as our framework relies on it to register your action and manage routing and other related operations.
+To implement this functionality, you must extend the `Action` abstract class based on your specific business logic.
+
+```ts
+class MyAction extends Action {
+  async getMetadata(): Promise<ActionMetadata> {
+    return {
+      title: 'An Action Example',
+      description: 'This is a simple action',
+
+      description: 'Support the works you love',
+      logo: '',
+      networks: [
+        {
+          name: 'zkLink Nova',
+          chainId: '810180',,
+          contractAddress: '0x',
+        },
+      ],
+      dApp: { name: 'An Action Example' },
+      intent: {
+        components: [
+          {
+            name: 'value',
+            label: 'Amount',
+            desc: 'The amount to sponsor',
+            type: 'input',
+            regex: '^[0-9]+$',
+            regexDesc: 'Must be a number',
+          },
+         {
+            name: 'recipient',
+            label: 'Recipient',
+            desc: 'The address that is sponsored',
+            type: 'input',
+            regex: '^0x[a-fA-F0-9]{40}$',
+            regexDesc: 'Address',
+          },
+        ]
+      },
+    };
+  }
+
+  async generateTransaction(
+    params: ActionTransactionParams,
+  ): Promise<GeneratedTransaction> {
+    return {
+      tx: {
+        value: BigInt(params.value),
+        to: params.recipient,
+      },
+      // tell the render whether to send the transaction
+      shouldSend: true,
+    };
+  }
+}
+```
+
+There must be noticeable that the `intent` field describes the parameters that the intent creator or user can set in Intent URL, which will be displayed on the frontend.
+
+The last step for implementation is to register your action into our framework. You need to put your action instance into the registered action list in [`registeredActions`](../src/modules/action/registeredActions.ts).
+
+
+```ts
+import * as myAction from '@action/my-action';
+
+export const registeredActions = [
+  { key: 'novaswap', module: novaSwapAction.default },
+  { key: 'buyMeACoffee', module: buyMeACoffeeAction.default },
+  { key: 'myAction', module: myAction.default },
+];
+```
 
 ### 3. Submit
 
@@ -85,6 +155,4 @@ After implementing your action, you need to submit a PR to the repository. We wi
 
 ## Example
 
-For reference, the [`novaswap`](./novaswap/) directory contains an exemplary implementation of a real action that you can use as a guide.
-
-TODO: Add more details about the example.
+The [buy-me-a-coffee](../libs/buy-me-a-coffee/) and [`novaswap`](../libs/novaswap/) Actions are builtin by zkLink official, which are good examples for you to learn how to implement an action.
