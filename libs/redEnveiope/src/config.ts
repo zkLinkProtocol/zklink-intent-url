@@ -1,0 +1,111 @@
+import { ActionMetadata } from 'src/common/dto';
+import {
+  DistributionModeValue,
+  DistributionTokenValue,
+  GasTokenValue,
+} from './type';
+
+export const METADATA: ActionMetadata = {
+  title: 'RedEnveiope',
+  logo: 'https://xxx', // todo
+  description: 'Send red Enveiope',
+  networks: [
+    {
+      name: 'zkLink Nova',
+      chainId: '810180',
+      contractAddress: '', // todo
+    },
+  ],
+  dApp: { name: 'RedEnveiope' },
+  author: { name: 'zkLink' },
+  intent: {
+    components: [
+      {
+        name: 'distributionMode',
+        label: 'Distribution Mode',
+        desc: 'Choose Mode to distribute Red Enveiopes',
+        type: 'searchSelect',
+        regex: '^[a-fA-F0-9]$',
+        regexDesc: 'String',
+        options: [
+          {
+            label: 'Equal Amount Per Address',
+            value: DistributionModeValue.equealAmountPerAddress,
+          },
+          {
+            label: 'Random Amount Per Address',
+            value: DistributionModeValue.randomAmountPerAddress,
+          },
+        ],
+      },
+      {
+        name: 'totalDistributionAmount',
+        label: 'Total Distribution Amount',
+        desc: 'Total amount you want ro distribute',
+        type: 'input',
+        regex: '^\\d$',
+        regexDesc: 'Int',
+      },
+      {
+        name: 'distributionToken',
+        label: 'Distribution Token',
+        desc: 'Choose a token to distribute',
+        type: 'searchSelectErc20',
+        regex: '^0x[a-fA-F0-9]{40}$',
+        regexDesc: 'Address',
+        options: [
+          {
+            label: 'ETH',
+            value: DistributionTokenValue.ETH,
+          },
+          {
+            label: 'USDC',
+            value: DistributionTokenValue.USDC,
+          },
+          {
+            label: 'USDT',
+            value: DistributionTokenValue.USDT,
+          },
+          {
+            label: 'DAI',
+            value: DistributionTokenValue.DAI,
+          },
+        ],
+      },
+      {
+        name: 'amountOfRedEnvelopes',
+        label: 'Amount Of Red Envelopes',
+        desc: 'How many Red Envelopes want to distribute',
+        type: 'input',
+        regex: '^\\d$',
+        regexDesc: 'Int',
+      },
+      {
+        name: 'gasToken',
+        label: 'Gas Token',
+        desc: 'Gas can be deducted from distributed amount, allowing recipient to grab red envelope with 0 gas',
+        type: 'searchSelect',
+        regex: '^[a-fA-F0-9]$',
+        regexDesc: 'String',
+        options: [
+          {
+            label: 'ETH(Pay By Recipient)',
+            value: GasTokenValue.eth,
+          },
+          {
+            label: 'Distributed Token(No Gas)',
+            value: GasTokenValue.distributedToken,
+          },
+        ],
+      },
+      {
+        name: 'password',
+        label: 'Password',
+        desc: 'Enter password to receive Red Envelope',
+        type: 'input',
+        regex: '^[a-fA-F0-9]$',
+        regexDesc: 'String',
+      },
+    ],
+  },
+};

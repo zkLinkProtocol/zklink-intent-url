@@ -7,7 +7,7 @@ export class GeneratedTransaction {
   tx: ContractTransaction;
 
   @ApiProperty({ description: 'The transaction request object' })
-  provider: JsonRpcProvider;
+  provider?: JsonRpcProvider;
 
   @ApiProperty({
     description: 'Flag indicating whether the transaction should be sent',
