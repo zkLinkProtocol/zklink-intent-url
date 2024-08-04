@@ -1,12 +1,13 @@
-## Preamble
-This document outlines detailed guidance on how protocols can create Actions to leverage on the intent URL feature. By following this guide, the developers can create compatible adapters, format code and understand the integration workflow. 
+# zkLink Nova Actions & Intent URL SDK
+
+### Comprehensive Guide for Creating, Registering, and Utilizing Actions with Intent URLs in the zkLink Nova Network
 
 ## Overview
 Intent URL is a feature launched by zkLink that converts the act of constructing a transaction into an actionable link. Intent URL is a sharable short link to complete specified action in the zkLink Nova network. User who has the Intent URL can build a certain transaction easily. They can preview, sign the transaction and finally send it to the zkLink Nova network, without understanding the details of the transaction. Intent URL can be used for various on-chain activities such as token swaps, voting, and sponsorship. It greatly lowers the barrier to entry into the blockchain world. More importantly, Intent URl is short, easy to share on social media and webpage.
 
 ****Key Concepts****
-- Action: An Action is a standardized API implementation created by developers. It accepts certain parameters and generates transactions that meet specific needs based on predefined logic.
-- Intent URL: It is a shareable short link that serves as the entry point for executing an action. On the page of this short link, users can set a few parameters using selection boxes or input fields. After clicking confirm, they can generate and preview the transaction. If everything is correct, the user can sign and send it to the zkLink Nova network.
+- **Action**: An Action is a standardized API implementation created by developers. It accepts certain parameters and generates transactions that meet specific needs based on predefined logic.
+- **Intent URL**: It is a shareable short link that serves as the entry point for executing an action. On the page of this short link, users can set a few parameters using selection boxes or input fields. After clicking confirm, they can generate and preview the transaction. If everything is correct, the user can sign and send it to the zkLink Nova network.
 
 ## Role
 - Developer: The role responsible for developing Actions. Developers need to implement the Action specifications and submit the code to the repository. We (zkLink) will register the reviewed Actions.
