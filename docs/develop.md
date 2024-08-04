@@ -200,11 +200,11 @@ When you encounter issues, you can observe the logs in the command line console 
 
 To update an existing action, follow these steps:
 
-**Modify Your Code:** Make the necessary changes to your action implementation.  
-**Test Thoroughly:** Ensure all changes are thoroughly tested, including unit, integration, and manual tests.  
-**Submit a Pull Request (PR):** Create a PR with a detailed description of the changes and the reasons for the update.  
-**Code Review:** The zkLink team will review your PR for quality, security, and compliance with standards.  
-**Approval and Registration:** Once approved, your updated action will be registered and available for use.
+Modify Your Code: Make the necessary changes to your action implementation.  
+Test Thoroughly: Ensure all changes are thoroughly tested, including unit, integration, and manual tests.  
+Submit a Pull Request (PR): Create a PR with a detailed description of the changes and the reasons for the update.  
+Code Review: The zkLink team will review your PR for quality, security, and compliance with standards.  
+Approval and Registration: Once approved, your updated action will be registered and available for use.
 
 ### 2. What if my action requires external data?
 
@@ -212,15 +212,15 @@ Minimize reliance on external APIs. If necessary, use them cautiously and ensure
 
 ### 3. What is the submission and review process for new actions?
 
-**Submit a PR:** Follow the repository's guidelines for submitting a pull request.  
-**Code Review:** Your code will be reviewed for quality, security, and compliance with standards.  
-**Approval:** Once approved, your action will be registered and available for use.  
+Submit a PR: Follow the repository's guidelines for submitting a pull request.  
+Code Review: Your code will be reviewed for quality, security, and compliance with standards.  
+Approval: Once approved, your action will be registered and available for use.  
 
 ## Glossary
 
-1. **Action:** A standardized API implementation for generating transactions.  
+1. Action: A standardized API implementation for generating transactions.  
 
-2. **Intent URL:** A shareable link for executing actions on the zkLink Nova network.  
+2. Intent URL: A shareable link for executing actions on the zkLink Nova network.  
 
-3. **Swagger:** A tool for testing and verifying APIs.  
+3. Swagger: A tool for testing and verifying APIs.  
 
