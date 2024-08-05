@@ -17,7 +17,7 @@ Intent URL is a feature launched by zkLink that converts the act of constructing
 - Intent Creator: The role responsible for creating Intent URLs. They select a registered Action, configure it, and generate a shareable short link.
 - User: The person using the Intent URL. Users do not need to understand complex transaction details; they can send transactions and participate in activities with simple inputs and clicks.
 
-![](./img/Interactive-workflow.png)
+![](./img/interactive-workflow.png)
 
 # Getting Started
 
