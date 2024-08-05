@@ -1,6 +1,5 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsBoolean, IsString } from 'class-validator';
-import { ContractTransaction, JsonRpcProvider } from 'ethers';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsBoolean } from 'class-validator';
 
 export class Tx {
   @ApiProperty({ description: 'The chain id of transaction' })
@@ -23,6 +22,12 @@ export class Tx {
     description: 'Transaction parameters',
   })
   dataObject: object;
+
+  @ApiProperty({
+    description: 'Flag indicating whether the transaction should be sent',
+  })
+  @IsBoolean()
+  shouldSend: boolean;
 }
 
 export class Token {
@@ -47,13 +52,4 @@ export class GeneratedTransaction {
     description: 'Token information required by the target chain',
   })
   tokens: Token[];
-
-  @ApiProperty({ description: 'The provider of transaction' })
-  provider: JsonRpcProvider;
-
-  @ApiProperty({
-    description: 'Flag indicating whether the transaction should be sent',
-  })
-  @IsBoolean()
-  shouldSend: boolean;
 }
