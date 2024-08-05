@@ -1,23 +1,55 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsBoolean, IsString } from 'class-validator';
-import { ContractTransaction, JsonRpcProvider } from 'ethers';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsBoolean } from 'class-validator';
 
-export class GeneratedTransaction {
-  @ApiProperty({ description: 'The transaction request object' })
-  tx: ContractTransaction;
+export class Tx {
+  @ApiProperty({ description: 'The chain id of transaction' })
+  chainId: number;
 
-  @ApiProperty({ description: 'The transaction request object' })
-  provider?: JsonRpcProvider;
+  @ApiProperty({ description: 'The to address of transaction' })
+  to: string;
+
+  @ApiProperty({
+    description: 'The value of the transaction (including decimal)',
+  })
+  value: string;
+
+  @ApiProperty({
+    description: 'The data of the transaction',
+  })
+  data: string;
+
+  @ApiProperty({
+    description: 'Transaction parameters',
+  })
+  dataObject: object;
 
   @ApiProperty({
     description: 'Flag indicating whether the transaction should be sent',
   })
   @IsBoolean()
   shouldSend: boolean;
+}
 
-  @ApiPropertyOptional({
-    description: 'Cross-chain transfer amount',
+export class Token {
+  @ApiProperty({ description: 'The chain id of the target chain' })
+  chainId: number;
+
+  @ApiProperty({ description: 'The token address of the target chain' })
+  token: string;
+
+  @ApiProperty({
+    description:
+      'The number of tokens required by the target chain (including decimal)',
   })
-  @IsString()
-  crossChainAmount?: string;
+  amount: string;
+}
+
+export class GeneratedTransaction {
+  @ApiProperty({ description: 'The transaction request object' })
+  txs: Tx[];
+
+  @ApiProperty({
+    description: 'Token information required by the target chain',
+  })
+  tokens: Token[];
 }
