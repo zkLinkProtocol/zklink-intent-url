@@ -26,8 +26,7 @@ Our framework maintains the registration of actions. Once you complete an action
 
 Here is the workflow.
 
-<img width="498" alt="image" src="https://github.com/user-attachments/assets/a188a309-567b-4595-a4aa-388433ef38bd">
-
+![](./img/backend-action-flow.png)
 
 ### 0. Prepare
 
