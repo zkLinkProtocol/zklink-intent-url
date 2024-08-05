@@ -167,7 +167,7 @@ After implementing your action, you need to submit a PR to the repository. We wi
 
 ## Example
 
-The [buy-me-a-coffee](../libs/buy-me-a-coffee/) and [`novaswap`](../libs/novaswap/) Actions are built-in by zkLink official, which are good examples for you to learn how to implement an action.
+The [buy-me-a-coffee](../libs/buy-me-a-coffee/) and [`novaswap`](../libs/novaswap/) Actions are good examples for you to learn how to implement an action.
 
 ## Tips and Tricks
 
