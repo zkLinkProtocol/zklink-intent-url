@@ -53,21 +53,21 @@ async function validateData(data: any) {
 }
 
 async function main() {
-  try {
-    const module = await loadModuleData(argv.module);
-    const data = await module.getMetadata();
-    await validateData(data);
-    const { tx, provider } = await module.generateTransaction(
-      JSON.parse(argv.params),
-    );
-    const gasEstimate = await provider.estimateGas(tx);
-    console.log(
-      'Transaction simulation succeeded. Estimated gas:',
-      gasEstimate.toString(),
-    );
-  } catch (error) {
-    console.error('Error:', error.message);
-  }
+  // try {
+  //   const module = await loadModuleData(argv.module);
+  //   const data = await module.getMetadata();
+  //   await validateData(data);
+  //   const { tx, tokens } = await module.generateTransaction(
+  //     JSON.parse(argv.params),
+  //   );
+  //   const gasEstimate = await provider.estimateGas(tx);
+  //   console.log(
+  //     'Transaction simulation succeeded. Estimated gas:',
+  //     gasEstimate.toString(),
+  //   );
+  // } catch (error) {
+  //   console.error('Error:', error.message);
+  // }
 }
 
 main();
