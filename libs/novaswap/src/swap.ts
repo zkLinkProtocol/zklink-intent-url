@@ -133,7 +133,7 @@ export class NovaSwap {
         swapParams,
       );
     const tx = {
-      chainId: params.chainId,
+      chainId: 810180,
       value: '0',
       to: transaction.to,
       data: transaction.data,
