@@ -31,10 +31,13 @@ class Action implements ActionDto {
       params.tokenOutAddress,
       params.amount,
     );
+
     return {
       txs: [approveTx, swapTx],
       tokens: [
         {
+          decimals: 18,
+          symbol: 'WBTC',
           chainId: params.chainId,
           token: params.tokenInAddress,
           amount: params.amount.toString(),
