@@ -42,6 +42,16 @@ export class Token {
       'The number of tokens required by the target chain (including decimal)',
   })
   amount: string;
+
+  @ApiProperty({
+    description: 'The number of decimal places of the token',
+  })
+  decimals: number;
+
+  @ApiProperty({
+    description: 'The symbol of the token',
+  })
+  symbol: string;
 }
 
 export class GeneratedTransaction {
