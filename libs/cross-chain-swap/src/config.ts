@@ -38,7 +38,7 @@ export const METADATA: ActionMetadata = {
         options: [
           {
             label: 'WBTC',
-            value: '0xA7ffF134e7C164e8E43C15099940e1e4fB0F83A9',
+            value: '0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f',
           },
         ],
       },
