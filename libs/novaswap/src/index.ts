@@ -34,11 +34,7 @@ class Action implements ActionDto {
     params: ActionTransactionParams,
   ): Promise<GeneratedTransaction> {
     const tx = await novaswap.swapToken(intoParams(params), FEE);
-    return {
-      tx: tx,
-      provider: provider,
-      shouldSend: true,
-    };
+    return tx;
   }
 }
 
