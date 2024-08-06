@@ -1,4 +1,5 @@
 import CryptoJS from 'crypto-js';
+import fetch from 'node-fetch';
 import { Tx } from 'src/common/dto/transaction.dto';
 
 type HeadersParams = {
