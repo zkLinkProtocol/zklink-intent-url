@@ -37,7 +37,13 @@
       ],
       "@action/buy-me-a-coffee/*": [
         "libs/buy-me-a-coffee/src/*"
-      ]
+      ],
+      "@action/cross-chain-swap": [
+        "libs/cross-chain-swap/src"
+      ],
+      "@action/cross-chain-swap/*": [
+        "libs/cross-chain-swap/src/*"
+      ],
     }
   }
 }
