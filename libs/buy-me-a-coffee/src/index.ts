@@ -1,16 +1,13 @@
-import { ethers } from 'ethers';
-
 import {
   Action as ActionDto,
   ActionMetadata,
   ActionTransactionParams,
   GeneratedTransaction,
+  Tx,
 } from 'src/common/dto';
 
-import { METADATA, RPC_URL } from './config';
+import { METADATA } from './config';
 import { intoParams } from './interface';
-
-const provider = new ethers.JsonRpcProvider(RPC_URL);
 
 class Action implements ActionDto {
   async getMetadata(): Promise<ActionMetadata> {
@@ -22,15 +19,20 @@ class Action implements ActionDto {
   ): Promise<GeneratedTransaction> {
     const params = intoParams(_params);
 
-    const tx = {
-      value: params.value,
+    const tx: Tx = {
+      chainId: 810180, // zkLink
       to: params.recipient,
+      value: params.value.toString(),
       data: '0x',
+      dataObject: {
+        'Sent ETH': params.value.toString(),
+        To: params.recipient,
+      },
+      shouldSend: true,
     };
     return {
-      tx: tx,
-      provider: provider,
-      shouldSend: true,
+      txs: [tx],
+      tokens: [],
     };
   }
 }

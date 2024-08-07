@@ -33,7 +33,14 @@ export class ActionUrlService {
     const offset = Math.max((page - 1) * limit, 0);
     const [actionUrls, total] = await this.actionUrlRepository.findAndCount({
       where: { creatorId },
-      select: ['code', 'title', 'description', 'createdAt', 'updatedAt'],
+      select: [
+        'code',
+        'title',
+        'metadata',
+        'description',
+        'createdAt',
+        'updatedAt',
+      ],
       take: limit,
       skip: offset,
       order: { createdAt: 'DESC' },

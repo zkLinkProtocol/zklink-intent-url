@@ -2,7 +2,7 @@ import { ActionMetadata } from './action-metadata.dto';
 import { GeneratedTransaction } from './transaction.dto';
 
 export type ActionId = string;
-export type ActionTransactionParams = { chainId: number } & {
+export type ActionTransactionParams = { chainId?: number } & {
   [key: string]: string;
 };
 

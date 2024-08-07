@@ -3,10 +3,9 @@ import { ActionTransactionParams } from 'src/common/dto';
 export interface Params {
   tokenInAddress: string;
   tokenOutAddress: string;
-  recipient: string;
-  deadlineDurationInSec: number;
-  amountIn: bigint;
-  amountInDecimal: number;
+  amount: bigint;
+  userAddress: string;
+  chainId: number;
 }
 
 type ConversionMap<T> = {
@@ -14,19 +13,11 @@ type ConversionMap<T> = {
 };
 
 const conversionMap: ConversionMap<Params> = {
+  chainId: (value) => parseInt(value, 10),
   tokenInAddress: (value) => value,
   tokenOutAddress: (value) => value,
-  recipient: (value) => value,
-  deadlineDurationInSec: (value) => {
-    const parsed = parseInt(value, 10);
-    if (isNaN(parsed)) {
-      throw new Error(
-        `Invalid deadlineDurationInSec value: "${value}" is not a valid number.`,
-      );
-    }
-    return parsed;
-  },
-  amountIn: (value) => {
+  userAddress: (value) => value,
+  amount: (value) => {
     try {
       return BigInt(value);
     } catch (e) {
@@ -34,15 +25,6 @@ const conversionMap: ConversionMap<Params> = {
         `Invalid amountIn value: "${value}" is not a valid bigint.`,
       );
     }
-  },
-  amountInDecimal: (value) => {
-    const parsed = parseInt(value, 10);
-    if (isNaN(parsed)) {
-      throw new Error(
-        `Invalid amountInDecimal value: "${value}" is not a valid number.`,
-      );
-    }
-    return parsed;
   },
 };
 
