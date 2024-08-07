@@ -1,6 +1,6 @@
 export enum DistributionModeValue {
-  equealAmountPerAddress = 'equealAmountPerAddress',
-  randomAmountPerAddress = 'randomAmountPerAddress',
+  EqualAmountPerAddress = 'equalAmountPerAddress',
+  RandomAmountPerAddress = 'randomAmountPerAddress',
 }
 
 export enum DistributionTokenValue {
@@ -11,6 +11,6 @@ export enum DistributionTokenValue {
 }
 
 export enum GasTokenValue {
-  eth = 'eth',
-  distributedToken = 'distributedToken',
+  Eth = 'eth',
+  DistributedToken = 'distributedToken',
 }

@@ -9,5 +9,8 @@
   "author": "",
   "license": "ISC",
   "description": "",
-  "dependencies": {}
+  "devDependencies": {
+    "ethers": "^6.13.2",
+    "zksync-web3": "^0.17.1"
+  }
 }

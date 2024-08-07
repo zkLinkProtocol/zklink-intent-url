@@ -1,4 +1,5 @@
 import { ActionMetadata } from 'src/common/dto';
+
 import {
   DistributionModeValue,
   DistributionTokenValue,
@@ -6,9 +7,9 @@ import {
 } from './type';
 
 export const METADATA: ActionMetadata = {
-  title: 'RedEnveiope',
+  title: 'RedEnvelope',
   logo: 'https://xxx', // todo
-  description: 'Send red Enveiope',
+  description: 'Send red Envelope',
   networks: [
     {
       name: 'zkLink Nova',
@@ -16,25 +17,25 @@ export const METADATA: ActionMetadata = {
       contractAddress: '', // todo
     },
   ],
-  dApp: { name: 'RedEnveiope' },
+  dApp: { name: 'RedEnvelope' },
   author: { name: 'zkLink' },
   intent: {
     components: [
       {
         name: 'distributionMode',
         label: 'Distribution Mode',
-        desc: 'Choose Mode to distribute Red Enveiopes',
+        desc: 'Choose Mode to distribute Red Envelopes',
         type: 'searchSelect',
         regex: '^[a-fA-F0-9]$',
         regexDesc: 'String',
         options: [
           {
             label: 'Equal Amount Per Address',
-            value: DistributionModeValue.equealAmountPerAddress,
+            value: DistributionModeValue.EqualAmountPerAddress,
           },
           {
             label: 'Random Amount Per Address',
-            value: DistributionModeValue.randomAmountPerAddress,
+            value: DistributionModeValue.RandomAmountPerAddress,
           },
         ],
       },
@@ -90,21 +91,13 @@ export const METADATA: ActionMetadata = {
         options: [
           {
             label: 'ETH(Pay By Recipient)',
-            value: GasTokenValue.eth,
+            value: GasTokenValue.Eth,
           },
           {
             label: 'Distributed Token(No Gas)',
-            value: GasTokenValue.distributedToken,
+            value: GasTokenValue.DistributedToken,
           },
         ],
-      },
-      {
-        name: 'password',
-        label: 'Password',
-        desc: 'Enter password to receive Red Envelope',
-        type: 'input',
-        regex: '^[a-fA-F0-9]$',
-        regexDesc: 'String',
       },
     ],
   },
