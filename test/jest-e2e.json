@@ -12,6 +12,8 @@
     "@action/utils/(.*)": "<rootDir>/../libs/utils/src/$1",
     "@action/utils": "<rootDir>/../libs/utils/src",
     "@action/buy-me-a-coffee/(.*)": "<rootDir>/../libs/buy-me-a-coffee/src/$1",
-    "@action/buy-me-a-coffee": "<rootDir>/../libs/buy-me-a-coffee/src"
+    "@action/buy-me-a-coffee": "<rootDir>/../libs/buy-me-a-coffee/src",
+    "@action/red-envelope/(.*)": "<rootDir>/../libs/red-envelope/src/$1",
+    "@action/red-envelope": "<rootDir>/../libs/red-envelope/src"
   }
 }

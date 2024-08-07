@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsBoolean } from 'class-validator';
 
 export class Tx {
@@ -22,6 +22,11 @@ export class Tx {
     description: 'Transaction parameters',
   })
   dataObject: object;
+
+  @ApiPropertyOptional({
+    description: 'paymaster customData',
+  })
+  customData?: any;
 
   @ApiProperty({
     description: 'Flag indicating whether the transaction should be sent',
