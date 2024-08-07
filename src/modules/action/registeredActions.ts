@@ -7,5 +7,5 @@ export const registeredActions = [
   { key: 'novaswap', module: novaSwapAction.default },
   { key: 'buyMeACoffee', module: buyMeACoffeeAction.default },
   { key: 'crossChainSwap', module: crossChainSwapAction.default },
-  { key: 'red-envelop', module: redEnvelopAction.default },
+  { key: 'red-envelope', module: redEnvelopAction.default },
 ];
