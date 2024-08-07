@@ -36,6 +36,15 @@
       "compilerOptions": {
         "tsConfigPath": "libs/buy-me-a-coffee/tsconfig.lib.json"
       }
+    },
+     "red-envelop": {
+      "type": "library",
+      "root": "libs/red-envelop",
+      "entryFile": "index",
+      "sourceRoot": "libs/red-envelop/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/red-envelop/tsconfig.lib.json"
+      }
     }
   }
 }

@@ -324,4 +324,5 @@ class Action implements ActionDto {
 }
 
 const action = new Action();
+
 export default action;
