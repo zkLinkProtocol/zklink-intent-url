@@ -81,7 +81,7 @@ export async function getSwapData(
   const resData = (await swapRes.json()).data[0];
   return {
     chainId,
-    to: resData.to,
+    to: resData.tx.to,
     value: '0',
     data: resData.tx.data,
     dataObject: {
