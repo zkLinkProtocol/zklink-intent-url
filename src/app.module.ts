@@ -12,6 +12,7 @@ import { ActionModule } from './modules/action/action.module';
 import { ActionUrlModule } from './modules/actionUrl/actionUrl.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { FilesModule } from './modules/files/files.module';
+import { HubModule } from './modules/hub/hub.module';
 import { typeOrmModuleOptions } from './typeorm.config';
 import { UnitOfWorkModule } from './unitOfWork';
 
@@ -40,6 +41,7 @@ import { UnitOfWorkModule } from './unitOfWork';
     ActionUrlModule,
     ActionModule,
     FilesModule,
+    HubModule,
   ],
 
   controllers: [AppController],
