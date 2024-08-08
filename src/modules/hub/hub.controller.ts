@@ -30,7 +30,7 @@ export class HubController extends BaseController {
   @Get('')
   @CommonApiOperation('Return the value of hub.')
   async get(
-    @Headers('sessionId') sessionId: string,
+    @Headers('SessionId') sessionId: string,
   ): Promise<ResponseDto<string>> {
     // 1. Get sessionId from header
     // 2. Get value from cache by sessionId, check if it is expired or not
@@ -74,7 +74,7 @@ export class HubController extends BaseController {
   @CommonApiOperation(`Update hub's value.`)
   async save(
     @Body() request: HubRequestDto,
-    @Headers('sessionId') sessionId: string,
+    @Headers('SessionId') sessionId: string,
   ): Promise<ResponseDto<boolean>> {
     // 1. Get data from request
     // 2. Get sessionId from header, check if it is expired or not
