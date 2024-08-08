@@ -1,3 +1,4 @@
+
 # zkLink Nova Actions & Intent URL SDK
 
 Comprehensive Guide for Creating, Registering, and Utilizing Actions with Intent URLs in the zkLink Nova Network
@@ -64,13 +65,13 @@ cd lib
 npx nest g library my-action
 ```
 
-You will see a new directory named `my-action` in the `libs` directory. This directory contains the basic structure of a nest project.
+You will see `package.json` in repository root is modified, and a new directory named `my-action` in the `libs` directory. This directory contains the basic structure of a nest project.
 
 ### 2. Implement
 
 We provide an abstract class that you must extend to implement your action.
 
-The action is described by the `Action` class defined in [`action.dto.ts`](../src/common/dto/action.dto.ts). The abstract class is structured as follows:
+The action is described by the `Action` class defined in [`action.dto.ts`](../src/common/dto/action.dto.ts#10). The abstract class is structured as follows:
 
 ```ts
 type ActionTransactionParams = { [key: string]: string };
@@ -131,19 +132,38 @@ class MyAction extends Action {
   async generateTransaction(
     params: ActionTransactionParams,
   ): Promise<GeneratedTransaction> {
-    return {
-      tx: {
-        value: BigInt(params.value),
-        to: params.recipient,
+    // Build and return your transaction
+    const tx = {
+      chainId: 810180,
+      to: params.recipient,
+      value: params.value,
+      data: '0x',
+      dataObject: {
+        "Sent Value": params.value,
       },
       // tell the render whether to send the transaction
-      shouldSend: true,
+      shouldSend: true
+    }
+    return {
+      txs: [tx],
+      tokens: [],
     };
   }
 }
 ```
 
-It must be noticeable that the `intent` field describes the parameters that the intent creator or user can set in Intent URL, which will be displayed on the frontend.
+For [`ActionMetadata`](../src/common/dto/action-metadata.dto.ts#137), it must be noticeable that the `intent` field describes the parameters that the intent creator or user can set in Intent URL, which will be displayed on the frontend.
+
+The filed `components` is an array of objects that describe the parameters that the user can set. There are some fields to pay attention to：
+
+- `type`: describes the type that the frontend will render. It can be `input` (user inputs), `searchSelect` (drop-down box), `searchSelectErc20` (drop-down box for ERC20 token), `text` (action creator inputs). If you choose `searchSelect` or `searchSelectErc20`, you need to provide avaliable value in `options` field.
+- `regex`: a regular expression that the frontend will use to validate the input.
+
+[`GeneratedTransaction`](../src/common/dto/transaction.dto.ts#57) is a type that describes the transaction that will be sent to the blockchain. It contains the
+fields `txs` and `tokens`.
+
+- The `txs` field is an array of transactions that will be sent to the blockchain. The field `chainId`, `to`, `value`, `data` are standard Ethereum transaction fields. It has two additional fields: `dataObject` and `shouldSend`. The `dataObject` field is a JSON object that will be displayed on the frontend. The `shouldSend` field tells the frontend whether to send the transaction.
+- The `tokens` field is a list of tokens that should be prepared in target. You can think of this field as describing the prerequisites for initiating a transaction. The frontend will automatically search and perform cross-chain transactions to meet the prerequisites on your target chain. Then, it starts to send the transaction.
 
 ### 3. Register
 
@@ -191,10 +211,13 @@ Security is our top priority. Minimizing dependencies and external services enha
 
 After completing an Action, you should test it to ensure it works properly. Our code acts as SWAGGER, allowing you to test whether your Action functions correctly within our API on this page. The process is as follows:
 
+Before running the project, you need to run PostgreSQL locally. You also need to configure environment variables in the .env file, which you can get from the .env.example template. You should replace the variables with your own (especially for the PostgreSQL configuration).
+
 Start the project using the following command:
 
 ```shell
-npm run start
+npm run migration:run  # create the database tables if you haven't done it before
+npm run start  # start the project
 ```
 
 At this point, you can access SWAGGER through `localhost:4101`. You should ensure the proper functioning of three APIs:
