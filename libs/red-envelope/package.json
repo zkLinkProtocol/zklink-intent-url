@@ -11,6 +11,6 @@
   "description": "",
   "devDependencies": {
     "ethers": "^6.13.2",
-    "zksync-web3": "^0.17.1"
+    "zksync-ethers": "^6.11.1"
   }
 }

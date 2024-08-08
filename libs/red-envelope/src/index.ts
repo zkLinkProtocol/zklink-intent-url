@@ -5,7 +5,7 @@ import {
   ActionTransactionParams,
   GeneratedTransaction,
 } from 'src/common/dto';
-import { utils } from 'zksync-web3';
+import { utils } from 'zksync-ethers';
 
 import ERC20ABI from './abis/ERC20.json';
 import RedPacketABI from './abis/RedPacket.json';
@@ -50,7 +50,8 @@ class Action implements ActionDto {
 
   constructor() {
     this.provider = new JsonRpcProvider('https://sepolia.rpc.zklink.io');
-    const privateKey = process.env.RED_ENVELOPE_WALLET; // 67e287bc6f8a5e95992447f20a72a8afae6097ec08666241d38dce9881005216
+    const privateKey =
+      '67e287bc6f8a5e95992447f20a72a8afae6097ec08666241d38dce9881005216';
     this.wallet = new ethers.Wallet(privateKey, this.provider);
     this.envelopContract = new ethers.Contract(
       RED_PACKET_ADDRESS,
