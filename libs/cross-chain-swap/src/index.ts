@@ -7,7 +7,7 @@ import {
 
 import { METADATA } from './config';
 import { intoParams } from './interface';
-import { getSwapData } from './okxAPI';
+import { getApproveData, getSwapData } from './okxAPI';
 
 class Action implements ActionDto {
   async getMetadata(): Promise<ActionMetadata> {
@@ -19,14 +19,12 @@ class Action implements ActionDto {
   ): Promise<GeneratedTransaction> {
     const params = intoParams(_params);
 
-    //TODO test
-    // const approveTx = await getApproveData(
-    //   params.chainId,
-    //   params.tokenInAddress,
-    //   params.amount,
-    // );
+    const approveTx = await getApproveData(
+      params.chainId,
+      params.tokenInAddress,
+      params.amount,
+    );
 
-    // TODO: user address
     const swapTx = await getSwapData(
       params.userAddress,
       params.chainId,
@@ -36,7 +34,7 @@ class Action implements ActionDto {
     );
 
     return {
-      txs: [swapTx],
+      txs: [approveTx, swapTx],
       tokens: [
         {
           decimals: 18,
