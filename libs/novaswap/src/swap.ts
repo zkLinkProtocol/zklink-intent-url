@@ -1,3 +1,4 @@
+import { getERC20SymbolAndDecimals } from '@action/utils';
 import { Contract, Provider, ethers } from 'ethers';
 import { Token } from 'src/common/dto';
 
@@ -149,7 +150,8 @@ export class NovaSwap {
       shouldSend: true,
     };
 
-    const { symbol } = await this.getERC20SymbolAndDecimals(
+    const { symbol } = await getERC20SymbolAndDecimals(
+      this.provider,
       params.tokenInAddress,
     );
     const token: Token = {
@@ -163,20 +165,5 @@ export class NovaSwap {
       txs: [tx],
       tokens: [token],
     };
-  }
-
-  public async getERC20SymbolAndDecimals(
-    tokenAddress,
-  ): Promise<{ symbol: string; decimals: number }> {
-    const abi = [
-      'function symbol() view returns (string)',
-      'function decimals() view returns (uint8)',
-    ];
-    const tokenContract = new ethers.Contract(tokenAddress, abi, this.provider);
-    const [symbol, decimals] = await Promise.all([
-      tokenContract.symbol(),
-      tokenContract.decimals(),
-    ]);
-    return { symbol, decimals };
   }
 }
