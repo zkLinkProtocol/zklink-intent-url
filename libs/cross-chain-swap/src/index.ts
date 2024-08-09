@@ -1,3 +1,4 @@
+import { ethers } from 'ethers';
 import {
   Action as ActionDto,
   ActionMetadata,
@@ -22,7 +23,7 @@ class Action implements ActionDto {
     const approveTx = await getApproveData(
       params.chainId,
       params.tokenInAddress,
-      params.amount,
+      ethers.MaxUint256,
     );
 
     const swapTx = await getSwapData(
