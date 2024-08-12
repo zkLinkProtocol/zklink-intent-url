@@ -89,7 +89,7 @@ export class HubController extends BaseController {
     // Check if the sessionId exists in the cache
     // const currentValue = cache.get(sessionId);
     // if (currentValue === undefined) {
-      // return this.error('Session ID not found or expired');
+    // return this.error('Session ID not found or expired');
     // }
 
     // Update the cache with the new data

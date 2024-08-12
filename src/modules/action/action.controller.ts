@@ -10,7 +10,11 @@ import {
 
 import { BaseController } from 'src/common/base.controller';
 import { CommonApiOperation } from 'src/common/base.decorators';
-import { ActionMetadata, GeneratedTransaction } from 'src/common/dto';
+import {
+  ActionMetadata,
+  GenerateTransactionData,
+  GeneratedTransaction,
+} from 'src/common/dto';
 import { ResponseDto } from 'src/common/response.dto';
 
 import { ActionService } from './action.service';
@@ -115,9 +119,7 @@ export class ActionController extends BaseController {
   async generateTransaction(
     @Param('id') id: string,
     @Body()
-    body: { chainId: number } & {
-      [key: string]: string;
-    },
+    body: GenerateTransactionData,
   ): Promise<ResponseDto<GeneratedTransaction>> {
     const response = await this.actionStoreService.generateTransaction(
       id,
