@@ -35,9 +35,6 @@ export class Intention extends BaseEntity {
   @Column({ type: 'varchar' })
   public metadata: string;
 
-  @Column({ type: 'text' })
-  public content: string;
-
   @Column({ type: 'jsonb' })
   public settings: object;
 
