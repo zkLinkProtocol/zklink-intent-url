@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import {
   Action,
   ActionId,
-  ActionTransactionParams,
+  GenerateTransactionData,
   GeneratedTransaction,
 } from 'src/common/dto';
 import { BusinessException } from 'src/exception/business.exception';
@@ -36,14 +36,22 @@ export class ActionService {
     return action ? { id, ...metadata } : null;
   }
 
+  async getActionStore(id: ActionId): Promise<Action | null> {
+    const action = this.actions.get(id);
+    if (!action) {
+      return null;
+    }
+    return action;
+  }
+
   async generateTransaction(
     id: ActionId,
-    params: ActionTransactionParams,
+    data: GenerateTransactionData,
   ): Promise<GeneratedTransaction> {
     const action = this.actions.get(id);
     if (!action) {
       throw new BusinessException(`Action with id '${id}' not found.`);
     }
-    return action.generateTransaction(params);
+    return action.generateTransaction(data);
   }
 }
