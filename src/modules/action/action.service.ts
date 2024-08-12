@@ -22,7 +22,8 @@ export class ActionService {
     const actions = Array.from(this.actions.keys()).map(async (id) => {
       const action = this.actions.get(id);
       const metadata = await action.getMetadata();
-      return { id, ...metadata };
+      const hasPostTxs = !!action.afterActionUrlCreated;
+      return { id, ...metadata, hasPostTxs };
     });
     return Promise.all(actions);
   }
@@ -33,7 +34,8 @@ export class ActionService {
       return null;
     }
     const metadata = await action.getMetadata();
-    return action ? { id, ...metadata } : null;
+    const hasPostTxs = !!action.afterActionUrlCreated;
+    return action ? { id, ...metadata, hasPostTxs } : null;
   }
 
   async getActionStore(id: ActionId): Promise<Action | null> {
