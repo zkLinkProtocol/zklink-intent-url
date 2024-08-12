@@ -10,7 +10,12 @@ import {
 
 import { BaseController } from 'src/common/base.controller';
 import { CommonApiOperation } from 'src/common/base.decorators';
-import { ActionMetadata, GeneratedTransaction } from 'src/common/dto';
+import {
+  ActionMetadata,
+  ActionTransactionParams,
+  GenerateTransactionData,
+  GeneratedTransaction,
+} from 'src/common/dto';
 import { ResponseDto } from 'src/common/response.dto';
 
 import { ActionService } from './action.service';
@@ -69,6 +74,53 @@ export class ActionController extends BaseController {
     return this.success(action);
   }
 
+  @Post(':id/validation')
+  @CommonApiOperation('Generate transaction by action Id.')
+  @ApiParam({
+    name: 'id',
+    example: 'novaswap',
+  })
+  @ApiBody({
+    description: 'parameters to generate transaction',
+    schema: {
+      type: 'object',
+      additionalProperties: {
+        type: 'any',
+      },
+    },
+    examples: {
+      example1: {
+        summary: 'Validate Tx',
+        description: 'post body',
+        value: {
+          tokenInAddress: '0x6e42d10eB474a17b14f3cfeAC2590bfa604313C7',
+          tokenOutAddress: '0x461fE851Cd66e82A274570ED5767c873bE9Ae1ff',
+          amountIn: '1',
+          amountInDecimal: '18',
+          recipient: '0xE592427A0AEce92De3Edee1F18E0157C05861564',
+          deadlineDurationInSec: '3600',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Return generated transaction',
+    schema: {
+      type: 'string',
+      example: 'Invalid Token Amount',
+    },
+  })
+  async validateTransaction(
+    @Param('id') id: string,
+    @Body()
+    body: ActionTransactionParams,
+  ): Promise<ResponseDto<string>> {
+    const actionStore = await this.actionStoreService.getActionStore(id);
+    const response = await actionStore.validateIntentParams(body);
+    return this.success(response);
+  }
+
   @Post(':id/transaction')
   @CommonApiOperation('Generate transaction by action Id.')
   @ApiParam({
@@ -115,9 +167,7 @@ export class ActionController extends BaseController {
   async generateTransaction(
     @Param('id') id: string,
     @Body()
-    body: { chainId: number } & {
-      [key: string]: string;
-    },
+    body: GenerateTransactionData,
   ): Promise<ResponseDto<GeneratedTransaction>> {
     const response = await this.actionStoreService.generateTransaction(
       id,

@@ -12,14 +12,17 @@ import { METADATA, RPC_URL } from './config';
 import { intoParams } from './interface';
 import { getApproveData, getSwapData } from './okxAPI';
 import { getUserERC20Balance } from './utils';
-class Action implements ActionDto {
+class Action extends ActionDto {
   async getMetadata(): Promise<ActionMetadata> {
     return METADATA;
   }
 
-  async generateTransaction(
-    _params: ActionTransactionParams,
-  ): Promise<GeneratedTransaction> {
+  async generateTransaction(data: {
+    code: string;
+    sender: string;
+    params: ActionTransactionParams;
+  }): Promise<GeneratedTransaction> {
+    const { params: _params } = data;
     const params = intoParams(_params);
     let approveTx: Tx;
     let swapTx: Tx;

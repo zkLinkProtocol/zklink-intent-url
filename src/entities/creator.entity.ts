@@ -1,4 +1,4 @@
-import { Column, Entity, Index, PrimaryColumn } from 'typeorm';
+import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
 
 import { BaseEntity } from './base.entity';
 import { hexTransformer } from '../transformers/hex.transformer';
@@ -8,15 +8,15 @@ export enum CreatorStatus {
   INACTIVE = 'inactive',
 }
 
-@Entity({ name: 'intent_creator' })
+@Entity()
 @Index(['publickey'], { unique: true })
 @Index(['address'], { unique: true })
 export class Creator extends BaseEntity {
-  @PrimaryColumn({ type: 'int' })
+  @PrimaryGeneratedColumn()
   public readonly id: bigint;
 
   @Column({ type: 'varchar' })
-  public publicid: string;
+  public publicId: string;
 
   @Column({ type: 'bytea', transformer: hexTransformer })
   public publickey: string;

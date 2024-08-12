@@ -9,11 +9,10 @@ import {
 
 import { BaseEntity } from './base.entity';
 import { Creator } from './creator.entity';
-import { jsonStringTransformer } from '../transformers/jsonString.transformer';
 
-@Entity({ name: 'intent_actionUrl' })
+@Entity()
 @Index(['creatorId'])
-export class ActionUrl extends BaseEntity {
+export class Intention extends BaseEntity {
   @PrimaryColumn({ type: 'varchar' })
   public code: string;
 
@@ -39,6 +38,9 @@ export class ActionUrl extends BaseEntity {
   @Column({ type: 'text' })
   public content: string;
 
-  @Column({ type: 'text', transformer: jsonStringTransformer })
+  @Column({ type: 'jsonb' })
   public settings: object;
+
+  @Column({ type: 'boolean', default: true })
+  public active: boolean;
 }

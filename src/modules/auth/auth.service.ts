@@ -32,7 +32,7 @@ export class AuthService {
     const creator = await this.creatorRepository.findByPublicId(publicId);
     if (!creator) {
       const creator = {
-        publicid: publicId,
+        publicId: publicId,
         publickey: publickey,
         status: 'active',
       } as Creator;

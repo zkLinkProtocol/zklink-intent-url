@@ -22,13 +22,17 @@ import {
   ActionUrlUpdateRequestDto,
 } from './actionUrl.dto';
 import { ActionUrlService } from './actionUrl.service';
+import { ActionService } from '../action/action.service';
 import { GetCreator } from '../auth/creator.decorators';
 import { JwtAuthGuard } from '../auth/jwtAuth.guard';
 
 @Controller('action-url')
 @ApiTags('action-url')
 export class ActionUrlController extends BaseController {
-  constructor(private readonly actionUrlService: ActionUrlService) {
+  constructor(
+    private readonly actionUrlService: ActionUrlService,
+    private readonly actionStoreService: ActionService,
+  ) {
     super();
   }
 
@@ -128,9 +132,14 @@ export class ActionUrlController extends BaseController {
     @Body() request: ActionUrlUpdateRequestDto,
     @GetCreator() creator,
   ): Promise<ResponseDto<string>> {
+    const actionStore = await this.actionStoreService.getActionStore(
+      request.actionId,
+    );
+    const active = actionStore.afterActionUrlCreated ? false : true;
+    const requestData = { ...request, active };
     const result = await this.actionUrlService.updateByCode(
       code,
-      request,
+      requestData,
       creator.id,
     );
     return this.success(result);
