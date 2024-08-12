@@ -59,7 +59,7 @@ export const METADATA: ActionMetadata = {
       {
         name: 'amount',
         label: 'Amount',
-        desc: 'The amount of token you want to swap',
+        desc: 'The amount of token you want to swap, if percentOrAmount is percent, the amount is the percent of the balance, 100 means 100%',
         type: 'input',
         regex: '^[0-9]+$',
         regexDesc: 'Must be a number',
