@@ -156,7 +156,25 @@ For [`ActionMetadata`](../src/common/dto/action-metadata.dto.ts#137), it must be
 
 The filed `components` is an array of objects that describe the parameters that the user can set. There are some fields to pay attention to：
 
-- `type`: describes the type that the frontend will render. It can be `input` (user inputs), `searchSelect` (drop-down box), `searchSelectErc20` (drop-down box for ERC20 token), `text` (action creator inputs). If you choose `searchSelect` or `searchSelectErc20`, you need to provide avaliable value in `options` field.
+- `type`: describes the type that the frontend will render. It can be `input` (user inputs), `searchSelect` (drop-down box), `searchSelectErc20` (drop-down box for ERC20 token), `text` (action creator inputs). If you choose `searchSelect` or `searchSelectErc20`, you need to provide available value in `options` field like this:
+  ```ts
+  components: [
+    {
+      name: "token",
+      options: [
+        {
+          label: 'WETH',
+          value: '0x8280a4e7D5B3B658ec4580d3Bc30f5e50454F169',
+        },
+        {
+          label: 'USDC',
+          value: '0x1a1A3b2ff016332e866787B311fcB63928464509',
+        },
+      ]
+    }
+
+  ]
+  ```
 - `regex`: a regular expression that the frontend will use to validate the input.
 
 [`GeneratedTransaction`](../src/common/dto/transaction.dto.ts#57) is a type that describes the transaction that will be sent to the blockchain. It contains the
