@@ -86,7 +86,6 @@ export class ActionUrlService {
     actionUrl.title = params.title;
     actionUrl.description = params.description;
     actionUrl.metadata = params.metadata;
-    actionUrl.content = params.content;
     actionUrl.settings = params.settings;
 
     try {

@@ -54,15 +54,6 @@ export class ActionUrlAddRequestDto {
   metadata: string;
 
   @ApiProperty({
-    name: 'content',
-    description: 'Content for actionUrl.',
-    example: 'The price of eth is 3000 usdt.',
-  })
-  @IsNotEmpty()
-  @IsString()
-  content: string;
-
-  @ApiProperty({
     name: 'settings',
     description: 'Configuration options for actionUrl.',
     example: { params1: 1, type: 'input' },

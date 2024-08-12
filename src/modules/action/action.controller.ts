@@ -75,7 +75,7 @@ export class ActionController extends BaseController {
   }
 
   @Post(':id/validation')
-  @CommonApiOperation('Generate transaction by action Id.')
+  @CommonApiOperation('Validate transaction params before create intent-url.')
   @ApiParam({
     name: 'id',
     example: 'novaswap',

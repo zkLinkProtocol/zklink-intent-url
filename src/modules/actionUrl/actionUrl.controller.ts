@@ -53,7 +53,6 @@ export class ActionUrlController extends BaseController {
       title: result.title,
       description: result.description,
       metadata: result.metadata,
-      content: result.content,
       settings: result.settings,
       creator: {
         publickey: result.creator.publickey,
@@ -102,7 +101,6 @@ export class ActionUrlController extends BaseController {
       title: result.title,
       description: result.description,
       metadata: result.metadata,
-      content: result.content,
       settings: result.settings,
       creator: {
         id: result.creator.id,
