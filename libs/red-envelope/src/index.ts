@@ -340,16 +340,6 @@ class Action extends ActionDto {
     }
   }
 
-  // async afterActionUrlCreated(actionUrl: ActionUrl): Promise<void> {}
-
-  // async beforeActionUrlEdited(settings: object): Promise<void> {}
-
-  // async afterActionUrlEdited(actionUrl: ActionUrl): Promise<void> {}
-
-  // async beforeActionUrlDeleted(actionUrl: ActionUrl): Promise<void> {}
-
-  // async afterActionUrlDeleted(actionUrl: ActionUrl): Promise<void> {}
-
   public async generateTransaction(data: {
     code: string;
     sender: string;
@@ -396,8 +386,8 @@ class Action extends ActionDto {
 
 const action = new Action();
 
-action.envelopContract.on('RedPacketCreated', function (redPacketId: number) {
-  console.log(redPacketId);
-});
+// action.envelopContract.on('RedPacketCreated', function (redPacketId: number) {
+//   console.log(redPacketId);
+// });
 
 export default action;
