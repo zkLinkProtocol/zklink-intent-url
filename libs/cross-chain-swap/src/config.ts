@@ -21,9 +21,45 @@ export const METADATA: ActionMetadata = {
   intent: {
     components: [
       {
+        name: 'isBuy',
+        label: 'Buy Or Sell',
+        desc: 'Buy or Sell',
+        type: 'searchSelect',
+        regex: '^true$|^false$',
+        regexDesc: 'true or false',
+        options: [
+          {
+            label: 'Buy',
+            value: 'true',
+          },
+          {
+            label: 'Sell',
+            value: 'false',
+          },
+        ],
+      },
+      {
+        name: 'percentOrAmount',
+        label: 'Percent Or Amount',
+        desc: 'Percent or Amount(only sell can use percent)',
+        type: 'searchSelect',
+        regex: '^percent$|^amount$',
+        regexDesc: 'percent or amount',
+        options: [
+          {
+            label: 'Percent(only sell can use percent)',
+            value: 'percent',
+          },
+          {
+            label: 'Amount',
+            value: 'amount',
+          },
+        ],
+      },
+      {
         name: 'amount',
-        label: 'Amount Of Token',
-        desc: 'The amount of token you want to swap',
+        label: 'Amount',
+        desc: 'The amount of token you want to swap, if percentOrAmount is percent, the amount is the percent of the balance, 100 means 100%',
         type: 'input',
         regex: '^[0-9]+$',
         regexDesc: 'Must be a number',

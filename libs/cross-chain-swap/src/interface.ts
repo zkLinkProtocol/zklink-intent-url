@@ -6,6 +6,8 @@ export interface Params {
   amount: bigint;
   userAddress: string;
   chainId: number;
+  isBuy: boolean;
+  percentOrAmount: string;
 }
 
 type ConversionMap<T> = {
@@ -26,6 +28,18 @@ const conversionMap: ConversionMap<Params> = {
       );
     }
   },
+  isBuy: (value) => {
+    if (typeof value === 'boolean') {
+      return value;
+    } else if (typeof value === 'string') {
+      return value.toLowerCase() === 'true';
+    } else {
+      throw new Error(
+        `Invalid isBuy value: "${value}" is not a valid boolean.`,
+      );
+    }
+  },
+  percentOrAmount: (value) => value,
 };
 
 export function intoParams(raw: ActionTransactionParams): Params {
