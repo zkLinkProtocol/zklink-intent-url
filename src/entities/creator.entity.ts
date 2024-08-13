@@ -15,13 +15,13 @@ export class Creator extends BaseEntity {
   @PrimaryGeneratedColumn()
   public readonly id: bigint;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', nullable: true })
   public publicId: string;
 
-  @Column({ type: 'bytea', transformer: hexTransformer })
+  @Column({ type: 'bytea', transformer: hexTransformer, nullable: true })
   public publickey: string;
 
-  @Column({ type: 'bytea', transformer: hexTransformer })
+  @Column({ type: 'bytea', transformer: hexTransformer, nullable: true })
   public address: string;
 
   @Column({ type: 'enum', enum: CreatorStatus })
