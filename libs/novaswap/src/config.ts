@@ -60,6 +60,7 @@ export const METADATA: ActionMetadata = {
         regex: '^[0-9]+$',
         regexDesc: 'Must be a number',
         defaultValue: '1000000',
+        bind: true,
       },
       {
         name: 'recipient',
