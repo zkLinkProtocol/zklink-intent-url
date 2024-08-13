@@ -207,6 +207,23 @@ After implementing your action, you need to submit a PR to the repository. We wi
 
 The [buy-me-a-coffee](../libs/buy-me-a-coffee/) and [`novaswap`](../libs/novaswap/) Actions are good examples for you to learn how to implement an action.
 
+## Advanced Usage
+
+Our action definition provides two more optional methods for advanced usage.
+
+```ts
+abstract class Action {
+    // Validate the parameters with user custom logic
+    validateIntentParams(_: ActionTransactionParams): Promise<string>;
+    // Process something after the action URL is created
+    afterActionUrlCreated?(_code: any, _params: {
+        [key in string]: string;
+    }): any;
+}
+```
+
+Most of the time, you don't need to implement these methods. But if you have some special requirements, you can override them. See the [red-envelope](../libs/red-envelope/) Action for an example.
+
 ## Tips and Tricks
 
 ### Keep it Simple
