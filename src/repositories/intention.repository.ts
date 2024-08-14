@@ -1,22 +1,22 @@
 import { Injectable } from '@nestjs/common';
 
 import { BaseRepository } from './base.repository';
-import { ActionUrl } from '../entities/actionUrl.entity';
+import { Intention } from '../entities/intention.entity';
 import { UnitOfWork } from '../unitOfWork';
 
 @Injectable()
-export class ActionUrlRepository extends BaseRepository<ActionUrl> {
+export class IntentionRepository extends BaseRepository<Intention> {
   public constructor(unitOfWork: UnitOfWork) {
-    super(ActionUrl, unitOfWork);
+    super(Intention, unitOfWork);
   }
 
   public async updateByCode(code: string, params: any) {
     const transactionManager = this.unitOfWork.getTransactionManager();
-    await transactionManager.update(ActionUrl, { code }, params);
+    await transactionManager.update(Intention, { code }, params);
   }
 
   public async deleteByCode(code: string) {
     const transactionManager = this.unitOfWork.getTransactionManager();
-    await transactionManager.softDelete(ActionUrl, { code });
+    await transactionManager.softDelete(Intention, { code });
   }
 }

@@ -115,7 +115,8 @@
     "moduleNameMapper": {
       "^@action/novaswap(|/.*)$": "<rootDir>/libs/novaswap/src/$1",
       "^@action/utils(|/.*)$": "<rootDir>/libs/utils/src/$1",
-      "^@action/buy-me-a-coffee(|/.*)$": "<rootDir>/libs/buy-me-a-coffee/src/$1"
+      "^@action/buy-me-a-coffee(|/.*)$": "<rootDir>/libs/buy-me-a-coffee/src/$1",
+      "^@action/red-envelope(|/.*)$": "<rootDir>/libs/buy-me-a-coffee/src/$1"
     }
   }
 }

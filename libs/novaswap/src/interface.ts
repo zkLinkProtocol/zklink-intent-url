@@ -1,3 +1,4 @@
+import { ConversionMap, rawIntoParams as rawIntoParams } from '@action/utils';
 import { ActionTransactionParams } from 'src/common/dto';
 
 export interface Params {
@@ -6,11 +7,8 @@ export interface Params {
   recipient: string;
   deadlineDurationInSec: number;
   amountIn: bigint;
+  amountInDecimal: number;
 }
-
-type ConversionMap<T> = {
-  [K in keyof T]: (value: string) => T[K];
-};
 
 const conversionMap: ConversionMap<Params> = {
   tokenInAddress: (value) => value,
@@ -34,20 +32,17 @@ const conversionMap: ConversionMap<Params> = {
       );
     }
   },
+  amountInDecimal: (value) => {
+    const parsed = parseInt(value, 10);
+    if (isNaN(parsed)) {
+      throw new Error(
+        `Invalid amountInDecimal value: "${value}" is not a valid number.`,
+      );
+    }
+    return parsed;
+  },
 };
 
 export function intoParams(raw: ActionTransactionParams): Params {
-  const result: Partial<Params> = {};
-
-  for (const key in conversionMap) {
-    const convert = conversionMap[key];
-
-    if (raw[key] !== undefined) {
-      result[key] = convert(raw[key]);
-    } else {
-      throw new Error(`Missing required parameter: ${key}`);
-    }
-  }
-
-  return result as Params;
+  return rawIntoParams(raw, conversionMap);
 }

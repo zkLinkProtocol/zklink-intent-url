@@ -13,6 +13,7 @@ import { ApiTags } from '@nestjs/swagger';
 
 import { BaseController } from 'src/common/base.controller';
 import { CommonApiOperation } from 'src/common/base.decorators';
+import { ActionTransactionParams } from 'src/common/dto';
 import { PagingOptionsDto } from 'src/common/pagingOptionsDto.param';
 import { PagingMetaDto, ResponseDto } from 'src/common/response.dto';
 
@@ -22,13 +23,17 @@ import {
   ActionUrlUpdateRequestDto,
 } from './actionUrl.dto';
 import { ActionUrlService } from './actionUrl.service';
+import { ActionService } from '../action/action.service';
 import { GetCreator } from '../auth/creator.decorators';
 import { JwtAuthGuard } from '../auth/jwtAuth.guard';
 
 @Controller('action-url')
 @ApiTags('action-url')
 export class ActionUrlController extends BaseController {
-  constructor(private readonly actionUrlService: ActionUrlService) {
+  constructor(
+    private readonly actionUrlService: ActionUrlService,
+    private readonly actionStoreService: ActionService,
+  ) {
     super();
   }
 
@@ -40,6 +45,10 @@ export class ActionUrlController extends BaseController {
     @Param('code') code: string,
   ): Promise<ResponseDto<ActionUrlFindOneResponseDto>> {
     const result = await this.actionUrlService.findOneByCode(code);
+    const actionStore = await this.actionStoreService.getActionStore(
+      result.actionId,
+    );
+    const hasPostTxs = !!actionStore.afterActionUrlCreated;
     if (!result) {
       return this.error('ActionUrl not found');
     }
@@ -49,14 +58,28 @@ export class ActionUrlController extends BaseController {
       title: result.title,
       description: result.description,
       metadata: result.metadata,
-      content: result.content,
       settings: result.settings,
+      hasPostTxs,
       creator: {
         publickey: result.creator.publickey,
         address: result.creator.address,
       },
     };
     return this.success(response);
+  }
+
+  @Get(':code/post-transactions')
+  @CommonApiOperation(
+    'Returns the configuration information for a single actionUrl.',
+  )
+  @UseGuards(JwtAuthGuard)
+  async getIntentPostTxs(
+    @Param('code') code: string,
+    @Body() request: ActionTransactionParams,
+  ): Promise<ResponseDto<ActionUrlFindOneResponseDto>> {
+    const actionStore = await this.actionStoreService.getActionStore(code);
+    const data = actionStore.afterActionUrlCreated(code, request);
+    return this.success(data);
   }
 
   @Get('auth/list')
@@ -98,7 +121,6 @@ export class ActionUrlController extends BaseController {
       title: result.title,
       description: result.description,
       metadata: result.metadata,
-      content: result.content,
       settings: result.settings,
       creator: {
         id: result.creator.id,
@@ -116,7 +138,12 @@ export class ActionUrlController extends BaseController {
     @Body() request: ActionUrlAddRequestDto,
     @GetCreator() creator,
   ): Promise<ResponseDto<string>> {
-    const result = await this.actionUrlService.add(request, creator.id);
+    const actionStore = await this.actionStoreService.getActionStore(
+      request.actionId,
+    );
+    const active = actionStore.afterActionUrlCreated ? false : true;
+    const requestData = { ...request, active };
+    const result = await this.actionUrlService.add(requestData, creator.id);
     return this.success(result);
   }
 

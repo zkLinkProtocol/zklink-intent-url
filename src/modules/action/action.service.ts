@@ -7,7 +7,7 @@ import { ConfigService } from '@nestjs/config';
 import {
   Action,
   ActionId,
-  ActionTransactionParams,
+  GenerateTransactionData,
   GeneratedTransaction,
 } from 'src/common/dto';
 import { ConfigType } from 'src/config';
@@ -43,26 +43,40 @@ export class ActionService {
 
   async getActions(): Promise<ActionResponseDto[]> {
     const actions = Array.from(this.actions.keys()).map(async (id) => {
+      const action = this.actions.get(id);
       const metadata = await this.getActionMetadata(id);
-      return { id, ...metadata };
+      const hasPostTxs = !!action.afterActionUrlCreated;
+      return { id, ...metadata, hasPostTxs };
     });
     return Promise.all(actions);
   }
 
   async getAction(id: ActionId): Promise<ActionResponseDto | null> {
+    const action = this.actions.get(id);
+    if (!action) {
+      return null;
+    }
     const metadata = await this.getActionMetadata(id);
+    const hasPostTxs = !!action.afterActionUrlCreated;
+    return action ? { id, ...metadata, hasPostTxs } : null;
+  }
 
-    return metadata ? { id, ...metadata } : null;
+  async getActionStore(id: ActionId): Promise<Action | null> {
+    const action = this.actions.get(id);
+    if (!action) {
+      return null;
+    }
+    return action;
   }
 
   async generateTransaction(
     id: ActionId,
-    params: ActionTransactionParams,
+    data: GenerateTransactionData,
   ): Promise<GeneratedTransaction> {
     const action = this.actions.get(id);
     if (!action) {
       throw new BusinessException(`Action with id '${id}' not found.`);
     }
-    return action.generateTransaction(params);
+    return action.generateTransaction(data);
   }
 }

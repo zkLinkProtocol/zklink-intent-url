@@ -1,0 +1,13 @@
+{
+  "name": "swap",
+  "type": "module",
+  "main": "index.js",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0",
+    "crypto-js": "^4.2.0",
+    "ethers": "^6.0.0"
+  }
+}

@@ -25,20 +25,19 @@ const novaswap = new NovaSwap(
   SWAP_ROUTER_CONTRACT_ADDRESS,
 );
 
-class Action implements ActionDto {
+class Action extends ActionDto {
   async getMetadata(): Promise<ActionMetadata> {
     return METADATA;
   }
 
-  async generateTransaction(
-    params: ActionTransactionParams,
-  ): Promise<GeneratedTransaction> {
+  async generateTransaction(data: {
+    code: string;
+    sender: string;
+    params: ActionTransactionParams;
+  }): Promise<GeneratedTransaction> {
+    const { params } = data;
     const tx = await novaswap.swapToken(intoParams(params), FEE);
-    return {
-      tx: tx,
-      provider: provider,
-      shouldSend: true,
-    };
+    return tx;
   }
 }
 

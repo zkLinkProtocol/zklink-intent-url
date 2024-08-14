@@ -1,7 +1,5 @@
 import { ActionMetadata } from 'src/common/dto';
 
-export const RPC_URL = 'https://sepolia.rpc.zklink.io';
-
 export const METADATA: ActionMetadata = {
   title: 'Buy Me a Coffee',
   description: 'Support the works you love',

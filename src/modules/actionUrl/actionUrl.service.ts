@@ -1,24 +1,24 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { nanoid } from 'nanoid';
 
-import { ActionUrl } from 'src/entities/actionUrl.entity';
+import { Intention } from 'src/entities/intention.entity';
 import { BusinessException } from 'src/exception/business.exception';
 import { ActionService } from 'src/modules/action/action.service';
-import { ActionUrlRepository } from 'src/repositories/actionUrl.repository';
+import { IntentionRepository } from 'src/repositories/intention.repository';
 
 @Injectable()
 export class ActionUrlService {
   logger: Logger;
   constructor(
     logger: Logger,
-    private readonly actionUrlRepository: ActionUrlRepository,
+    private readonly intentionRepository: IntentionRepository,
     private readonly actionService: ActionService,
   ) {
     this.logger = new Logger(ActionUrlService.name);
   }
 
   async findOneByCode(code: string) {
-    const actionUrl = await this.actionUrlRepository.findOne({
+    const actionUrl = await this.intentionRepository.findOne({
       where: [{ code }],
       relations: ['creator'],
     });
@@ -31,9 +31,16 @@ export class ActionUrlService {
     limit: number = 20,
   ) {
     const offset = Math.max((page - 1) * limit, 0);
-    const [actionUrls, total] = await this.actionUrlRepository.findAndCount({
+    const [actionUrls, total] = await this.intentionRepository.findAndCount({
       where: { creatorId },
-      select: ['code', 'title', 'description', 'createdAt', 'updatedAt'],
+      select: [
+        'code',
+        'title',
+        'metadata',
+        'description',
+        'createdAt',
+        'updatedAt',
+      ],
       take: limit,
       skip: offset,
       order: { createdAt: 'DESC' },
@@ -51,7 +58,7 @@ export class ActionUrlService {
   }
 
   async add(params: any, creatorId: bigint): Promise<string> {
-    const actionUrl = { ...params } as ActionUrl;
+    const actionUrl = { ...params } as Intention;
     const action = await this.actionService.getAction(actionUrl.actionId);
     if (!action) {
       throw new BusinessException('Action not found');
@@ -60,7 +67,7 @@ export class ActionUrlService {
     const code = nanoid(8);
     actionUrl.code = code;
     try {
-      await this.actionUrlRepository.add(actionUrl);
+      await this.intentionRepository.add(actionUrl);
     } catch (error) {
       this.logger.error(error);
       throw new BusinessException('Failed to add actionUrl');
@@ -79,11 +86,10 @@ export class ActionUrlService {
     actionUrl.title = params.title;
     actionUrl.description = params.description;
     actionUrl.metadata = params.metadata;
-    actionUrl.content = params.content;
     actionUrl.settings = params.settings;
 
     try {
-      await this.actionUrlRepository.updateByCode(code, actionUrl);
+      await this.intentionRepository.updateByCode(code, actionUrl);
     } catch (error) {
       this.logger.error(error);
       throw new BusinessException('Failed to update actionUrl');
@@ -100,7 +106,7 @@ export class ActionUrlService {
       throw new BusinessException('ActionUrl not found');
     }
     try {
-      await this.actionUrlRepository.deleteByCode(code);
+      await this.intentionRepository.deleteByCode(code);
     } catch (error) {
       this.logger.error(error);
       throw new BusinessException('Failed to delete actionUrl');

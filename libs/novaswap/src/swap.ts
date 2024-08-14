@@ -1,4 +1,6 @@
+import { getERC20SymbolAndDecimals } from '@action/utils';
 import { Contract, Provider, ethers } from 'ethers';
+import { Token } from 'src/common/dto';
 
 import ERC20_ABI from './abis/erc20.json';
 import FACTORY_ABI from './abis/factory.json';
@@ -99,8 +101,10 @@ export class NovaSwap {
   }
 
   public async swapToken(params: Params, _fee: number) {
-    const inputAmount = params.amountIn;
-    const amountIn = ethers.parseUnits(inputAmount.toString(), 18);
+    const amountIn = ethers.parseUnits(
+      params.amountIn.toString(),
+      params.amountInDecimal,
+    );
     const { poolContract, fee } = await this.getPoolInfo(
       this.factoryContract,
       params.tokenInAddress,
@@ -129,6 +133,37 @@ export class NovaSwap {
       await this.swapRouterContract.exactInputSingle.populateTransaction(
         swapParams,
       );
-    return transaction;
+    const tx = {
+      chainId: 810180,
+      value: '0',
+      to: transaction.to,
+      data: transaction.data,
+      dataObject: {
+        'Token In': params.tokenInAddress,
+        'Token Out': params.tokenOutAddress,
+        Recipient: params.recipient,
+        'Amount In': params.amountIn.toString(),
+        'Amount In Decimal': params.amountInDecimal,
+        Fee: fee,
+        'Deadline Duration in Second': params.deadlineDurationInSec,
+      },
+      shouldSend: true,
+    };
+
+    const { symbol } = await getERC20SymbolAndDecimals(
+      this.provider,
+      params.tokenInAddress,
+    );
+    const token: Token = {
+      chainId: 810180, // zkLink
+      token: params.tokenInAddress,
+      amount: amountIn.toString(),
+      decimals: params.amountInDecimal,
+      symbol: symbol,
+    };
+    return {
+      txs: [tx],
+      tokens: [token],
+    };
   }
 }

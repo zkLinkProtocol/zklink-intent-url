@@ -6,6 +6,7 @@ import {
 import { Type } from 'class-transformer';
 import {
   IsArray,
+  IsBoolean,
   IsEnum,
   IsObject,
   IsOptional,
@@ -107,6 +108,13 @@ class ComponentDto {
   })
   @IsString()
   defaultValue?: string;
+
+  @ApiPropertyOptional({
+    type: String,
+    description: 'should bind value with submit button',
+  })
+  @IsBoolean()
+  bind?: boolean;
 
   @ApiPropertyOptional({
     type: 'array',
