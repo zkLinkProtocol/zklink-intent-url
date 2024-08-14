@@ -134,7 +134,10 @@ class IntentDto {
   @ApiProperty({ type: [ComponentDto], description: 'List of components' })
   @IsArray()
   @ValidateNested({ each: true })
-  components: ComponentDto[];
+  components: Array<
+    | ComponentDto
+    | { conditional: Array<Omit<ComponentDto, 'type' | 'options'>> }
+  >;
 
   @ApiPropertyOptional({ description: 'Human-readable description (optional)' })
   @IsOptional()
