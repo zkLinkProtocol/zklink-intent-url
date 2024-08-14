@@ -8,7 +8,6 @@ import {
 
 export const METADATA: ActionMetadata = {
   title: 'RedEnvelope',
-  logo: 'https://xxx', // todo
   description: 'Send red Envelope',
   networks: [
     {
