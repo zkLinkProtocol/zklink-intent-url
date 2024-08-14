@@ -13,7 +13,7 @@ import { ApiTags } from '@nestjs/swagger';
 
 import { BaseController } from 'src/common/base.controller';
 import { CommonApiOperation } from 'src/common/base.decorators';
-import { ActionTransactionParams } from 'src/common/dto';
+import { ActionTransactionParams, GeneratedTransaction } from 'src/common/dto';
 import { PagingOptionsDto } from 'src/common/pagingOptionsDto.param';
 import { PagingMetaDto, ResponseDto } from 'src/common/response.dto';
 
@@ -75,10 +75,15 @@ export class ActionUrlController extends BaseController {
   @UseGuards(JwtAuthGuard)
   async getIntentPostTxs(
     @Param('code') code: string,
-    @Body() request: ActionTransactionParams,
-  ): Promise<ResponseDto<ActionUrlFindOneResponseDto>> {
+    @Body() request: { sender: string; params: ActionTransactionParams },
+  ): Promise<ResponseDto<GeneratedTransaction[]>> {
+    const { sender, params } = request;
     const actionStore = await this.actionStoreService.getActionStore(code);
-    const data = actionStore.afterActionUrlCreated(code, request);
+    const data = await actionStore.afterActionUrlCreated({
+      code,
+      sender,
+      params,
+    });
     return this.success(data);
   }
 
