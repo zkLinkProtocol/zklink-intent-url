@@ -216,9 +216,7 @@ abstract class Action {
     // Validate the parameters with user custom logic
     validateIntentParams(_: ActionTransactionParams): Promise<string>;
     // Process something after the action URL is created
-    afterActionUrlCreated?(_code: any, _params: {
-        [key in string]: string;
-    }): any;
+    afterActionUrlCreated?(params:GenerateTransactionData): any;
 }
 ```
 

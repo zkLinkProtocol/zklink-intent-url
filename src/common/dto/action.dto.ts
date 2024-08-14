@@ -18,9 +18,8 @@ export abstract class Action {
   }
 
   async afterActionUrlCreated?(
-    _code: any,
-    _params: { [key in string]: string },
-  );
+    data: GenerateTransactionData,
+  ): Promise<GeneratedTransaction[]>;
 
   abstract generateTransaction(
     data: GenerateTransactionData,
