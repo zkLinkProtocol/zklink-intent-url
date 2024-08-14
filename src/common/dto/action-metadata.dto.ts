@@ -147,9 +147,9 @@ export class ActionMetadata {
   @IsString()
   title: string;
 
-  @ApiProperty({ type: String, description: 'Action logo' })
+  @ApiPropertyOptional({ type: String, description: 'Action logo' })
   @IsString()
-  logo: string;
+  logo?: string;
 
   @ApiProperty({
     type: String,

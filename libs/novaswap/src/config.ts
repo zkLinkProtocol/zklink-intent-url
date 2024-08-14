@@ -11,7 +11,6 @@ export const FEE = 3000; // fee level, 0.3% fee is 3000
 
 export const METADATA: ActionMetadata = {
   title: 'NovaSwap',
-  logo: 'https://placehold.co/40x40',
   description: 'Swap tokens',
   networks: [
     {
