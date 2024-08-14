@@ -1,4 +1,11 @@
-import { JsonRpcProvider, ethers, parseUnits } from 'ethers';
+import {
+  JsonRpcProvider,
+  ethers,
+  getBigInt,
+  keccak256,
+  parseUnits,
+  toUtf8Bytes,
+} from 'ethers';
 import { utils } from 'zksync-ethers';
 
 import ERC20ABI from './abis/ERC20.json';
@@ -23,8 +30,8 @@ interface CreateRedPacketParams {
   creator: string;
   token: string;
   totalCount: number;
-  tokenAmount: number;
-  payForGas: number;
+  tokenAmount: bigint;
+  payForGas: bigint;
   totalShare: number;
   packetHash: string;
   isRandom: boolean;
@@ -136,7 +143,7 @@ class Action extends ActionDto {
   }
 
   private async claimRedEnvelopeTxGas() {
-    const id = 'TODO';
+    const id = '1';
     const expiry = Math.floor(Date.now() / 1000) + 60 * 60;
     const signature = this.genClaimSignature({
       id,
@@ -191,7 +198,7 @@ class Action extends ActionDto {
     return totalShare;
   }
 
-  private async getDecimals(tokenAddress: string) {
+  private async getDecimals(tokenAddress: string): Promise<bigint> {
     const contract = new ethers.Contract(tokenAddress, ERC20ABI, this.provider);
     try {
       const decimals = await contract.decimals();
@@ -201,46 +208,14 @@ class Action extends ActionDto {
     }
   }
 
-  public async genApproveTx(data: {
-    code: number;
-    sender: string;
-    params: any;
-  }): Promise<GeneratedTransaction> {
-    const { params } = data;
-    const { totalDistributionAmount, distributionToken } = params;
-
-    const tokenContract = new ethers.Contract(
-      distributionToken,
-      ERC20ABI,
-      this.provider,
-    );
-    console.log(111, parseUnits(totalDistributionAmount.toString(), 18));
-    const approveData = await tokenContract.approve.populateTransaction(
-      RED_PACKET_ADDRESS,
-      parseUnits((totalDistributionAmount + 10).toString(), 18),
-    );
-
-    return {
-      txs: [
-        {
-          chainId: this.chainId,
-          to: approveData.to,
-          value: '0',
-          data: approveData.data,
-          dataObject: {},
-          shouldSend: false,
-        },
-      ],
-      tokens: [],
-    };
-  }
-
   public async afterActionUrlCreated(data: {
-    code: number;
+    code: string;
     sender: string;
     params: any;
   }): Promise<GeneratedTransaction> {
     const { code, sender, params } = data;
+    const hash = keccak256(toUtf8Bytes(code));
+    const uint256Value = getBigInt(hash);
     const {
       distributionMode,
       totalDistributionAmount,
@@ -248,15 +223,20 @@ class Action extends ActionDto {
       amountOfRedEnvelopes,
       gasToken,
     } = params;
+
     const totalShare = this.genTotalShare(amountOfRedEnvelopes);
     const packetHash = PACKET_HASH;
     const isRandom =
       distributionMode === DistributionModeValue.RandomAmountPerAddress;
     const isGasfree = gasToken === GasTokenValue.DistributedToken;
-    // const txGas = await this.claimRedEnvelopeTxGas();
-    const payForGas = isGasfree ? 10 : 0;
+    const txGas = await this.claimRedEnvelopeTxGas();
+    const payForGas = isGasfree ? txGas : 0n;
+    const decimals = await this.getDecimals(distributionToken);
     // : await this.getQuote(distributionToken, txGas);
-
+    const totalDistributionAmountBn = parseUnits(
+      totalDistributionAmount,
+      decimals,
+    );
     const expiry = Math.floor(Date.now() / 1000) + 60 * 60;
 
     const tokenContract = new ethers.Contract(
@@ -266,14 +246,14 @@ class Action extends ActionDto {
     );
     const approveData = await tokenContract.approve.populateTransaction(
       RED_PACKET_ADDRESS,
-      parseUnits((totalDistributionAmount + payForGas).toString(), 18),
+      totalDistributionAmountBn + payForGas,
     );
 
     const signature = await this.genCreateSignature({
       creator: sender,
       token: distributionToken,
       totalCount: amountOfRedEnvelopes,
-      tokenAmount: totalDistributionAmount,
+      tokenAmount: totalDistributionAmountBn,
       payForGas: payForGas,
       totalShare: totalShare,
       packetHash: packetHash,
@@ -284,7 +264,7 @@ class Action extends ActionDto {
 
     const createRedPacketData =
       await this.envelopContract.createRedPacket.populateTransaction(
-        code,
+        uint256Value,
         distributionToken,
         amountOfRedEnvelopes,
         totalDistributionAmount,
@@ -329,8 +309,8 @@ class Action extends ActionDto {
     const decimals = await this.getDecimals(distributionToken);
 
     if (
-      Number(txGas) * Number(amountOfRedEnvelopes) * 1.5 >=
-      Number(totalDistributionAmount) * decimals
+      txGas * BigInt(Number(amountOfRedEnvelopes) * 1.5) >=
+      parseUnits(totalDistributionAmount, decimals)
     ) {
       return 'The amount of the pool is too low to cover gas fee';
     }
