@@ -168,6 +168,20 @@ export class ActionUrlController extends BaseController {
     return this.success(result);
   }
 
+  @Put(':code/activate')
+  @CommonApiOperation('Activate the actionUrl associated with the given code.')
+  @UseGuards(JwtAuthGuard)
+  async activateCode(
+    @Param('code') code: string,
+    @GetCreator() creator,
+  ): Promise<ResponseDto<string>> {
+    const result = await this.actionUrlService.updateActiveStatusByCode(
+      code,
+      creator.id,
+    );
+    return this.success(result);
+  }
+
   @Delete(':code')
   @CommonApiOperation('Delete the actionUrl created by oneself.')
   @UseGuards(JwtAuthGuard)
