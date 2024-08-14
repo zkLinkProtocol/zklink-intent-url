@@ -1,5 +1,6 @@
 const configFactory = async () => {
   return {
+    env: process.env.ENV,
     port: parseInt(process.env.PORT, 10) || 2101,
     jwt: {
       secret: process.env.JWT_SECRET,

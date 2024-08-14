@@ -76,7 +76,7 @@ export class ActionUrlController extends BaseController {
   async getIntentPostTxs(
     @Param('code') code: string,
     @Body() request: { sender: string; params: ActionTransactionParams },
-  ): Promise<ResponseDto<GeneratedTransaction[]>> {
+  ): Promise<ResponseDto<GeneratedTransaction>> {
     const { sender, params } = request;
     const actionStore = await this.actionStoreService.getActionStore(code);
     const data = await actionStore.afterActionUrlCreated({
