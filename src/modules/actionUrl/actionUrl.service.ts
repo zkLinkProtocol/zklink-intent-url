@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { nanoid } from 'nanoid';
 
 import { Intention } from 'src/entities/intention.entity';
@@ -87,6 +87,25 @@ export class ActionUrlService {
     actionUrl.description = params.description;
     actionUrl.metadata = params.metadata;
     actionUrl.settings = params.settings;
+
+    try {
+      await this.intentionRepository.updateByCode(code, actionUrl);
+    } catch (error) {
+      this.logger.error(error);
+      throw new BusinessException('Failed to update actionUrl');
+    }
+    return code;
+  }
+
+  async updateActiveStatusByCode(code: string, creatorId: bigint) {
+    const actionUrl = await this.findOneByCode(code);
+    if (!actionUrl) {
+      throw new BusinessException('ActionUrl not found');
+    }
+    if (actionUrl.creatorId !== creatorId) {
+      throw new UnauthorizedException('Not your own intent');
+    }
+    actionUrl.active = true;
 
     try {
       await this.intentionRepository.updateByCode(code, actionUrl);
