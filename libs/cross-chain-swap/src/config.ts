@@ -21,48 +21,29 @@ export const METADATA: ActionMetadata = {
   intent: {
     components: [
       {
-        name: 'isBuy',
-        label: 'Buy Or Sell',
-        desc: 'Buy or Sell',
-        type: 'searchSelect',
-        regex: '^true$|^false$',
-        regexDesc: 'true or false',
-        options: [
+        conditional: [
           {
-            label: 'Buy',
-            value: 'true',
+            name: 'amountToBuy',
+            label: 'Amount to Buy',
+            desc: 'The amount of input tokens used to buy output tokens',
+            regex: '^[0-9]+(.[0-9]+)?$',
+            regexDesc: 'Positive number',
           },
           {
-            label: 'Sell',
-            value: 'false',
-          },
-        ],
-      },
-      {
-        name: 'percentOrAmount',
-        label: 'Percent Or Amount',
-        desc: 'Percent or Amount(only sell can use percent)',
-        type: 'searchSelect',
-        regex: '^percent$|^amount$',
-        regexDesc: 'percent or amount',
-        options: [
-          {
-            label: 'Percent(only sell can use percent)',
-            value: 'percent',
+            name: 'amountToSell',
+            label: 'Amount to Sell',
+            desc: 'The amount of output tokens you want to sell',
+            regex: '^[0-9]+(.[0-9]+)?$',
+            regexDesc: 'Positive number',
           },
           {
-            label: 'Amount',
-            value: 'amount',
+            name: 'percentToSell',
+            label: 'Percent to Sell',
+            desc: 'The percentage of output tokens you want to sell',
+            regex: '^(100|[1-9]?[0-9])(.[0-9]+)?$',
+            regexDesc: 'Percentage (0-100)',
           },
         ],
-      },
-      {
-        name: 'amount',
-        label: 'Amount',
-        desc: 'The amount of token you want to swap, if percentOrAmount is percent, the amount is the percent of the balance, 100 means 100%',
-        type: 'input',
-        regex: '^[0-9]+$',
-        regexDesc: 'Must be a number',
       },
       {
         name: 'tokenInAddress',
