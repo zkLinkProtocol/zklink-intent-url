@@ -24,13 +24,14 @@ class Action extends ActionDto {
     sender: string;
     params: ActionTransactionParams;
   }): Promise<GeneratedTransaction> {
-    const { params: _params } = data;
+    const { params: _params, sender } = data;
+
     const params = intoParams(_params);
     let approveTx: Tx;
     let swapTx: Tx;
     let tokens: Token[];
 
-    if (params.isBuy) {
+    if (params.amountToBuy) {
       //buy
       approveTx = await getApproveData(
         params.chainId,
@@ -39,11 +40,11 @@ class Action extends ActionDto {
       );
 
       swapTx = await getSwapData(
-        params.userAddress,
+        sender,
         params.chainId,
         params.tokenInAddress,
         params.tokenOutAddress,
-        params.amount,
+        params.amountToBuy,
       );
       const { symbol, decimals } = await getERC20SymbolAndDecimals(
         new ethers.JsonRpcProvider(RPC_URL[params.chainId.toString()]) as any,
@@ -55,19 +56,21 @@ class Action extends ActionDto {
           symbol,
           chainId: params.chainId,
           token: params.tokenInAddress,
-          amount: params.amount.toString(),
+          amount: params.amountToBuy.toString(),
         },
       ];
     } else {
       //sell
-      let amount = params.amount;
-      if (params.percentOrAmount === 'percent') {
+      let amount = params.amountToSell;
+      if (params.amountToSell) {
+        amount = params.amountToSell;
+      } else {
         const balance = await getUserERC20Balance(
-          params.userAddress,
+          sender,
           params.tokenOutAddress,
           new ethers.JsonRpcProvider(RPC_URL[params.chainId.toString()]),
         );
-        amount = (balance * BigInt(params.amount)) / BigInt(100);
+        amount = (balance * BigInt(params.percentToSell)) / BigInt(100);
       }
 
       approveTx = await getApproveData(
@@ -77,7 +80,7 @@ class Action extends ActionDto {
       );
 
       swapTx = await getSwapData(
-        params.userAddress,
+        sender,
         params.chainId,
         params.tokenOutAddress,
         params.tokenInAddress,
