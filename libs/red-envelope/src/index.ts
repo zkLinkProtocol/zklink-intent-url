@@ -9,6 +9,7 @@ import {
 import { utils } from 'zksync-ethers';
 
 import ERC20ABI from './abis/ERC20.json';
+import QuoterV2 from './abis/QuoterV2.json';
 import RedPacketABI from './abis/RedPacket.json';
 import { METADATA } from './config';
 import { DistributionModeValue, GasTokenValue } from './type';
@@ -50,6 +51,7 @@ class Action extends ActionDto {
     return METADATA;
   }
   public envelopContract: ethers.Contract;
+  private quoter: ethers.Contract;
   private wallet: ethers.Wallet;
   private provider: ethers.Provider;
   private chainId = 810181;
@@ -57,14 +59,18 @@ class Action extends ActionDto {
   constructor() {
     super();
     this.provider = new JsonRpcProvider('https://sepolia.rpc.zklink.io');
+    const mainNetProvider = new JsonRpcProvider('https://rpc.zklink.io');
+
     const privateKey =
       '67e287bc6f8a5e95992447f20a72a8afae6097ec08666241d38dce9881005216';
     this.wallet = new ethers.Wallet(privateKey, this.provider);
+    const mainWallet = new ethers.Wallet(privateKey, mainNetProvider);
     this.envelopContract = new ethers.Contract(
       RED_PACKET_ADDRESS,
       RedPacketABI,
       this.wallet,
     );
+    this.quoter = new ethers.Contract(QUOTER_ADDRESS, QuoterV2, mainWallet);
   }
 
   private async genCreateSignature(params: CreateRedPacketParams) {
@@ -161,24 +167,17 @@ class Action extends ActionDto {
     return txCost;
   }
 
-  private async getQuote(tokenOut: string, EthAmountIn: bigint) {
+  private async getQuote(tokenOut: string, ethAmountIn: bigint) {
     const fee = 3000;
-    const quoterAbi = [
-      'function quoteExactInputSingle(address tokenIn, address tokenOut, uint24 fee, uint256 amountIn, uint160 sqrtPriceLimitX96) external returns (uint256 amountOut)',
-    ];
-    const quoter = new ethers.Contract(
-      QUOTER_ADDRESS,
-      quoterAbi,
-      this.provider,
-    );
+    console.log('todo', tokenOut);
     try {
-      const amountOut = await quoter.quoteExactInputSingle(
-        WETH_ADDRESS,
-        tokenOut,
-        fee,
-        EthAmountIn,
-        0,
-      );
+      const [amountOut] = await this.quoter.quoteExactInputSingle.staticCall({
+        tokenIn: WETH_ADDRESS,
+        tokenOut: '0xDa4AaEd3A53962c83B35697Cd138cc6df43aF71f', // todo tokenOut
+        amountIn: ethAmountIn,
+        fee: fee,
+        sqrtPriceLimitX96: 0,
+      });
       return amountOut;
     } catch (error) {
       console.error('Error fetching quote:', error);
@@ -230,9 +229,10 @@ class Action extends ActionDto {
       distributionMode === DistributionModeValue.RandomAmountPerAddress;
     const isGasfree = gasToken === GasTokenValue.DistributedToken;
     const txGas = await this.claimRedEnvelopeTxGas();
-    const payForGas = isGasfree ? txGas : 0n;
+    const payForGas = isGasfree
+      ? await this.getQuote(distributionToken, txGas)
+      : 0n;
     const decimals = await this.getDecimals(distributionToken);
-    // : await this.getQuote(distributionToken, txGas);
     const totalDistributionAmountBn = parseUnits(
       totalDistributionAmount,
       decimals,
