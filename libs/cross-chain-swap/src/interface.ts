@@ -1,7 +1,7 @@
 import { ActionTransactionParams } from 'src/common/dto';
 
 export interface Params {
-  tokenInAddress: string;
+  tokenIn: string;
   tokenOutAddress: string;
 
   chainId: number;
@@ -16,7 +16,7 @@ type ConversionMap<T> = {
 
 const conversionMap: ConversionMap<Params> = {
   chainId: (value) => parseInt(value, 10),
-  tokenInAddress: (value) => value,
+  tokenIn: (value) => value,
   tokenOutAddress: (value) => value,
   amountToBuy: (value) => {
     try {

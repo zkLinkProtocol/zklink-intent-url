@@ -4,6 +4,15 @@ export const RPC_URL = {
   '42161': 'https://arb1.arbitrum.io/rpc',
 };
 
+export const TOKEN_CONFIG = {
+  42161: {
+    weth: '0x82af49447d8a07e3bd95bd0d56f35241523fbab1',
+    wbtc: '0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f',
+    usdt: '0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9',
+    usdc: '0xff970a61a04b1ca14834a43f5de4533ebddb5cc8',
+  },
+};
+
 export const METADATA: ActionMetadata = {
   title: 'Cross Chain Swap',
   description:
@@ -46,16 +55,28 @@ export const METADATA: ActionMetadata = {
         ],
       },
       {
-        name: 'tokenInAddress',
-        label: 'Token In Address',
-        desc: 'The address of the token you want to swap',
+        name: 'tokenIn',
+        label: 'Token In ',
+        desc: 'The token you want to swap',
         type: 'searchSelect',
-        regex: '^0x[a-fA-F0-9]{40}$',
-        regexDesc: 'Address',
+        regex: '^[a-zA-Z0-9]+$',
+        regexDesc: 'Token Symbol',
         options: [
           {
+            label: 'WETH',
+            value: 'weth',
+          },
+          {
             label: 'WBTC',
-            value: '0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f',
+            value: 'wbtc',
+          },
+          {
+            label: 'USDT',
+            value: 'usdt',
+          },
+          {
+            label: 'USDC',
+            value: 'usdc',
           },
         ],
       },

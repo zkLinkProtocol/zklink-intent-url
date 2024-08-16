@@ -10,10 +10,10 @@ import {
 } from 'src/common/dto';
 
 import { METADATA, RPC_URL } from './config';
+import { TOKEN_CONFIG } from './config';
 import { intoParams } from './interface';
 import { getApproveData, getSwapData } from './okxAPI';
 import { getUserERC20Balance } from './utils';
-
 class Action extends ActionDto {
   async getMetadata(): Promise<ActionMetadata> {
     return METADATA;
@@ -25,7 +25,7 @@ class Action extends ActionDto {
     params: ActionTransactionParams;
   }): Promise<GeneratedTransaction> {
     const { params: _params, sender } = data;
-
+    const tokenInAddress = TOKEN_CONFIG[_params.chainId][_params.tokenIn];
     const params = intoParams(_params);
     let approveTx: Tx;
     let swapTx: Tx;
@@ -35,27 +35,27 @@ class Action extends ActionDto {
       //buy
       approveTx = await getApproveData(
         params.chainId,
-        params.tokenInAddress,
+        tokenInAddress,
         ethers.MaxUint256,
       );
 
       swapTx = await getSwapData(
         sender,
         params.chainId,
-        params.tokenInAddress,
+        tokenInAddress,
         params.tokenOutAddress,
         params.amountToBuy,
       );
       const { symbol, decimals } = await getERC20SymbolAndDecimals(
         new ethers.JsonRpcProvider(RPC_URL[params.chainId.toString()]) as any,
-        params.tokenInAddress,
+        tokenInAddress,
       );
       tokens = [
         {
           decimals,
           symbol,
           chainId: params.chainId,
-          token: params.tokenInAddress,
+          token: tokenInAddress,
           amount: params.amountToBuy.toString(),
         },
       ];
@@ -83,7 +83,7 @@ class Action extends ActionDto {
         sender,
         params.chainId,
         params.tokenOutAddress,
-        params.tokenInAddress,
+        tokenInAddress,
         amount,
       );
       tokens = [];
