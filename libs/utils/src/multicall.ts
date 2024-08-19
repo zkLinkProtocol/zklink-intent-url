@@ -25,7 +25,7 @@ export class Multicall<A extends Array<any>> {
     );
   }
 
-  public appendTransaction(tx) {
+  public appendTransaction(tx: any) {
     this.contractMethodArgs.push(tx);
     return this;
   }

@@ -39,7 +39,7 @@ async function bootstrap() {
     customSiteTitle: 'zkIntent docs',
   });
 
-  const port = configService.get<string>('port');
+  const port = configService.get('port');
   await app.listen(port);
   logger.log(`App was listened port : ${port}`);
 }

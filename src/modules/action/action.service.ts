@@ -19,7 +19,7 @@ import { ActionResponseDto } from './dto/actions.dto';
 export class ActionService {
   private awsConfig: ConfigType['aws'];
   constructor(configService: ConfigService) {
-    this.awsConfig = configService.get('aws');
+    this.awsConfig = configService.get('aws', { infer: true })!;
   }
   private actions: Map<ActionId, Action> = new Map();
 
@@ -29,6 +29,9 @@ export class ActionService {
 
   private async getActionMetadata(id: ActionId) {
     const action = this.actions.get(id);
+    if (!action) {
+      throw new BusinessException(`Action with id '${id}' not found.`);
+    }
     const actionMetadata = await action.getMetadata();
     if (!actionMetadata.logo) {
       const logos = fs.readdirSync(path.join(process.cwd(), 'assets/logos'));
@@ -44,6 +47,9 @@ export class ActionService {
   async getActions(): Promise<ActionResponseDto[]> {
     const actions = Array.from(this.actions.keys()).map(async (id) => {
       const action = this.actions.get(id);
+      if (!action) {
+        throw new BusinessException(`Action with id '${id}' not found.`);
+      }
       const metadata = await this.getActionMetadata(id);
       const hasPostTxs = !!action.afterActionUrlCreated;
       return { id, ...metadata, hasPostTxs };
@@ -51,20 +57,20 @@ export class ActionService {
     return Promise.all(actions);
   }
 
-  async getAction(id: ActionId): Promise<ActionResponseDto | null> {
+  async getAction(id: ActionId): Promise<ActionResponseDto> {
     const action = this.actions.get(id);
     if (!action) {
-      return null;
+      throw new BusinessException(`Action ${id} not found`);
     }
     const metadata = await this.getActionMetadata(id);
     const hasPostTxs = !!action.afterActionUrlCreated;
-    return action ? { id, ...metadata, hasPostTxs } : null;
+    return { id, ...metadata, hasPostTxs };
   }
 
-  async getActionStore(id: ActionId): Promise<Action | null> {
+  async getActionStore(id: ActionId): Promise<Action> {
     const action = this.actions.get(id);
     if (!action) {
-      return null;
+      throw new BusinessException(`Action with id '${id}' not found.`);
     }
     return action;
   }

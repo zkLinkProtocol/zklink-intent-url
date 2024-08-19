@@ -7,6 +7,7 @@ import { BaseController } from 'src/common/base.controller';
 import { CommonApiOperation } from 'src/common/base.decorators';
 import { ResponseDto } from 'src/common/response.dto';
 import { sign_message } from 'src/constants';
+import { BusinessException } from 'src/exception/business.exception';
 
 import {
   LoginByPasskeyRequestDto,
@@ -39,7 +40,7 @@ export class AuthController extends BaseController {
     const message = params.message;
     const key = Buffer.from(message).toString('base64');
     if (!cache.has(key)) {
-      return this.error('Invalid message');
+      throw new BusinessException('Invalid message');
     }
     const result = await this.authService.loginByPasskey(
       params.id,
@@ -60,7 +61,7 @@ export class AuthController extends BaseController {
     const message = params.message;
     const key = Buffer.from(message).toString('base64');
     if (!cache.has(key)) {
-      return this.error('Invalid message');
+      throw new BusinessException('Invalid message');
     }
     cache.delete(key);
     const result = await this.authService.loginByAddress(

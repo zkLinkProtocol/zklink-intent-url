@@ -19,7 +19,7 @@ export const hexTransformer: ValueTransformer = {
   },
   from(hex: Buffer): string {
     if (!hex) {
-      return null;
+      return '';
     }
     return `0x${hex.toString('hex')}`;
   },

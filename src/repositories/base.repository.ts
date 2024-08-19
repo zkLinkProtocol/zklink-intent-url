@@ -1,5 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { EntityTarget, FindManyOptions, FindOptionsWhere } from 'typeorm';
+import {
+  EntityTarget,
+  FindManyOptions,
+  FindOptionsWhere,
+  ObjectLiteral,
+} from 'typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 
 import { UnitOfWork } from '../unitOfWork';
@@ -7,7 +12,7 @@ import { UnitOfWork } from '../unitOfWork';
 const BATCH_SIZE = 1000;
 
 @Injectable()
-export abstract class BaseRepository<T> {
+export abstract class BaseRepository<T extends ObjectLiteral> {
   public constructor(
     protected readonly entityTarget: EntityTarget<T>,
     protected readonly unitOfWork: UnitOfWork,
@@ -97,12 +102,15 @@ export abstract class BaseRepository<T> {
   ): Promise<void> {
     const transactionManager = this.unitOfWork.getTransactionManager();
     const recordToUpsert = shouldExcludeNullValues
-      ? Object.keys(record).reduce((acc, key) => {
-          if (record[key] !== null && record[key] !== undefined) {
-            acc[key] = record[key];
-          }
-          return acc;
-        }, {})
+      ? (Object.keys(record) as Array<keyof QueryDeepPartialEntity<T>>).reduce(
+          (acc, key) => {
+            if (record[key] !== null && record[key] !== undefined) {
+              acc[key] = record[key];
+            }
+            return acc;
+          },
+          {} as QueryDeepPartialEntity<T>,
+        )
       : record;
     await transactionManager.upsert<T>(this.entityTarget, recordToUpsert, {
       conflictPaths,

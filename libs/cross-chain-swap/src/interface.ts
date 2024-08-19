@@ -61,9 +61,11 @@ export function intoParams(raw: ActionTransactionParams): Params {
   }
 
   for (const key in conversionMap) {
-    const convert = conversionMap[key];
+    const convert = conversionMap[key as keyof ConversionMap<Params>]!;
     if (raw[key] !== undefined) {
-      result[key] = convert(raw[key]);
+      result[key as keyof Params] = convert(
+        raw[key as keyof ActionTransactionParams],
+      ) as any;
     } else if (
       key !== 'amountToBuy' &&
       key !== 'amountToSell' &&
