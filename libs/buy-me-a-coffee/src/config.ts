@@ -10,6 +10,16 @@ export const METADATA: ActionMetadata = {
       chainId: '1',
       contractAddress: '0x',
     },
+    {
+      name: 'Arbitrum',
+      chainId: '42161',
+      contractAddress: '0x',
+    },
+    {
+      name: 'zkLink Nova',
+      chainId: '810180',
+      contractAddress: '0x',
+    },
   ],
   dApp: { name: 'Buy Me a Coffee' },
   author: { name: 'zkLink' },
