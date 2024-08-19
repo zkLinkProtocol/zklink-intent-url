@@ -22,6 +22,7 @@ export class ActionUrlService {
       where: [{ code }],
       relations: ['creator'],
     });
+    if (!actionUrl) throw new BusinessException('ActionUrl not found');
     return actionUrl;
   }
 

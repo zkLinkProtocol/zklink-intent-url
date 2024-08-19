@@ -16,6 +16,7 @@ import { CommonApiOperation } from 'src/common/base.decorators';
 import { ActionTransactionParams, GeneratedTransaction } from 'src/common/dto';
 import { PagingOptionsDto } from 'src/common/pagingOptionsDto.param';
 import { PagingMetaDto, ResponseDto } from 'src/common/response.dto';
+import { BusinessException } from 'src/exception/business.exception';
 
 import {
   ActionUrlAddRequestDto,
@@ -49,9 +50,7 @@ export class ActionUrlController extends BaseController {
       result.actionId,
     );
     const hasPostTxs = !!actionStore.afterActionUrlCreated;
-    if (!result) {
-      return this.error('ActionUrl not found');
-    }
+
     const response = {
       code: result.code,
       actionId: result.actionId,
@@ -79,7 +78,38 @@ export class ActionUrlController extends BaseController {
   ): Promise<ResponseDto<GeneratedTransaction>> {
     const { sender, params } = request;
     const actionStore = await this.actionStoreService.getActionStore(code);
+    if (!actionStore.afterActionUrlCreated) {
+      throw new BusinessException('No post transactions!');
+    }
+
     const data = await actionStore.afterActionUrlCreated({
+      code,
+      sender,
+      params,
+    });
+
+    return this.success(data);
+  }
+
+  @Get(':code/real-time-data')
+  @CommonApiOperation(
+    'Returns the configuration information for a single actionUrl.',
+  )
+  async getRefreshContent(
+    @Param('code') code: string,
+    @Body() request: { sender: string; params: ActionTransactionParams },
+  ): Promise<
+    ResponseDto<{
+      title: string;
+      content: string;
+    }>
+  > {
+    const { sender, params } = request;
+    const actionStore = await this.actionStoreService.getActionStore(code);
+    if (!actionStore.getRealTimeContent) {
+      throw new BusinessException('getRealTimeContent not implement');
+    }
+    const data = await actionStore.getRealTimeContent({
       code,
       sender,
       params,
@@ -92,7 +122,7 @@ export class ActionUrlController extends BaseController {
   @UseGuards(JwtAuthGuard)
   async findListAuth(
     @Query() pagingOptions: PagingOptionsDto,
-    @GetCreator() creator,
+    @GetCreator() creator: { id: bigint },
   ): Promise<ResponseDto<ActionUrlFindOneResponseDto[]>> {
     const { page = 1, limit = 20 } = pagingOptions;
     const result = await this.actionUrlService.findListByCreator(
@@ -114,11 +144,11 @@ export class ActionUrlController extends BaseController {
   @UseGuards(JwtAuthGuard)
   async findOneAuth(
     @Param('code') code: string,
-    @GetCreator() creator,
+    @GetCreator() creator: { id: bigint },
   ): Promise<ResponseDto<ActionUrlFindOneResponseDto>> {
     const result = await this.actionUrlService.findOneByCode(code);
     if ((result?.creatorId ?? '') !== creator.id) {
-      return this.error('ActionUrl not found');
+      throw new BusinessException('ActionUrl not found');
     }
     const response = {
       code: result.code,
@@ -141,7 +171,7 @@ export class ActionUrlController extends BaseController {
   @UseGuards(JwtAuthGuard)
   async create(
     @Body() request: ActionUrlAddRequestDto,
-    @GetCreator() creator,
+    @GetCreator() creator: { id: bigint },
   ): Promise<ResponseDto<string>> {
     const actionStore = await this.actionStoreService.getActionStore(
       request.actionId,
@@ -158,7 +188,7 @@ export class ActionUrlController extends BaseController {
   async edit(
     @Param('code') code: string,
     @Body() request: ActionUrlUpdateRequestDto,
-    @GetCreator() creator,
+    @GetCreator() creator: { id: bigint },
   ): Promise<ResponseDto<string>> {
     const result = await this.actionUrlService.updateByCode(
       code,
@@ -173,7 +203,7 @@ export class ActionUrlController extends BaseController {
   @UseGuards(JwtAuthGuard)
   async activateCode(
     @Param('code') code: string,
-    @GetCreator() creator,
+    @GetCreator() creator: { id: bigint },
   ): Promise<ResponseDto<string>> {
     const result = await this.actionUrlService.updateActiveStatusByCode(
       code,
@@ -187,7 +217,7 @@ export class ActionUrlController extends BaseController {
   @UseGuards(JwtAuthGuard)
   async delete(
     @Param('code') path: string,
-    @GetCreator() creator,
+    @GetCreator() creator: { id: bigint },
   ): Promise<ResponseDto<boolean>> {
     const result = await this.actionUrlService.deleteByCode(path, creator.id);
     return this.success(result);

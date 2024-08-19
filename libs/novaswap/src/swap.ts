@@ -40,10 +40,10 @@ export class NovaSwap {
   }
 
   public async getPoolInfo(
-    factoryContract,
-    tokenInAddress,
-    tokenOutAddress,
-    poolFee,
+    factoryContract: ethers.Contract,
+    tokenInAddress: string,
+    tokenOutAddress: string,
+    poolFee: number,
   ) {
     const poolAddress = await factoryContract.getPool(
       tokenInAddress,
@@ -66,7 +66,7 @@ export class NovaSwap {
     return { poolContract, token0, token1, fee };
   }
 
-  public async tokenDecimal(tokenAddress) {
+  public async tokenDecimal(tokenAddress: string) {
     const tokenContract = new ethers.Contract(
       tokenAddress,
       ERC20_ABI,
@@ -77,13 +77,13 @@ export class NovaSwap {
   }
 
   public async quoteAndLogSwap(
-    quoterContract,
-    tokenInAddress,
-    tokenOutAddress,
-    fee,
-    recipient,
-    amountIn,
-    deadlineInSecs,
+    quoterContract: ethers.Contract,
+    tokenInAddress: string,
+    tokenOutAddress: string,
+    fee: number,
+    recipient: string,
+    amountIn: bigint,
+    deadlineInSecs: number,
   ) {
     const quotedAmountOut =
       await quoterContract.quoteExactInputSingle.staticCall({

@@ -1,10 +1,10 @@
 import { ActionMetadata } from 'src/common/dto';
 
-export const RPC_URL = {
+export const RPC_URL: { [key: string]: string } = {
   '42161': 'https://arb1.arbitrum.io/rpc',
 };
 
-export const TOKEN_CONFIG = {
+export const TOKEN_CONFIG: { [key: string]: { [key: string]: string } } = {
   42161: {
     weth: '0x82af49447d8a07e3bd95bd0d56f35241523fbab1',
     wbtc: '0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f',

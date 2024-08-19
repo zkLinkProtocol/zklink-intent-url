@@ -17,7 +17,7 @@ export function CommonApiOperation(summary: string) {
           return new BadRequestException({
             code: 400,
             message: errors
-              .map((error) => Object.values(error.constraints))
+              .map((error) => Object.values(error.constraints || {}))
               .join(','),
             data: null,
           });

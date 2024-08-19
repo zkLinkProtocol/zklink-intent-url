@@ -9,8 +9,7 @@ import {
   Tx,
 } from 'src/common/dto';
 
-import { METADATA, RPC_URL } from './config';
-import { TOKEN_CONFIG } from './config';
+import { METADATA, RPC_URL, TOKEN_CONFIG } from './config';
 import { intoParams } from './interface';
 import { getApproveData, getSwapData } from './okxAPI';
 import { getUserERC20Balance } from './utils';
@@ -70,7 +69,7 @@ class Action extends ActionDto {
           params.tokenOutAddress,
           new ethers.JsonRpcProvider(RPC_URL[params.chainId.toString()]),
         );
-        amount = (balance * BigInt(params.percentToSell)) / BigInt(100);
+        amount = (balance * BigInt(params.percentToSell!)) / BigInt(100);
       }
 
       approveTx = await getApproveData(

@@ -15,8 +15,8 @@ export class FilesService {
   private readonly s3: AWS.S3;
   private awsConfig: ConfigType['aws'];
 
-  constructor(private configService: ConfigService<ConfigType>) {
-    this.awsConfig = configService.get('aws', { infer: true });
+  constructor(configService: ConfigService<ConfigType>) {
+    this.awsConfig = configService.get('aws', { infer: true })!;
 
     this.s3 = new AWS.S3({
       accessKeyId: this.awsConfig.accessKeyId,

@@ -2,7 +2,7 @@ import { Provider, ethers } from 'ethers';
 
 export async function getERC20SymbolAndDecimals(
   provider: Provider,
-  tokenAddress,
+  tokenAddress: string,
 ): Promise<{ symbol: string; decimals: number }> {
   const abi = [
     'function symbol() view returns (string)',

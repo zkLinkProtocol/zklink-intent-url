@@ -163,7 +163,7 @@ class Action extends ActionDto {
       signature,
     );
     const { maxFeePerGas } = await this.provider.getFeeData();
-    const txCost = gasEstimate * maxFeePerGas;
+    const txCost = gasEstimate * (maxFeePerGas ?? 0n);
     return txCost;
   }
 
@@ -199,12 +199,8 @@ class Action extends ActionDto {
 
   private async getDecimals(tokenAddress: string): Promise<bigint> {
     const contract = new ethers.Contract(tokenAddress, ERC20ABI, this.provider);
-    try {
-      const decimals = await contract.decimals();
-      return decimals;
-    } catch (error) {
-      console.error(`Failed to fetch decimals: ${error.message}`);
-    }
+    const decimals = await contract.decimals();
+    return decimals;
   }
 
   public async afterActionUrlCreated(data: {
@@ -362,12 +358,22 @@ class Action extends ActionDto {
       tokens: [],
     };
   }
+
+  public async getRealTimeContent(data: {
+    code: string;
+    sender: string;
+    params: ActionTransactionParams;
+  }): Promise<{ title: string; content: string }> {
+    const { code } = data;
+    const [_, unClaimedCount] =
+      await this.envelopContract.getRedPacketBalance(code);
+    return {
+      title: 'Red Envelope Info',
+      content: `<p>There are still ${unClaimedCount} red packets unclaimed.</p>`,
+    };
+  }
 }
 
 const action = new Action();
-
-// action.envelopContract.on('RedPacketCreated', function (redPacketId: number) {
-//   console.log(redPacketId);
-// });
 
 export default action;

@@ -6,6 +6,7 @@ import { nanoid } from 'nanoid';
 import { BaseController } from 'src/common/base.controller';
 import { CommonApiOperation } from 'src/common/base.decorators';
 import { ResponseDto } from 'src/common/response.dto';
+import { BusinessException } from 'src/exception/business.exception';
 
 import { HubRequestDto } from './hub.dto';
 
@@ -38,7 +39,7 @@ export class HubController extends BaseController {
 
     // Check if sessionId is provided
     if (!sessionId) {
-      return this.error('Session ID is required');
+      throw new BusinessException('Session ID is required');
     }
 
     // Get the cached value for the sessionId
@@ -46,7 +47,7 @@ export class HubController extends BaseController {
 
     // If the value is undefined, it means the sessionId is expired or does not exist
     if (value === undefined) {
-      return this.error('Session ID not found or expired');
+      throw new BusinessException('Session ID not found or expired');
     }
 
     // Return the cached value
@@ -83,7 +84,7 @@ export class HubController extends BaseController {
 
     // Check if sessionId is provided
     if (!sessionId) {
-      return this.error('Session ID is required');
+      throw new BusinessException('Session ID is required');
     }
 
     // Check if the sessionId exists in the cache

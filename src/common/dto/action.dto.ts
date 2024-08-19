@@ -2,7 +2,7 @@ import { ActionMetadata } from './action-metadata.dto';
 import { GeneratedTransaction } from './transaction.dto';
 
 export type ActionId = string;
-export type ActionTransactionParams = { chainId?: number } & {
+export type ActionTransactionParams = { chainId: number } & {
   [key: string]: string;
 };
 export interface GenerateTransactionData {
@@ -16,6 +16,11 @@ export abstract class Action {
   async validateIntentParams(_: ActionTransactionParams): Promise<string> {
     return Promise.resolve('');
   }
+
+  async getRealTimeContent?(data: GenerateTransactionData): Promise<{
+    title: string;
+    content: string;
+  }>;
 
   async afterActionUrlCreated?(
     data: GenerateTransactionData,
