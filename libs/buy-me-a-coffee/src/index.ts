@@ -1,3 +1,5 @@
+import { Injectable } from '@nestjs/common';
+
 import {
   Action as ActionDto,
   ActionMetadata,
@@ -6,12 +8,13 @@ import {
   Tx,
 } from 'src/common/dto';
 
-import { METADATA } from './config';
+import { metadata } from './config';
 import { intoParams } from './interface';
 
-class Action extends ActionDto {
+@Injectable()
+export class BuyMeACoffeeService extends ActionDto {
   async getMetadata(): Promise<ActionMetadata> {
-    return METADATA;
+    return metadata;
   }
 
   async generateTransaction(data: {
@@ -39,6 +42,3 @@ class Action extends ActionDto {
     };
   }
 }
-
-const action = new Action();
-export default action;

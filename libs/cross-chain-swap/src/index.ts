@@ -1,4 +1,5 @@
 import { getERC20SymbolAndDecimals } from '@action/utils';
+import { Injectable } from '@nestjs/common';
 import { ethers } from 'ethers';
 import {
   Action as ActionDto,
@@ -13,7 +14,9 @@ import { METADATA, RPC_URL, TOKEN_CONFIG } from './config';
 import { intoParams } from './interface';
 import { getApproveData, getSwapData } from './okxAPI';
 import { getUserERC20Balance } from './utils';
-class Action extends ActionDto {
+
+@Injectable()
+export class CrossChainSwapService extends ActionDto {
   async getMetadata(): Promise<ActionMetadata> {
     return METADATA;
   }
@@ -78,6 +81,3 @@ class Action extends ActionDto {
     }
   }
 }
-
-const action = new Action();
-export default action;

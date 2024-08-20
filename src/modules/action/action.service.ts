@@ -4,6 +4,10 @@ import path from 'path';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
+import { BuyMeACoffeeService } from '@action/buy-me-a-coffee';
+import { CrossChainSwapService } from '@action/cross-chain-swap';
+import { NovaswapService } from '@action/novaswap';
+import { RedEnvelopeService } from '@action/red-envelope';
 import {
   Action,
   ActionId,
@@ -18,10 +22,21 @@ import { ActionResponseDto } from './dto/actions.dto';
 @Injectable()
 export class ActionService {
   private awsConfig: ConfigType['aws'];
-  constructor(configService: ConfigService) {
-    this.awsConfig = configService.get('aws', { infer: true })!;
-  }
   private actions: Map<ActionId, Action> = new Map();
+
+  constructor(
+    configService: ConfigService,
+    redEnvelopeService: RedEnvelopeService,
+    novaswapService: NovaswapService,
+    buyMeACoffeeService: BuyMeACoffeeService,
+    crossChainSwapService: CrossChainSwapService,
+  ) {
+    this.awsConfig = configService.get('aws', { infer: true })!;
+    this.actions.set('red-envelope', redEnvelopeService);
+    this.actions.set('novaswap', novaswapService);
+    this.actions.set('buy-me-a-coffee', buyMeACoffeeService);
+    this.actions.set('cross-chain-swap', crossChainSwapService);
+  }
 
   setActions(actions: Map<ActionId, Action>) {
     this.actions = actions;

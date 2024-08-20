@@ -1,3 +1,5 @@
+import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import {
   JsonRpcProvider,
   ethers,
@@ -6,12 +8,14 @@ import {
   parseUnits,
   toUtf8Bytes,
 } from 'ethers';
+import { ConfigType } from 'src/config';
 import { utils } from 'zksync-ethers';
 
 import ERC20ABI from './abis/ERC20.json';
 import QuoterV2 from './abis/QuoterV2.json';
 import RedPacketABI from './abis/RedPacket.json';
-import { METADATA } from './config';
+import { Value, config } from './config';
+import { genMetadata } from './metadata';
 import { DistributionModeValue, GasTokenValue } from './type';
 import {
   Action as ActionDto,
@@ -20,11 +24,6 @@ import {
   GeneratedTransaction,
 } from '../../../src/common/dto';
 
-const WETH_ADDRESS = '0x8280a4e7D5B3B658ec4580d3Bc30f5e50454F169';
-const QUOTER_ADDRESS = '0x86Fc6ab84CFc6a506d51FC722D3aDe959599A98A';
-const RED_PACKET_ADDRESS = '0xD6D392794aDCA3d3EF300c3Cc99B8AfD89da2235';
-const RED_PACKET_PAYMASTER_ADDRESS =
-  '0x8f283dEB6E1612fD016D139bAF465208402F9C3d';
 const PACKET_HASH = ethers.keccak256(ethers.toUtf8Bytes('REDPACKET'));
 
 interface CreateRedPacketParams {
@@ -46,39 +45,53 @@ interface ClaimRedPacketParams {
   expiry: number;
 }
 
-class Action extends ActionDto {
-  public async getMetadata(): Promise<ActionMetadata> {
-    return METADATA;
-  }
+@Injectable()
+export class RedEnvelopeService extends ActionDto {
   public envelopContract: ethers.Contract;
   private quoter: ethers.Contract;
   private wallet: ethers.Wallet;
   private provider: ethers.Provider;
-  private chainId = 810181;
+  readonly env: ConfigType['env'];
+  readonly witnessPrivateKey: ConfigType['witnessPrivateKey'];
+  readonly config: Value;
 
-  constructor() {
+  constructor(readonly configService: ConfigService) {
     super();
-    this.provider = new JsonRpcProvider('https://sepolia.rpc.zklink.io');
+    this.env = configService.get('env', { infer: true })!;
+    this.witnessPrivateKey = configService.get('witnessPrivateKey', {
+      infer: true,
+    })!;
+    this.config = config[this.env];
+    this.provider = new JsonRpcProvider(this.config.rpcUrl);
     const mainNetProvider = new JsonRpcProvider('https://rpc.zklink.io');
 
-    const privateKey =
-      '67e287bc6f8a5e95992447f20a72a8afae6097ec08666241d38dce9881005216';
-    this.wallet = new ethers.Wallet(privateKey, this.provider);
-    const mainWallet = new ethers.Wallet(privateKey, mainNetProvider);
+    this.wallet = new ethers.Wallet(this.witnessPrivateKey, this.provider);
+    const mainWallet = new ethers.Wallet(
+      this.witnessPrivateKey,
+      mainNetProvider,
+    );
     this.envelopContract = new ethers.Contract(
-      RED_PACKET_ADDRESS,
+      this.config.redPacketContractAddress,
       RedPacketABI,
       this.wallet,
     );
-    this.quoter = new ethers.Contract(QUOTER_ADDRESS, QuoterV2, mainWallet);
+    this.quoter = new ethers.Contract(
+      this.config.quoterContractAddress,
+      QuoterV2,
+      mainWallet,
+    );
+  }
+
+  public async getMetadata(): Promise<ActionMetadata> {
+    return genMetadata(this.config);
   }
 
   private async genCreateSignature(params: CreateRedPacketParams) {
     const domain = {
       name: 'RedPacket',
       version: '0',
-      chainId: this.chainId,
-      verifyingContract: RED_PACKET_ADDRESS,
+      chainId: this.config.chainId,
+      verifyingContract: this.config.redPacketContractAddress,
     };
 
     const types = {
@@ -121,8 +134,8 @@ class Action extends ActionDto {
     const domain = {
       name: 'RedPacket',
       version: '0',
-      chainId: this.chainId,
-      verifyingContract: RED_PACKET_ADDRESS,
+      chainId: this.config.chainId,
+      verifyingContract: this.config.redPacketContractAddress,
     };
 
     const types = {
@@ -172,7 +185,7 @@ class Action extends ActionDto {
     console.log('todo', tokenOut);
     try {
       const [amountOut] = await this.quoter.quoteExactInputSingle.staticCall({
-        tokenIn: WETH_ADDRESS,
+        tokenIn: this.config.wethAddress,
         tokenOut: '0xDa4AaEd3A53962c83B35697Cd138cc6df43aF71f', // todo tokenOut
         amountIn: ethAmountIn,
         fee: fee,
@@ -241,7 +254,7 @@ class Action extends ActionDto {
       this.provider,
     );
     const approveData = await tokenContract.approve.populateTransaction(
-      RED_PACKET_ADDRESS,
+      this.config.redPacketContractAddress,
       totalDistributionAmountBn + payForGas,
     );
 
@@ -276,7 +289,7 @@ class Action extends ActionDto {
     return {
       txs: [
         {
-          chainId: this.chainId,
+          chainId: this.config.chainId,
           to: approveData.to,
           value: '0',
           data: approveData.data,
@@ -284,7 +297,7 @@ class Action extends ActionDto {
           shouldSend: false,
         },
         {
-          chainId: this.chainId,
+          chainId: this.config.chainId,
           to: createRedPacketData.to,
           value: '0',
           data: createRedPacketData.data,
@@ -323,7 +336,7 @@ class Action extends ActionDto {
   }): Promise<GeneratedTransaction> {
     const { code, sender } = data;
     const paymasterParams = utils.getPaymasterParams(
-      RED_PACKET_PAYMASTER_ADDRESS,
+      this.config.paymasterContractAddress,
       {
         type: 'General',
         innerInput: new Uint8Array(),
@@ -343,8 +356,8 @@ class Action extends ActionDto {
     return {
       txs: [
         {
-          chainId: this.chainId,
-          to: RED_PACKET_ADDRESS,
+          chainId: this.config.chainId,
+          to: this.config.redPacketContractAddress,
           value: '0',
           data: tx.data,
           dataObject: {},
@@ -373,7 +386,3 @@ class Action extends ActionDto {
     };
   }
 }
-
-const action = new Action();
-
-export default action;

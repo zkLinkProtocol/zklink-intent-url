@@ -1,6 +1,6 @@
 import { ActionMetadata } from 'src/common/dto';
 
-export const METADATA: ActionMetadata = {
+export const metadata: ActionMetadata = {
   title: 'Buy Me a Coffee',
   description: 'Support the works you love',
   logo: '',
