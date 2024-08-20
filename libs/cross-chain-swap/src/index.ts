@@ -24,13 +24,39 @@ class Action extends ActionDto {
     params: ActionTransactionParams;
   }): Promise<GeneratedTransaction> {
     const { params: _params, sender } = data;
-    const tokenInAddress = TOKEN_CONFIG[_params.chainId][_params.tokenIn];
+
     const params = intoParams(_params);
     let approveTx: Tx;
     let swapTx: Tx;
-    let tokens: Token[];
+    const tokenInAddress = TOKEN_CONFIG[_params.chainId][_params.tokenIn];
+    const { symbol, decimals } = await getERC20SymbolAndDecimals(
+      new ethers.JsonRpcProvider(RPC_URL[params.chainId.toString()]) as any,
+      tokenInAddress,
+    );
+    const tokens = [
+      {
+        decimals,
+        symbol,
+        chainId: params.chainId,
+        token: tokenInAddress,
+        amount: params.amountToBuy.toString(),
+      },
+    ];
 
-    if (params.amountToBuy) {
+    if (_params.tokenIn === 'weth') {
+      swapTx = await getSwapData(
+        sender,
+        params.chainId,
+        '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+        params.tokenOutAddress,
+        params.amountToBuy,
+      );
+
+      return {
+        txs: [swapTx],
+        tokens,
+      };
+    } else {
       //buy
       approveTx = await getApproveData(
         params.chainId,
@@ -45,53 +71,11 @@ class Action extends ActionDto {
         params.tokenOutAddress,
         params.amountToBuy,
       );
-      const { symbol, decimals } = await getERC20SymbolAndDecimals(
-        new ethers.JsonRpcProvider(RPC_URL[params.chainId.toString()]) as any,
-        tokenInAddress,
-      );
-      tokens = [
-        {
-          decimals,
-          symbol,
-          chainId: params.chainId,
-          token: tokenInAddress,
-          amount: params.amountToBuy.toString(),
-        },
-      ];
-    } else {
-      //sell
-      let amount = params.amountToSell;
-      if (params.amountToSell) {
-        amount = params.amountToSell;
-      } else {
-        const balance = await getUserERC20Balance(
-          sender,
-          params.tokenOutAddress,
-          new ethers.JsonRpcProvider(RPC_URL[params.chainId.toString()]),
-        );
-        amount = (balance * BigInt(params.percentToSell!)) / BigInt(100);
-      }
-
-      approveTx = await getApproveData(
-        params.chainId,
-        params.tokenOutAddress,
-        ethers.MaxUint256,
-      );
-
-      swapTx = await getSwapData(
-        sender,
-        params.chainId,
-        params.tokenOutAddress,
-        tokenInAddress,
-        amount,
-      );
-      tokens = [];
+      return {
+        txs: [approveTx, swapTx],
+        tokens,
+      };
     }
-
-    return {
-      txs: [approveTx, swapTx],
-      tokens,
-    };
   }
 }
 
