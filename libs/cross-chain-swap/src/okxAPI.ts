@@ -82,7 +82,7 @@ export async function getSwapData(
   return {
     chainId,
     to: resData.tx.to,
-    value: '0',
+    value: resData.tx.value,
     data: resData.tx.data,
     dataObject: {
       fromTokenAddress: tokenInAddress,
