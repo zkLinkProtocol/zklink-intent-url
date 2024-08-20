@@ -23,7 +23,7 @@ class Action extends ActionDto {
     const params = intoParams(_params);
 
     const tx: Tx = {
-      chainId: 810180, // zkLink
+      chainId: params.chainId, // zkLink
       to: params.recipient,
       value: params.value.toString(),
       data: '0x',
