@@ -1,103 +1,22 @@
-import { ActionMetadata } from 'src/common/dto';
-
-import {
-  DistributionModeValue,
-  DistributionTokenValue,
-  GasTokenValue,
-} from './type';
-
-export const METADATA: ActionMetadata = {
-  title: 'RedEnvelope',
-  description: 'Send red Envelope',
-  networks: [
-    {
-      name: 'zkLink Nova',
-      chainId: '810180',
-      contractAddress: '', // todo
-    },
-  ],
-  dApp: { name: 'RedEnvelope' },
-  author: { name: 'zkLink' },
-  intent: {
-    components: [
-      {
-        name: 'distributionMode',
-        label: 'Distribution Mode',
-        desc: 'Choose Mode to distribute Red Envelopes',
-        type: 'searchSelect',
-        regex: '^[a-fA-F0-9]$',
-        regexDesc: 'String',
-        options: [
-          {
-            label: 'Equal Amount Per Address',
-            value: DistributionModeValue.EqualAmountPerAddress,
-          },
-          {
-            label: 'Random Amount Per Address',
-            value: DistributionModeValue.RandomAmountPerAddress,
-          },
-        ],
-      },
-      {
-        name: 'totalDistributionAmount',
-        label: 'Total Distribution Amount',
-        desc: 'Total amount you want ro distribute',
-        type: 'input',
-        regex: '^\\d$',
-        regexDesc: 'Int',
-      },
-      {
-        name: 'distributionToken',
-        label: 'Distribution Token',
-        desc: 'Choose a token to distribute',
-        type: 'searchSelectErc20',
-        regex: '^0x[a-fA-F0-9]{40}$',
-        regexDesc: 'Address',
-        options: [
-          {
-            label: 'ETH',
-            value: DistributionTokenValue.ETH,
-          },
-          {
-            label: 'USDC',
-            value: DistributionTokenValue.USDC,
-          },
-          {
-            label: 'USDT',
-            value: DistributionTokenValue.USDT,
-          },
-          {
-            label: 'DAI',
-            value: DistributionTokenValue.DAI,
-          },
-        ],
-      },
-      {
-        name: 'amountOfRedEnvelopes',
-        label: 'Amount Of Red Envelopes',
-        desc: 'How many Red Envelopes want to distribute',
-        type: 'input',
-        regex: '^\\d$',
-        regexDesc: 'Int',
-      },
-      {
-        name: 'gasToken',
-        label: 'Gas Token',
-        desc: 'Gas can be deducted from distributed amount, allowing recipient to grab red envelope with 0 gas',
-        type: 'searchSelect',
-        regex: '^[a-fA-F0-9]$',
-        regexDesc: 'String',
-        options: [
-          {
-            label: 'ETH(Pay By Recipient)',
-            value: GasTokenValue.Eth,
-          },
-          {
-            label: 'Distributed Token(No Gas)',
-            value: GasTokenValue.DistributedToken,
-          },
-        ],
-      },
-    ],
+export const config = {
+  dev: {
+    chainId: 810181,
+    rpcUrl: 'https://sepolia.rpc.zklink.io',
+    wethAddress: '0x8280a4e7D5B3B658ec4580d3Bc30f5e50454F169',
+    quoterContractAddress: '0x86Fc6ab84CFc6a506d51FC722D3aDe959599A98A',
+    redPacketContractAddress: '0xD6D392794aDCA3d3EF300c3Cc99B8AfD89da2235',
+    paymasterContractAddress: '0x8f283dEB6E1612fD016D139bAF465208402F9C3d',
   },
-};
+  prod: {
+    chainId: 810180,
+    rpcUrl: 'https://rpc.zklink.io',
+    wethAddress: '',
+    quoterContractAddress: '',
+    redPacketContractAddress: '',
+    paymasterContractAddress: '',
+  },
+} as const;
+
+type Config = typeof config;
+
+export type Value = Config[keyof Config];

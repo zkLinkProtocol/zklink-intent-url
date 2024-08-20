@@ -1,6 +1,6 @@
 const configFactory = async () => {
   return {
-    env: process.env.ENV || '',
+    env: (process.env.ENV || 'dev') as 'dev' | 'prod',
     port: parseInt(process.env.PORT || '2101', 10),
     jwt: {
       secret: process.env.JWT_SECRET || '',
@@ -14,6 +14,7 @@ const configFactory = async () => {
       keyPrefix: process.env.AWS_KEY_PREFIX || '',
       s3Url: process.env.AWS_S3_URL || '',
     },
+    witnessPrivateKey: process.env.WITNESS_PRIVATE_KEY || '',
   };
 };
 

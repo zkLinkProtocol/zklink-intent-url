@@ -1,3 +1,4 @@
+import { Injectable } from '@nestjs/common';
 import { ethers } from 'ethers';
 import {
   Action as ActionDto,
@@ -25,7 +26,8 @@ const novaswap = new NovaSwap(
   SWAP_ROUTER_CONTRACT_ADDRESS,
 );
 
-class Action extends ActionDto {
+@Injectable()
+export class NovaswapService extends ActionDto {
   async getMetadata(): Promise<ActionMetadata> {
     return METADATA;
   }
@@ -40,6 +42,3 @@ class Action extends ActionDto {
     return tx;
   }
 }
-
-const action = new Action();
-export default action;

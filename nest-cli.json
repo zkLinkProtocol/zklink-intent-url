@@ -37,7 +37,7 @@
         "tsConfigPath": "libs/buy-me-a-coffee/tsconfig.lib.json"
       }
     },
-     "red-envelop": {
+    "red-envelop": {
       "type": "library",
       "root": "libs/red-envelop",
       "entryFile": "index",
