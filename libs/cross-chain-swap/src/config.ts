@@ -6,6 +6,7 @@ export const RPC_URL: { [key: string]: string } = {
 
 export const TOKEN_CONFIG: { [key: string]: { [key: string]: string } } = {
   42161: {
+    weth: '0x82af49447d8a07e3bd95bd0d56f35241523fbab1',
     wbtc: '0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f',
     usdt: '0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9',
     usdc: '0xff970a61a04b1ca14834a43f5de4533ebddb5cc8',
