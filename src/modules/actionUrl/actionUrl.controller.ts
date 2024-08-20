@@ -23,6 +23,12 @@ import {
   ActionUrlUpdateRequestDto,
 } from './actionUrl.dto';
 import { ActionUrlService } from './actionUrl.service';
+import {
+  IntentionRecordAddRequestDto,
+  IntentionRecordFindOneResponseDto,
+  IntentionRecordListItemResponseDto,
+} from './intentionRecord.dto';
+import { IntentionRecordService } from './intentionRecord.service';
 import { ActionService } from '../action/action.service';
 import { GetCreator } from '../auth/creator.decorators';
 import { JwtAuthGuard } from '../auth/jwtAuth.guard';
@@ -33,6 +39,7 @@ export class ActionUrlController extends BaseController {
   constructor(
     private readonly actionUrlService: ActionUrlService,
     private readonly actionStoreService: ActionService,
+    private readonly intentionRecordService: IntentionRecordService,
   ) {
     super();
   }
@@ -191,5 +198,64 @@ export class ActionUrlController extends BaseController {
   ): Promise<ResponseDto<boolean>> {
     const result = await this.actionUrlService.deleteByCode(path, creator.id);
     return this.success(result);
+  }
+
+  // post intention record and txs
+  @Post(':code/intention-record')
+  @CommonApiOperation('Post intention record and txs.')
+  async postIntentionRecord(
+    @Param('code') code: string,
+    @Body() request: IntentionRecordAddRequestDto,
+  ): Promise<ResponseDto<boolean>> {
+    const result = await this.intentionRecordService.add(code, request);
+    return this.success(result);
+  }
+
+  // get intention record list with txs
+  @Get(':code/intention-record')
+  @CommonApiOperation('Get intention record list with txs.')
+  async getIntentionRecordList(
+    @Param('code') code: string,
+    @Query() publicKey: string,
+    @Query() address: string,
+    @Query() pagingOptions: PagingOptionsDto,
+  ): Promise<ResponseDto<IntentionRecordListItemResponseDto[]>> {
+    const { page = 1, limit = 20 } = pagingOptions;
+    const result = await this.intentionRecordService.findListByCodeAndPublickey(
+      code,
+      publicKey,
+      address,
+      page,
+      limit,
+    );
+
+    const meta = {
+      currentPage: result.currentPage,
+      itemsPerPage: result.itemsPerPage,
+      totalItems: result.totalItems,
+      totalPages: result.totalPages,
+    } as PagingMetaDto;
+    return this.success(result.data, meta);
+  }
+
+  // get intention record with txs by id
+  @Get(':code/intention-record/:id')
+  @CommonApiOperation('Get intention record with txs by id.')
+  async getIntentionRecord(
+    @Param('id') id: bigint,
+    @Query() publicKey: string,
+    @Query() address: string,
+  ): Promise<ResponseDto<IntentionRecordFindOneResponseDto>> {
+    const result = await this.intentionRecordService.findOneById(id);
+    if (!result) {
+      return this.error('Intention record not found');
+    }
+    if (publicKey && result.publickey !== publicKey) {
+      return this.error('Intention record not found under the public key');
+    }
+    if (address && result.address !== address) {
+      return this.error('Intention record not found under the address');
+    }
+    return this.success(result as IntentionRecordFindOneResponseDto);
   }
 }

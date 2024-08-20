@@ -7,6 +7,8 @@ import { AppService } from './app.service';
 import config from './config';
 import { Creator } from './entities/creator.entity';
 import { Intention } from './entities/intention.entity';
+import { IntentionRecord } from './entities/intentionRecord.entity';
+import { IntentionRecordTx } from './entities/intentionRecordTx.entity';
 import { MetricsModule } from './metrics';
 import { ActionModule } from './modules/action/action.module';
 import { ActionUrlModule } from './modules/actionUrl/actionUrl.module';
@@ -34,7 +36,12 @@ import { UnitOfWorkModule } from './unitOfWork';
         };
       },
     }),
-    TypeOrmModule.forFeature([Creator, Intention]),
+    TypeOrmModule.forFeature([
+      Creator,
+      Intention,
+      IntentionRecord,
+      IntentionRecordTx,
+    ]),
     MetricsModule,
     UnitOfWorkModule,
     AuthModule,
