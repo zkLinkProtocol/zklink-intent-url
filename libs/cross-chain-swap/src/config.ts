@@ -6,7 +6,6 @@ export const RPC_URL: { [key: string]: string } = {
 
 export const TOKEN_CONFIG: { [key: string]: { [key: string]: string } } = {
   42161: {
-    weth: '0x82af49447d8a07e3bd95bd0d56f35241523fbab1',
     wbtc: '0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f',
     usdt: '0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9',
     usdc: '0xff970a61a04b1ca14834a43f5de4533ebddb5cc8',
@@ -30,29 +29,12 @@ export const METADATA: ActionMetadata = {
   intent: {
     components: [
       {
-        conditional: [
-          {
-            name: 'amountToBuy',
-            label: 'Amount to Buy',
-            desc: 'The amount of input tokens used to buy output tokens',
-            regex: '^[0-9]+(.[0-9]+)?$',
-            regexDesc: 'Positive number',
-          },
-          {
-            name: 'amountToSell',
-            label: 'Amount to Sell',
-            desc: 'The amount of output tokens you want to sell',
-            regex: '^[0-9]+(.[0-9]+)?$',
-            regexDesc: 'Positive number',
-          },
-          {
-            name: 'percentToSell',
-            label: 'Percent to Sell',
-            desc: 'The percentage of output tokens you want to sell',
-            regex: '^(100|[1-9]?[0-9])(.[0-9]+)?$',
-            regexDesc: 'Percentage (0-100)',
-          },
-        ],
+        name: 'amountToBuy',
+        label: 'Amount to Buy',
+        desc: 'The amount of input tokens used to buy output tokens',
+        type: 'input',
+        regex: '^[0-9]+(.[0-9]+)?$',
+        regexDesc: 'Positive number',
       },
       {
         name: 'tokenIn',
