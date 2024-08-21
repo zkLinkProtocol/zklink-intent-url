@@ -7,6 +7,8 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
+import { hexTransformer } from 'src/transformers/hex.transformer';
+
 import { BaseEntity } from './base.entity';
 import { IntentionRecord } from './intentionRecord.entity';
 
@@ -29,7 +31,7 @@ export class IntentionRecordTx extends BaseEntity {
   @JoinColumn({ name: 'intentionRecordId' })
   public readonly intentionRecord: IntentionRecord;
 
-  @Column({ type: 'bytea' })
+  @Column({ type: 'bytea', transformer: hexTransformer })
   public txHash: string;
 
   @Column({ type: 'int' })

@@ -36,8 +36,17 @@ export class IntentionRecordRepository extends BaseRepository<IntentionRecord> {
   // get intention record with txs by id
   public async getIntentionRecordWithTxsById(
     intentionRecordId: bigint,
-  ): Promise<IntentionRecord> {
+  ): Promise<IntentionRecord | null> {
     return await this.findOne({
+      select: [
+        'id',
+        'intentionCode',
+        'status',
+        'publickey',
+        'address',
+        'createdAt',
+        'intention',
+      ],
       where: { id: intentionRecordId },
       relations: ['intentionRecordTxs'],
     });
@@ -51,30 +60,37 @@ export class IntentionRecordRepository extends BaseRepository<IntentionRecord> {
     page: number = 1,
     limit: number = 10,
   ) {
+    const publickeyHash = publicKey
+      ? Buffer.from(publicKey.substring(2), 'hex')
+      : '';
+    const addressHash = address ? Buffer.from(address.substring(2), 'hex') : '';
     const queryBuilder = this.unitOfWork
       .getTransactionManager()
-      .createQueryBuilder()
+      .createQueryBuilder(IntentionRecord, 'intentionrecord')
       .select([
-        'intentionRecord.id',
-        'intentionRecord.status',
-        'intentionRecord.createdAt',
+        'intentionrecord.id as id',
+        'intentionrecord.status as status',
+        'intentionrecord.createdAt as createdAt',
       ])
-      .addSelect("intentionRecord.intention->>'title'", 'title')
-      .where('intentionRecord.intentionCode = :intentionCode', {
+      .addSelect("intentionrecord.intention->>'title'", 'title')
+      .where('intentionrecord.intentionCode = :intentionCode', {
         intentionCode,
       })
       .andWhere(
         new Brackets((qb) => {
-          qb.where('intentionRecord.publickey = :publicKey', {
-            publicKey,
-          }).orWhere('intentionRecord.address = :address', { address });
+          qb.where('intentionrecord.publickey = :publicKey', {
+            publicKey: publickeyHash,
+          }).orWhere('intentionrecord.address = :address', {
+            address: addressHash,
+          });
         }),
       )
-      .orderBy('intentionRecord.createdAt', 'DESC')
+      .orderBy('intentionrecord.createdAt', 'DESC')
       .skip((page - 1) * limit)
       .take(limit);
 
-    const [data, total] = await queryBuilder.getManyAndCount();
+    const data = await queryBuilder.getRawMany();
+    const total = await queryBuilder.getCount();
 
     return { data, total };
   }

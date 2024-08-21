@@ -249,8 +249,8 @@ export class ActionUrlController extends BaseController {
   @CommonApiOperation('Get intention record list with txs.')
   async getIntentionRecordList(
     @Param('code') code: string,
-    @Query() publicKey: string,
-    @Query() address: string,
+    @Query('publicKey') publicKey: string,
+    @Query('address') address: string,
     @Query() pagingOptions: PagingOptionsDto,
   ): Promise<ResponseDto<IntentionRecordListItemResponseDto[]>> {
     const { page = 1, limit = 20 } = pagingOptions;
@@ -272,12 +272,12 @@ export class ActionUrlController extends BaseController {
   }
 
   // get intention record with txs by id
-  @Get(':code/intention-record/:id')
+  @Get('intention-record/:id')
   @CommonApiOperation('Get intention record with txs by id.')
   async getIntentionRecord(
     @Param('id') id: bigint,
-    @Query() publicKey: string,
-    @Query() address: string,
+    @Query('publicKey') publicKey: string,
+    @Query('address') address: string,
   ): Promise<ResponseDto<IntentionRecordFindOneResponseDto>> {
     const result = await this.intentionRecordService.findOneById(id);
     if (!result) {

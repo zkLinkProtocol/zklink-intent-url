@@ -24,10 +24,7 @@ export class BaseController {
     }
   }
 
-  protected async error(
-    errmsg: string,
-    code: number = 500,
-  ): Promise<ResponseDto<null>> {
+  protected async error(errmsg: string, code: number = 500) {
     return {
       code,
       message: errmsg,

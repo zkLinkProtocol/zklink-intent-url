@@ -30,6 +30,9 @@ export class IntentionRecordService {
   async findOneById(id: bigint): Promise<IntentionRecord> {
     const intentionRecord =
       await this.intentionRecordRepository.getIntentionRecordWithTxsById(id);
+    if (!intentionRecord) {
+      throw new BusinessException('Intention record not found');
+    }
     const intentionTmp = await this.intentionService.findOneByCode(
       intentionRecord.intentionCode,
     );
@@ -85,6 +88,7 @@ export class IntentionRecordService {
     intentionRecord.address = params.address;
     intentionRecord.bundleHash = params.bundleHash;
     intentionRecord.status = IntentionRecordStatus.PENDING;
+    intentionRecord.intention = intention;
 
     const txs = params.txs.map((tx) => {
       const intentionRecordTx = new IntentionRecordTx();

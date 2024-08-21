@@ -116,7 +116,7 @@ export class IntentionRecordListItemResponseDto {
   })
   @IsString()
   @IsNotEmpty()
-  createdAt: string;
+  createdAt: Date | undefined;
 }
 
 export class IntentionRecordTxListItemResponseDto {
