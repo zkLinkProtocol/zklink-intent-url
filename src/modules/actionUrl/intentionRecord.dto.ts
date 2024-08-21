@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsArray, IsNotEmpty, IsString } from 'class-validator';
 
 import { IntentionRecordStatus } from 'src/entities/intentionRecord.entity';
 import { IntentionRecordTxStatus } from 'src/entities/intentionRecordTx.entity';
@@ -71,7 +71,7 @@ export class IntentionRecordAddRequestDto {
     example: IntentionRecordTxRequestDto,
     required: true,
   })
-  @IsString()
+  @IsArray()
   @IsNotEmpty()
   txs: IntentionRecordTxRequestDto[];
 }

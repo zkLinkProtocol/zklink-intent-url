@@ -153,6 +153,9 @@ export class ActionUrlController extends BaseController {
     const actionStore = await this.actionStoreService.getActionStore(
       request.actionId,
     );
+    if (!actionStore) {
+      return this.error('Action not found');
+    }
     const active = actionStore.afterActionUrlCreated ? false : true;
     const requestData = { ...request, active };
     const result = await this.actionUrlService.add(requestData, creator.id);
