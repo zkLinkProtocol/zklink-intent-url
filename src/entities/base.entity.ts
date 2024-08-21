@@ -2,7 +2,7 @@ import { CreateDateColumn, DeleteDateColumn, UpdateDateColumn } from 'typeorm';
 
 export abstract class BaseEntity {
   @CreateDateColumn()
-  public readonly createdAt?: Date;
+  public createdAt?: Date;
 
   @UpdateDateColumn()
   public readonly updatedAt?: Date;
