@@ -7,10 +7,9 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-import { hexTransformer } from 'src/transformers/hex.transformer';
-
 import { BaseEntity } from './base.entity';
 import { IntentionRecord } from './intentionRecord.entity';
+import { hexTransformer } from '../transformers/hex.transformer';
 
 export enum IntentionRecordTxStatus {
   PENDING = 'pending',
