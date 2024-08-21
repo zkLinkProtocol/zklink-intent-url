@@ -1,7 +1,8 @@
 import { ActionMetadata } from 'src/common/dto';
 
 export const RPC_URL: { [key: string]: string } = {
-  '42161': 'https://arb1.arbitrum.io/rpc',
+  '42161':
+    'https://arb-mainnet.g.alchemy.com/v2/I-ZVEdUQy4Mk3rwbsNAIp_MVql6coseO',
 };
 
 export const TOKEN_CONFIG: { [key: string]: { [key: string]: string } } = {
