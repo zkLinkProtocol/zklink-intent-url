@@ -109,12 +109,12 @@ export class ActionUrlController extends BaseController {
     ResponseDto<{
       title: string;
       content: string;
-    }>
+    } | null>
   > {
     const { sender, params } = request;
     const actionStore = await this.actionStoreService.getActionStore(code);
     if (!actionStore.getRealTimeContent) {
-      throw new BusinessException('getRealTimeContent not implement');
+      return this.success(null);
     }
     const data = await actionStore.getRealTimeContent({
       code,
