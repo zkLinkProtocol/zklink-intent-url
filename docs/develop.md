@@ -79,18 +79,37 @@ type ActionTransactionParams = { [key: string]: string };
 abstract class Action {
   abstract getMetadata(): Promise<ActionMetadata>;
 
+  async validateIntentParams(_: ActionTransactionParams): Promise<string> {
+    return Promise.resolve('');
+  }
+
+  async getRealTimeContent?(data: GenerateTransactionData): Promise<{
+    title: string;
+    content: string;
+  }>;
+
+  async afterActionUrlCreated?(
+    data: GenerateTransactionData,
+  ): Promise<GeneratedTransaction>;
+
   abstract generateTransaction(
-    params: ActionTransactionParams,
+    data: GenerateTransactionData,
   ): Promise<GeneratedTransaction>;
 }
 ```
 
-The `getMetadata` method returns metadata (`ActionMetadata`) that describes the action for display on the frontend. The `generateTransaction` method is responsible for constructing transactions. When a user confirms the action in intent url page, this method executes in the background to construct and return the transaction, which will subsequently be sent to the blockchain.
+- The `getMetadata` method returns metadata (`ActionMetadata`) that describes the action for display on the frontend. 
+- validateIntentParams
+- The `generateTransaction` method is responsible for constructing transactions. When a user confirms the action in intent url page, this method executes in the background to construct and return the transaction, which will subsequently be sent to the blockchain.
+- The `validateIntentParams` method allows developers to create more flexible validation rules. It takes `ActionTransactionParams` as input and returns a string containing error messages. When the frontend creates an intent URL, the parameters passed can be validated against custom rules using this hook function. If an error message is returned, the frontend will display it.
+- The `getRealTimeContent` optional function processes real-time contract information that should be displayed to users through the intent URL. For example, for a red packet contract, it might show something like "There are 20 red packets in total, and 3 red packets have been claimed." Developers can use this method to return a title and an HTML string based on the contract's stored information, making it easier for users to refresh and view the information.
+- Sometimes, after constructing the parameters and creating the intent URL, it may not become active immediately and will remain in an inactive state. You will need to initiate one or more transactions to the smart contract before you can create an active intent URL. For example, with a red packet contract, you need to deposit a red packet asset into the contract before the intent URL can become active.The `afterActionUrlCreated` provides this capability. It returns GeneratedTransaction. The frontend will initiate the on-chain transaction based on this information.
 
 To implement this functionality, you must extend the `Action` abstract class based on your specific business logic.
 
 ```ts
-class MyAction extends Action {
+@Injectable()
+class MyActionService extends Action {
   async getMetadata(): Promise<ActionMetadata> {
     return {
       title: 'An Action Example',
@@ -183,18 +202,71 @@ fields `txs` and `tokens`.
 - The `txs` field is an array of transactions that will be sent to the blockchain. The field `chainId`, `to`, `value`, `data` are standard Ethereum transaction fields. It has two additional fields: `dataObject` and `shouldSend`. The `dataObject` field is a JSON object that will be displayed on the frontend. The `shouldSend` field tells the frontend whether to send the transaction.
 - The `tokens` field is a list of tokens that should be prepared in target. You can think of this field as describing the prerequisites for initiating a transaction. The frontend will automatically search and perform cross-chain transactions to meet the prerequisites on your target chain. Then, it starts to send the transaction.
 
-### 3. Register
+### 3. Switch `env`
+We offer two environment variables, `dev` and `prod`, that allow you to configure contract addresses or settings for both environments. The env variable for the dev branch is set to `dev`, while the env variable for the main branch is set to `prod`. In the dev branch, you can test with the Sepolia network's intent URL, and once the code is merged into the main branch, it will read the mainnet network's contract configurations.
 
-The last step for implementation is to register your action into our framework. You need to put your action instance into the registered action list in [`registeredActions`](../src/modules/action/registeredActions.ts).
+Here's how you can implement this:
 
-```ts
-import * as myAction from '@action/my-action';
+1. Create a config.ts file:
+```typescript
+export const config = {
+  dev: {
+    chainId: 810181,
+    rpcUrl: 'https://sepolia.rpc.zklink.io',
+    quoterContractAddress: '0x86Fc6ab84CFc6a506d51FC722D3aDe959599A98A',
+  },
+  prod: {
+    chainId: 810180,
+    rpcUrl: 'https://rpc.zklink.io',
+    quoterContractAddress: '0x23Fc6ab84CFc6a506321FC722D3aDe959599A901',
+  },
+} as const;
+```
 
-export const registeredActions = [
-  { key: 'novaswap', module: novaSwapAction.default },
-  { key: 'buyMeACoffee', module: buyMeACoffeeAction.default },
-  { key: 'myAction', module: myAction.default },
-];
+2. read the env using NestJS DI:
+
+```typescript
+@Injectable()
+export class RedEnvelopeService extends ActionDto {
+  constructor(readonly configService: ConfigService) {
+    const env = configService.get('env', { infer: true })!;
+    this.config = config[env];
+  }
+}
+```
+This setup ensures that your Actions uses the correct configuration based on the environment it is running in.
+
+
+### 4. Register
+
+To register an Action in a NestJS application, which involves dependency injection, you need to follow these steps:
+1. Create `YourActionService`: Ensure that your action service is properly set up and extends abstract `Action` class
+2. Register the Service in the Module:
+
+```typescript
+import { Module } from '@nestjs/common';
+import { YourActionService } from './your-action.service';
+import { ConfigService } from '@nestjs/config';
+
+@Module({
+  providers: [YourActionService, ConfigService],
+  exports: [YourActionService],
+})
+export class ActionModule {}
+```
+3. Inject the Service into the Provider,the ID of the Action can be set to the kebab case of the Action's name.
+
+```typescript
+import { Injectable } from '@nestjs/common';
+import { YourActionService } from '@action/your-action';
+
+@Injectable()
+export class ActionService {
+  private actions: Map<ActionId, Action> = new Map();
+  constructor(private readonly yourActionService: YourActionService) {
+    this.actions.set('your-action-id', yourActionService);
+  }
+}
 ```
 
 Our framework will register your Action implementation into the routing system. When a request arrives, it will locate your Action implementation based on your ID, pass in the parameters, and execute your business logic, ultimately generating a transaction for the user to sign and send.
