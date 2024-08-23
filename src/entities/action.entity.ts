@@ -6,17 +6,17 @@ import { AuthorDto, DAppDto, IntentDto, NetworkDto } from '../common/dto';
 
 @Entity()
 export abstract class Action extends BaseEntity {
-  @PrimaryColumn({ type: 'varchar', length: 8 })
+  @PrimaryColumn({ type: 'varchar', length: 20 })
   public readonly id: string;
 
   @Column({ type: 'varchar', length: 40 })
   public readonly title: string;
 
-  @Column({ type: 'varchar', length: 60 })
+  @Column({ type: 'varchar', length: 255 })
   public readonly logo: string;
 
   @Column({ type: 'jsonb' })
-  public readonly network: NetworkDto;
+  public readonly networks: NetworkDto[];
 
   @Column({ type: 'varchar', length: 255 })
   public readonly description: string;

@@ -60,7 +60,9 @@ export class ActionUrlService {
 
   async add(params: any, creatorId: bigint): Promise<string> {
     const actionUrl = { ...params } as Intention;
-    const action = await this.actionService.getAction(actionUrl.actionId);
+    const action = await this.actionService.getActionMetadata(
+      actionUrl.actionId,
+    );
     if (!action) {
       throw new BusinessException('Action not found');
     }
