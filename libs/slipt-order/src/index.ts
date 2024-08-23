@@ -26,12 +26,12 @@ export class BuyMeACoffeeService extends ActionDto {
     const params = intoParams(_params);
 
     const tx: Tx = {
-      chainId: params.chainId,
+      chainId: params.chainId, // zkLink
       to: params.recipient,
       value: params.value.toString(),
       data: '0x',
       dataObject: {
-        'Sent TOKEN': params.value.toString(),
+        'Charge TOKEN': params.value.toString(),
         To: params.recipient,
       },
       shouldSend: true,
