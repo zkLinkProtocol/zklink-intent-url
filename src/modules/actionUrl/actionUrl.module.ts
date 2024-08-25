@@ -1,8 +1,11 @@
 import { Logger, Module } from '@nestjs/common';
 
 import { ActionModule } from 'src/modules/action/action.module';
-import { IntentionRepository } from 'src/repositories/intention.repository';
-import { IntentionRecordRepository } from 'src/repositories/intentionRecord.repository';
+import {
+  ActionRepository,
+  IntentionRecordRepository,
+  IntentionRepository,
+} from 'src/repositories';
 import { UnitOfWorkModule } from 'src/unitOfWork';
 
 import { ActionUrlController } from './actionUrl.controller';
@@ -10,7 +13,7 @@ import { ActionUrlService } from './actionUrl.service';
 import { IntentionRecordService } from './intentionRecord.service';
 
 @Module({
-  imports: [UnitOfWorkModule, ActionModule],
+  imports: [UnitOfWorkModule, ActionModule, ActionRepository],
   controllers: [ActionUrlController],
   providers: [
     Logger,

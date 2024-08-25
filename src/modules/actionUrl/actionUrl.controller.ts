@@ -39,7 +39,7 @@ import { JwtAuthGuard } from '../auth/jwtAuth.guard';
 export class ActionUrlController extends BaseController {
   constructor(
     private readonly actionUrlService: ActionUrlService,
-    private readonly actionStoreService: ActionService,
+    private readonly actionService: ActionService,
     private readonly intentionRecordService: IntentionRecordService,
   ) {
     super();
@@ -53,7 +53,7 @@ export class ActionUrlController extends BaseController {
     @Param('code') code: string,
   ): Promise<ResponseDto<ActionUrlFindOneResponseDto>> {
     const result = await this.actionUrlService.findOneByCode(code);
-    const actionStore = await this.actionStoreService.getActionStore(
+    const actionStore = await this.actionService.getActionStore(
       result.actionId,
     );
     const hasPostTxs = !!actionStore.afterActionUrlCreated;
@@ -84,7 +84,7 @@ export class ActionUrlController extends BaseController {
     @Body() request: { sender: string; params: ActionTransactionParams },
   ): Promise<ResponseDto<GeneratedTransaction>> {
     const { sender, params } = request;
-    const actionStore = await this.actionStoreService.getActionStore(code);
+    const actionStore = await this.actionService.getActionStore(code);
     if (!actionStore.afterActionUrlCreated) {
       throw new BusinessException('No post transactions!');
     }
@@ -112,7 +112,7 @@ export class ActionUrlController extends BaseController {
     } | null>
   > {
     const { sender, params } = request;
-    const actionStore = await this.actionStoreService.getActionStore(code);
+    const actionStore = await this.actionService.getActionStore(code);
     if (!actionStore.getRealTimeContent) {
       return this.success(null);
     }
@@ -180,7 +180,7 @@ export class ActionUrlController extends BaseController {
     @Body() request: ActionUrlAddRequestDto,
     @GetCreator() creator: { id: bigint },
   ): Promise<ResponseDto<string>> {
-    const actionStore = await this.actionStoreService.getActionStore(
+    const actionStore = await this.actionService.getActionStore(
       request.actionId,
     );
     if (!actionStore) {
