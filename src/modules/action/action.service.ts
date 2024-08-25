@@ -38,10 +38,6 @@ export class ActionService {
     this.actions.set('cross-chain-swap', crossChainSwapService);
   }
 
-  setActions(actions: Map<ActionId, Action>) {
-    this.actions = actions;
-  }
-
   private async getActionMetadata(id: ActionId) {
     const action = this.actions.get(id);
     if (!action) {
