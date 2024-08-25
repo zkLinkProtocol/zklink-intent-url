@@ -273,7 +273,10 @@ export class ActionUrlController extends BaseController {
 
   // get intention record with txs by id
   @Get('intention-record/:id')
-  @CommonApiOperation('Get intention record with txs by id.')
+  @CommonApiOperation(
+    'Get intention record with txs by id.',
+    IntentionRecordFindOneResponseDto,
+  )
   async getIntentionRecord(
     @Param('id') id: bigint,
     @Query('publicKey') publicKey: string,

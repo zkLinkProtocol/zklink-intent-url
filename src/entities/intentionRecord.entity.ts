@@ -11,6 +11,7 @@ import { IntentionRecordTx } from './intentionRecordTx.entity';
 import { hexTransformer } from '../transformers/hex.transformer';
 
 export enum IntentionRecordStatus {
+  WAITING = 'waiting',
   PENDING = 'pending',
   SUCCESS = 'success',
   FAILD = 'faild',
@@ -20,6 +21,7 @@ export enum IntentionRecordStatus {
 @Index(['intentionCode'])
 @Index(['publickey'])
 @Index(['address'])
+@Index(['opUserHash', 'opUserChainId'], { unique: true })
 export class IntentionRecord extends BaseEntity {
   @PrimaryGeneratedColumn()
   public readonly id: bigint;
@@ -47,5 +49,8 @@ export class IntentionRecord extends BaseEntity {
   public intentionRecordTxs: IntentionRecordTx[];
 
   @Column({ type: 'bytea', transformer: hexTransformer, nullable: true })
-  public bundleHash: string;
+  public opUserHash: string;
+
+  @Column({ type: 'int' })
+  public opUserChainId: number;
 }
