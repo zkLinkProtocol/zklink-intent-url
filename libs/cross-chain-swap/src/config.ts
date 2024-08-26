@@ -17,7 +17,7 @@ export const TOKEN_CONFIG: { [key: string]: { [key: string]: string } } = {
 export const METADATA: ActionMetadata = {
   title: 'Cross Chain Swap',
   description:
-    'Perform cross-chain token swaps seamlessly across multiple netwoks',
+    'Perform cross-chain token swaps seamlessly across multiple networks',
   logo: 'https://placehold.co/40x40',
   networks: [
     {
