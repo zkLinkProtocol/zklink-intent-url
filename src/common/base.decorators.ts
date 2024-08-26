@@ -4,12 +4,24 @@ import {
   ValidationPipe,
   applyDecorators,
 } from '@nestjs/common';
-import { ApiBadRequestResponse, ApiOperation } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiOperation,
+  ApiResponse,
+} from '@nestjs/swagger';
 
-export function CommonApiOperation(summary: string) {
+export function CommonApiOperation(
+  summary: string,
+  successResponseType: any = null,
+) {
   return applyDecorators(
     ApiOperation({ summary }),
     ApiBadRequestResponse({ description: '{ "code": 400, "message": "Service exception", "data":null }' }), // prettier-ignore
+    ApiResponse({
+      status: 200,
+      description: summary,
+      type: successResponseType,
+    }),
     UsePipes(
       new ValidationPipe({
         transform: true,

@@ -57,13 +57,23 @@ export class IntentionRecordAddRequestDto {
   address: string;
 
   @ApiProperty({
-    name: 'bundleHash',
+    name: 'opUserHash',
     description: 'bundle hash by response of solver.',
     example: '0x123456',
   })
   @IsString()
   @IsNotEmpty()
-  bundleHash: string;
+  opUserHash: string;
+
+  @ApiProperty({
+    name: 'opUserChainId',
+    description: 'ChainId of target chain.',
+    example: '1',
+    required: true,
+  })
+  @IsString()
+  @IsNotEmpty()
+  opUserChainId: number;
 
   @ApiProperty({
     name: 'txs',

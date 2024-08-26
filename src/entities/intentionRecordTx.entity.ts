@@ -19,6 +19,7 @@ export enum IntentionRecordTxStatus {
 
 @Entity()
 @Index(['intentionRecordId'])
+@Index(['txHash', 'chainId'], { unique: true })
 export class IntentionRecordTx extends BaseEntity {
   @PrimaryGeneratedColumn()
   public readonly id: bigint;

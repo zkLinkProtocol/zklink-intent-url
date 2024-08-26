@@ -1,9 +1,10 @@
-import { Logger, Module } from '@nestjs/common';
+import { Logger, Module, OnModuleInit } from '@nestjs/common';
 
 import { ActionModule } from 'src/modules/action/action.module';
 import {
   ActionRepository,
   IntentionRecordRepository,
+  IntentionRecordTxRepository,
   IntentionRepository,
 } from 'src/repositories';
 import { UnitOfWorkModule } from 'src/unitOfWork';
@@ -16,12 +17,20 @@ import { IntentionRecordService } from './intentionRecord.service';
   imports: [UnitOfWorkModule, ActionModule],
   controllers: [ActionUrlController],
   providers: [
-    Logger,
+    ActionRepository,
     ActionUrlService,
+    Logger,
     IntentionRecordService,
     IntentionRepository,
     IntentionRecordRepository,
-    ActionRepository,
+    IntentionRecordTxRepository,
   ],
 })
-export class ActionUrlModule {}
+export class ActionUrlModule implements OnModuleInit {
+  constructor(
+    private readonly intentionRecordService: IntentionRecordService,
+  ) {}
+  async onModuleInit() {
+    this.intentionRecordService.handleRecordTxsStatus();
+  }
+}
