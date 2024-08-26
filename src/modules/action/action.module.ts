@@ -5,6 +5,8 @@ import { BuyMeACoffeeService } from '@action/buy-me-a-coffee';
 import { CrossChainSwapService } from '@action/cross-chain-swap';
 import { NovaswapService } from '@action/novaswap';
 import { RedEnvelopeService } from '@action/red-envelope';
+import { ActionRepository } from 'src/repositories/action.repository';
+import { UnitOfWorkModule } from 'src/unitOfWork';
 
 import { ActionController } from './action.controller';
 import { ActionService } from './action.service';
@@ -13,6 +15,7 @@ import { BigIntInterceptor } from './interceptor';
 @Global()
 @Module({
   controllers: [ActionController],
+  imports: [UnitOfWorkModule],
   providers: [
     ActionService,
     {
@@ -23,6 +26,7 @@ import { BigIntInterceptor } from './interceptor';
     RedEnvelopeService,
     NovaswapService,
     CrossChainSwapService,
+    ActionRepository,
   ],
   exports: [ActionService],
 })

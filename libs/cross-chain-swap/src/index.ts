@@ -6,14 +6,12 @@ import {
   ActionMetadata,
   ActionTransactionParams,
   GeneratedTransaction,
-  Token,
   Tx,
 } from 'src/common/dto';
 
 import { METADATA, RPC_URL, TOKEN_CONFIG } from './config';
 import { intoParams } from './interface';
 import { getApproveData, getSwapData } from './okxAPI';
-import { getUserERC20Balance } from './utils';
 
 @Injectable()
 export class CrossChainSwapService extends ActionDto {

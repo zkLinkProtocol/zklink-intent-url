@@ -5,6 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import config from './config';
+import { Action } from './entities/action.entity';
 import { Creator } from './entities/creator.entity';
 import { Intention } from './entities/intention.entity';
 import { IntentionRecord } from './entities/intentionRecord.entity';
@@ -38,6 +39,7 @@ import { UnitOfWorkModule } from './unitOfWork';
       },
     }),
     TypeOrmModule.forFeature([
+      Action,
       Creator,
       Intention,
       IntentionRecord,

@@ -7,6 +7,7 @@ import {
   PrimaryColumn,
 } from 'typeorm';
 
+import { Action } from './action.entity';
 import { BaseEntity } from './base.entity';
 import { Creator } from './creator.entity';
 
@@ -22,6 +23,10 @@ export class Intention extends BaseEntity {
   @ManyToOne(() => Creator, (creator) => creator.id)
   @JoinColumn({ name: 'creatorId' })
   public readonly creator: Creator;
+
+  @ManyToOne(() => Action, (action) => action.intentions)
+  @JoinColumn({ name: 'actionId' })
+  public action: Action;
 
   @Column({ type: 'varchar' })
   public actionId: string;
