@@ -17,15 +17,9 @@ export class CreateActionTable21724408187569 implements MigrationInterface {
     await queryRunner.query(`
       CREATE INDEX idx_dapp_name_gin ON "action" USING gin ((("dApp"->>'name')) gin_trgm_ops);
     `);
-    await queryRunner.query(
-      `ALTER TABLE "intention" ADD CONSTRAINT "FK_8b7409224328b3c1fe7e09e3f0b" FOREIGN KEY ("actionId") REFERENCES "action"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
-    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(
-      `ALTER TABLE "intention" DROP CONSTRAINT "FK_8b7409224328b3c1fe7e09e3f0b"`,
-    );
     await queryRunner.query(`
       DROP INDEX idx_dapp_name_gin;
     `);
