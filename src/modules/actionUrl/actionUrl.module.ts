@@ -13,7 +13,7 @@ import { ActionUrlService } from './actionUrl.service';
 import { IntentionRecordService } from './intentionRecord.service';
 
 @Module({
-  imports: [UnitOfWorkModule, ActionModule, ActionRepository],
+  imports: [UnitOfWorkModule, ActionModule],
   controllers: [ActionUrlController],
   providers: [
     Logger,
@@ -21,6 +21,7 @@ import { IntentionRecordService } from './intentionRecord.service';
     IntentionRecordService,
     IntentionRepository,
     IntentionRecordRepository,
+    ActionRepository,
   ],
 })
 export class ActionUrlModule {}
