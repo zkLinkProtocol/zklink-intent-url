@@ -1,17 +1,21 @@
 import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { nanoid } from 'nanoid';
 
-import { Intention } from 'src/entities/intention.entity';
 import { BusinessException } from 'src/exception/business.exception';
 import { ActionService } from 'src/modules/action/action.service';
+import { ActionRepository } from 'src/repositories';
 import { IntentionRepository } from 'src/repositories/intention.repository';
+import { UnitOfWork } from 'src/unitOfWork';
+
+import { ActionUrlAddRequestDto } from './actionUrl.dto';
 
 @Injectable()
 export class ActionUrlService {
   logger: Logger;
   constructor(
-    logger: Logger,
+    private readonly unitOfWork: UnitOfWork,
     private readonly intentionRepository: IntentionRepository,
+    private readonly actionRepository: ActionRepository,
     private readonly actionService: ActionService,
   ) {
     this.logger = new Logger(ActionUrlService.name);
@@ -58,17 +62,34 @@ export class ActionUrlService {
     };
   }
 
-  async add(params: any, creatorId: bigint): Promise<string> {
-    const actionUrl = { ...params } as Intention;
-    const action = await this.actionService.getAction(actionUrl.actionId);
+  async add(
+    params: ActionUrlAddRequestDto & { active: boolean },
+    creatorId: bigint,
+  ): Promise<string> {
+    const action = await this.actionService.getActionMetadata(params.actionId);
     if (!action) {
       throw new BusinessException('Action not found');
     }
-    actionUrl.creatorId = creatorId;
     const code = nanoid(8);
-    actionUrl.code = code;
+    const intentionRecord = this.intentionRepository.create({
+      ...params,
+      creatorId,
+      code,
+    });
     try {
-      await this.intentionRepository.add(actionUrl);
+      this.unitOfWork.useTransaction(async () => {
+        const actionInfo = await this.actionRepository.findOneBy({
+          id: params.actionId,
+        });
+        if (!actionInfo) {
+          throw new BusinessException(`No action ${params.actionId} found`);
+        }
+        actionInfo.intentionCount += 1;
+
+        await this.intentionRepository.add(intentionRecord);
+        await this.actionRepository.upsert(actionInfo, true, ['id']);
+        this.logger.log(`a new intention is added ${code}`);
+      });
     } catch (error) {
       this.logger.error(error);
       throw new BusinessException('Failed to add actionUrl');

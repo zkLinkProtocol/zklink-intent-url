@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { Brackets } from 'typeorm';
 
-import { IntentionRecord } from 'src/entities/intentionRecord.entity';
+import {
+  IntentionRecord,
+  IntentionRecordStatus,
+} from 'src/entities/intentionRecord.entity';
 import { IntentionRecordTx } from 'src/entities/intentionRecordTx.entity';
 
 import { BaseRepository } from './base.repository';
@@ -20,6 +23,13 @@ export class IntentionRecordRepository extends BaseRepository<IntentionRecord> {
   ) {
     const transactionManager = this.unitOfWork.getTransactionManager();
     await transactionManager.transaction(async (manager) => {
+      const exists = await manager.findOneBy(IntentionRecord, {
+        opUserHash: intentionRecord.opUserHash,
+        opUserChainId: intentionRecord.opUserChainId,
+      });
+      if (exists) {
+        return;
+      }
       const savedIntentionRecord = await manager.save(
         IntentionRecord,
         intentionRecord,
@@ -30,6 +40,24 @@ export class IntentionRecordRepository extends BaseRepository<IntentionRecord> {
       });
 
       await manager.save(IntentionRecordTx, intentionRecordTxs);
+    });
+  }
+
+  // update intention record and intention record tx in one transaction
+  public async updateIntentionRecordPendingAndTx(
+    intentionRecordId: bigint,
+    intentionRecordTxs: IntentionRecordTx[],
+  ) {
+    const transactionManager = this.unitOfWork.getTransactionManager();
+    await transactionManager.transaction(async (manager) => {
+      await manager.update(IntentionRecord, intentionRecordId, {
+        status: IntentionRecordStatus.PENDING,
+      });
+
+      await manager.upsert(IntentionRecordTx, intentionRecordTxs, [
+        'chainId',
+        'txHash',
+      ]);
     });
   }
 

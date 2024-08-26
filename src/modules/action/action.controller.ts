@@ -49,7 +49,7 @@ export class ActionController extends BaseController {
     },
   })
   async findAll(): Promise<ResponseDto<ActionResponseDto[]>> {
-    const actions = await this.actionStoreService.getActions();
+    const actions = await this.actionStoreService.getAllActionMetadata();
     return this.success(actions);
   }
 
@@ -70,7 +70,7 @@ export class ActionController extends BaseController {
     },
   })
   async find(@Param('id') id: string): Promise<ResponseDto<ActionResponseDto>> {
-    const action = await this.actionStoreService.getAction(id);
+    const action = await this.actionStoreService.getActionMetadata(id);
     return this.success(action);
   }
 

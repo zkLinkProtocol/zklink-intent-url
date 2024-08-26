@@ -5,12 +5,14 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import config from './config';
+import { Action } from './entities/action.entity';
 import { Creator } from './entities/creator.entity';
 import { Intention } from './entities/intention.entity';
 import { IntentionRecord } from './entities/intentionRecord.entity';
 import { IntentionRecordTx } from './entities/intentionRecordTx.entity';
 import { MetricsModule } from './metrics';
 import { ActionModule } from './modules/action/action.module';
+import { ActionsJsonModule } from './modules/actions.json/actionsJson.module';
 import { ActionUrlModule } from './modules/actionUrl/actionUrl.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { FilesModule } from './modules/files/files.module';
@@ -37,6 +39,7 @@ import { UnitOfWorkModule } from './unitOfWork';
       },
     }),
     TypeOrmModule.forFeature([
+      Action,
       Creator,
       Intention,
       IntentionRecord,
@@ -49,6 +52,7 @@ import { UnitOfWorkModule } from './unitOfWork';
     ActionModule,
     FilesModule,
     HubModule,
+    ActionsJsonModule,
   ],
 
   controllers: [AppController],

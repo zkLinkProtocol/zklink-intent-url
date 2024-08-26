@@ -184,16 +184,20 @@ The filed `components` is an array of objects that describe the parameters that 
         {
           label: 'WETH',
           value: '0x8280a4e7D5B3B658ec4580d3Bc30f5e50454F169',
+          chainId: '1',
         },
         {
           label: 'USDC',
           value: '0x1a1A3b2ff016332e866787B311fcB63928464509',
+          chainId: '1',
         },
       ]
     }
 
   ]
   ```
+When you allow Actions to create action URLS across different chains, the `option` here should include `chainId` to indicate that it is available for selection only on the corresponding `chainId`.
+
 - `regex`: a regular expression that the frontend will use to validate the input.
 
 [`GeneratedTransaction`](../src/common/dto/transaction.dto.ts#57) is a type that describes the transaction that will be sent to the blockchain. It contains the

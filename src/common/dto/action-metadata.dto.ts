@@ -17,7 +17,7 @@ import {
 
 import { ValidateOptions } from '../decorators';
 
-class NetworkDto {
+export class NetworkDto {
   @ApiProperty({ type: String, description: 'Network name' })
   @IsString()
   name: string;
@@ -31,7 +31,7 @@ class NetworkDto {
   contractAddress: string;
 }
 
-class DAppDto {
+export class DAppDto {
   @ApiProperty({ type: String, description: 'DApp name' })
   @IsString()
   name: string;
@@ -42,7 +42,7 @@ class DAppDto {
   url?: string;
 }
 
-class AuthorDto {
+export class AuthorDto {
   @ApiProperty({ type: String, description: 'Author name' })
   @IsString()
   name: string;
@@ -72,8 +72,7 @@ export class OptionDto {
   @IsString()
   value: string;
 
-  @ApiProperty({ description: 'Option chainId' })
-  @IsOptional()
+  @ApiPropertyOptional({ description: 'chain id' })
   @IsString()
   chainId?: string;
 }
@@ -135,7 +134,7 @@ class ComponentDto {
   options?: OptionDto[];
 }
 
-class IntentDto {
+export class IntentDto {
   @ApiProperty({ type: [ComponentDto], description: 'List of components' })
   @IsArray()
   @ValidateNested({ each: true })

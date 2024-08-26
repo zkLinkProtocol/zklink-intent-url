@@ -39,12 +39,13 @@ import { JwtAuthGuard } from '../auth/jwtAuth.guard';
 export class ActionUrlController extends BaseController {
   constructor(
     private readonly actionUrlService: ActionUrlService,
-    private readonly actionStoreService: ActionService,
+    private readonly actionService: ActionService,
     private readonly intentionRecordService: IntentionRecordService,
   ) {
     super();
   }
 
+  // https://xxx.com/aciont-url/:code
   @Get(':code')
   @CommonApiOperation(
     'Returns the configuration information for a single actionUrl.',
@@ -53,7 +54,7 @@ export class ActionUrlController extends BaseController {
     @Param('code') code: string,
   ): Promise<ResponseDto<ActionUrlFindOneResponseDto>> {
     const result = await this.actionUrlService.findOneByCode(code);
-    const actionStore = await this.actionStoreService.getActionStore(
+    const actionStore = await this.actionService.getActionStore(
       result.actionId,
     );
     const hasPostTxs = !!actionStore.afterActionUrlCreated;
@@ -74,6 +75,39 @@ export class ActionUrlController extends BaseController {
     return this.success(response);
   }
 
+  // https://xxx.com/aciont-url/:code/metadata
+  @Get(':code/metadata')
+  async metadata(@Param('code') code: string): Promise<any> {
+    const result = await this.actionUrlService.findOneByCode(code);
+
+    const response = {
+      icon: 'https://novaswap.fi/static/media/adorn.83100a16105ac0ce7574.png',
+      title: result.title,
+      description: result.description,
+      label: 'Swap usdt to eth',
+      disable: false,
+      error: {
+        message: '',
+      },
+      links: {
+        actions: [
+          {
+            href: `/api/action-url/${code}/post-transactions`,
+            label: 'Swap',
+            parameters: [
+              { name: 'inputToken', label: 'inputToken', required: false },
+            ],
+          },
+          {
+            href: `/api/action-url/${code}/post-transactions?inAmount=10`,
+            label: 'Swap 10 usdt',
+          },
+        ],
+      },
+    };
+    return response;
+  }
+
   @Get(':code/post-transactions')
   @CommonApiOperation(
     'Returns the configuration information for a single actionUrl.',
@@ -84,7 +118,7 @@ export class ActionUrlController extends BaseController {
     @Body() request: { sender: string; params: ActionTransactionParams },
   ): Promise<ResponseDto<GeneratedTransaction>> {
     const { sender, params } = request;
-    const actionStore = await this.actionStoreService.getActionStore(code);
+    const actionStore = await this.actionService.getActionStore(code);
     if (!actionStore.afterActionUrlCreated) {
       throw new BusinessException('No post transactions!');
     }
@@ -112,7 +146,7 @@ export class ActionUrlController extends BaseController {
     } | null>
   > {
     const { sender, params } = request;
-    const actionStore = await this.actionStoreService.getActionStore(code);
+    const actionStore = await this.actionService.getActionStore(code);
     if (!actionStore.getRealTimeContent) {
       return this.success(null);
     }
@@ -180,7 +214,7 @@ export class ActionUrlController extends BaseController {
     @Body() request: ActionUrlAddRequestDto,
     @GetCreator() creator: { id: bigint },
   ): Promise<ResponseDto<string>> {
-    const actionStore = await this.actionStoreService.getActionStore(
+    const actionStore = await this.actionService.getActionStore(
       request.actionId,
     );
     if (!actionStore) {
@@ -273,7 +307,10 @@ export class ActionUrlController extends BaseController {
 
   // get intention record with txs by id
   @Get('intention-record/:id')
-  @CommonApiOperation('Get intention record with txs by id.')
+  @CommonApiOperation(
+    'Get intention record with txs by id.',
+    IntentionRecordFindOneResponseDto,
+  )
   async getIntentionRecord(
     @Param('id') id: bigint,
     @Query('publicKey') publicKey: string,
