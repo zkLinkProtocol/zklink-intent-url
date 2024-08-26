@@ -17,7 +17,7 @@ export class ActionsJsonController extends BaseController {
     const actions = {
       rules: [
         {
-          pathPattern: 'https://intent.zklink.io/*',
+          pathPattern: '/*',
           apiPath:
             'https://api-intent.sepolia.zklink.io/api/action-url/*/metadata',
         },
