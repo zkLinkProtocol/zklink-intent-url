@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import {
+  DeepPartial,
   EntityTarget,
   FindManyOptions,
   FindOptionsWhere,
@@ -17,6 +18,11 @@ export abstract class BaseRepository<T extends ObjectLiteral> {
     protected readonly entityTarget: EntityTarget<T>,
     protected readonly unitOfWork: UnitOfWork,
   ) {}
+
+  public create(records: DeepPartial<T>): T {
+    const transactionManager = this.unitOfWork.getTransactionManager();
+    return transactionManager.create(this.entityTarget, records);
+  }
 
   public async addMany(records: Partial<T>[]): Promise<void> {
     if (!records?.length) {
