@@ -12,7 +12,7 @@ import { metadata } from './config';
 import { intoParams } from './interface';
 
 @Injectable()
-export class BuyMeACoffeeService extends ActionDto {
+export class SliptOrderService extends ActionDto {
   async getMetadata(): Promise<ActionMetadata> {
     return metadata;
   }
@@ -26,12 +26,13 @@ export class BuyMeACoffeeService extends ActionDto {
     const params = intoParams(_params);
 
     const tx: Tx = {
-      chainId: params.chainId, // zkLink
+      chainId: params.chainId,
       to: params.recipient,
       value: params.value.toString(),
       data: '0x',
       dataObject: {
-        'Charge TOKEN': params.value.toString(),
+        Token: params.token.toString,
+        'Sent TOKEN': params.value.toString(),
         To: params.recipient,
       },
       shouldSend: true,

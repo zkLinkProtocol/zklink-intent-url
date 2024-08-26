@@ -71,6 +71,11 @@ export class OptionDto {
   @ApiProperty({ description: 'Option value' })
   @IsString()
   value: string;
+
+  @ApiProperty({ description: 'Option chainId' })
+  @IsOptional()
+  @IsString()
+  chainId?: string;
 }
 
 class ComponentDto {

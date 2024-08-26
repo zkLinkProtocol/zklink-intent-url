@@ -45,6 +45,15 @@
       "compilerOptions": {
         "tsConfigPath": "libs/red-envelop/tsconfig.lib.json"
       }
+    },
+    "slipt-order": {
+      "type": "library",
+      "root": "libs/slipt-order",
+      "entryFile": "index",
+      "sourceRoot": "libs/slipt-order/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/slipt-order/tsconfig.lib.json"
+      }
     }
   }
 }

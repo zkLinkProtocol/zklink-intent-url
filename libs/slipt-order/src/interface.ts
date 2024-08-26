@@ -2,7 +2,7 @@ import { ActionTransactionParams } from 'src/common/dto';
 
 export interface Params {
   chainId: number;
-  payer: string;
+  recipient: string;
   value: bigint;
   token: string;
 }
@@ -25,7 +25,7 @@ export function intoParams(raw: ActionTransactionParams): Params {
 
   return {
     chainId: raw.chainId,
-    payer: raw.payer,
+    recipient: raw.recipient,
     value: value,
     token: raw.token,
   };

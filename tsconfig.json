@@ -49,6 +49,12 @@
       ],
       "@action/red-envelope/*": [
         "libs/red-envelope/src/*"
+      ],
+      "@action/slipt-order": [
+        "libs/slipt-order/src"
+      ],
+      "@action/slipt-order/*": [
+        "libs/slipt-order/src/*"
       ]
     }
   }

@@ -31,6 +31,7 @@ export class BuyMeACoffeeService extends ActionDto {
       value: params.value.toString(),
       data: '0x',
       dataObject: {
+        Token: params.token.toString,
         'Sent TOKEN': params.value.toString(),
         To: params.recipient,
       },
