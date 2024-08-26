@@ -11,6 +11,7 @@ import { IntentionRecord } from './entities/intentionRecord.entity';
 import { IntentionRecordTx } from './entities/intentionRecordTx.entity';
 import { MetricsModule } from './metrics';
 import { ActionModule } from './modules/action/action.module';
+import { ActionsJsonModule } from './modules/actions.json/actionsJson.module';
 import { ActionUrlModule } from './modules/actionUrl/actionUrl.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { FilesModule } from './modules/files/files.module';
@@ -49,6 +50,7 @@ import { UnitOfWorkModule } from './unitOfWork';
     ActionModule,
     FilesModule,
     HubModule,
+    ActionsJsonModule,
   ],
 
   controllers: [AppController],

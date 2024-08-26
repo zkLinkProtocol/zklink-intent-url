@@ -45,6 +45,7 @@ export class ActionUrlController extends BaseController {
     super();
   }
 
+  // https://xxx.com/aciont-url/:code
   @Get(':code')
   @CommonApiOperation(
     'Returns the configuration information for a single actionUrl.',
@@ -72,6 +73,39 @@ export class ActionUrlController extends BaseController {
       },
     };
     return this.success(response);
+  }
+
+  // https://xxx.com/aciont-url/:code/metadata
+  @Get(':code/metadata')
+  async metadata(@Param('code') code: string): Promise<any> {
+    const result = await this.actionUrlService.findOneByCode(code);
+
+    const response = {
+      icon: 'https://novaswap.fi/static/media/adorn.83100a16105ac0ce7574.png',
+      title: result.title,
+      description: result.description,
+      label: 'Swap usdt to eth',
+      disable: false,
+      error: {
+        message: '',
+      },
+      links: {
+        actions: [
+          {
+            href: `/api/action-url/${code}/post-transactions`,
+            label: 'Swap',
+            parameters: [
+              { name: 'inputToken', label: 'inputToken', required: false },
+            ],
+          },
+          {
+            href: `/api/action-url/${code}/post-transactions?inAmount=10`,
+            label: 'Swap 10 usdt',
+          },
+        ],
+      },
+    };
+    return response;
   }
 
   @Get(':code/post-transactions')
