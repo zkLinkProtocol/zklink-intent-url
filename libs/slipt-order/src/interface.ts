@@ -2,8 +2,9 @@ import { ActionTransactionParams } from 'src/common/dto';
 
 export interface Params {
   chainId: number;
-  recipient: string;
+  payer: string;
   value: bigint;
+  token: string;
 }
 export function intoParams(raw: ActionTransactionParams): Params {
   if (!raw.chainId) {
@@ -18,10 +19,14 @@ export function intoParams(raw: ActionTransactionParams): Params {
       `Invalid value value: "${raw.value}" is not a valid bigint.`,
     );
   }
+  if (!raw.token) {
+    throw new Error('missing field "value"');
+  }
 
   return {
     chainId: raw.chainId,
-    recipient: raw.recipient,
+    payer: raw.payer,
     value: value,
+    token: raw.token,
   };
 }
