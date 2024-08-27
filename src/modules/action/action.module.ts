@@ -5,6 +5,7 @@ import { BuyMeACoffeeService } from '@action/buy-me-a-coffee';
 import { CrossChainSwapService } from '@action/cross-chain-swap';
 import { NovaswapService } from '@action/novaswap';
 import { RedEnvelopeService } from '@action/red-envelope';
+import { SliptOrderService } from '@action/slipt-order';
 import { ActionRepository } from 'src/repositories/action.repository';
 import { UnitOfWorkModule } from 'src/unitOfWork';
 
@@ -26,6 +27,7 @@ import { BigIntInterceptor } from './interceptor';
     RedEnvelopeService,
     NovaswapService,
     CrossChainSwapService,
+    SliptOrderService,
     ActionRepository,
   ],
   exports: [ActionService],
