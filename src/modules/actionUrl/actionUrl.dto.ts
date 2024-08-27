@@ -1,16 +1,38 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, OmitType } from '@nestjs/swagger';
 import { IsNotEmpty, IsObject, IsString } from 'class-validator';
 
-class Creator {
+import { AuthorDto } from 'src/common/dto';
+
+class CreatorDto {
   @ApiProperty({
-    name: 'name',
-    description: 'Name of creator.',
-    example: 'julie',
+    name: 'publicId',
+    description: 'publicId of creator.',
+    example: '2ksc23e',
     required: true,
   })
   @IsString()
   @IsNotEmpty()
-  name: string;
+  publicId: string;
+
+  @ApiProperty({
+    name: 'publickey',
+    description: 'publickey of creator.',
+    example: '0x132310ab2d...',
+    required: true,
+  })
+  @IsString()
+  @IsNotEmpty()
+  publickey: string;
+
+  @ApiProperty({
+    name: 'address',
+    description: 'address of creator.',
+    example: '0xbE3d310ab2d...',
+    required: true,
+  })
+  @IsString()
+  @IsNotEmpty()
+  address: string;
 }
 
 // request dto
@@ -70,10 +92,51 @@ export class ActionUrlFindOneResponseDto extends ActionUrlAddRequestDto {
   @ApiProperty({
     name: 'creator',
     description: 'Creator info.',
-    example: Creator,
+    example: CreatorDto,
     required: true,
   })
   @IsString()
   @IsNotEmpty()
   creator: any;
+}
+
+export class ActionUrlResponseDto extends OmitType(ActionUrlAddRequestDto, [
+  'actionId',
+] as const) {
+  @ApiProperty({
+    name: 'code',
+    description: 'Action URL code',
+    example: 'ki2a902s',
+    required: true,
+  })
+  @IsString()
+  @IsNotEmpty()
+  code: string;
+
+  @ApiProperty({
+    name: 'code',
+    description: 'Action URL code',
+    example: {
+      name: 'zklink',
+      github: 'https://github.com/zkLinkProtocol',
+      x: '',
+    },
+    required: true,
+  })
+  @IsString()
+  @IsNotEmpty()
+  actionAuthor: AuthorDto;
+
+  @ApiProperty({
+    name: 'creator',
+    description: 'Creator info.',
+    example: {
+      publicId: '2ksc23e',
+      publickey: '0x132310ab2d...',
+      address: '0xbE3d310ab2d...',
+    },
+    required: true,
+  })
+  @IsObject()
+  creator: CreatorDto;
 }

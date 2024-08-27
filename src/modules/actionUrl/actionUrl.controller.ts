@@ -21,6 +21,7 @@ import { BusinessException } from 'src/exception/business.exception';
 import {
   ActionUrlAddRequestDto,
   ActionUrlFindOneResponseDto,
+  ActionUrlResponseDto,
   ActionUrlUpdateRequestDto,
 } from './actionUrl.dto';
 import { ActionUrlService } from './actionUrl.service';
@@ -52,24 +53,20 @@ export class ActionUrlController extends BaseController {
   )
   async findOne(
     @Param('code') code: string,
-  ): Promise<ResponseDto<ActionUrlFindOneResponseDto>> {
+  ): Promise<ResponseDto<ActionUrlResponseDto>> {
     const result = await this.actionUrlService.findOneByCode(code);
-    const actionStore = await this.actionService.getActionStore(
-      result.actionId,
-    );
-    const hasPostTxs = !!actionStore.afterActionUrlCreated;
 
     const response = {
       code: result.code,
-      actionId: result.actionId,
+      actionAuthor: result.action.author,
       title: result.title,
       description: result.description,
       metadata: result.metadata,
       settings: result.settings,
-      hasPostTxs,
       creator: {
         publickey: result.creator.publickey,
         address: result.creator.address,
+        publicId: result.creator.publicId,
       },
     };
     return this.success(response);
