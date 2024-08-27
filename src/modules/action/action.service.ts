@@ -8,6 +8,7 @@ import { BuyMeACoffeeService } from '@action/buy-me-a-coffee';
 import { CrossChainSwapService } from '@action/cross-chain-swap';
 import { NovaswapService } from '@action/novaswap';
 import { RedEnvelopeService } from '@action/red-envelope';
+import { SliptOrderService } from '@action/slipt-order';
 import {
   Action,
   ActionId,
@@ -32,6 +33,7 @@ export class ActionService {
     readonly novaswapService: NovaswapService,
     readonly buyMeACoffeeService: BuyMeACoffeeService,
     readonly crossChainSwapService: CrossChainSwapService,
+    readonly sliptOrderService: SliptOrderService,
   ) {
     this.awsConfig = configService.get('aws', { infer: true })!;
     const allServiceConfig = [
@@ -39,6 +41,7 @@ export class ActionService {
       { id: 'novaswap', service: novaswapService },
       { id: 'buy-me-a-coffee', service: buyMeACoffeeService },
       { id: 'cross-chain-swap', service: crossChainSwapService },
+      { id: 'spit-order', service: sliptOrderService },
     ];
     this.initializeActionsMetadata(allServiceConfig);
     allServiceConfig.forEach((action) => {
