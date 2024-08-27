@@ -12,7 +12,7 @@ import { metadata } from './config';
 import { intoParams } from './interface';
 
 @Injectable()
-export class BuyMeACoffeeService extends ActionDto {
+export class SliptOrderService extends ActionDto {
   async getMetadata(): Promise<ActionMetadata> {
     return metadata;
   }

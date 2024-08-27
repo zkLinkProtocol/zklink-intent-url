@@ -1,7 +1,7 @@
 import { ActionMetadata } from 'src/common/dto';
 
 export const metadata: ActionMetadata = {
-  title: 'Buy Me a Coffee',
+  title: 'Slipt Order',
   description: 'Support the works you love',
   logo: '',
   networks: [
@@ -21,7 +21,7 @@ export const metadata: ActionMetadata = {
       contractAddress: '0x',
     },
   ],
-  dApp: { name: 'Buy Me a Coffee' },
+  dApp: { name: 'Slipt Order' },
   author: { name: 'zkLink' },
   intent: {
     components: [
@@ -83,7 +83,7 @@ export const metadata: ActionMetadata = {
       {
         name: 'value',
         label: 'Amount',
-        desc: 'The amount to sponsor',
+        desc: 'The amount to collection',
         type: 'input',
         regex: '^[0-9]+$',
         regexDesc: 'Must be a number',
@@ -91,7 +91,7 @@ export const metadata: ActionMetadata = {
       {
         name: 'recipient',
         label: 'Recipient',
-        desc: 'The address that is sponsored',
+        desc: 'The address that is recipient',
         type: 'input',
         regex: '^0x[a-fA-F0-9]{40}$',
         regexDesc: 'Address',
