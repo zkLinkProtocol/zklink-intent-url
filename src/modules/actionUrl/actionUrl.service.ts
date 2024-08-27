@@ -22,12 +22,12 @@ export class ActionUrlService {
   }
 
   async findOneByCode(code: string) {
-    const actionUrl = await this.intentionRepository.findOne({
+    const intention = await this.intentionRepository.findOne({
       where: [{ code }],
-      relations: ['creator'],
+      relations: ['creator', 'action'],
     });
-    if (!actionUrl) throw new BusinessException('ActionUrl not found');
-    return actionUrl;
+    if (!intention) throw new BusinessException(`intention ${code} not found`);
+    return intention;
   }
 
   async findListByCreator(

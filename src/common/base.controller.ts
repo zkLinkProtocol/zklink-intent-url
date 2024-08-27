@@ -24,10 +24,10 @@ export class BaseController {
     }
   }
 
-  protected async error(errmsg: string, code: number = 500) {
+  protected async error(errMsg: string, code: number = 500) {
     return {
       code,
-      message: errmsg,
+      message: errMsg,
       data: null,
     };
   }
