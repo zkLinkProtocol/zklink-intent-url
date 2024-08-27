@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 import { BuyMeACoffeeService } from '@action/buy-me-a-coffee';
@@ -22,6 +22,7 @@ import { ActionResponseDto } from './dto/actions.dto';
 
 @Injectable()
 export class ActionService {
+  private logger = new Logger(ActionService.name);
   private awsConfig: ConfigType['aws'];
   private allActionStore: Map<ActionId, Action> = new Map();
 
@@ -119,6 +120,11 @@ export class ActionService {
     if (!actionStore) {
       throw new BusinessException(`Action with id '${id}' not found.`);
     }
-    return actionStore.generateTransaction(data);
+    try {
+      return actionStore.generateTransaction(data);
+    } catch (error) {
+      this.logger.error(error);
+      throw new BusinessException('Failed to generate transaction');
+    }
   }
 }

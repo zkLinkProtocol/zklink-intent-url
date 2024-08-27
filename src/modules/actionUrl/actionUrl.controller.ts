@@ -25,6 +25,7 @@ import {
   ActionUrlUpdateRequestDto,
 } from './actionUrl.dto';
 import { ActionUrlService } from './actionUrl.service';
+import { BlinkService } from './blink.service';
 import {
   IntentionRecordAddRequestDto,
   IntentionRecordFindOneResponseDto,
@@ -42,11 +43,11 @@ export class ActionUrlController extends BaseController {
     private readonly actionUrlService: ActionUrlService,
     private readonly actionService: ActionService,
     private readonly intentionRecordService: IntentionRecordService,
+    private readonly blinkService: BlinkService,
   ) {
     super();
   }
 
-  // https://xxx.com/aciont-url/:code
   @Get(':code')
   @CommonApiOperation(
     'Returns the configuration information for a single actionUrl.',
@@ -71,39 +72,6 @@ export class ActionUrlController extends BaseController {
       },
     };
     return this.success(response);
-  }
-
-  // https://xxx.com/aciont-url/:code/metadata
-  @Get(':code/metadata')
-  async metadata(@Param('code') code: string): Promise<any> {
-    const result = await this.actionUrlService.findOneByCode(code);
-
-    const response = {
-      icon: 'https://novaswap.fi/static/media/adorn.83100a16105ac0ce7574.png',
-      title: result.title,
-      description: result.description,
-      label: 'Swap usdt to eth',
-      disable: false,
-      error: {
-        message: '',
-      },
-      links: {
-        actions: [
-          {
-            href: `/api/action-url/${code}/post-transactions`,
-            label: 'Swap',
-            parameters: [
-              { name: 'inputToken', label: 'inputToken', required: false },
-            ],
-          },
-          {
-            href: `/api/action-url/${code}/post-transactions?inAmount=10`,
-            label: 'Swap 10 usdt',
-          },
-        ],
-      },
-    };
-    return response;
   }
 
   @Get(':code/post-transactions')
@@ -325,5 +293,23 @@ export class ActionUrlController extends BaseController {
       return this.error('Intention record not found under the address');
     }
     return this.success(result as IntentionRecordFindOneResponseDto);
+  }
+
+  // https://xxx.com/aciont-url/:code/metadata
+  @Get(':code/metadata')
+  async metadata(@Param('code') code: string) {
+    return await this.blinkService.getMetadata(code);
+  }
+
+  // https://xxx.com/aciont-url/:code/build-transactions
+  @Post(':code/build-transactions')
+  async buildTransactions(
+    @Param('code') code: string,
+    @Param() Params: any,
+    @Body() body: any,
+    @Query() query: any,
+  ) {
+    const allParams = { ...Params, ...body, ...query };
+    return await this.blinkService.buildTransactions(code, allParams);
   }
 }

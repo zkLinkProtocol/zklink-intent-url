@@ -11,6 +11,7 @@ import { UnitOfWorkModule } from 'src/unitOfWork';
 
 import { ActionUrlController } from './actionUrl.controller';
 import { ActionUrlService } from './actionUrl.service';
+import { BlinkService } from './blink.service';
 import { IntentionRecordService } from './intentionRecord.service';
 
 @Module({
@@ -19,6 +20,7 @@ import { IntentionRecordService } from './intentionRecord.service';
   providers: [
     ActionRepository,
     ActionUrlService,
+    BlinkService,
     Logger,
     IntentionRecordService,
     IntentionRepository,
