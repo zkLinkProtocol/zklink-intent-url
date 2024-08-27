@@ -104,6 +104,17 @@ export class ActionUrlResponseDto extends OmitType(ActionUrlAddRequestDto, [
   'actionId',
 ] as const) {
   @ApiProperty({
+    name: 'logo',
+    description: 'Action Logo',
+    example:
+      'https://zklink-intent.s3.ap-northeast-1.amazonaws.com/dev/logos/red-envelope.png',
+    required: true,
+  })
+  @IsString()
+  @IsNotEmpty()
+  logo: string;
+
+  @ApiProperty({
     name: 'code',
     description: 'Action URL code',
     example: 'ki2a902s',

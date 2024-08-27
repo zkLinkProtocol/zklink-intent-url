@@ -63,6 +63,7 @@ export class ActionUrlController extends BaseController {
       description: result.description,
       metadata: result.metadata,
       settings: result.settings,
+      logo: result.action.logo,
       creator: {
         publickey: result.creator.publickey,
         address: result.creator.address,
