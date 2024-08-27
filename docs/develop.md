@@ -1,22 +1,23 @@
 
-# zkLink Nova Actions & Intent URL SDK
+# zkLink Nova Actions & MagicLink SDK
 
-Comprehensive Guide for Creating, Registering, and Utilizing Actions with Intent URLs in the zkLink Nova Network
+Comprehensive Guide for Creating, Registering, and Utilizing Actions with MagicLinks in the zkLink Nova Network
 
 ## Overview
 
-Intent URL is a feature launched by zkLink that converts the act of constructing a transaction into an actionable link. Intent URL is a sharable short link to complete specified action in the zkLink Nova network. User who has the Intent URL can build a certain transaction easily. They can preview, sign the transaction and finally send it to the zkLink Nova network, without understanding the details of the transaction. Intent URL can be used for various on-chain activities such as token swaps, voting, and sponsorship. It greatly lowers the barrier to entry into the blockchain world. More importantly, Intent URl is short, easy to share on social media and webpage.
+MagicLink is a feature launched by zkLink that converts the act of constructing a transaction into an actionable link. MagicLink is a sharable short link to complete specified action in the zkLink Nova network. User who has the MagicLink can build a certain transaction easily. They can preview, sign the transaction and finally send it to the zkLink Nova network, without understanding the details of the transaction. MagicLink can be used for various on-chain activities such as token swaps, voting, and sponsorship. It greatly lowers the barrier to entry into the blockchain world. More importantly, MagicLink is short, easy to share on social media and webpage.
 
 **Key Concepts**
 
-- **Action**: An Action is a standardized API implementation created by developers. It accepts certain parameters and generates transactions that meet specific needs based on predefined logic.
-- **Intent URL**: It is a shareable short link that serves as the entry point for executing an action. On the page of this short link, users can set a few parameters using selection boxes or input fields. After clicking confirm, they can generate and preview the transaction. If everything is correct, the user can sign and send it to the zkLink Nova network.
+- **Action**: An Action is a standardized API implementation created by developers. It accepts certain parameters and returns signable transaction or message, enabling specific on-chain or off-chain activities. Actions allow developers to abstract their services to meet user's potential intents, while being maximally flexible by allowing anyone to set parameters when creating a magicLink. Actions simplify the process of integrating the "actionables" throughout EVM-compatible networks right into specific environment, allowing users to execute blockchain transactions without switching between different apps or websites. 
+- **MagicLink**: It is a shareable short link that serves as the entry point for executing an action. On the page of this short link, users can set a few parameters using selection boxes or input fields. After clicking confirm, they can generate and preview the transaction. If everything is correct, the user can sign and send it to the zkLink Nova network. While on a website, a magicLink might immediately initiate a transaction preview in a wallet without redirecting users to a dApp. In Telegram, a bot can be used to expand a magicLink into an interactive set of buttons. In the future iteration, this function will be expanded to Discord. 
+- 
 
 ## Role
 
 - Developer: The role responsible for developing Actions. Developers need to implement the Action specifications and submit the code to the repository. We (zkLink) will register the reviewed Actions.
-- Intent Creator: The role responsible for creating Intent URLs. They select a registered Action, configure it, and generate a shareable short link.
-- User: The person using the Intent URL. Users do not need to understand complex transaction details; they can send transactions and participate in activities with simple inputs and clicks.
+- Intent Creator: The role responsible for creating magicLinks. They select a registered Action, configure it, and generate a shareable short link.
+- User: The person using the magicLinkL. Users do not need to understand complex transaction details; they can send transactions and participate in activities with simple inputs and clicks.
 
 ![](./img/interactive-workflow.png)
 
@@ -100,10 +101,10 @@ abstract class Action {
 
 - The `getMetadata` method returns metadata (`ActionMetadata`) that describes the action for display on the frontend. 
 - validateIntentParams
-- The `generateTransaction` method is responsible for constructing transactions. When a user confirms the action in intent url page, this method executes in the background to construct and return the transaction, which will subsequently be sent to the blockchain.
-- The `validateIntentParams` method allows developers to create more flexible validation rules. It takes `ActionTransactionParams` as input and returns a string containing error messages. When the frontend creates an intent URL, the parameters passed can be validated against custom rules using this hook function. If an error message is returned, the frontend will display it.
-- The `getRealTimeContent` optional function processes real-time contract information that should be displayed to users through the intent URL. For example, for a red packet contract, it might show something like "There are 20 red packets in total, and 3 red packets have been claimed." Developers can use this method to return a title and an HTML string based on the contract's stored information, making it easier for users to refresh and view the information.
-- Sometimes, after constructing the parameters and creating the intent URL, it may not become active immediately and will remain in an inactive state. You will need to initiate one or more transactions to the smart contract before you can create an active intent URL. For example, with a red packet contract, you need to deposit a red packet asset into the contract before the intent URL can become active.The `afterActionUrlCreated` provides this capability. It returns GeneratedTransaction. The frontend will initiate the on-chain transaction based on this information.
+- The `generateTransaction` method is responsible for constructing transactions. When a user confirms the action in magicLink page, this method executes in the background to construct and return the transaction, which will subsequently be sent to the blockchain.
+- The `validateIntentParams` method allows developers to create more flexible validation rules. It takes `ActionTransactionParams` as input and returns a string containing error messages. When the frontend creates an magicLink, the parameters passed can be validated against custom rules using this hook function. If an error message is returned, the frontend will display it.
+- The `getRealTimeContent` optional function processes real-time contract information that should be displayed to users through the magicLink. For example, for a red packet contract, it might show something like "There are 20 red packets in total, and 3 red packets have been claimed." Developers can use this method to return a title and an HTML string based on the contract's stored information, making it easier for users to refresh and view the information.
+- Sometimes, after constructing the parameters and creating the magicLink, it may not become active immediately and will remain in an inactive state. You will need to initiate one or more transactions to the smart contract before you can create an active magicLink. For example, with a red packet contract, you need to deposit a red packet asset into the contract before the magicLink can become active.The `afterActionUrlCreated` provides this capability. It returns GeneratedTransaction. The frontend will initiate the on-chain transaction based on this information.
 
 To implement this functionality, you must extend the `Action` abstract class based on your specific business logic.
 
@@ -171,7 +172,7 @@ class MyActionService extends Action {
 }
 ```
 
-For [`ActionMetadata`](../src/common/dto/action-metadata.dto.ts#137), it must be noticeable that the `intent` field describes the parameters that the intent creator or user can set in Intent URL, which will be displayed on the frontend.
+For [`ActionMetadata`](../src/common/dto/action-metadata.dto.ts#137), it must be noticeable that the `intent` field describes the parameters that the intent creator or user can set in magicLink, which will be displayed on the frontend.
 
 The filed `components` is an array of objects that describe the parameters that the user can set. There are some fields to pay attention to：
 
@@ -207,7 +208,7 @@ fields `txs` and `tokens`.
 - The `tokens` field is a list of tokens that should be prepared in target. You can think of this field as describing the prerequisites for initiating a transaction. The frontend will automatically search and perform cross-chain transactions to meet the prerequisites on your target chain. Then, it starts to send the transaction.
 
 ### 3. Switch `env`
-We offer two environment variables, `dev` and `prod`, that allow you to configure contract addresses or settings for both environments. The env variable for the dev branch is set to `dev`, while the env variable for the main branch is set to `prod`. In the dev branch, you can test with the Sepolia network's intent URL, and once the code is merged into the main branch, it will read the mainnet network's contract configurations.
+We offer two environment variables, `dev` and `prod`, that allow you to configure contract addresses or settings for both environments. The env variable for the dev branch is set to `dev`, while the env variable for the main branch is set to `prod`. In the dev branch, you can test with the Sepolia network's magicLink, and once the code is merged into the main branch, it will read the mainnet network's contract configurations.
 
 Here's how you can implement this:
 
@@ -362,5 +363,5 @@ Minimize reliance on external APIs. If necessary, use them cautiously and ensure
 ## Glossary
 
 1. Action: A standardized API implementation for generating transactions.
-2. Intent URL: A shareable link for executing actions on the zkLink Nova network.
+2. magicLink: A shareable link for executing actions on the zkLink Nova network.
 3. Swagger: A tool for testing and verifying APIs.
