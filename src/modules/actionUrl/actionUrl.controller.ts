@@ -112,7 +112,10 @@ export class ActionUrlController extends BaseController {
     } | null>
   > {
     const { sender, params } = request;
-    const actionStore = await this.actionService.getActionStore(code);
+    const result = await this.actionUrlService.findOneByCode(code);
+    const actionStore = await this.actionService.getActionStore(
+      result.actionId,
+    );
     if (!actionStore.getRealTimeContent) {
       return this.success(null);
     }
