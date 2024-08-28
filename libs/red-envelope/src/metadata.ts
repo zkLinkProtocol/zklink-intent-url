@@ -26,7 +26,7 @@ export const genMetadata = (configValue: Value): ActionMetadata => ({
         label: 'Distribution Mode',
         desc: 'Choose Mode to distribute Red Envelopes',
         type: 'searchSelect',
-        regex: '^[a-fA-F0-9]$',
+        regex: '^[a-zA-Z0-9]+$',
         regexDesc: 'String',
         options: [
           {
@@ -42,9 +42,9 @@ export const genMetadata = (configValue: Value): ActionMetadata => ({
       {
         name: 'totalDistributionAmount',
         label: 'Total Distribution Amount',
-        desc: 'Total amount you want ro distribute',
+        desc: 'Total amount you want to distribute',
         type: 'input',
-        regex: '^\\d$',
+        regex: '^[1-9]\\d*$',
         regexDesc: 'Int',
       },
       {
@@ -78,7 +78,7 @@ export const genMetadata = (configValue: Value): ActionMetadata => ({
         label: 'Amount Of Red Envelopes',
         desc: 'How many Red Envelopes want to distribute',
         type: 'input',
-        regex: '^\\d$',
+        regex: '^[1-9]\\d*$',
         regexDesc: 'Int',
       },
       {
@@ -86,7 +86,7 @@ export const genMetadata = (configValue: Value): ActionMetadata => ({
         label: 'Gas Token',
         desc: 'Gas can be deducted from distributed amount, allowing recipient to grab red envelope with 0 gas',
         type: 'searchSelect',
-        regex: '^[a-fA-F0-9]$',
+        regex: '^[a-zA-Z0-9]+$',
         regexDesc: 'String',
         options: [
           {
