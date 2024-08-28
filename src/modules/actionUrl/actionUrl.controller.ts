@@ -7,9 +7,11 @@ import {
   Post,
   Put,
   Query,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import { Response } from 'express';
 
 import { BaseController } from 'src/common/base.controller';
 import { CommonApiOperation } from 'src/common/base.decorators';
@@ -300,19 +302,82 @@ export class ActionUrlController extends BaseController {
 
   // https://xxx.com/aciont-url/:code/metadata
   @Get(':code/metadata')
-  async metadata(@Param('code') code: string) {
-    return await this.blinkService.getMetadata(code);
+  async metadata(
+    @Param('code') code: string,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    res.setHeader('Access-Control-Expose-Headers', 'X-Blockchain-Ids');
+    const metadata = {
+      icon: '',
+      title: '',
+      description: '',
+      label: '',
+      disable: false,
+      error: {
+        message: '',
+      },
+      links: {
+        actions: [],
+      },
+    };
+    const intention = await this.actionUrlService.findOneByCode(code);
+    if (!intention) {
+      metadata.error.message = 'Action not found';
+      // res.json(metadata);
+      return metadata;
+    }
+    const chainId =
+      (intention.settings as any)?.intentInfo?.network?.chainId ?? 0;
+    res.setHeader('X-Blockchain-Ids', `eip155:${chainId}`);
+    metadata.icon = intention.metadata;
+    metadata.title = intention.title;
+    metadata.description = intention.description;
+
+    metadata.links.actions = await this.blinkService.getMetadataActions(
+      code,
+      intention.settings,
+    );
+    // res.json(metadata);
+    return metadata;
   }
 
   // https://xxx.com/aciont-url/:code/build-transactions
   @Post(':code/build-transactions')
   async buildTransactions(
     @Param('code') code: string,
+    @Body('account') account: string,
     @Param() Params: any,
     @Body() body: any,
     @Query() query: any,
+    @Res({ passthrough: true }) res: Response,
   ) {
+    res.setHeader('Access-Control-Expose-Headers', 'X-Blockchain-Ids');
+    const response = {
+      transaction: '',
+      message: '',
+    };
+    const intention = await this.actionUrlService.findOneByCode(code);
+    if (!intention) {
+      response.message = 'Action not found';
+      return response;
+    }
+
+    const chainId =
+      (intention.settings as any)?.intentInfo?.network?.chainId ?? 0;
+    res.setHeader('X-Blockchain-Ids', `eip155:${chainId}`);
     const allParams = { ...Params, ...body, ...query };
-    return await this.blinkService.buildTransactions(code, allParams);
+    allParams.chainId = chainId;
+    try {
+      const transaction = await this.blinkService.buildTransactions(
+        code,
+        intention.actionId,
+        account,
+        allParams,
+      );
+      response.transaction = transaction;
+    } catch (error) {
+      response.message = error.message;
+    }
+    return response;
   }
 }
