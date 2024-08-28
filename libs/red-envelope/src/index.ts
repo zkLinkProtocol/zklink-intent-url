@@ -375,11 +375,12 @@ export class RedEnvelopeService extends ActionDto {
   public async getRealTimeContent(data: {
     code: string;
     sender: string;
-    params: ActionTransactionParams;
   }): Promise<{ title: string; content: string }> {
     const { code } = data;
+    const hash = keccak256(toUtf8Bytes(code));
+    const packetId = getBigInt(hash);
     const [_, unClaimedCount] =
-      await this.envelopContract.getRedPacketBalance(code);
+      await this.envelopContract.getRedPacketBalance(packetId);
     return {
       title: 'Red Envelope Info',
       content: `<p>There are still ${unClaimedCount} red packets unclaimed.</p>`,

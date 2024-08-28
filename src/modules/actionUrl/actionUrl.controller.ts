@@ -76,7 +76,7 @@ export class ActionUrlController extends BaseController {
     return this.success(response);
   }
 
-  @Get(':code/post-transactions')
+  @Post(':code/post-transactions')
   @CommonApiOperation(
     'Returns the configuration information for a single actionUrl.',
   )
@@ -106,14 +106,13 @@ export class ActionUrlController extends BaseController {
   )
   async getRefreshContent(
     @Param('code') code: string,
-    @Body() request: { sender: string; params: ActionTransactionParams },
+    @Query('sender') sender: string,
   ): Promise<
     ResponseDto<{
       title: string;
       content: string;
     } | null>
   > {
-    const { sender, params } = request;
     const result = await this.actionUrlService.findOneByCode(code);
     const actionStore = await this.actionService.getActionStore(
       result.actionId,
@@ -124,7 +123,6 @@ export class ActionUrlController extends BaseController {
     const data = await actionStore.getRealTimeContent({
       code,
       sender,
-      params,
     });
     return this.success(data);
   }

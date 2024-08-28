@@ -17,7 +17,9 @@ export abstract class Action {
     return Promise.resolve('');
   }
 
-  async getRealTimeContent?(data: GenerateTransactionData): Promise<{
+  async getRealTimeContent?(
+    data: Omit<GenerateTransactionData, 'params'>,
+  ): Promise<{
     title: string;
     content: string;
   }>;
