@@ -1,27 +1,17 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { ethers } from 'ethers';
 
-import { BusinessException } from 'src/exception/business.exception';
-
-import { ActionUrlService } from './actionUrl.service';
 import { ActionService } from '../action/action.service';
 
 @Injectable()
 export class BlinkService {
   logger: Logger;
-  constructor(
-    private readonly actionUrlService: ActionUrlService,
-    private readonly actionService: ActionService,
-  ) {
+  constructor(private readonly actionService: ActionService) {
     this.logger = new Logger(BlinkService.name);
   }
 
-  async getMetadata(code: string) {
-    const result = await this.actionUrlService.findOneByCode(code);
-    if (!result) {
-      throw new BusinessException('Action not found');
-    }
+  async getMetadataActions(code: string, setting: any) {
     const postHref = `/api/action-url/${code}/build-transactions`;
-    const setting: any = result.settings;
 
     const componentsArr = setting.intentInfo.components;
     const components = new Map();
@@ -36,27 +26,26 @@ export class BlinkService {
     let actions = [];
     if (intentList && intentList.length > 0) {
       actions = intentList.map((item: any) => {
+        let res: any = {};
         if (item.type == 'Button') {
           if (!('' == item?.field ?? '')) {
             params.set(item.field, item.value);
           }
-          let paramsStr = '';
-          params.forEach((value, key) => {
-            paramsStr += `${key}=${value}&`;
-          });
-          return {
-            href: `${postHref}?${paramsStr.substring(0, paramsStr.length - 1)}`,
+          res = {
+            href: '',
             label: item.title,
           };
         } else if (item.type == 'Input') {
+          params.set(item.field, `{${item.field}}`);
           const component = components.get(item.field);
           if (component) {
-            return {
-              href: postHref,
+            res = {
+              href: '',
               label: item.title,
               parameters: [
                 {
-                  name: component.name,
+                  name: component.label,
+                  // name: component.name,
                   label: component.label,
                   required: true,
                 },
@@ -64,43 +53,39 @@ export class BlinkService {
             };
           }
         }
+
+        let paramsStr = '';
+        params.forEach((value, key) => {
+          paramsStr += `${key}=${value}&`;
+        });
+        res.href = `${postHref}?${paramsStr.substring(0, paramsStr.length - 1)}`;
+        return res;
       });
     }
-
-    const metadata = {
-      icon: result.metadata,
-      title: result.title,
-      description: result.description,
-      label: '',
-      disable: false,
-      error: {
-        message: '',
-      },
-      links: {
-        actions,
-      },
-    };
-    return metadata;
+    return actions;
   }
 
-  async buildTransactions(code: string, params: any) {
-    const result = await this.actionUrlService.findOneByCode(code);
-    if (!result) {
-      throw new BusinessException('Action not found');
-    }
-    const actionId = result.actionId;
-    const chainId = (result.settings as any)?.intentInfo?.network?.chainId ?? 0;
-    if (chainId == 0) {
-      throw new BusinessException(
-        'buildTransactions: code : ${code}, ChainId not found',
-      );
-    }
-    params.chainId = chainId;
+  async buildTransactions(
+    code: string,
+    actionId: string,
+    sender: string,
+    params: any,
+  ): Promise<string> {
     const data = {
       code,
-      sender: result.creator.address,
+      sender,
       params,
     };
-    return await this.actionService.generateTransaction(actionId, data);
+    const result = await this.actionService.generateTransaction(actionId, data);
+    if (!result || result.txs.length == 0) {
+      return '';
+    }
+    const tx = result.txs[0];
+    const transaction = new ethers.Transaction();
+    transaction.chainId = tx.chainId;
+    transaction.to = tx.to;
+    transaction.value = tx.value;
+    transaction.data = tx.data;
+    return transaction.serialized;
   }
 }
