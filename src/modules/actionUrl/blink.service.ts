@@ -28,7 +28,7 @@ export class BlinkService {
       actions = intentList.map((item: any) => {
         let res: any = {};
         if (item.type == 'Button') {
-          if (!('' == item?.field ?? '')) {
+          if (undefined != item.value) {
             params.set(item.field, item.value);
           }
           res = {
