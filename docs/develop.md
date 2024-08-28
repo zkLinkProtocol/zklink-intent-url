@@ -11,13 +11,12 @@ MagicLink is a feature launched by zkLink that converts the act of constructing 
 
 - **Action**: An Action is a standardized API implementation created by developers. It accepts certain parameters and returns signable transaction or message, enabling specific on-chain or off-chain activities. Actions allow developers to abstract their services to meet user's potential intents, while being maximally flexible by allowing anyone to set parameters when creating a magicLink. Actions simplify the process of integrating the "actionables" throughout EVM-compatible networks right into specific environment, allowing users to execute blockchain transactions without switching between different apps or websites. 
 - **MagicLink**: It is a shareable short link that serves as the entry point for executing an action. On the page of this short link, users can set a few parameters using selection boxes or input fields. After clicking confirm, they can generate and preview the transaction. If everything is correct, the user can sign and send it to the zkLink Nova network. While on a website, a magicLink might immediately initiate a transaction preview in a wallet without redirecting users to a dApp. In Telegram, a bot can be used to expand a magicLink into an interactive set of buttons. In the future iteration, this function will be expanded to Discord. 
-- 
 
 ## Role
 
 - Developer: The role responsible for developing Actions. Developers need to implement the Action specifications and submit the code to the repository. We (zkLink) will register the reviewed Actions.
 - Intent Creator: The role responsible for creating magicLinks. They select a registered Action, configure it, and generate a shareable short link.
-- User: The person using the magicLinkL. Users do not need to understand complex transaction details; they can send transactions and participate in activities with simple inputs and clicks.
+- User: The person using the magicLink. Users do not need to understand complex transaction details; they can send transactions and participate in activities with simple inputs and clicks.
 
 ![](./img/interactive-workflow.png)
 
@@ -228,7 +227,7 @@ export const config = {
 } as const;
 ```
 
-2. read the env using NestJS DI:
+2. Read the env using NestJS DI:
 
 ```typescript
 @Injectable()
@@ -348,7 +347,7 @@ To update an existing action, follow these steps:
 Test Thoroughly: Ensure all changes are thoroughly tested, including unit, integration, and manual tests.
 2. Submit a Pull Request (PR): Create a PR with a detailed description of the changes and the reasons for the update.
 3. Code Review: The zkLink team will review your PR for quality, security, and compliance with standards.
-Approval and Registration: Once approved, your updated action will be registered and available for use.
+4. Approval and Registration: Once approved, your updated action will be registered and available for use.
 
 ### 2. What if my action requires external data?
 
