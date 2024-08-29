@@ -22,7 +22,7 @@ export const metadata: ActionMetadata = {
     },
   ],
   dApp: { name: 'Buy Me a Coffee' },
-  author: { name: 'zkLink' },
+  author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
   intent: {
     components: [
       {
