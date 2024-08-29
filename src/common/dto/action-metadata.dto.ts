@@ -52,10 +52,9 @@ export class AuthorDto {
   @IsString()
   x?: string;
 
-  @ApiPropertyOptional({ type: String, description: 'GitHub url (optional)' })
-  @IsOptional()
+  @ApiProperty({ type: String, description: 'GitHub url' })
   @IsString()
-  github?: string;
+  github: string;
 
   @ApiPropertyOptional({ type: String, description: 'Discord url (optional)' })
   @IsOptional()
@@ -190,7 +189,7 @@ export class ActionMetadata {
   })
   @IsOptional()
   @ValidateNested()
-  author?: AuthorDto;
+  author: AuthorDto;
 
   @ApiProperty({ type: IntentDto, description: 'Intent details' })
   @ValidateNested()
