@@ -1,6 +1,7 @@
 import { RegistryPlug } from '@action/registry';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import BigNumber from 'bignumber.js';
 import {
   JsonRpcProvider,
   ethers,
@@ -320,14 +321,12 @@ export class RedEnvelopeService extends ActionDto {
     const decimals = await this.getDecimals(distributionToken);
 
     if (
-      txGas * BigInt(Number(amountOfRedEnvelopes) * 1.5) >=
-      parseUnits(totalDistributionAmount, decimals)
+      BigNumber(txGas.toString())
+        .multipliedBy(amountOfRedEnvelopes)
+        .multipliedBy(1.5)
+        .gte(parseUnits(totalDistributionAmount, decimals).toString())
     ) {
       return 'The amount of the pool is too low to cover gas fee';
-    }
-
-    if (Number(amountOfRedEnvelopes) > 100) {
-      return 'A maximum of 100 red envelopes can be sent at one time';
     }
   }
 
