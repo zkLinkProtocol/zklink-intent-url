@@ -1,6 +1,6 @@
 import path from 'path';
 
-import { Module, OnModuleInit } from '@nestjs/common';
+import { Logger, Module, OnModuleInit } from '@nestjs/common';
 
 import { FilesController } from './files.controller';
 import { FilesService } from './files.service';
@@ -10,17 +10,20 @@ import { FilesService } from './files.service';
   providers: [FilesService],
 })
 export class FilesModule implements OnModuleInit {
-  constructor(private readonly filesService: FilesService) {}
+  logger: Logger;
+  constructor(private readonly filesService: FilesService) {
+    this.logger = new Logger(FilesModule.name);
+  }
 
   async onModuleInit() {
-    // const folderPath = path.join(process.cwd(), 'assets/logos');
-    // if (folderPath) {
-    //   try {
-    //     const urls = await this.filesService.uploadFolder(folderPath);
-    //     console.log('Uploaded files:', urls);
-    //   } catch (error) {
-    //     console.error('Error uploading folder:', error);
-    //   }
-    // }
+    const folderPath = path.join(process.cwd(), 'assets/logos');
+    if (folderPath) {
+      try {
+        const urls = await this.filesService.uploadFolder(folderPath);
+        this.logger.log('Uploaded files:', urls);
+      } catch (error) {
+        this.logger.error('Error uploading folder:', error);
+      }
+    }
   }
 }
