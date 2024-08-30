@@ -3,7 +3,6 @@ import { ActionMetadata } from 'src/common/dto';
 export const metadata: ActionMetadata = {
   title: 'Slipt Order',
   description: 'Support the works you love',
-  logo: '',
   networks: [
     {
       name: 'Ethereum',

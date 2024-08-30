@@ -50,11 +50,11 @@ export class ActionService implements OnApplicationBootstrap {
 
       if (!metadata.logo) {
         const logos = fs.readdirSync(path.join(process.cwd(), 'assets/logos'));
-        const logo = logos.find((file) => {
+        const logoWithExt = logos.find((file) => {
           const fileName = path.basename(file, path.extname(file));
           return fileName === id;
         });
-        metadata.logo = `${this.awsConfig.s3Url}/${this.awsConfig.keyPrefix}/logos/${logo ?? 'zklink'}`;
+        metadata.logo = `${this.awsConfig.s3Url}/${this.awsConfig.keyPrefix}/logos/${logoWithExt ?? 'zklink.png'}`;
       }
 
       const { title, logo, description, networks, intent, dApp, author } =
