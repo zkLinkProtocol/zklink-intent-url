@@ -43,7 +43,6 @@ export class ActionModule implements OnModuleInit {
         {
           provide: 'ALL_ACTION_PLUGS',
           useFactory: (module: ActionModule) => {
-            // await module.onModuleInit();
             return module.serviceRegistry;
           },
           inject: [ActionModule],
