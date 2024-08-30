@@ -12,5 +12,8 @@
   "devDependencies": {
     "ethers": "^6.13.2",
     "zksync-ethers": "^6.11.1"
+  },
+  "dependencies": {
+    "bignumber.js": "^9.1.2"
   }
 }
