@@ -1,4 +1,4 @@
-export const config = {
+export const configuration = {
   dev: {
     chainId: 810181,
     rpcUrl: 'https://sepolia.rpc.zklink.io',
@@ -17,6 +17,6 @@ export const config = {
   },
 } as const;
 
-type Config = typeof config;
+type Config = typeof configuration;
 
 export type Value = Config[keyof Config];

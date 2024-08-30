@@ -51,10 +51,17 @@
         "libs/red-envelope/src/*"
       ],
       "@action/slipt-order": [
-        "libs/slipt-order/src"
+        "libs/split-order/src"
       ],
       "@action/slipt-order/*": [
-        "libs/slipt-order/src/*"
+        "libs/split-order/src/*"
+      ],
+      "@action/registry": [
+        "libs/registry/src",
+        "libs/registry/src/index.ts"
+      ],
+      "@action/registry/*": [
+        "libs/registry/src/*"
       ]
     }
   }

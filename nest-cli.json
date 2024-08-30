@@ -54,6 +54,15 @@
       "compilerOptions": {
         "tsConfigPath": "libs/slipt-order/tsconfig.lib.json"
       }
+    },
+    "registry": {
+      "type": "library",
+      "root": "libs/registry",
+      "entryFile": "index",
+      "sourceRoot": "libs/registry/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/registry/tsconfig.lib.json"
+      }
     }
   }
 }

@@ -16,6 +16,8 @@
     "@action/red-envelope/(.*)": "<rootDir>/../libs/red-envelope/src/$1",
     "@action/red-envelope": "<rootDir>/../libs/red-envelope/src",
     "@action/slipt-order/(.*)": "<rootDir>/../libs/slipt-order/src/$1",
-    "@action/slipt-order": "<rootDir>/../libs/slipt-order/src"
+    "@action/slipt-order": "<rootDir>/../libs/slipt-order/src",
+    "@action/registry/(.*)": "<rootDir>/../libs/registry/src/$1",
+    "@action/registry": "<rootDir>/../libs/registry/src"
   }
 }

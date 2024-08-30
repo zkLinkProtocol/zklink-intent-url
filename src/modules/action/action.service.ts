@@ -1,59 +1,51 @@
 import fs from 'fs';
 import path from 'path';
 
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-
-import { BuyMeACoffeeService } from '@action/buy-me-a-coffee';
-import { CrossChainSwapService } from '@action/cross-chain-swap';
-import { NovaswapService } from '@action/novaswap';
-import { RedEnvelopeService } from '@action/red-envelope';
-import { SliptOrderService } from '@action/slipt-order';
 import {
-  Action,
-  ActionId,
-  GenerateTransactionData,
-  GeneratedTransaction,
-} from 'src/common/dto';
+  Inject,
+  Injectable,
+  Logger,
+  OnApplicationBootstrap,
+} from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import _ from 'lodash';
+
+import { Action, ActionId } from 'src/common/dto';
 import { ConfigType } from 'src/config';
 import { BusinessException } from 'src/exception/business.exception';
 import { ActionRepository } from 'src/repositories/action.repository';
 
 import { ActionResponseDto } from './dto/actions.dto';
+import { RegistryAction } from './model';
 
 @Injectable()
-export class ActionService {
+export class ActionService implements OnApplicationBootstrap {
   private logger = new Logger(ActionService.name);
   private awsConfig: ConfigType['aws'];
-  private allActionStore: Map<ActionId, Action> = new Map();
+  private uniqueActionPlugs: Array<RegistryAction>;
 
   constructor(
     private readonly actionRepository: ActionRepository,
     readonly configService: ConfigService,
-    readonly redEnvelopeService: RedEnvelopeService,
-    readonly novaswapService: NovaswapService,
-    readonly buyMeACoffeeService: BuyMeACoffeeService,
-    readonly crossChainSwapService: CrossChainSwapService,
-    readonly sliptOrderService: SliptOrderService,
+    @Inject('ALL_ACTION_PLUGS')
+    private readonly allActionPlugs: Array<RegistryAction>,
   ) {
     this.awsConfig = configService.get('aws', { infer: true })!;
-    const allServiceConfig = [
-      { id: 'red-envelope', service: redEnvelopeService },
-      { id: 'novaswap', service: novaswapService },
-      { id: 'buy-me-a-coffee', service: buyMeACoffeeService },
-      { id: 'cross-chain-swap', service: crossChainSwapService },
-      { id: 'spit-order', service: sliptOrderService },
-    ];
-    this.initializeActionsMetadata(allServiceConfig);
-    allServiceConfig.forEach((action) => {
-      this.allActionStore.set(action.id, action.service);
-    });
   }
 
-  private async initializeActionsMetadata(
-    actionList: Array<{ id: string; service: Action }>,
-  ) {
-    for (const { id, service } of actionList) {
+  onApplicationBootstrap() {
+    this.uniqueActionPlugs = _.chain(this.allActionPlugs)
+      .groupBy('id')
+      .map((actions) => _.maxBy(actions, 'version'))
+      .compact()
+      .value();
+
+    this.initializeActionsMetadata(this.uniqueActionPlugs);
+    this.logger.log(`initializeActionsMetadata successfully`);
+  }
+
+  private async initializeActionsMetadata(actionPlugs: Array<RegistryAction>) {
+    for (const { id, service } of actionPlugs) {
       const metadata = await service.getMetadata();
 
       if (!metadata.logo) {
@@ -62,7 +54,7 @@ export class ActionService {
           const fileName = path.basename(file, path.extname(file));
           return fileName === id;
         });
-        metadata.logo = `${this.awsConfig.s3Url}/${this.awsConfig.keyPrefix}/logos/${logo}`;
+        metadata.logo = `${this.awsConfig.s3Url}/${this.awsConfig.keyPrefix}/logos/${logo ?? 'zklink'}`;
       }
 
       const { title, logo, description, networks, intent, dApp, author } =
@@ -108,26 +100,23 @@ export class ActionService {
   }
 
   getActionStore(id: ActionId): Action {
-    const actionStore = this.allActionStore.get(id);
+    const actionStore = this.uniqueActionPlugs.find((plug) => plug.id === id);
+
     if (!actionStore) {
       throw new BusinessException(`Action with id '${id}' not found.`);
     }
-    return actionStore;
+    return actionStore.service;
   }
 
-  generateTransaction(
-    id: ActionId,
-    data: GenerateTransactionData,
-  ): Promise<GeneratedTransaction> {
-    const actionStore = this.getActionStore(id);
+  getActionVersionStore(id: ActionId, version: string): Action {
+    const actionStore = this.allActionPlugs.find(
+      (plug) => plug.id === id && plug.version === version,
+    );
     if (!actionStore) {
-      throw new BusinessException(`Action with id '${id}' not found.`);
+      throw new BusinessException(
+        `ActionVersion with id '${id}' version ${version} not found.`,
+      );
     }
-    try {
-      return actionStore.generateTransaction(data);
-    } catch (error) {
-      this.logger.error(error);
-      throw new BusinessException('Failed to generate transaction');
-    }
+    return actionStore.service;
   }
 }

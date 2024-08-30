@@ -15,7 +15,7 @@ import { BlinkService } from './blink.service';
 import { IntentionRecordService } from './intentionRecord.service';
 
 @Module({
-  imports: [UnitOfWorkModule, ActionModule],
+  imports: [UnitOfWorkModule, ActionModule.forRoot()],
   controllers: [ActionUrlController],
   providers: [
     ActionRepository,

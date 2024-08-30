@@ -1,3 +1,4 @@
+import { RegistryPlug } from '@action/registry';
 import { Injectable } from '@nestjs/common';
 import { ethers } from 'ethers';
 import {
@@ -26,6 +27,7 @@ const novaswap = new NovaSwap(
   SWAP_ROUTER_CONTRACT_ADDRESS,
 );
 
+@RegistryPlug('novaswap', 'v1')
 @Injectable()
 export class NovaswapService extends ActionDto {
   async getMetadata(): Promise<ActionMetadata> {

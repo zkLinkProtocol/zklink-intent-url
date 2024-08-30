@@ -1,6 +1,7 @@
 import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { nanoid } from 'nanoid';
 
+import { GenerateTransactionData, GeneratedTransaction } from 'src/common/dto';
 import { BusinessException } from 'src/exception/business.exception';
 import { ActionService } from 'src/modules/action/action.service';
 import { ActionRepository } from 'src/repositories';
@@ -153,5 +154,24 @@ export class ActionUrlService {
       throw new BusinessException('Failed to delete actionUrl');
     }
     return true;
+  }
+
+  async generateTransaction(
+    code: string,
+    data: GenerateTransactionData,
+  ): Promise<GeneratedTransaction> {
+    const actionUrl = await this.findOneByCode(code);
+    const { actionId, actionVersion } = actionUrl;
+    const actionStore = this.actionService.getActionVersionStore(
+      actionId,
+      actionVersion,
+    );
+
+    try {
+      return actionStore.generateTransaction(data);
+    } catch (error) {
+      this.logger.error(error);
+      throw new BusinessException('Failed to generate transaction');
+    }
   }
 }

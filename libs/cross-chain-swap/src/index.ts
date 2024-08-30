@@ -1,3 +1,4 @@
+import { RegistryPlug } from '@action/registry';
 import { getERC20SymbolAndDecimals } from '@action/utils';
 import { Injectable } from '@nestjs/common';
 import { ethers } from 'ethers';
@@ -13,6 +14,7 @@ import { METADATA, RPC_URL, TOKEN_CONFIG } from './config';
 import { intoParams } from './interface';
 import { getApproveData, getSwapData } from './okxAPI';
 
+@RegistryPlug('cross-chain-swap', 'v1')
 @Injectable()
 export class CrossChainSwapService extends ActionDto {
   async getMetadata(): Promise<ActionMetadata> {
