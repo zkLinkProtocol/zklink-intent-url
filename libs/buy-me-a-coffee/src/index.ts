@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
+import { RegistryPlug } from '@action/registry';
 import {
   Action as ActionDto,
   ActionMetadata,
@@ -11,6 +12,7 @@ import {
 import { metadata } from './config';
 import { intoParams } from './interface';
 
+@RegistryPlug('buy-me-a-coffee', 'v1')
 @Injectable()
 export class BuyMeACoffeeService extends ActionDto {
   async getMetadata(): Promise<ActionMetadata> {

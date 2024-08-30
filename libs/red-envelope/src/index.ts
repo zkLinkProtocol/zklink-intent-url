@@ -1,3 +1,4 @@
+import { RegistryPlug } from '@action/registry';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
@@ -14,7 +15,7 @@ import { utils } from 'zksync-ethers';
 import ERC20ABI from './abis/ERC20.json';
 import QuoterV2 from './abis/QuoterV2.json';
 import RedPacketABI from './abis/RedPacket.json';
-import { Value, config } from './config';
+import { Value, configuration } from './config';
 import { genMetadata } from './metadata';
 import { DistributionModeValue, GasTokenValue } from './type';
 import {
@@ -45,6 +46,7 @@ interface ClaimRedPacketParams {
   expiry: number;
 }
 
+@RegistryPlug('red-envelope', 'v1')
 @Injectable()
 export class RedEnvelopeService extends ActionDto {
   public envelopContract: ethers.Contract;
@@ -61,7 +63,7 @@ export class RedEnvelopeService extends ActionDto {
     this.witnessPrivateKey = configService.get('witnessPrivateKey', {
       infer: true,
     })!;
-    this.config = config[this.env];
+    this.config = configuration[this.env];
     this.provider = new JsonRpcProvider(this.config.rpcUrl);
     const mainNetProvider = new JsonRpcProvider('https://rpc.zklink.io');
 

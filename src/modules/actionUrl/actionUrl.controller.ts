@@ -10,12 +10,22 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+  getSchemaPath,
+} from '@nestjs/swagger';
 import { Response } from 'express';
 
 import { BaseController } from 'src/common/base.controller';
 import { CommonApiOperation } from 'src/common/base.decorators';
-import { ActionTransactionParams, GeneratedTransaction } from 'src/common/dto';
+import {
+  ActionTransactionParams,
+  GenerateTransactionData,
+  GeneratedTransaction,
+} from 'src/common/dto';
 import { PagingOptionsDto } from 'src/common/pagingOptionsDto.param';
 import { PagingMetaDto, ResponseDto } from 'src/common/response.dto';
 import { BusinessException } from 'src/exception/business.exception';
@@ -86,7 +96,11 @@ export class ActionUrlController extends BaseController {
     @Body() request: { sender: string; params: ActionTransactionParams },
   ): Promise<ResponseDto<GeneratedTransaction>> {
     const { sender, params } = request;
-    const actionStore = await this.actionService.getActionStore(code);
+    const intention = await this.actionUrlService.findOneByCode(code);
+    const actionStore = await this.actionService.getActionVersionStore(
+      intention.actionId,
+      intention.actionVersion,
+    );
     if (!actionStore.afterActionUrlCreated) {
       throw new BusinessException('No post transactions!');
     }
@@ -114,8 +128,9 @@ export class ActionUrlController extends BaseController {
     } | null>
   > {
     const result = await this.actionUrlService.findOneByCode(code);
-    const actionStore = await this.actionService.getActionStore(
+    const actionStore = await this.actionService.getActionVersionStore(
       result.actionId,
+      result.actionVersion,
     );
     if (!actionStore.getRealTimeContent) {
       return this.success(null);
@@ -234,6 +249,61 @@ export class ActionUrlController extends BaseController {
   ): Promise<ResponseDto<boolean>> {
     const result = await this.actionUrlService.deleteByCode(path, creator.id);
     return this.success(result);
+  }
+
+  @Post(':code/transaction')
+  @CommonApiOperation('Generate transaction by action Id.')
+  @ApiParam({
+    name: 'id',
+    example: 'novaswap',
+  })
+  @ApiBody({
+    description: 'parameters to generate transaction',
+    schema: {
+      type: 'object',
+      additionalProperties: {
+        type: 'any',
+      },
+    },
+    examples: {
+      a: {
+        summary: 'NovaSwap',
+        description: 'Generate tranasction for NovaSwap',
+        value: {
+          tokenInAddress: '0x6e42d10eB474a17b14f3cfeAC2590bfa604313C7',
+          tokenOutAddress: '0x461fE851Cd66e82A274570ED5767c873bE9Ae1ff',
+          amountIn: '1',
+          amountInDecimal: '18',
+          recipient: '0xE592427A0AEce92De3Edee1F18E0157C05861564',
+          deadlineDurationInSec: '3600',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Return generated transaction',
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ResponseDto) },
+        {
+          properties: {
+            data: { $ref: getSchemaPath(GeneratedTransaction) },
+          },
+        },
+      ],
+    },
+  })
+  async generateTransaction(
+    @Param('code') code: string,
+    @Body()
+    body: GenerateTransactionData,
+  ): Promise<ResponseDto<GeneratedTransaction>> {
+    const response = await this.actionUrlService.generateTransaction(
+      code,
+      body,
+    );
+    return this.success(response);
   }
 
   // post intention record and txs

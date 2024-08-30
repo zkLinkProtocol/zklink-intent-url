@@ -1,4 +1,4 @@
-import { Controller, Get, RequestMapping, RequestMethod } from '@nestjs/common';
+import { Controller, RequestMapping, RequestMethod } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 
 import { BaseController } from 'src/common/base.controller';

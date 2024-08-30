@@ -31,6 +31,9 @@ export class Intention extends BaseEntity {
   @Column({ type: 'varchar' })
   public actionId: string;
 
+  @Column({ type: 'varchar', default: 'v1' })
+  public actionVersion: string;
+
   @Column({ type: 'varchar' })
   public title: string;
 

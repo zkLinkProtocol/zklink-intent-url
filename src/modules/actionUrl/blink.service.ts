@@ -1,12 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ethers } from 'ethers';
 
-import { ActionService } from '../action/action.service';
+import { ActionUrlService } from './actionUrl.service';
 
 @Injectable()
 export class BlinkService {
   logger: Logger;
-  constructor(private readonly actionService: ActionService) {
+  constructor(private readonly actionUrlService: ActionUrlService) {
     this.logger = new Logger(BlinkService.name);
   }
 
@@ -76,7 +76,10 @@ export class BlinkService {
       sender,
       params,
     };
-    const result = await this.actionService.generateTransaction(actionId, data);
+    const result = await this.actionUrlService.generateTransaction(
+      actionId,
+      data,
+    );
     if (!result || result.txs.length == 0) {
       return '';
     }
