@@ -1,11 +1,7 @@
 import { ActionMetadata } from 'src/common/dto';
 
 import { Value } from './config';
-import {
-  DistributionModeValue,
-  DistributionTokenValue,
-  GasTokenValue,
-} from './type';
+import { DistributionModeValue, GasTokenValue } from './type';
 
 export const genMetadata = (configValue: Value): ActionMetadata => ({
   title: 'RedEnvelope',
@@ -54,24 +50,7 @@ export const genMetadata = (configValue: Value): ActionMetadata => ({
         type: 'searchSelectErc20',
         regex: '^0x[a-fA-F0-9]{40}$',
         regexDesc: 'Address',
-        options: [
-          {
-            label: 'ETH',
-            value: DistributionTokenValue.ETH,
-          },
-          {
-            label: 'USDC',
-            value: DistributionTokenValue.USDC,
-          },
-          {
-            label: 'USDT',
-            value: DistributionTokenValue.USDT,
-          },
-          {
-            label: 'DAI',
-            value: DistributionTokenValue.DAI,
-          },
-        ],
+        options: configValue.tokens,
       },
       {
         name: 'amountOfRedEnvelopes',
