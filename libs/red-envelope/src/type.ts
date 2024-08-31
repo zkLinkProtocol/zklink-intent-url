@@ -14,3 +14,22 @@ export enum GasTokenValue {
   Eth = 'eth',
   DistributedToken = 'distributedToken',
 }
+
+export interface CreateRedPacketParams {
+  creator: string;
+  token: string;
+  totalCount: number;
+  tokenAmount: bigint;
+  payForGas: bigint;
+  totalShare: number;
+  packetHash: string;
+  isRandom: boolean;
+  isGasfree: boolean;
+  expiry: number;
+}
+
+export interface ClaimRedPacketParams {
+  id: string;
+  recipient: string;
+  expiry: number;
+}

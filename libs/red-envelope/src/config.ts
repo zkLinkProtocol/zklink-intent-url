@@ -1,3 +1,5 @@
+import { DistributionTokenValue } from './type';
+
 export const configuration = {
   dev: {
     chainId: 810181,
@@ -6,6 +8,12 @@ export const configuration = {
     quoterContractAddress: '0x86Fc6ab84CFc6a506d51FC722D3aDe959599A98A',
     redPacketContractAddress: '0xD6D392794aDCA3d3EF300c3Cc99B8AfD89da2235',
     paymasterContractAddress: '0x8f283dEB6E1612fD016D139bAF465208402F9C3d',
+    tokens: [
+      {
+        label: 'DTN',
+        value: '0x8a183994392CDBb3e6451cFC8cC779f7b0e907BA',
+      },
+    ],
   },
   prod: {
     chainId: 810180,
@@ -14,8 +22,26 @@ export const configuration = {
     quoterContractAddress: '',
     redPacketContractAddress: '',
     paymasterContractAddress: '',
+    tokens: [
+      {
+        label: 'ETH',
+        value: DistributionTokenValue.ETH,
+      },
+      {
+        label: 'USDC',
+        value: DistributionTokenValue.USDC,
+      },
+      {
+        label: 'USDT',
+        value: DistributionTokenValue.USDT,
+      },
+      {
+        label: 'DAI',
+        value: DistributionTokenValue.DAI,
+      },
+    ],
   },
-} as const;
+};
 
 type Config = typeof configuration;
 

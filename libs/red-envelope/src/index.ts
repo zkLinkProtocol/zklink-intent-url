@@ -18,7 +18,12 @@ import QuoterV2 from './abis/QuoterV2.json';
 import RedPacketABI from './abis/RedPacket.json';
 import { Value, configuration } from './config';
 import { genMetadata } from './metadata';
-import { DistributionModeValue, GasTokenValue } from './type';
+import {
+  ClaimRedPacketParams,
+  CreateRedPacketParams,
+  DistributionModeValue,
+  GasTokenValue,
+} from './type';
 import {
   Action as ActionDto,
   ActionMetadata,
@@ -27,25 +32,6 @@ import {
 } from '../../../src/common/dto';
 
 const PACKET_HASH = ethers.keccak256(ethers.toUtf8Bytes('REDPACKET'));
-
-interface CreateRedPacketParams {
-  creator: string;
-  token: string;
-  totalCount: number;
-  tokenAmount: bigint;
-  payForGas: bigint;
-  totalShare: number;
-  packetHash: string;
-  isRandom: boolean;
-  isGasfree: boolean;
-  expiry: number;
-}
-
-interface ClaimRedPacketParams {
-  id: string;
-  recipient: string;
-  expiry: number;
-}
 
 @RegistryPlug('red-envelope', 'v1')
 @Injectable()
