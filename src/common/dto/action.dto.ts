@@ -13,6 +13,10 @@ export interface GenerateTransactionData {
 export abstract class Action {
   abstract getMetadata(): Promise<ActionMetadata>;
 
+  abstract generateTransaction(
+    data: GenerateTransactionData,
+  ): Promise<GeneratedTransaction>;
+
   async validateIntentParams(_: ActionTransactionParams): Promise<string> {
     return Promise.resolve('');
   }
@@ -25,10 +29,6 @@ export abstract class Action {
   }>;
 
   async afterActionUrlCreated?(
-    data: GenerateTransactionData,
-  ): Promise<GeneratedTransaction>;
-
-  abstract generateTransaction(
     data: GenerateTransactionData,
   ): Promise<GeneratedTransaction>;
 }
