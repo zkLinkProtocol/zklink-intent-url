@@ -1,21 +1,23 @@
-import { DataSource, DataSourceOptions } from 'typeorm';
 import { config } from 'dotenv';
+import { DataSource, DataSourceOptions } from 'typeorm';
 
 config();
 
 export const typeOrmModuleOptions: DataSourceOptions = {
   type: 'postgres',
-  host: process.env.DATABASE_HOST || 'localhost',
-  port: parseInt(process.env.DATABASE_PORT) || 5432,
-  username: process.env.DATABASE_USER || 'postgres',
-  password: process.env.DATABASE_PASSWORD || 'postgres',
-  database: process.env.DATABASE_NAME || 'nova-points-distribute',
-  poolSize: parseInt(process.env.DATABASE_CONNECTION_POOL_SIZE, 10) || 100,
+  host: process.env.DATABASE_HOST,
+  port: parseInt(process.env.DATABASE_PORT || ''),
+  username: process.env.DATABASE_USER,
+  password: process.env.DATABASE_PASSWORD,
+  database: process.env.DATABASE_NAME,
+  poolSize: parseInt(process.env.DATABASE_CONNECTION_POOL_SIZE || '100', 10),
   extra: {
-    idleTimeoutMillis:
-      parseInt(process.env.DATABASE_CONNECTION_IDLE_TIMEOUT_MS, 10) || 12000,
+    idleTimeoutMillis: parseInt(
+      process.env.DATABASE_CONNECTION_IDLE_TIMEOUT_MS || '12000',
+      10,
+    ),
   },
-  applicationName: 'lrt-points-distribute',
+  applicationName: 'zklink-intent-url',
   migrationsRun: false,
   synchronize: false,
   logging: false,

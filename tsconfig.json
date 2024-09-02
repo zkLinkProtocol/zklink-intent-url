@@ -14,23 +14,54 @@
     "baseUrl": "./",
     "incremental": true,
     "skipLibCheck": true,
-    "strictNullChecks": false,
-    "noImplicitAny": false,
+    "strictNullChecks": true,
+    "noImplicitAny": true,
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
-      "@action/example": [
-        "libs/example/src"
+      "@action/utils": [
+        "libs/utils/src"
       ],
-      "@action/example/*": [
-        "libs/example/src/*"
+      "@action/utils/*": [
+        "libs/utils/src/*"
       ],
       "@action/novaswap": [
         "libs/novaswap/src"
       ],
       "@action/novaswap/*": [
         "libs/novaswap/src/*"
+      ],
+      "@action/buy-me-a-coffee": [
+        "libs/buy-me-a-coffee/src"
+      ],
+      "@action/buy-me-a-coffee/*": [
+        "libs/buy-me-a-coffee/src/*"
+      ],
+      "@action/cross-chain-swap": [
+        "libs/cross-chain-swap/src"
+      ],
+      "@action/cross-chain-swap/*": [
+        "libs/cross-chain-swap/src/*"
+      ],
+      "@action/red-envelope": [
+        "libs/red-envelope/src"
+      ],
+      "@action/red-envelope/*": [
+        "libs/red-envelope/src/*"
+      ],
+      "@action/slipt-order": [
+        "libs/split-order/src"
+      ],
+      "@action/slipt-order/*": [
+        "libs/split-order/src/*"
+      ],
+      "@action/registry": [
+        "libs/registry/src",
+        "libs/registry/src/index.ts"
+      ],
+      "@action/registry/*": [
+        "libs/registry/src/*"
       ]
     }
   }

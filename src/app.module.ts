@@ -1,17 +1,24 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { typeOrmModuleOptions } from './typeorm.config';
-import { MetricsModule } from './metrics';
-import { UnitOfWorkModule } from './unitOfWork';
-import { AuthModule } from './auth/auth.module';
 import config from './config';
+import { Action } from './entities/action.entity';
 import { Creator } from './entities/creator.entity';
-import { ActionUrlModule } from './actionUrl/actionUrl.module';
-import { ActionUrl } from './entities/actionUrl.entity';
-import { ActionModule } from './action/action.module';
+import { Intention } from './entities/intention.entity';
+import { IntentionRecord } from './entities/intentionRecord.entity';
+import { IntentionRecordTx } from './entities/intentionRecordTx.entity';
+import { MetricsModule } from './metrics';
+import { ActionModule } from './modules/action/action.module';
+import { ActionsJsonModule } from './modules/actions.json/actionsJson.module';
+import { ActionUrlModule } from './modules/actionUrl/actionUrl.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { FilesModule } from './modules/files/files.module';
+import { HubModule } from './modules/hub/hub.module';
+import { typeOrmModuleOptions } from './typeorm.config';
+import { UnitOfWorkModule } from './unitOfWork';
 
 @Module({
   imports: [
@@ -31,12 +38,21 @@ import { ActionModule } from './action/action.module';
         };
       },
     }),
-    TypeOrmModule.forFeature([Creator, ActionUrl]),
+    TypeOrmModule.forFeature([
+      Action,
+      Creator,
+      Intention,
+      IntentionRecord,
+      IntentionRecordTx,
+    ]),
     MetricsModule,
     UnitOfWorkModule,
     AuthModule,
     ActionUrlModule,
     ActionModule,
+    FilesModule,
+    HubModule,
+    ActionsJsonModule,
   ],
 
   controllers: [AppController],

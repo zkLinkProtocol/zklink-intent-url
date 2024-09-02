@@ -1,12 +1,34 @@
-export type NetworkKey = string;
-export default async () => {
-  const { PORT, JWT_SECRET, JWT_EXPIRATION_TIME } = process.env;
-
+const configFactory = async () => {
   return {
-    port: parseInt(PORT, 10) || 2101,
+    env: (process.env.ENV || 'dev') as 'dev' | 'prod',
+    port: parseInt(process.env.PORT || '2101', 10),
     jwt: {
-      secret: JWT_SECRET,
-      expirationTime: JWT_EXPIRATION_TIME || '3600s',
+      secret: process.env.JWT_SECRET || '',
+      expirationTime: process.env.JWT_EXPIRATION_TIME || '3600s',
+    },
+    aws: {
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID || '',
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '',
+      bucket: process.env.AWS_BUCKET || '',
+      region: process.env.AWS_REGION || '',
+      keyPrefix: process.env.AWS_KEY_PREFIX || '',
+      s3Url: process.env.AWS_S3_URL || '',
+    },
+    witnessPrivateKey: process.env.WITNESS_PRIVATE_KEY || '',
+    rpc: {
+      810180: process.env.Nova_RPC_URL || '',
+      1: process.env.Ethereum_RPC_URL || '',
+      324: process.env.Zksync_RPC_URL || '',
+      59144: process.env.Linea_RPC_URL || '',
+      42161: process.env.Arbitrum_RPC_URL || '',
+      10: process.env.Optimism_RPC_URL || '',
+      8453: process.env.Base_RPC_URL || '',
+      5000: process.env.Mantle_RPC_URL || '',
+      169: process.env.Manta_RPC_URL || '',
+      534352: process.env.Scroll_RPC_URL || '',
     },
   };
 };
+
+export default configFactory;
+export type ConfigType = Awaited<ReturnType<typeof configFactory>>;

@@ -1,4 +1,5 @@
 import { Controller } from '@nestjs/common';
+
 import { PagingMetaDto, ResponseDto } from 'src/common/response.dto';
 
 @Controller()
@@ -10,26 +11,23 @@ export class BaseController {
     if (!meta) {
       return {
         code: 200,
-        message: 'succdess',
+        message: 'success',
         data: data,
       };
     } else {
       return {
         code: 200,
-        message: 'succdess',
+        message: 'success',
         meta: meta,
         data: data,
       };
     }
   }
 
-  protected async error(
-    errmsg: string,
-    code: number = 500,
-  ): Promise<ResponseDto<null>> {
+  protected async error(errMsg: string, code: number = 500) {
     return {
       code,
-      message: errmsg,
+      message: errMsg,
       data: null,
     };
   }
