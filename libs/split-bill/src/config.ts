@@ -1,14 +1,9 @@
 import { ActionMetadata } from 'src/common/dto';
 
 export const metadata: ActionMetadata = {
-  title: 'Slipt Order',
-  description: 'Support the works you love',
+  title: 'Split Bill 💰',
+  description: 'Each friend will pay you the same amount.',
   networks: [
-    {
-      name: 'Ethereum',
-      chainId: '1',
-      contractAddress: '0x',
-    },
     {
       name: 'Arbitrum',
       chainId: '42161',
@@ -20,7 +15,7 @@ export const metadata: ActionMetadata = {
       contractAddress: '0x',
     },
   ],
-  dApp: { name: 'Slipt Order' },
+  dApp: { name: 'Split bill' },
   author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
   intent: {
     components: [
@@ -32,21 +27,6 @@ export const metadata: ActionMetadata = {
         regex: '^[a-zA-Z0-9]+$',
         regexDesc: 'Token Symbol',
         options: [
-          {
-            label: 'WETH',
-            value: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
-            chainId: '1',
-          },
-          {
-            label: 'USDT',
-            value: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
-            chainId: '1',
-          },
-          {
-            label: 'USDC',
-            value: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-            chainId: '1',
-          },
           {
             label: 'WETH',
             value: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
@@ -61,6 +41,7 @@ export const metadata: ActionMetadata = {
             label: 'USDC',
             value: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831',
             chainId: '42161',
+            default: true,
           },
           {
             label: 'WETH',
@@ -76,21 +57,23 @@ export const metadata: ActionMetadata = {
             label: 'USDC',
             value: '0x1a1A3b2ff016332e866787B311fcB63928464509',
             chainId: '810180',
+            default: true,
           },
         ],
       },
       {
         name: 'value',
         label: 'Amount',
-        desc: 'The amount to collection',
+        desc: 'The amount of tokens you receive from each friend.',
         type: 'input',
         regex: '^[0-9]+$',
+        defaultValue: '10',
         regexDesc: 'Must be a number',
       },
       {
         name: 'recipient',
         label: 'Recipient',
-        desc: 'The address that is recipient',
+        desc: "Please enter the recipient's address.",
         type: 'input',
         regex: '^0x[a-fA-F0-9]{40}$',
         regexDesc: 'Address',

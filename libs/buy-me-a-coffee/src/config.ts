@@ -1,14 +1,9 @@
 import { ActionMetadata } from 'src/common/dto';
 
 export const metadata: ActionMetadata = {
-  title: 'Buy Me a Coffee',
-  description: 'Support the works you love',
+  title: 'Buy me a coffee ☕',
+  description: 'Magic Link Enthusiast | Donate with your love for zkLink magic',
   networks: [
-    {
-      name: 'Ethereum',
-      chainId: '1',
-      contractAddress: '0x',
-    },
     {
       name: 'Arbitrum',
       chainId: '42161',
@@ -20,7 +15,7 @@ export const metadata: ActionMetadata = {
       contractAddress: '0x',
     },
   ],
-  dApp: { name: 'Buy Me a Coffee' },
+  dApp: { name: 'Buy me a coffee' },
   author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
   intent: {
     components: [
@@ -34,48 +29,15 @@ export const metadata: ActionMetadata = {
         options: [
           {
             label: 'WETH',
-            value: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
-            chainId: '1',
-          },
-          {
-            label: 'USDT',
-            value: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
-            chainId: '1',
-          },
-          {
-            label: 'USDC',
-            value: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-            chainId: '1',
-          },
-          {
-            label: 'WETH',
             value: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
             chainId: '42161',
-          },
-          {
-            label: 'USDT',
-            value: '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9',
-            chainId: '42161',
-          },
-          {
-            label: 'USDC',
-            value: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831',
-            chainId: '42161',
+            default: true,
           },
           {
             label: 'WETH',
             value: '0x8280a4e7D5B3B658ec4580d3Bc30f5e50454F169',
             chainId: '810180',
-          },
-          {
-            label: 'USDT',
-            value: '0x2F8A25ac62179B31D62D7F80884AE57464699059',
-            chainId: '810180',
-          },
-          {
-            label: 'USDC',
-            value: '0x1a1A3b2ff016332e866787B311fcB63928464509',
-            chainId: '810180',
+            default: true,
           },
         ],
       },

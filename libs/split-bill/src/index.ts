@@ -12,9 +12,9 @@ import {
 import { metadata } from './config';
 import { intoParams } from './interface';
 
-@RegistryPlug('split-order', 'v1')
+@RegistryPlug('split-bill', 'v1')
 @Injectable()
-export class SliptOrderService extends ActionDto {
+export class SplitBillService extends ActionDto {
   async getMetadata(): Promise<ActionMetadata> {
     return metadata;
   }
