@@ -148,6 +148,26 @@ export class IntentDto {
   humanize?: string;
 }
 
+export class MagicLinkMetadata {
+  @ApiPropertyOptional({ type: String, description: 'name of the magic link' })
+  @IsString()
+  title?: string;
+
+  @ApiPropertyOptional({
+    type: String,
+    description: 'description of the magic link',
+  })
+  @IsString()
+  description?: string;
+
+  @ApiPropertyOptional({
+    type: String,
+    description: 'main image of the magic link',
+  })
+  @IsString()
+  gallery?: string;
+}
+
 export class ActionMetadata {
   @ApiProperty({ type: String, description: 'Action title' })
   @IsString()
@@ -194,4 +214,11 @@ export class ActionMetadata {
   @ApiProperty({ type: IntentDto, description: 'Intent details' })
   @ValidateNested()
   intent: IntentDto;
+
+  @ApiPropertyOptional({
+    type: MagicLinkMetadata,
+    description: 'magic link default value',
+  })
+  @ValidateNested()
+  magicLinkMetadata?: MagicLinkMetadata;
 }

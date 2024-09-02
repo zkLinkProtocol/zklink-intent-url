@@ -1,3 +1,4 @@
+import fs from 'fs/promises';
 import path from 'path';
 
 import { Logger, Module, OnModuleInit } from '@nestjs/common';
@@ -16,14 +17,24 @@ export class FilesModule implements OnModuleInit {
   }
 
   async onModuleInit() {
-    const folderPath = path.join(process.cwd(), 'assets/logos');
-    if (folderPath) {
-      try {
-        const urls = await this.filesService.uploadFolder(folderPath);
-        this.logger.log('Uploaded files:', urls);
-      } catch (error) {
-        this.logger.error('Error uploading folder:', error);
+    const baseFolderPath = path.join(process.cwd(), 'assets');
+
+    try {
+      const folders = await fs
+        .readdir(baseFolderPath, { withFileTypes: true })
+        .then((entries) =>
+          entries
+            .filter((entry) => entry.isDirectory())
+            .map((entry) => entry.name),
+        );
+
+      for (const folder of folders) {
+        const folderPath = path.join(baseFolderPath, folder);
+        const urls = await this.filesService.uploadFolder(folderPath, folder);
+        this.logger.log(`Uploaded ${folder} files:`, urls);
       }
+    } catch (error) {
+      this.logger.error('Error uploading folders:', error);
     }
   }
 }
