@@ -32,6 +32,7 @@ export const METADATA: ActionMetadata = {
   ],
   dApp: { name: 'NovaSwap' },
   author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
+  magicLinkMetadata: {},
   intent: {
     components: [
       {

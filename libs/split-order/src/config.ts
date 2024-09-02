@@ -22,6 +22,7 @@ export const metadata: ActionMetadata = {
   ],
   dApp: { name: 'Slipt Order' },
   author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
+  magicLinkMetadata: {},
   intent: {
     components: [
       {
