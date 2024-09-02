@@ -71,18 +71,27 @@ export class ActionService implements OnApplicationBootstrap {
           : '';
       }
 
-      const { title, logo, description, networks, intent, dApp, author } =
-        metadata;
+      const {
+        title,
+        logo,
+        description,
+        networks,
+        intent,
+        dApp,
+        author,
+        magicLinkMetadata,
+      } = metadata;
 
       const newAction = this.actionRepository.create({
-        id: id,
-        title: title,
-        logo: logo,
-        networks: networks,
-        description: description,
-        author: author,
-        dApp: dApp,
-        intent: intent,
+        id,
+        title,
+        logo,
+        networks,
+        description,
+        author,
+        dApp,
+        intent,
+        magicLinkMetadata,
       });
       await this.actionRepository.initAction(newAction);
     }

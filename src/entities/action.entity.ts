@@ -2,7 +2,13 @@ import { Column, Entity, Index, OneToMany, PrimaryColumn } from 'typeorm';
 
 import { BaseEntity } from './base.entity';
 import { Intention } from './intention.entity';
-import { AuthorDto, DAppDto, IntentDto, NetworkDto } from '../common/dto';
+import {
+  AuthorDto,
+  DAppDto,
+  IntentDto,
+  MagicLinkMetadataDto,
+  NetworkDto,
+} from '../common/dto';
 
 @Entity()
 export abstract class Action extends BaseEntity {
@@ -26,6 +32,9 @@ export abstract class Action extends BaseEntity {
 
   @Column({ type: 'jsonb', name: 'dApp' })
   public readonly dApp: DAppDto;
+
+  @Column({ type: 'jsonb', default: {} })
+  public readonly magicLinkMetadata: MagicLinkMetadataDto;
 
   @Column({ type: 'jsonb' })
   @Index('idx_dapp_name_gin', { synchronize: false })
