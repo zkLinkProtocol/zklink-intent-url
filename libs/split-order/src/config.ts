@@ -98,3 +98,9 @@ export const metadata: ActionMetadata = {
     ],
   },
 };
+
+export const providerConfig: { [key in number]: string } = {
+  1: 'https://eth.llamarpc.com',
+  42161: 'https://arbitrum.llamarpc.com	',
+  810180: 'https://rpc.zklink.io',
+};
