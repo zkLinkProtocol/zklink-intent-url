@@ -1,7 +1,7 @@
 import CryptoJS from 'crypto-js';
+import { ethers } from 'ethers';
 import fetch from 'node-fetch';
 import { Tx } from 'src/common/dto/transaction.dto';
-
 type HeadersParams = {
   'Content-Type': string;
   'OK-ACCESS-KEY': string;
@@ -53,13 +53,40 @@ export async function getApproveData(
   };
 }
 
+export async function getQuote(
+  chainId: number,
+  tokenInAddress: string,
+  tokenOutAddress: string,
+  amount: bigint,
+): Promise<bigint> {
+  const quoteParams = {
+    amount: ethers.parseEther('1'),
+    chainId,
+    toTokenAddress: tokenOutAddress,
+    fromTokenAddress: tokenInAddress,
+  };
+
+  const quoteURL = getAggregatorRequestUrl('quote', quoteParams);
+
+  const quoteToSignUrl = quoteURL.replace('https://www.okx.com', '');
+
+  const timestamp = new Date().toISOString();
+  const headers = getHeaders(timestamp, quoteToSignUrl);
+  const quoteRes = await fetch(quoteURL, {
+    method: 'get',
+    headers,
+  });
+  const resData = (await quoteRes.json()).data[0];
+  return (amount * BigInt(resData.toTokenAmount)) / ethers.parseEther('1');
+}
+
 export async function getSwapData(
   userAddress: string,
   chainId: number,
   tokenInAddress: string,
   tokenOutAddress: string,
   amount: bigint,
-): Promise<Tx> {
+): Promise<Tx & { estimateGasFee: string }> {
   const swapParams = {
     amount,
     chainId,
@@ -79,6 +106,8 @@ export async function getSwapData(
     headers,
   });
   const resData = (await swapRes.json()).data[0];
+  console.log('resData', resData);
+  const estimateGasFee = resData.routerResult.estimateGasFee;
   return {
     chainId,
     to: resData.tx.to,
@@ -90,6 +119,7 @@ export async function getSwapData(
       amount: amount.toString(),
     },
     shouldSend: true,
+    estimateGasFee: estimateGasFee,
   };
 }
 
