@@ -148,7 +148,7 @@ export class IntentDto {
   humanize?: string;
 }
 
-export class MagicLinkMetadata {
+export class MagicLinkMetadataDto {
   @ApiPropertyOptional({ type: String, description: 'name of the magic link' })
   @IsString()
   title?: string;
@@ -216,9 +216,9 @@ export class ActionMetadata {
   intent: IntentDto;
 
   @ApiPropertyOptional({
-    type: MagicLinkMetadata,
+    type: MagicLinkMetadataDto,
     description: 'magic link default value',
   })
   @ValidateNested()
-  magicLinkMetadata?: MagicLinkMetadata;
+  magicLinkMetadata?: MagicLinkMetadataDto;
 }
