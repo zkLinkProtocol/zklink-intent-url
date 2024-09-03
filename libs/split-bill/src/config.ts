@@ -1,14 +1,9 @@
 import { ActionMetadata } from 'src/common/dto';
 
 export const metadata: ActionMetadata = {
-  title: 'Slipt Order',
-  description: 'Support the works you love',
+  title: 'Split Bill 💰',
+  description: 'This action is made for friends to split the bill',
   networks: [
-    {
-      name: 'Ethereum',
-      chainId: '1',
-      contractAddress: '0x',
-    },
     {
       name: 'Arbitrum',
       chainId: '42161',
@@ -20,9 +15,11 @@ export const metadata: ActionMetadata = {
       contractAddress: '0x',
     },
   ],
-  dApp: { name: 'Slipt Order' },
+  dApp: { name: 'Split bill' },
   author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
-  magicLinkMetadata: {},
+  magicLinkMetadata: {
+    description: 'Each friend will pay you the same amount',
+  },
   intent: {
     components: [
       {
@@ -34,23 +31,8 @@ export const metadata: ActionMetadata = {
         regexDesc: 'Token Symbol',
         options: [
           {
-            label: 'WETH',
-            value: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
-            chainId: '1',
-          },
-          {
-            label: 'USDT',
-            value: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
-            chainId: '1',
-          },
-          {
-            label: 'USDC',
-            value: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-            chainId: '1',
-          },
-          {
-            label: 'WETH',
-            value: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
+            label: 'ETH',
+            value: '',
             chainId: '42161',
           },
           {
@@ -62,10 +44,11 @@ export const metadata: ActionMetadata = {
             label: 'USDC',
             value: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831',
             chainId: '42161',
+            default: true,
           },
           {
-            label: 'WETH',
-            value: '0x8280a4e7D5B3B658ec4580d3Bc30f5e50454F169',
+            label: 'ETH',
+            value: '',
             chainId: '810180',
           },
           {
@@ -77,21 +60,55 @@ export const metadata: ActionMetadata = {
             label: 'USDC',
             value: '0x1a1A3b2ff016332e866787B311fcB63928464509',
             chainId: '810180',
+            default: true,
+          },
+          {
+            label: 'ETH',
+            value: '',
+            chainId: '810181',
+          },
+          {
+            label: 'USDT',
+            value: '0x0efDC9f3948BE4509e8c57d49Df97660CF038F9a',
+            chainId: '810181',
+          },
+          {
+            label: 'USDC',
+            value: '0xAC4a95747cB3f291BC4a26630862FfA0A4b01B44',
+            chainId: '810181',
+            default: true,
+          },
+          {
+            label: 'ETH',
+            value: '',
+            chainId: '270',
+          },
+          {
+            label: 'USDT',
+            value: '0xDBBD57f02DdbC9f1e2B80D8DAcfEC34BC8B287e3',
+            chainId: '270',
+          },
+          {
+            label: 'USDC',
+            value: '0x09B141F8a41BA6d2A0Ec1d55d67De3C8f3846921',
+            chainId: '270',
+            default: true,
           },
         ],
       },
       {
         name: 'value',
         label: 'Amount',
-        desc: 'The amount to collection',
+        desc: 'The amount of tokens you receive from each friend.',
         type: 'input',
         regex: '^[0-9]+$',
+        defaultValue: '10',
         regexDesc: 'Must be a number',
       },
       {
         name: 'recipient',
         label: 'Recipient',
-        desc: 'The address that is recipient',
+        desc: "Please enter the recipient's address.",
         type: 'input',
         regex: '^0x[a-fA-F0-9]{40}$',
         regexDesc: 'Address',
@@ -101,7 +118,8 @@ export const metadata: ActionMetadata = {
 };
 
 export const providerConfig: { [key in number]: string } = {
-  1: 'https://eth.llamarpc.com',
   42161: 'https://arbitrum.llamarpc.com	',
   810180: 'https://rpc.zklink.io',
+  810181: 'https://sepolia.rpc.zklink.io',
+  270: 'http://3.112.15.165:3050',
 };

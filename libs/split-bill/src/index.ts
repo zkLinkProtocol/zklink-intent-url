@@ -13,9 +13,9 @@ import ERC20ABI from './abis/ERC20.json';
 import { metadata, providerConfig } from './config';
 import { intoParams } from './interface';
 
-@RegistryPlug('split-order', 'v1')
+@RegistryPlug('split-bill', 'v1')
 @Injectable()
-export class SliptOrderService extends ActionDto {
+export class SplitBillService extends ActionDto {
   async getMetadata(): Promise<ActionMetadata> {
     return metadata;
   }
@@ -30,18 +30,21 @@ export class SliptOrderService extends ActionDto {
     const params = intoParams(_params);
     const providerUrl = providerConfig[params.chainId];
     const provider = new JsonRpcProvider(providerUrl);
-    const contract = new Contract(params.token, ERC20ABI, provider);
-    const decimals = await contract.decimals();
-    const amountToSend = parseUnits(params.value.toString(), decimals);
-    const transferTx = await contract.transfer.populateTransaction(
-      params.recipient,
-      amountToSend,
-    );
+    let transferTx = { to: params.recipient, data: '0x' };
+    if (params.token !== '') {
+      const contract = new Contract(params.token, ERC20ABI, provider);
+      const decimals = await contract.decimals();
+      const amountToSend = parseUnits(params.value.toString(), decimals);
+      transferTx = await contract.transfer.populateTransaction(
+        params.recipient,
+        amountToSend,
+      );
+    }
 
     const tx: Tx = {
       chainId: params.chainId,
       to: transferTx.to,
-      value: '0',
+      value: params.token === '' ? params.value.toString() : '0',
       data: transferTx.data,
       dataObject: {
         Token: params.token.toString(),

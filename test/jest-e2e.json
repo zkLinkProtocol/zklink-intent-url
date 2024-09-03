@@ -15,8 +15,8 @@
     "@action/buy-me-a-coffee": "<rootDir>/../libs/buy-me-a-coffee/src",
     "@action/red-envelope/(.*)": "<rootDir>/../libs/red-envelope/src/$1",
     "@action/red-envelope": "<rootDir>/../libs/red-envelope/src",
-    "@action/slipt-order/(.*)": "<rootDir>/../libs/slipt-order/src/$1",
-    "@action/slipt-order": "<rootDir>/../libs/slipt-order/src",
+    "@action/split-bill/(.*)": "<rootDir>/../libs/split-bill/src/$1",
+    "@action/split-bill": "<rootDir>/../libs/split-bill/src",
     "@action/registry/(.*)": "<rootDir>/../libs/registry/src/$1",
     "@action/registry": "<rootDir>/../libs/registry/src"
   }

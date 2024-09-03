@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
-
 import { RegistryPlug } from '@action/registry';
+import { Injectable } from '@nestjs/common';
+import { Contract, JsonRpcProvider, parseUnits } from 'ethers';
 import {
   Action as ActionDto,
   ActionMetadata,
@@ -33,7 +33,7 @@ export class BuyMeACoffeeService extends ActionDto {
       value: params.value.toString(),
       data: '0x',
       dataObject: {
-        Token: params.token.toString,
+        Token: params.token.toString(),
         'Sent TOKEN': params.value.toString(),
         To: params.recipient,
       },

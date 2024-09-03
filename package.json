@@ -120,7 +120,7 @@
       "^@action/utils(|/.*)$": "<rootDir>/libs/utils/src/$1",
       "^@action/buy-me-a-coffee(|/.*)$": "<rootDir>/libs/buy-me-a-coffee/src/$1",
       "^@action/red-envelope(|/.*)$": "<rootDir>/libs/buy-me-a-coffee/src/$1",
-      "^@action/slipt-order(|/.*)$": "<rootDir>/libs/slipt-order/src/$1",
+      "^@action/split-bill(|/.*)$": "<rootDir>/libs/split-bill/src/$1",
       "^@action/registry(|/.*)$": "<rootDir>/libs/registry/src/$1"
     }
   }
