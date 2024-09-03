@@ -28,16 +28,14 @@ export const metadata: ActionMetadata = {
         regexDesc: 'Token Symbol',
         options: [
           {
-            label: 'WETH',
-            value: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
+            label: 'ETH',
+            value: '',
             chainId: '42161',
-            default: true,
           },
           {
-            label: 'WETH',
-            value: '0x8280a4e7D5B3B658ec4580d3Bc30f5e50454F169',
+            label: 'ETH',
+            value: '',
             chainId: '810180',
-            default: true,
           },
         ],
       },
@@ -59,4 +57,11 @@ export const metadata: ActionMetadata = {
       },
     ],
   },
+};
+
+export const providerConfig: { [key in number]: string } = {
+  42161: 'https://arbitrum.llamarpc.com	',
+  810180: 'https://rpc.zklink.io',
+  810181: 'https://sepolia.rpc.zklink.io',
+  270: 'http://3.112.15.165:3050',
 };

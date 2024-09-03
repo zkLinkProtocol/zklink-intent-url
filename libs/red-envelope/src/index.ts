@@ -1,7 +1,6 @@
 import { RegistryPlug } from '@action/registry';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import BigNumber from 'bignumber.js';
 import {
   JsonRpcProvider,
   ethers,
@@ -283,7 +282,7 @@ export class RedEnvelopeService extends ActionDto {
           value: '0',
           data: approveData.data,
           dataObject: {},
-          shouldSend: false,
+          shouldSend: true,
         },
         {
           chainId: this.config.chainId,
@@ -291,7 +290,7 @@ export class RedEnvelopeService extends ActionDto {
           value: '0',
           data: createRedPacketData.data,
           dataObject: {},
-          shouldSend: false,
+          shouldSend: true,
         },
       ],
       tokens: [],
@@ -352,7 +351,7 @@ export class RedEnvelopeService extends ActionDto {
             gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
             paymasterParams,
           },
-          shouldSend: false,
+          shouldSend: true,
         },
       ],
       tokens: [],
