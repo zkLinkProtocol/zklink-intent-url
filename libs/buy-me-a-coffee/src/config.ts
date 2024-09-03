@@ -2,7 +2,8 @@ import { ActionMetadata } from 'src/common/dto';
 
 export const metadata: ActionMetadata = {
   title: 'Buy me a coffee ☕',
-  description: 'Magic Link Enthusiast | Donate with your love for zkLink magic',
+  description:
+    'This action allows you to create a Magic Link to receive donations',
   networks: [
     {
       name: 'Arbitrum',
@@ -17,7 +18,10 @@ export const metadata: ActionMetadata = {
   ],
   dApp: { name: 'Buy me a coffee' },
   author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
-  magicLinkMetadata: {},
+  magicLinkMetadata: {
+    description:
+      'Magic Link Enthusiast | Donate with your love for zkLink magic',
+  },
   intent: {
     components: [
       {
@@ -37,6 +41,16 @@ export const metadata: ActionMetadata = {
             label: 'ETH',
             value: '',
             chainId: '810180',
+          },
+          {
+            label: 'ETH',
+            value: '',
+            chainId: '810181',
+          },
+          {
+            label: 'ETH',
+            value: '',
+            chainId: '270',
           },
         ],
       },

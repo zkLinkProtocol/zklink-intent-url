@@ -74,6 +74,10 @@ export class OptionDto {
   @ApiPropertyOptional({ description: 'chain id' })
   @IsString()
   chainId?: string;
+
+  @ApiPropertyOptional({ description: 'default value' })
+  @IsBoolean()
+  default?: boolean;
 }
 
 class ComponentDto {
