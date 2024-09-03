@@ -1,5 +1,8 @@
 import { ethers } from 'ethers';
+import { Tx } from 'src/common/dto';
 
+import { ESTIMATED_GAS_WALLET } from './config';
+import { getQuote } from './okxAPI';
 export async function getUserERC20Balance(
   userAddress: string,
   tokenAddress: string,
@@ -16,4 +19,45 @@ export async function getUserERC20Balance(
     console.error('Error fetching ERC20 balance:', error);
     throw error;
   }
+}
+export async function getEstimatedGasCost(
+  sender: string,
+  to: string,
+  data: string,
+  value: string,
+  provider: ethers.Provider,
+): Promise<bigint> {
+  const estimatedGas = await provider.estimateGas({
+    from: sender,
+    to: to,
+    data: data,
+    value: value,
+  });
+  // gas price * estimatedGas
+  const gasCost = await getGasCost(estimatedGas, provider);
+  return gasCost;
+}
+
+export async function getGasCost(
+  estimateGasFee: bigint,
+  provider: ethers.Provider,
+): Promise<bigint> {
+  const gasPrice = await provider
+    .getFeeData()
+    .then((feeData) => feeData.gasPrice);
+  return gasPrice ? gasPrice * estimateGasFee : BigInt(0);
+}
+
+export async function getERC20GasCost(
+  chainId: number,
+  gasCost: bigint,
+  erc20Address: string,
+) {
+  const quote = await getQuote(
+    chainId,
+    '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+    erc20Address,
+    gasCost,
+  );
+  return quote;
 }

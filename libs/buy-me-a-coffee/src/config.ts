@@ -17,6 +17,7 @@ export const metadata: ActionMetadata = {
   ],
   dApp: { name: 'Buy me a coffee' },
   author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
+  magicLinkMetadata: {},
   intent: {
     components: [
       {
