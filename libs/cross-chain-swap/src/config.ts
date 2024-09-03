@@ -9,6 +9,7 @@ export const ESTIMATED_GAS_WALLET: { [key: string]: string } = {
   '42161': '0x5ABC821cf6267534f8650189745B170Eeeff030D',
 };
 
+export const GAS_COEFFICIENT = 4;
 export const TOKEN_CONFIG: { [key: string]: { [key: string]: string } } = {
   42161: {
     weth: '0x82af49447d8a07e3bd95bd0d56f35241523fbab1',

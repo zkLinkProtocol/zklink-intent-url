@@ -11,9 +11,9 @@ type HeadersParams = {
 };
 
 const apiBaseUrl = 'https://www.okx.com/api/v5/dex/aggregator/';
-const SECREAT_KEY = '7674652439B4876417E1238DAB0538B9';
-const ACCESS_KEY = '4a194686-dde0-4f5f-b7a7-50ba24564c91';
-const PASSPHRASE = '46112341Hcj!';
+const SECREAT_KEY = '91DC4BA6E6FF03F2BDAFBD1A18BF8C14';
+const ACCESS_KEY = '90fae07d-3fe3-4b23-bc27-afc59285b4aa';
+const PASSPHRASE = '8686Qwe!';
 
 export async function getApproveData(
   chainId: number,

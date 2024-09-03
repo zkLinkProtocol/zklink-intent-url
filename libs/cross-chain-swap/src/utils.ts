@@ -1,8 +1,9 @@
 import { ethers } from 'ethers';
 import { Tx } from 'src/common/dto';
 
-import { ESTIMATED_GAS_WALLET } from './config';
+import { GAS_COEFFICIENT } from './config';
 import { getQuote } from './okxAPI';
+
 export async function getUserERC20Balance(
   userAddress: string,
   tokenAddress: string,
@@ -45,9 +46,16 @@ export async function getGasCost(
   const gasPrice = await provider
     .getFeeData()
     .then((feeData) => feeData.gasPrice);
-  return gasPrice ? gasPrice * estimateGasFee : BigInt(0);
+
+  return gasPrice
+    ? BigInt(Math.floor(Number(GAS_COEFFICIENT) * Number(gasPrice))) *
+        estimateGasFee
+    : BigInt(0);
 }
 
+export async function getSolverFee(amount: bigint): Promise<bigint> {
+  return BigInt(0);
+}
 export async function getERC20GasCost(
   chainId: number,
   gasCost: bigint,
