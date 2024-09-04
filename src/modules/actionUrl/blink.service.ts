@@ -67,23 +67,19 @@ export class BlinkService {
 
   async buildTransactions(
     code: string,
-    actionId: string,
     sender: string,
     params: any,
   ): Promise<string> {
     const data = {
       code,
       sender,
-      params,
+      ...params,
     };
-    const result = await this.actionUrlService.generateTransaction(
-      actionId,
-      data,
-    );
-    if (!result || result.txs.length == 0) {
+    const result = await this.actionUrlService.generateTransaction(data);
+    if (!result || result.length == 0) {
       return '';
     }
-    const tx = result.txs[0];
+    const tx = result[0];
     const transaction = new ethers.Transaction();
     transaction.chainId = tx.chainId;
     transaction.to = tx.to;

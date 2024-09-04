@@ -1,6 +1,8 @@
 import { ActionMetadata } from 'src/common/dto';
 
-export const metadata = {
+import { FormName } from './types';
+
+export const metadata: ActionMetadata<FormName> = {
   title: 'Buy me a coffee ☕',
   description:
     'This action allows you to create a Magic Link to receive donations',

@@ -1,14 +1,10 @@
 import { RegistryPlug } from '@action/registry';
-import { getERC20SymbolAndDecimals } from '@action/utils';
 import { Injectable } from '@nestjs/common';
 import { ethers } from 'ethers';
 import {
   Action as ActionDto,
-  ActionMetadata,
-  ActionTransactionParams,
-  GeneratedTransaction,
-  Token,
-  Tx,
+  GenerateTransactionParams,
+  TransactionInfo,
 } from 'src/common/dto';
 
 import {
@@ -17,8 +13,8 @@ import {
   RPC_URL,
   TOKEN_CONFIG,
 } from './config';
-import { intoParams } from './interface';
 import { getApproveData, getSwapData } from './okxAPI';
+import { FormName } from './types';
 import {
   getERC20GasCost,
   getEstimatedGasCost,
@@ -28,51 +24,49 @@ import {
 
 @RegistryPlug('cross-chain-swap', 'v1')
 @Injectable()
-export class CrossChainSwapService extends ActionDto {
-  async getMetadata(): Promise<ActionMetadata> {
+export class CrossChainSwapService extends ActionDto<FormName> {
+  async getMetadata() {
     return METADATA;
   }
 
-  async generateTransaction(data: {
-    code: string;
-    sender: string;
-    params: ActionTransactionParams;
-  }): Promise<GeneratedTransaction> {
-    const { params: _params, sender } = data;
-    const params = intoParams(_params);
-    let approveTx: Tx;
-    let swapTx: Tx;
-    const tokenInAddress = TOKEN_CONFIG[_params.chainId][_params.tokenIn];
-    const provider = new ethers.JsonRpcProvider(
-      RPC_URL[params.chainId.toString()],
-    ) as any;
+  async generateTransaction(
+    data: GenerateTransactionParams<FormName>,
+  ): Promise<TransactionInfo[]> {
+    const { additionalData, formData } = data;
+    const { chainId, account } = additionalData;
+    if (!account) {
+      throw new Error('Missing account!');
+    }
+    const { amountToBuy, ...restParams } = formData;
+    const params = { ...restParams, amountToBuy: BigInt(amountToBuy) };
 
-    const { symbol, decimals } = await getERC20SymbolAndDecimals(
-      provider,
-      tokenInAddress,
-    );
-    const tokens = [
+    let approveTx: TransactionInfo;
+    let swapTx: TransactionInfo;
+    const tokenInAddress = TOKEN_CONFIG[additionalData.chainId][params.tokenIn];
+    const provider = new ethers.JsonRpcProvider(RPC_URL[chainId]) as any;
+
+    const tokens: TransactionInfo['requiredTokenAmount'] = [
       {
-        decimals,
-        symbol,
-        chainId: params.chainId,
         token: tokenInAddress,
         amount: params.amountToBuy.toString(),
       },
     ];
 
-    if (_params.tokenIn === 'weth') {
+    if (params.tokenIn === 'weth') {
       console.log(params);
-      console.log(sender);
+      console.log(account);
       swapTx = await getSwapData(
-        sender,
-        params.chainId,
+        account,
+        chainId,
         '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
         params.tokenOutAddress,
         params.amountToBuy,
       );
       const gasCost = await getGasCost(
-        BigInt((swapTx as Tx & { estimateGasFee: string }).estimateGasFee),
+        BigInt(
+          (swapTx as TransactionInfo & { estimateGasFee: string })
+            .estimateGasFee,
+        ),
         provider,
       );
 
@@ -81,50 +75,47 @@ export class CrossChainSwapService extends ActionDto {
       const totalFee = gasCost + solverFee;
       // Update the swap transaction with the new amount
       swapTx = await getSwapData(
-        sender,
-        params.chainId,
+        account,
+        chainId,
         '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
         params.tokenOutAddress,
         BigInt(params.amountToBuy) - BigInt(totalFee),
       );
-      swapTx.dataObject = {
-        ...swapTx.dataObject,
-        amount: (BigInt(params.amountToBuy) - BigInt(totalFee)).toString(),
-      };
-      return {
-        txs: [swapTx],
-        tokens,
-      };
+      swapTx.requiredTokenAmount = tokens;
+      return [swapTx];
     } else {
       //buy
       approveTx = await getApproveData(
-        params.chainId,
+        chainId,
         tokenInAddress,
         ethers.MaxUint256,
       );
       const approveGasCost = await getEstimatedGasCost(
-        ESTIMATED_GAS_WALLET[params.chainId],
+        ESTIMATED_GAS_WALLET[chainId],
         approveTx.to,
         approveTx.data,
         approveTx.value,
         provider,
       );
       swapTx = await getSwapData(
-        sender,
-        params.chainId,
+        account,
+        chainId,
         tokenInAddress,
         params.tokenOutAddress,
         params.amountToBuy,
       );
       const swapGasCost = await getGasCost(
-        BigInt((swapTx as Tx & { estimateGasFee: string }).estimateGasFee),
+        BigInt(
+          (swapTx as TransactionInfo & { estimateGasFee: string })
+            .estimateGasFee,
+        ),
         provider,
       );
       const totalGasCost = swapGasCost + approveGasCost;
 
       // Estimate gas cost in ERC20 tokens for the swap transaction
       const erc20GasCost = await getERC20GasCost(
-        params.chainId,
+        chainId,
         totalGasCost,
         tokenInAddress,
       );
@@ -133,20 +124,14 @@ export class CrossChainSwapService extends ActionDto {
       const totalFee = erc20GasCost + solverFee;
 
       swapTx = await getSwapData(
-        sender,
-        params.chainId,
+        account,
+        chainId,
         tokenInAddress,
         params.tokenOutAddress,
         BigInt(params.amountToBuy) - BigInt(totalFee),
       );
-      swapTx.dataObject = {
-        ...swapTx.dataObject,
-        amount: (BigInt(params.amountToBuy) - BigInt(totalFee)).toString(),
-      };
-      return {
-        txs: [approveTx, swapTx],
-        tokens,
-      };
+      swapTx.requiredTokenAmount = tokens;
+      return [approveTx, swapTx];
     }
   }
 }

@@ -1,3 +1,5 @@
+import { Address } from 'src/types';
+
 export enum DistributionModeValue {
   EqualAmountPerAddress = 'equalAmountPerAddress',
   RandomAmountPerAddress = 'randomAmountPerAddress',
@@ -16,8 +18,8 @@ export enum GasTokenValue {
 }
 
 export interface CreateRedPacketParams {
-  creator: string;
-  token: string;
+  creator: Address;
+  token: Address;
   totalCount: number;
   tokenAmount: bigint;
   payForGas: bigint;
@@ -33,3 +35,10 @@ export interface ClaimRedPacketParams {
   recipient: string;
   expiry: number;
 }
+
+export type FormName =
+  | 'distributionMode'
+  | 'totalDistributionAmount'
+  | 'distributionToken'
+  | 'amountOfRedEnvelopes'
+  | 'gasToken';
