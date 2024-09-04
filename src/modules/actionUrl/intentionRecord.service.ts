@@ -76,6 +76,23 @@ export class IntentionRecordService {
     };
   }
 
+  async findListByCode(
+    intentionCode: string,
+    publicKey: string,
+    address: string,
+  ) {
+    const { data, total } =
+      await this.intentionRecordRepository.getIntentionRecordListWithTxsByCodeAndPublickey(
+        intentionCode,
+        publicKey,
+        address,
+      );
+    return {
+      data,
+      totalItems: total,
+    };
+  }
+
   async add(
     code: string,
     params: IntentionRecordAddRequestDto,
