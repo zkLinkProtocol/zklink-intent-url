@@ -1,6 +1,7 @@
 import { getERC20SymbolAndDecimals } from '@action/utils';
 import { Contract, Provider, ethers } from 'ethers';
 import { Token } from 'src/common/dto';
+import { Tx } from 'src/common/dto';
 
 import ERC20_ABI from './abis/erc20.json';
 import FACTORY_ABI from './abis/factory.json';
@@ -14,7 +15,6 @@ export class NovaSwap {
   private factoryContract: Contract;
   private quoterContract: Contract;
   private swapRouterContract: Contract;
-
   constructor(
     provider: Provider,
     factoryContractAddress: string,
@@ -100,32 +100,46 @@ export class NovaSwap {
     return amountOut;
   }
 
-  public async swapToken(params: Params, _fee: number) {
-    const amountIn = ethers.parseUnits(
-      params.amountIn.toString(),
-      params.amountInDecimal,
+  public async swapToken(params: Params, _fee: number, referrer: string) {
+    const { symbol, decimals } = await getERC20SymbolAndDecimals(
+      this.provider,
+      params.tokenInAddress,
     );
+    const amountIn = ethers.parseUnits(params.amountIn.toString(), decimals);
+
+    const referralAmount = BigInt(
+      Math.floor((Number(params.referralRate) * Number(amountIn)) / 100),
+    );
+    const referralTx = await this.getReferralTx(
+      params.tokenInAddress,
+      referralAmount,
+      referrer,
+    );
+
+    const swapAmount = amountIn - referralAmount;
     const { poolContract, fee } = await this.getPoolInfo(
       this.factoryContract,
       params.tokenInAddress,
       params.tokenOutAddress,
       _fee,
     );
+
     const quotedAmountOut = await this.quoteAndLogSwap(
       this.quoterContract,
       params.tokenInAddress,
       params.tokenOutAddress,
       fee,
       params.recipient,
-      amountIn,
+      swapAmount,
       params.deadlineDurationInSec,
     );
+
     const swapParams = {
       tokenIn: params.tokenInAddress,
       tokenOut: params.tokenOutAddress,
       fee: await poolContract.fee(),
       recipient: params.recipient,
-      amountIn: amountIn,
+      amountIn: swapAmount,
       amountOutMinimum: quotedAmountOut[0].toString(),
       sqrtPriceLimitX96: 0,
     };
@@ -142,28 +156,63 @@ export class NovaSwap {
         'Token In': params.tokenInAddress,
         'Token Out': params.tokenOutAddress,
         Recipient: params.recipient,
-        'Amount In': params.amountIn.toString(),
-        'Amount In Decimal': params.amountInDecimal,
+        'Amount In': swapAmount.toString(),
+        'Amount In Decimal': decimals,
         Fee: fee,
         'Deadline Duration in Second': params.deadlineDurationInSec,
       },
       shouldSend: true,
     };
 
-    const { symbol } = await getERC20SymbolAndDecimals(
-      this.provider,
-      params.tokenInAddress,
-    );
     const token: Token = {
       chainId: 810180, // zkLink
       token: params.tokenInAddress,
       amount: amountIn.toString(),
-      decimals: params.amountInDecimal,
+      decimals: decimals,
       symbol: symbol,
     };
-    return {
-      txs: [tx],
-      tokens: [token],
+
+    if (referralAmount > 0) {
+      return {
+        txs: [referralTx, tx],
+        tokens: [token],
+      };
+    } else {
+      return {
+        txs: [tx],
+        tokens: [token],
+      };
+    }
+  }
+
+  public async getReferralTx(
+    tokenInAddress: string,
+    referralAmount: bigint,
+    referrer: string,
+  ): Promise<Tx> {
+    const tokenInContract = new ethers.Contract(
+      tokenInAddress,
+      ERC20_ABI,
+      this.provider,
+    );
+    console.log('get referral tx');
+    const transaction = await tokenInContract.transfer.populateTransaction(
+      referrer,
+      referralAmount,
+    );
+    const referralTx = {
+      chainId: 810180,
+      value: '0',
+      to: transaction.to,
+      data: transaction.data,
+      dataObject: {
+        'Referral Token': tokenInAddress,
+        Amount: referralAmount.toString(),
+        Referrer: referrer,
+      },
+      shouldSend: true,
     };
+
+    return referralTx;
   }
 }

@@ -77,6 +77,16 @@ export const METADATA: ActionMetadata = {
         regex: '^[0-9]+$',
         regexDesc: 'Must be a number',
       },
+      {
+        name: 'referralRate',
+        label: 'Referral Rate',
+        desc: 'The referral rate (between 0 and 1%)',
+        type: 'input',
+        regex: '^0\\.\\d{1,2}$|^1\\.00$',
+        regexDesc:
+          'Must be a number between 0 and 1 with up to 2 decimal places',
+        defaultValue: '0.00',
+      },
     ],
   },
 };

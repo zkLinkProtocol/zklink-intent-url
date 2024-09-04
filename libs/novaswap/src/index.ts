@@ -40,7 +40,8 @@ export class NovaswapService extends ActionDto {
     params: ActionTransactionParams;
   }): Promise<GeneratedTransaction> {
     const { params } = data;
-    const tx = await novaswap.swapToken(intoParams(params), FEE);
+    //TODO add referrer
+    const tx = await novaswap.swapToken(intoParams(params), FEE, data.sender);
     return tx;
   }
 }

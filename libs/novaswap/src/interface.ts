@@ -7,7 +7,7 @@ export interface Params {
   recipient: string;
   deadlineDurationInSec: number;
   amountIn: bigint;
-  amountInDecimal: number;
+  referralRate: number;
 }
 
 const conversionMap: ConversionMap<Params> = {
@@ -32,11 +32,11 @@ const conversionMap: ConversionMap<Params> = {
       );
     }
   },
-  amountInDecimal: (value) => {
-    const parsed = parseInt(value, 10);
+  referralRate: (value) => {
+    const parsed = parseFloat(value);
     if (isNaN(parsed)) {
       throw new Error(
-        `Invalid amountInDecimal value: "${value}" is not a valid number.`,
+        `Invalid referralRate value: "${value}" is not a valid number.`,
       );
     }
     return parsed;
