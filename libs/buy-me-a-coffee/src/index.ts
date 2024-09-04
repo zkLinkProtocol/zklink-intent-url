@@ -9,7 +9,6 @@ import {
 } from 'src/common/dto';
 
 import { metadata } from './config';
-import { intoParams } from './interface';
 
 @RegistryPlug('buy-me-a-coffee', 'v1')
 @Injectable()
@@ -23,8 +22,7 @@ export class BuyMeACoffeeService extends ActionDto {
     sender: string;
     params: ActionTransactionParams;
   }): Promise<GeneratedTransaction> {
-    const { params: _params } = data;
-    const params = intoParams(_params);
+    const { params } = data;
 
     const tx: Tx = {
       chainId: params.chainId,
