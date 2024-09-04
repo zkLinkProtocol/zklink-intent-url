@@ -11,7 +11,6 @@ import {
 
 import ERC20ABI from './abis/ERC20.json';
 import { metadata, providerConfig } from './config';
-import { intoParams } from './interface';
 
 @RegistryPlug('split-bill', 'v1')
 @Injectable()
@@ -25,9 +24,8 @@ export class SplitBillService extends ActionDto {
     sender: string;
     params: ActionTransactionParams;
   }): Promise<GeneratedTransaction> {
-    const { params: _params } = data;
+    const { params } = data;
 
-    const params = intoParams(_params);
     const providerUrl = providerConfig[params.chainId];
     const provider = new JsonRpcProvider(providerUrl);
     let transferTx = { to: params.recipient, data: '0x' };

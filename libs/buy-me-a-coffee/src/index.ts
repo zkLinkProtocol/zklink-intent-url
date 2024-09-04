@@ -1,6 +1,5 @@
 import { RegistryPlug } from '@action/registry';
 import { Injectable } from '@nestjs/common';
-import { Contract, JsonRpcProvider, parseUnits } from 'ethers';
 import {
   Action as ActionDto,
   ActionMetadata,
