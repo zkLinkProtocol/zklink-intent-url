@@ -33,7 +33,7 @@ export class AuthController extends BaseController {
   }
 
   @Post('login/passkey')
-  @CommonApiOperation('Login dashbord by passkey.')
+  @CommonApiOperation('Login dashboard by passkey.')
   async loginByPasskey(
     @Body() params: LoginByPasskeyRequestDto,
   ): Promise<ResponseDto<LoginByPasskeyResponseDto>> {

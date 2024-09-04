@@ -11,16 +11,15 @@ import {
 } from 'ethers';
 import {
   Action as ActionDto,
-  ActionMetadata,
-  ActionTransactionParams,
-  GeneratedTransaction,
-  Tx,
+  GenerateTransactionParams,
+  TransactionInfo,
+  isOptionComponentDto,
 } from 'src/common/dto';
-import {
-  IntentionRecordTx,
-  IntentionRecordTxStatus,
-} from 'src/entities/intentionRecordTx.entity';
-import { IntentionRecordService } from 'src/modules/actionUrl/intentionRecord.service';
+// import {
+//   IntentionRecordTx,
+//   IntentionRecordTxStatus,
+// } from 'src/entities/intentionRecordTx.entity';
+// import { IntentionRecordService } from 'src/modules/actionUrl/intentionRecord.service';
 
 import {
   TransactionResult,
@@ -28,75 +27,70 @@ import {
   metadata,
   providerConfig,
 } from './config';
-import { intoParams } from './interface';
+import { FormName } from './types';
 
 @RegistryPlug('buy-me-a-coffee', 'v1')
 @Injectable()
-export class BuyMeACoffeeService extends ActionDto {
-  constructor(private readonly intentionRecordService: IntentionRecordService) {
+export class BuyMeACoffeeService extends ActionDto<FormName> {
+  constructor() {
     super();
   }
 
-  async getMetadata(): Promise<ActionMetadata> {
-    return metadata as ActionMetadata;
+  async getMetadata() {
+    return metadata;
   }
 
-  async generateTransaction(data: {
-    code: string;
-    sender: string;
-    params: ActionTransactionParams;
-  }): Promise<GeneratedTransaction> {
-    const { params } = data;
+  async generateTransaction(
+    data: GenerateTransactionParams<FormName>,
+  ): Promise<TransactionInfo[]> {
+    const { additionalData, formData } = data;
 
-    const tx: Tx = {
-      chainId: params.chainId,
-      to: params.recipient,
-      value: parseUnits(params.value.toString(), 18).toString(),
+    const tx = {
+      chainId: additionalData.chainId,
+      to: formData.recipient,
+      value: parseUnits(formData.value, 18).toString(),
       data: '0x',
       dataObject: {
-        Token: params.token.toString(),
-        'Sent TOKEN': params.value.toString(),
-        To: params.recipient,
+        Token: formData.token.toString(),
+        'Sent TOKEN': formData.value.toString(),
+        To: formData.recipient,
       },
       shouldSend: true,
     };
-    return {
-      txs: [tx],
-      tokens: [],
-    };
+    return [tx];
   }
 
-  public async getRealTimeContent(data: {
-    code: string;
-    sender: string;
-  }): Promise<{ title: string; content: string }> {
-    const { code } = data;
-    const result = await this.intentionRecordService.findListByCode(
-      code,
-      '',
-      '',
-    );
-    const transferInfos: TransactionResult[] = [];
+  // public async getRealTimeContent(data: {
+  //   code: string;
+  //   sender: string;
+  // }): Promise<{ title: string; content: string }> {
+  //   const { code } = data;
+  //   const result = await this.intentionRecordService.findListByCode(
+  //     code,
+  //     '',
+  //     '',
+  //   );
+  //   const transferInfos: TransactionResult[] = [];
 
-    for (const item of result.data) {
-      const intentionRecordTxs: IntentionRecordTx[] = item.intentionRecordTxs;
-      for (const recordTx of intentionRecordTxs) {
-        if (recordTx.status !== IntentionRecordTxStatus.SUCCESS) {
-          continue;
-        }
-        const transferInfo: TransactionResult = await this.parseTransaction(
-          recordTx.txHash,
-          recordTx.chainId,
-        );
-        transferInfos.push(transferInfo);
-      }
-    }
+  //   for (const item of result.data) {
+  //     const intentionRecordTxs: IntentionRecordTx[] = item.intentionRecordTxs;
+  //     for (const recordTx of intentionRecordTxs) {
+  //       if (recordTx.status !== IntentionRecordTxStatus.SUCCESS) {
+  //         continue;
+  //       }
+  //       const transferInfo: TransactionResult = await this.parseTransaction(
+  //         recordTx.txHash,
+  //         recordTx.chainId,
+  //       );
+  //       transferInfos.push(transferInfo);
+  //     }
+  //   }
 
-    return {
-      title: 'Donations',
-      content: await this.generateHTML(transferInfos),
-    };
-  }
+  //   return {
+  //     title: 'Donations',
+  //     content: await this.generateHTML(transferInfos),
+  //   };
+  // }
 
   public async parseTransaction(txhash: string, chainId: number) {
     const transferEventHash = id('Transfer(address,address,uint256)');
@@ -163,15 +157,17 @@ export class BuyMeACoffeeService extends ActionDto {
         const tokenComponent = metadata.intent.components.find(
           (component) => component.name === 'token',
         );
-        const option = tokenComponent?.options?.find(
-          (option) =>
-            option.value === tx.tokenAddress &&
-            option.chainId === tx.chainId.toString(),
-        );
-        const browserUrl = browserConfig[tx.chainId];
-        const tokenName = option?.label;
-        const prefixedTxhash = `${browserUrl}${tx.txhash}`;
-        return `<p>${tx.toAddress}   ${tx.value} ${tokenName}   ${prefixedTxhash}</p>`;
+        if (isOptionComponentDto(tokenComponent)) {
+          const option = tokenComponent.options.find(
+            (option) =>
+              option.value === tx.tokenAddress &&
+              option.chainId === tx.chainId.toString(),
+          );
+          const browserUrl = browserConfig[tx.chainId];
+          const tokenName = option?.label;
+          const prefixedTxhash = `${browserUrl}${tx.txhash}`;
+          return `<p>${tx.toAddress}   ${tx.value} ${tokenName}   ${prefixedTxhash}</p>`;
+        }
       })
       .join('');
   }

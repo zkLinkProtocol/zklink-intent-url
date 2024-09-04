@@ -10,7 +10,11 @@ import {
 
 import { BaseController } from 'src/common/base.controller';
 import { CommonApiOperation } from 'src/common/base.decorators';
-import { ActionMetadata, ActionTransactionParams } from 'src/common/dto';
+import {
+  ActionMetadata,
+  GenerateFormParams,
+  GenerateTransactionParams,
+} from 'src/common/dto';
 import { ResponseDto } from 'src/common/response.dto';
 
 import { ActionService } from './action.service';
@@ -91,7 +95,6 @@ export class ActionController extends BaseController {
           tokenInAddress: '0x6e42d10eB474a17b14f3cfeAC2590bfa604313C7',
           tokenOutAddress: '0x461fE851Cd66e82A274570ED5767c873bE9Ae1ff',
           amountIn: '1',
-          amountInDecimal: '18',
           recipient: '0xE592427A0AEce92De3Edee1F18E0157C05861564',
           deadlineDurationInSec: '3600',
         },
@@ -109,10 +112,10 @@ export class ActionController extends BaseController {
   async validateTransaction(
     @Param('id') id: string,
     @Body()
-    body: ActionTransactionParams,
+    body: GenerateFormParams<string>,
   ): Promise<ResponseDto<string>> {
     const actionStore = await this.actionStoreService.getActionStore(id);
-    const response = await actionStore.validateIntentParams(body);
+    const response = await actionStore.validateFormData(body);
     return this.success(response);
   }
 }
