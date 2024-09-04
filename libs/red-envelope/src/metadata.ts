@@ -15,6 +15,7 @@ export const genMetadata = (configValue: Value): ActionMetadata => ({
   ],
   dApp: { name: 'RedEnvelope' },
   author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
+  magicLinkMetadata: {},
   intent: {
     components: [
       {

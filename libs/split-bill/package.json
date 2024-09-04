@@ -1,17 +1,14 @@
 {
-  "name": "novaswap",
+  "name": "split-bill",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@novaswap/smart-order-router": "github:NovaSwapFinance/smart-order-router#main",
-    "@uniswap/permit2-sdk": "^1.2.0",
-    "dotenv": "^16.4.5"
+    "ethers": "^6.13.2"
   }
 }

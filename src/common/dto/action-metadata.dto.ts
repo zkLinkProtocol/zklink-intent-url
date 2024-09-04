@@ -74,6 +74,10 @@ export class OptionDto {
   @ApiPropertyOptional({ description: 'chain id' })
   @IsString()
   chainId?: string;
+
+  @ApiPropertyOptional({ description: 'default value' })
+  @IsBoolean()
+  default?: boolean;
 }
 
 class ComponentDto {
@@ -148,6 +152,26 @@ export class IntentDto {
   humanize?: string;
 }
 
+export class MagicLinkMetadataDto {
+  @ApiPropertyOptional({ type: String, description: 'name of the magic link' })
+  @IsString()
+  title?: string;
+
+  @ApiPropertyOptional({
+    type: String,
+    description: 'description of the magic link',
+  })
+  @IsString()
+  description?: string;
+
+  @ApiPropertyOptional({
+    type: String,
+    description: 'main image of the magic link',
+  })
+  @IsString()
+  gallery?: string;
+}
+
 export class ActionMetadata {
   @ApiProperty({ type: String, description: 'Action title' })
   @IsString()
@@ -194,4 +218,11 @@ export class ActionMetadata {
   @ApiProperty({ type: IntentDto, description: 'Intent details' })
   @ValidateNested()
   intent: IntentDto;
+
+  @ApiPropertyOptional({
+    type: MagicLinkMetadataDto,
+    description: 'magic link default value',
+  })
+  @ValidateNested()
+  magicLinkMetadata?: MagicLinkMetadataDto;
 }

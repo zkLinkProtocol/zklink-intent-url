@@ -57,18 +57,41 @@ export class ActionService implements OnApplicationBootstrap {
         metadata.logo = `${this.awsConfig.s3Url}/${this.awsConfig.keyPrefix}/logos/${logoWithExt ?? 'zklink.png'}`;
       }
 
-      const { title, logo, description, networks, intent, dApp, author } =
-        metadata;
+      if (!metadata.magicLinkMetadata?.gallery) {
+        const logos = fs.readdirSync(
+          path.join(process.cwd(), 'assets/galleries'),
+        );
+        const galleryWithExt = logos.find((file) => {
+          const fileName = path.basename(file, path.extname(file));
+          return fileName === id;
+        });
+        metadata.magicLinkMetadata = metadata.magicLinkMetadata ?? {};
+        metadata.magicLinkMetadata.gallery = galleryWithExt
+          ? `${this.awsConfig.s3Url}/${this.awsConfig.keyPrefix}/logos/${galleryWithExt}`
+          : '';
+      }
+
+      const {
+        title,
+        logo,
+        description,
+        networks,
+        intent,
+        dApp,
+        author,
+        magicLinkMetadata,
+      } = metadata;
 
       const newAction = this.actionRepository.create({
-        id: id,
-        title: title,
-        logo: logo,
-        networks: networks,
-        description: description,
-        author: author,
-        dApp: dApp,
-        intent: intent,
+        id,
+        title,
+        logo,
+        networks,
+        description,
+        author,
+        dApp,
+        intent,
+        magicLinkMetadata,
       });
       await this.actionRepository.initAction(newAction);
     }

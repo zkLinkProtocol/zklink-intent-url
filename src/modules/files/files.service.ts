@@ -69,19 +69,17 @@ export class FilesService {
     return result.DeleteMarker;
   }
 
-  async uploadFolder(folderPath: string): Promise<string[]> {
+  async uploadFolder(folderPath: string, folder: string): Promise<string[]> {
     const files = fs.readdirSync(folderPath);
     const uploadPromises = files.map((fileName) => {
       const filePath = path.join(folderPath, fileName);
       const fileContent = fs.readFileSync(filePath);
       const params = {
         Bucket: this.awsConfig.bucket,
-        Key: `${this.awsConfig.keyPrefix}/logos/${fileName}`,
+        Key: `${this.awsConfig.keyPrefix}/${folder}/${fileName}`,
         Body: fileContent,
       };
-      this.logger.log(
-        `deleting folder Key:${params.Key}, Bucket:${params.Bucket}`,
-      );
+      this.logger.log(`Upload, Key:${params.Key}, Bucket:${params.Bucket}`);
       return this.s3.upload(params).promise();
     });
 

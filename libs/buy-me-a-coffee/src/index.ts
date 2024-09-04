@@ -1,6 +1,5 @@
-import { Injectable } from '@nestjs/common';
-
 import { RegistryPlug } from '@action/registry';
+import { Injectable } from '@nestjs/common';
 import {
   Action as ActionDto,
   ActionMetadata,
@@ -10,7 +9,6 @@ import {
 } from 'src/common/dto';
 
 import { metadata } from './config';
-import { intoParams } from './interface';
 
 @RegistryPlug('buy-me-a-coffee', 'v1')
 @Injectable()
@@ -24,8 +22,7 @@ export class BuyMeACoffeeService extends ActionDto {
     sender: string;
     params: ActionTransactionParams;
   }): Promise<GeneratedTransaction> {
-    const { params: _params } = data;
-    const params = intoParams(_params);
+    const { params } = data;
 
     const tx: Tx = {
       chainId: params.chainId,
@@ -33,7 +30,7 @@ export class BuyMeACoffeeService extends ActionDto {
       value: params.value.toString(),
       data: '0x',
       dataObject: {
-        Token: params.token.toString,
+        Token: params.token.toString(),
         'Sent TOKEN': params.value.toString(),
         To: params.recipient,
       },

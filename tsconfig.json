@@ -50,11 +50,11 @@
       "@action/red-envelope/*": [
         "libs/red-envelope/src/*"
       ],
-      "@action/slipt-order": [
-        "libs/split-order/src"
+      "@action/split-bill": [
+        "libs/split-bill/src"
       ],
-      "@action/slipt-order/*": [
-        "libs/split-order/src/*"
+      "@action/split-bill/*": [
+        "libs/split-bill/src/*"
       ],
       "@action/registry": [
         "libs/registry/src",
