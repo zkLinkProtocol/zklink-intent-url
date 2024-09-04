@@ -122,4 +122,45 @@ export class IntentionRecordRepository extends BaseRepository<IntentionRecord> {
 
     return { data, total };
   }
+
+  public async getIntentionRecordListWithTxsByCodeAndPublickey(
+    intentionCode: string,
+    publicKey: string,
+    address: string,
+  ) {
+    const publickeyHash = publicKey
+      ? Buffer.from(publicKey.substring(2), 'hex')
+      : '';
+    const addressHash = address ? Buffer.from(address.substring(2), 'hex') : '';
+    const queryBuilder = this.unitOfWork
+      .getTransactionManager()
+      .createQueryBuilder(IntentionRecord, 'intentionrecord')
+      .select([
+        'intentionrecord.id as id',
+        'intentionrecord.status as status',
+        'intentionrecord.createdAt as createdAt',
+      ])
+      .addSelect("intentionrecord.intention->>'title'", 'title')
+      .where('intentionrecord.intentionCode = :intentionCode', {
+        intentionCode,
+      });
+
+    if (publicKey) {
+      queryBuilder.andWhere('intentionrecord.publickey = :publicKey', {
+        publicKey: publickeyHash,
+      });
+    }
+    if (address) {
+      queryBuilder.orWhere('intentionrecord.address = :address', {
+        address: addressHash,
+      });
+    }
+
+    queryBuilder.orderBy('intentionrecord.createdAt', 'DESC');
+
+    const data = await queryBuilder.getRawMany();
+    const total = await queryBuilder.getCount();
+
+    return { data, total };
+  }
 }

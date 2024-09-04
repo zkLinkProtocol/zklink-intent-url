@@ -1,6 +1,6 @@
 import { ActionMetadata } from 'src/common/dto';
 
-export const metadata: ActionMetadata = {
+export const metadata = {
   title: 'Buy me a coffee ☕',
   description:
     'This action allows you to create a Magic Link to receive donations',
@@ -79,4 +79,19 @@ export const providerConfig: { [key in number]: string } = {
   810180: 'https://rpc.zklink.io',
   810181: 'https://sepolia.rpc.zklink.io',
   270: 'http://3.112.15.165:3050',
+};
+
+export const browserConfig: { [key in number]: string } = {
+  42161: 'https://arbiscan.io/tx/',
+  810180: 'https://explorer.zklink.io/tx/',
+  810181: 'https://sepolia.explorer.zklink.io/tx/',
+  270: 'http://3.112.15.165:3050',
+};
+
+export type TransactionResult = {
+  toAddress: string;
+  tokenAddress: string;
+  value: string;
+  txhash: string;
+  chainId: number;
 };
