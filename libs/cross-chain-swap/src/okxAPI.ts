@@ -1,7 +1,7 @@
 import CryptoJS from 'crypto-js';
+import { ethers } from 'ethers';
 import fetch from 'node-fetch';
 import { Tx } from 'src/common/dto/transaction.dto';
-
 type HeadersParams = {
   'Content-Type': string;
   'OK-ACCESS-KEY': string;
@@ -11,9 +11,9 @@ type HeadersParams = {
 };
 
 const apiBaseUrl = 'https://www.okx.com/api/v5/dex/aggregator/';
-const SECREAT_KEY = '7674652439B4876417E1238DAB0538B9';
-const ACCESS_KEY = '4a194686-dde0-4f5f-b7a7-50ba24564c91';
-const PASSPHRASE = '46112341Hcj!';
+const SECREAT_KEY = '91DC4BA6E6FF03F2BDAFBD1A18BF8C14';
+const ACCESS_KEY = '90fae07d-3fe3-4b23-bc27-afc59285b4aa';
+const PASSPHRASE = '8686Qwe!';
 
 export async function getApproveData(
   chainId: number,
@@ -53,13 +53,40 @@ export async function getApproveData(
   };
 }
 
+export async function getQuote(
+  chainId: number,
+  tokenInAddress: string,
+  tokenOutAddress: string,
+  amount: bigint,
+): Promise<bigint> {
+  const quoteParams = {
+    amount: ethers.parseEther('1'),
+    chainId,
+    toTokenAddress: tokenOutAddress,
+    fromTokenAddress: tokenInAddress,
+  };
+
+  const quoteURL = getAggregatorRequestUrl('quote', quoteParams);
+
+  const quoteToSignUrl = quoteURL.replace('https://www.okx.com', '');
+
+  const timestamp = new Date().toISOString();
+  const headers = getHeaders(timestamp, quoteToSignUrl);
+  const quoteRes = await fetch(quoteURL, {
+    method: 'get',
+    headers,
+  });
+  const resData = (await quoteRes.json()).data[0];
+  return (amount * BigInt(resData.toTokenAmount)) / ethers.parseEther('1');
+}
+
 export async function getSwapData(
   userAddress: string,
   chainId: number,
   tokenInAddress: string,
   tokenOutAddress: string,
   amount: bigint,
-): Promise<Tx> {
+): Promise<Tx & { estimateGasFee: string }> {
   const swapParams = {
     amount,
     chainId,
@@ -79,6 +106,8 @@ export async function getSwapData(
     headers,
   });
   const resData = (await swapRes.json()).data[0];
+  console.log('resData', resData);
+  const estimateGasFee = resData.routerResult.estimateGasFee;
   return {
     chainId,
     to: resData.tx.to,
@@ -90,6 +119,7 @@ export async function getSwapData(
       amount: amount.toString(),
     },
     shouldSend: true,
+    estimateGasFee: estimateGasFee,
   };
 }
 
