@@ -45,17 +45,12 @@ export class BuyMeACoffeeService extends ActionDto<FormName> {
   ): Promise<TransactionInfo[]> {
     const { additionalData, formData } = data;
 
-    const tx = {
+    const tx: TransactionInfo = {
       chainId: additionalData.chainId,
       to: formData.recipient,
       value: parseUnits(formData.value, 18).toString(),
       data: '0x',
-      dataObject: {
-        Token: formData.token.toString(),
-        'Sent TOKEN': formData.value.toString(),
-        To: formData.recipient,
-      },
-      shouldSend: true,
+      shouldPublishToChain: true,
     };
     return [tx];
   }
