@@ -61,7 +61,7 @@ export const metadata: ActionMetadata<FormName> = {
         label: 'Amount',
         desc: 'The amount to sponsor',
         type: 'input',
-        regex: '^[0-9]+$',
+        regex: '^\\d+\\.?\\d*$|^\\d*\\.\\d+$',
         regexDesc: 'Must be a number',
       },
       {

@@ -103,7 +103,7 @@ export const metadata: ActionMetadata<FormName> = {
         label: 'Amount',
         desc: 'The amount of tokens you receive from each friend.',
         type: 'input',
-        regex: '^[0-9]+$',
+        regex: '^\\d+\\.?\\d*$|^\\d*\\.\\d+$',
         defaultValue: '10',
         regexDesc: 'Must be a number',
         bind: true,
