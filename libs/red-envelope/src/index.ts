@@ -1,7 +1,6 @@
 import { RegistryPlug } from '@action/registry';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import BigNumber from 'bignumber.js';
 import {
   JsonRpcProvider,
   ethers,
