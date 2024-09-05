@@ -1,4 +1,7 @@
 import { ActionMetadata } from 'src/common/dto';
+import { Address } from 'src/types';
+
+import { FormName } from './types';
 
 export const RPC_URL: { [key: string]: string } = {
   '42161':
@@ -10,7 +13,7 @@ export const ESTIMATED_GAS_WALLET: { [key: string]: string } = {
 };
 
 export const GAS_COEFFICIENT = 5;
-export const TOKEN_CONFIG: { [key: string]: { [key: string]: string } } = {
+export const TOKEN_CONFIG: { [key: string]: { [key: string]: Address } } = {
   42161: {
     weth: '0x82af49447d8a07e3bd95bd0d56f35241523fbab1',
     wbtc: '0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f',
@@ -19,7 +22,7 @@ export const TOKEN_CONFIG: { [key: string]: { [key: string]: string } } = {
   },
 };
 
-export const METADATA: ActionMetadata = {
+export const METADATA: ActionMetadata<FormName> = {
   title: 'Cross Chain Swap',
   description:
     'Perform cross-chain token swaps seamlessly across multiple networks',

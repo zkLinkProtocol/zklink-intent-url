@@ -12,16 +12,16 @@ import {
 } from 'ethers';
 import {
   Action as ActionDto,
-  ActionMetadata,
-  ActionTransactionParams,
-  GeneratedTransaction,
-  Tx,
+  // BasicAdditionalParams,
+  GenerateTransactionParams,
+  TransactionInfo,
+  isOptionComponentDto,
 } from 'src/common/dto';
-import {
-  IntentionRecordTx,
-  IntentionRecordTxStatus,
-} from 'src/entities/intentionRecordTx.entity';
-import { IntentionRecordService } from 'src/modules/actionUrl/intentionRecord.service';
+// import {
+//   IntentionRecordTx,
+//   IntentionRecordTxStatus,
+// } from 'src/entities/intentionRecordTx.entity';
+// import { IntentionRecordService } from 'src/modules/actionUrl/intentionRecord.service';
 
 import ERC20ABI from './abis/ERC20.json';
 import {
@@ -30,91 +30,87 @@ import {
   metadata,
   providerConfig,
 } from './config';
-import { intoParams } from './interface';
+import { FormName } from './types';
 
 @RegistryPlug('split-bill', 'v1')
 @Injectable()
-export class SplitBillService extends ActionDto {
-  constructor(private readonly intentionRecordService: IntentionRecordService) {
+export class SplitBillService extends ActionDto<FormName> {
+  constructor() {
     super();
   }
 
-  async getMetadata(): Promise<ActionMetadata> {
-    return metadata as ActionMetadata;
+  async getMetadata() {
+    return metadata;
   }
 
-  async generateTransaction(data: {
-    code: string;
-    sender: string;
-    params: ActionTransactionParams;
-  }): Promise<GeneratedTransaction> {
-    const { params } = data;
-
-    const providerUrl = providerConfig[params.chainId];
+  async generateTransaction(
+    data: GenerateTransactionParams<FormName>,
+  ): Promise<TransactionInfo[]> {
+    const { additionalData, formData } = data;
+    const { chainId } = additionalData;
+    const providerUrl = providerConfig[chainId];
     const provider = new JsonRpcProvider(providerUrl);
-    let transferTx = { to: params.recipient, data: '0x' };
-    if (params.token !== '') {
-      const contract = new Contract(params.token, ERC20ABI, provider);
+    let transferTx = { to: formData.recipient, data: '0x' };
+    if (formData.token !== '') {
+      const contract = new Contract(
+        formData.token.toString(),
+        ERC20ABI,
+        provider,
+      );
       const decimals = await contract.decimals();
-      const amountToSend = parseUnits(params.value.toString(), decimals);
+      const amountToSend = parseUnits(formData.value.toString(), decimals);
       transferTx = await contract.transfer.populateTransaction(
-        params.recipient,
+        formData.recipient,
         amountToSend,
       );
     }
 
-    const tx: Tx = {
-      chainId: params.chainId,
+    const tx: TransactionInfo = {
+      chainId: chainId,
       to: transferTx.to,
       value:
-        params.token === ''
-          ? parseUnits(params.value.toString(), 18).toString()
+        formData.token === ''
+          ? parseUnits(formData.value.toString(), 18).toString()
           : '0',
       data: transferTx.data,
-      dataObject: {
-        Token: params.token.toString(),
-        'Sent TOKEN': params.value.toString(),
-        To: params.recipient,
-      },
-      shouldSend: true,
+      shouldPublishToChain: true,
     };
-    return {
-      txs: [tx],
-      tokens: [],
-    };
+    return [tx];
   }
 
-  public async getRealTimeContent(data: {
-    code: string;
-    sender: string;
-  }): Promise<{ title: string; content: string }> {
-    const { code } = data;
-    const result = await this.intentionRecordService.findListByCode(
-      code,
-      '',
-      '',
-    );
-    const transferInfos: TransactionResult[] = [];
+  // public async getRealTimeContent(
+  //   data: BasicAdditionalParams,
+  // ): Promise<{ title: string; content: string }> {
+  //   const { code } = data;
+  //   if (!code) {
+  //     throw new Error('missing code');
+  //   }
+  //   const result = await this.intentionRecordService.findListByCode(
+  //     code,
+  //     '',
+  //     '',
+  //   );
+  //   const transferInfos: TransactionResult[] = [];
 
-    for (const item of result.data) {
-      const intentionRecordTxs: IntentionRecordTx[] = item.intentionRecordTxs;
-      for (const recordTx of intentionRecordTxs) {
-        if (recordTx.status !== IntentionRecordTxStatus.SUCCESS) {
-          continue;
-        }
-        const transferInfo: TransactionResult = await this.parseTransaction(
-          recordTx.txHash,
-          recordTx.chainId,
-        );
-        transferInfos.push(transferInfo);
-      }
-    }
+  //   for (const item of result.data) {
+  //     const intentionRecordTxs: IntentionRecordTx[] = item.intentionRecordTxs;
+  //     for (const recordTx of intentionRecordTxs) {
+  //       if (recordTx.status !== IntentionRecordTxStatus.SUCCESS) {
+  //         continue;
+  //       }
+  //       const transferInfo: TransactionResult = await this.parseTransaction(
+  //         recordTx.txHash,
+  //         recordTx.chainId,
+  //       );
+  //       transferInfos.push(transferInfo);
+  //     }
+  //   }
 
-    return {
-      title: 'Paid Frens',
-      content: await this.generateHTML(transferInfos),
-    };
-  }
+  //   return {
+  //     title: 'Paid Frens',
+  //     content: await this.generateHTML(transferInfos),
+  //   };
+  // }
 
   public async parseTransaction(txhash: string, chainId: number) {
     const transferEventHash = id('Transfer(address,address,uint256)');
@@ -181,15 +177,17 @@ export class SplitBillService extends ActionDto {
         const tokenComponent = metadata.intent.components.find(
           (component) => component.name === 'token',
         );
-        const option = tokenComponent?.options?.find(
-          (option) =>
-            option.value === tx.tokenAddress &&
-            option.chainId === tx.chainId.toString(),
-        );
-        const browserUrl = browserConfig[tx.chainId];
-        const tokenName = option?.label;
-        const prefixedTxhash = `${browserUrl}${tx.txhash}`;
-        return `<p>${tx.toAddress}   ${tx.value} ${tokenName}   ${prefixedTxhash}</p>`;
+        if (isOptionComponentDto(tokenComponent)) {
+          const option = tokenComponent?.options?.find(
+            (option) =>
+              option.value === tx.tokenAddress &&
+              option.chainId === tx.chainId.toString(),
+          );
+          const browserUrl = browserConfig[tx.chainId];
+          const tokenName = option?.label;
+          const prefixedTxhash = `${browserUrl}${tx.txhash}`;
+          return `<p>${tx.toAddress}   ${tx.value} ${tokenName}   ${prefixedTxhash}</p>`;
+        }
       })
       .join('');
   }

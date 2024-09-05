@@ -1,7 +1,7 @@
 import CryptoJS from 'crypto-js';
 import { ethers } from 'ethers';
 import fetch from 'node-fetch';
-import { Tx } from 'src/common/dto/transaction.dto';
+import { TransactionInfo } from 'src/common/dto/transaction.dto';
 type HeadersParams = {
   'Content-Type': string;
   'OK-ACCESS-KEY': string;
@@ -19,7 +19,7 @@ export async function getApproveData(
   chainId: number,
   tokenInAddress: string,
   amount: bigint,
-): Promise<Tx> {
+): Promise<TransactionInfo> {
   const approveParam = {
     chainId,
     tokenContractAddress: tokenInAddress,
@@ -45,11 +45,8 @@ export async function getApproveData(
     to: tokenInAddress,
     value: '0',
     data: resData.data,
-    dataObject: {
-      to: tokenInAddress,
-      amount: amount.toString(),
-    },
-    shouldSend: true,
+
+    shouldPublishToChain: true,
   };
 }
 
@@ -86,7 +83,7 @@ export async function getSwapData(
   tokenInAddress: string,
   tokenOutAddress: string,
   amount: bigint,
-): Promise<Tx & { estimateGasFee: string }> {
+): Promise<TransactionInfo & { estimateGasFee: string }> {
   const swapParams = {
     amount,
     chainId,
@@ -113,12 +110,8 @@ export async function getSwapData(
     to: resData.tx.to,
     value: resData.tx.value,
     data: resData.tx.data,
-    dataObject: {
-      fromTokenAddress: tokenInAddress,
-      toTokenAddress: tokenOutAddress,
-      amount: amount.toString(),
-    },
-    shouldSend: true,
+
+    shouldPublishToChain: true,
     estimateGasFee: estimateGasFee,
   };
 }

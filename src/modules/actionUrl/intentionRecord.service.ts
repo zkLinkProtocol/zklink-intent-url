@@ -22,7 +22,6 @@ import { IntentionRecordAddRequestDto } from './intentionRecord.dto';
 export class IntentionRecordService {
   logger: Logger;
   constructor(
-    logger: Logger,
     private readonly intentionRepository: IntentionRepository,
     private readonly intentionRecordRepository: IntentionRecordRepository,
     private readonly intentionRecordTxRepository: IntentionRecordTxRepository,

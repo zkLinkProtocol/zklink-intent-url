@@ -1,6 +1,8 @@
 import { ActionMetadata } from 'src/common/dto';
 
-export const metadata = {
+import { FormName } from './types';
+
+export const metadata: ActionMetadata<FormName> = {
   title: 'Split Bill 💰',
   description: 'This action is made for friends to split the bill',
   networks: [
@@ -111,9 +113,10 @@ export const metadata = {
         label: 'Amount',
         desc: 'The amount of tokens you receive from each friend.',
         type: 'input',
-        regex: '^[0-9]+$',
+        regex: '^\\d+\\.?\\d*$|^\\d*\\.\\d+$',
         defaultValue: '10',
         regexDesc: 'Must be a number',
+        bind: true,
       },
       {
         name: 'recipient',

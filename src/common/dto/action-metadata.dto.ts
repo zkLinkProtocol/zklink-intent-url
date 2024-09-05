@@ -79,11 +79,10 @@ export class OptionDto {
   @IsBoolean()
   default?: boolean;
 }
-
-class ComponentDto {
+export class BaseComponentDto<T extends string> {
   @ApiProperty({ type: String, description: 'Component name' })
   @IsString()
-  name: string;
+  name: T;
 
   @ApiProperty({ type: String, description: 'Component label' })
   @IsString()
@@ -92,14 +91,6 @@ class ComponentDto {
   @ApiProperty({ type: String, description: 'Component description' })
   @IsString()
   desc: string;
-
-  @ApiProperty({
-    type: String,
-    enum: ['input', 'searchSelect', 'searchSelectErc20', 'text'],
-    description: 'Component type',
-  })
-  @IsEnum(['input', 'searchSelect', 'searchSelectErc20', 'text'])
-  type: 'input' | 'searchSelect' | 'searchSelectErc20' | 'text';
 
   @ApiProperty({ type: String, description: 'Validation regex' })
   @IsString()
@@ -122,34 +113,86 @@ class ComponentDto {
   })
   @IsBoolean()
   bind?: boolean;
+}
+export class PlainComponentDto<T extends string> extends BaseComponentDto<T> {
+  @ApiProperty({
+    type: String,
+    enum: ['input', 'text'],
+    description: 'Component type',
+  })
+  @IsEnum(['input', 'text'])
+  type: 'input' | 'text';
+}
 
-  @ApiPropertyOptional({
+export class OptionComponentDto<T extends string> extends BaseComponentDto<T> {
+  @ApiProperty({
+    type: String,
+    enum: ['searchSelect', 'searchSelectErc20'],
+    description: 'Component type',
+  })
+  @IsEnum(['searchSelect', 'searchSelectErc20'])
+  type: 'searchSelect' | 'searchSelectErc20';
+
+  @ApiProperty({
     type: 'array',
     items: { $ref: getSchemaPath(OptionDto) },
     description: 'Component options (optional)',
   })
-  @IsOptional()
   @IsArray()
   @Type(() => OptionDto)
   @ValidateNested({ each: true })
   @ValidateIf((o) => ['select', 'searchSelectErc20'].includes(o.type))
   @ValidateOptions({ message: 'Invalid options based on type value' })
-  options?: OptionDto[];
+  options: OptionDto[];
 }
 
-export class IntentDto {
-  @ApiProperty({ type: [ComponentDto], description: 'List of components' })
+export class PresetItemDto<N extends string> {
+  @ApiProperty({
+    type: String,
+    description: 'Set the name field for a specific component.',
+  })
+  field: N;
+
+  @ApiProperty({
+    type: String,
+    description: "Set up the trigger's text",
+  })
+  title: string;
+
+  @ApiProperty({
+    type: String,
+    enum: ['input', 'text'],
+    description: "Set up the trigger's text",
+  })
+  type: 'Button' | 'Input';
+
+  @ApiProperty({
+    type: String,
+    description: 'Set the value of the name field.',
+  })
+  value: string;
+}
+
+export class IntentDto<N extends string> {
+  @ApiProperty({
+    type: [PlainComponentDto, OptionComponentDto],
+    description: 'List of components',
+  })
   @IsArray()
   @ValidateNested({ each: true })
-  components: Array<
-    | ComponentDto
-    | { conditional: Array<Omit<ComponentDto, 'type' | 'options'>> }
-  >;
-
+  components: Array<PlainComponentDto<N> | OptionComponentDto<N>>;
   @ApiPropertyOptional({ description: 'Human-readable description (optional)' })
   @IsOptional()
   @IsString()
   humanize?: string;
+
+  @ApiPropertyOptional({
+    type: [PlainComponentDto, OptionComponentDto],
+    description: 'List of components',
+  })
+  @IsArray()
+  @ValidateNested({ each: true })
+  preset?: Array<PresetItemDto<N>>;
 }
 
 export class MagicLinkMetadataDto {
@@ -172,7 +215,7 @@ export class MagicLinkMetadataDto {
   gallery?: string;
 }
 
-export class ActionMetadata {
+export class ActionMetadata<N extends string> {
   @ApiProperty({ type: String, description: 'Action title' })
   @IsString()
   title: string;
@@ -215,9 +258,9 @@ export class ActionMetadata {
   @ValidateNested()
   author: AuthorDto;
 
-  @ApiProperty({ type: IntentDto, description: 'Intent details' })
+  @ApiProperty({ type: IntentDto<N>, description: 'Intent details' })
   @ValidateNested()
-  intent: IntentDto;
+  intent: IntentDto<N>;
 
   @ApiPropertyOptional({
     type: MagicLinkMetadataDto,
@@ -225,4 +268,14 @@ export class ActionMetadata {
   })
   @ValidateNested()
   magicLinkMetadata?: MagicLinkMetadataDto;
+}
+
+export function isOptionComponentDto<N extends string>(
+  component: OptionComponentDto<N> | PlainComponentDto<N> | undefined,
+): component is OptionComponentDto<N> {
+  return (
+    !!component &&
+    (component.type === 'searchSelect' ||
+      component.type === 'searchSelectErc20')
+  );
 }

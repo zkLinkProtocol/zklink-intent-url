@@ -1,6 +1,8 @@
 import { ActionMetadata } from 'src/common/dto';
 
-export const metadata = {
+import { FormName } from './types';
+
+export const metadata: ActionMetadata<FormName> = {
   title: 'Buy me a coffee ☕',
   description:
     'This action allows you to create a Magic Link to receive donations',
@@ -113,7 +115,7 @@ export const metadata = {
         label: 'Amount',
         desc: 'The amount to sponsor',
         type: 'input',
-        regex: '^[0-9]+$',
+        regex: '^\\d+\\.?\\d*$|^\\d*\\.\\d+$',
         regexDesc: 'Must be a number',
       },
       {
@@ -123,6 +125,26 @@ export const metadata = {
         type: 'input',
         regex: '^0x[a-fA-F0-9]{40}$',
         regexDesc: 'Address',
+      },
+    ],
+    preset: [
+      {
+        field: 'value',
+        title: '0.001 ETH',
+        type: 'Button',
+        value: '0.001',
+      },
+      {
+        field: 'value',
+        title: '0.005 ETH',
+        type: 'Button',
+        value: '0.005',
+      },
+      {
+        field: 'value',
+        title: '0.01 ETH',
+        type: 'Button',
+        value: '0.01',
       },
     ],
   },
