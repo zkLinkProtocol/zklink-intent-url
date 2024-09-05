@@ -5,26 +5,6 @@ import { AuthorDto } from 'src/common/dto';
 
 class CreatorDto {
   @ApiProperty({
-    name: 'publicId',
-    description: 'publicId of creator.',
-    example: '2ksc23e',
-    required: true,
-  })
-  @IsString()
-  @IsNotEmpty()
-  publicId: string;
-
-  @ApiProperty({
-    name: 'publickey',
-    description: 'publickey of creator.',
-    example: '0x132310ab2d...',
-    required: true,
-  })
-  @IsString()
-  @IsNotEmpty()
-  publickey: string;
-
-  @ApiProperty({
     name: 'address',
     description: 'address of creator.',
     example: '0xbE3d310ab2d...',
@@ -142,8 +122,6 @@ export class ActionUrlResponseDto extends OmitType(ActionUrlAddRequestDto, [
     name: 'creator',
     description: 'Creator info.',
     example: {
-      publicId: '2ksc23e',
-      publickey: '0x132310ab2d...',
       address: '0xbE3d310ab2d...',
     },
     required: true,

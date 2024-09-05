@@ -13,15 +13,6 @@ export class RegisterByPrivatekeyRequestDto {
   id: string;
 
   @ApiProperty({
-    name: 'publickey',
-    description: "Passkey's public key or public address.",
-    example: '0x1234567890abcdef1234567890abcdef12345678',
-  })
-  @IsNotEmpty()
-  @IsString()
-  publickey: string;
-
-  @ApiProperty({
     name: 'passkeySignature',
     description: 'Signed id by passkey.',
     example: '0x1234567890abcdef1234567890abcdef12345678',
@@ -58,35 +49,6 @@ export class LoginByPrivatekeyRequestDto {
   @IsNotEmpty()
   @IsString()
   address: string;
-
-  @ApiProperty({
-    name: 'message',
-    description: 'Message.',
-    example: '1234567890abcdef1234567890abcdef12345678',
-  })
-  @IsNotEmpty()
-  @IsString()
-  message: string;
-
-  @ApiProperty({
-    name: 'signature',
-    description: 'Signed string.',
-    example: '0x1234567890abcdef1234567890abcdef12345678',
-  })
-  @IsNotEmpty()
-  @IsString()
-  signature: string;
-}
-
-export class LoginByPasskeyRequestDto {
-  @ApiProperty({
-    name: 'id',
-    description: "Passkey's id or public address.",
-    example: '123456',
-  })
-  @IsNotEmpty()
-  @IsString()
-  id: string;
 
   @ApiProperty({
     name: 'message',

@@ -70,7 +70,6 @@ export class IntentionRecordRepository extends BaseRepository<IntentionRecord> {
         'id',
         'intentionCode',
         'status',
-        'publickey',
         'address',
         'createdAt',
         'intention',
@@ -80,17 +79,13 @@ export class IntentionRecordRepository extends BaseRepository<IntentionRecord> {
     });
   }
 
-  // get paging intention record list with txs by intention code and (publicKey or address)
+  // get paging intention record list with txs by intention code and address
   public async getPagingIntentionRecordListWithTxsByCodeAndPublickey(
     intentionCode: string,
-    publicKey: string,
     address: string,
     page: number = 1,
     limit: number = 10,
   ) {
-    const publickeyHash = publicKey
-      ? Buffer.from(publicKey.substring(2), 'hex')
-      : '';
     const addressHash = address ? Buffer.from(address.substring(2), 'hex') : '';
     const queryBuilder = this.unitOfWork
       .getTransactionManager()
@@ -106,9 +101,7 @@ export class IntentionRecordRepository extends BaseRepository<IntentionRecord> {
       })
       .andWhere(
         new Brackets((qb) => {
-          qb.where('intentionrecord.publickey = :publicKey', {
-            publicKey: publickeyHash,
-          }).orWhere('intentionrecord.address = :address', {
+          qb.where('intentionrecord.address = :address', {
             address: addressHash,
           });
         }),
@@ -125,12 +118,8 @@ export class IntentionRecordRepository extends BaseRepository<IntentionRecord> {
 
   public async getIntentionRecordListWithTxsByCodeAndPublickey(
     intentionCode: string,
-    publicKey: string,
     address: string,
   ) {
-    const publickeyHash = publicKey
-      ? Buffer.from(publicKey.substring(2), 'hex')
-      : '';
     const addressHash = address ? Buffer.from(address.substring(2), 'hex') : '';
     const queryBuilder = this.unitOfWork
       .getTransactionManager()
@@ -145,13 +134,8 @@ export class IntentionRecordRepository extends BaseRepository<IntentionRecord> {
         intentionCode,
       });
 
-    if (publicKey) {
-      queryBuilder.andWhere('intentionrecord.publickey = :publicKey', {
-        publicKey: publickeyHash,
-      });
-    }
     if (address) {
-      queryBuilder.orWhere('intentionrecord.address = :address', {
+      queryBuilder.andWhere('intentionrecord.address = :address', {
         address: addressHash,
       });
     }
