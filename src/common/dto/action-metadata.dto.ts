@@ -146,6 +146,33 @@ export class OptionComponentDto<T extends string> extends BaseComponentDto<T> {
   options: OptionDto[];
 }
 
+export class PresetItemDto<N extends string> {
+  @ApiProperty({
+    type: String,
+    description: 'Set the name field for a specific component.',
+  })
+  field: N;
+
+  @ApiProperty({
+    type: String,
+    description: "Set up the trigger's text",
+  })
+  title: string;
+
+  @ApiProperty({
+    type: String,
+    enum: ['input', 'text'],
+    description: "Set up the trigger's text",
+  })
+  type: 'Button' | 'Input';
+
+  @ApiProperty({
+    type: String,
+    description: 'Set the value of the name field.',
+  })
+  value: string;
+}
+
 export class IntentDto<N extends string> {
   @ApiProperty({
     type: [PlainComponentDto, OptionComponentDto],
@@ -154,11 +181,18 @@ export class IntentDto<N extends string> {
   @IsArray()
   @ValidateNested({ each: true })
   components: Array<PlainComponentDto<N> | OptionComponentDto<N>>;
-  // | { conditional: Array<Omit<ComponentDto<N>, 'type' | 'options'>> }[];
   @ApiPropertyOptional({ description: 'Human-readable description (optional)' })
   @IsOptional()
   @IsString()
   humanize?: string;
+
+  @ApiPropertyOptional({
+    type: [PlainComponentDto, OptionComponentDto],
+    description: 'List of components',
+  })
+  @IsArray()
+  @ValidateNested({ each: true })
+  preset?: Array<PresetItemDto<N>>;
 }
 
 export class MagicLinkMetadataDto {

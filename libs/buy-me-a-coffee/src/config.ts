@@ -73,6 +73,26 @@ export const metadata: ActionMetadata<FormName> = {
         regexDesc: 'Address',
       },
     ],
+    preset: [
+      {
+        field: 'value',
+        title: '0.001 ETH',
+        type: 'Button',
+        value: '0.001',
+      },
+      {
+        field: 'value',
+        title: '0.005 ETH',
+        type: 'Button',
+        value: '0.005',
+      },
+      {
+        field: 'value',
+        title: '0.01 ETH',
+        type: 'Button',
+        value: '0.01',
+      },
+    ],
   },
 };
 
