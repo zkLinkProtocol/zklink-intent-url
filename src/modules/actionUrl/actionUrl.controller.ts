@@ -80,9 +80,7 @@ export class ActionUrlController extends BaseController {
       settings: result.settings,
       logo: result.action.logo,
       creator: {
-        publickey: result.creator.publickey,
         address: result.creator.address,
-        publicId: result.creator.publicId,
       },
     };
     return this.success(response);
@@ -191,7 +189,6 @@ export class ActionUrlController extends BaseController {
       settings: result.settings,
       creator: {
         id: result.creator.id,
-        publickey: result.creator.publickey,
         address: result.creator.address,
       },
     };
@@ -337,14 +334,12 @@ export class ActionUrlController extends BaseController {
   @CommonApiOperation('Get intention record list with txs.')
   async getIntentionRecordList(
     @Param('code') code: string,
-    @Query('publicKey') publicKey: string,
     @Query('address') address: string,
     @Query() pagingOptions: PagingOptionsDto,
   ): Promise<ResponseDto<IntentionRecordListItemResponseDto[]>> {
     const { page = 1, limit = 20 } = pagingOptions;
     const result = await this.intentionRecordService.findListByCodeAndPublickey(
       code,
-      publicKey,
       address,
       page,
       limit,
@@ -364,16 +359,13 @@ export class ActionUrlController extends BaseController {
   @CommonApiOperation('Get intention record with txs by id.')
   async getIntentionRecord(
     @Param('id') id: bigint,
-    @Query('publicKey') publicKey: string,
     @Query('address') address: string,
   ): Promise<ResponseDto<IntentionRecordFindOneResponseDto>> {
     const result = await this.intentionRecordService.findOneById(id);
     if (!result) {
       return this.error('Intention record not found');
     }
-    if (publicKey && result.publickey !== publicKey) {
-      return this.error('Intention record not found under the public key');
-    }
+
     if (address && result.address !== address) {
       return this.error('Intention record not found under the address');
     }

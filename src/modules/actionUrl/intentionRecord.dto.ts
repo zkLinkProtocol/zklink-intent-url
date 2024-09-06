@@ -41,14 +41,6 @@ export class IntentionRecordTxRequestDto {
 
 export class IntentionRecordAddRequestDto {
   @ApiProperty({
-    name: 'publicKey',
-    description: 'If sign by passkey.',
-    example: '0x1234567890',
-  })
-  @IsString()
-  publicKey: string;
-
-  @ApiProperty({
     name: 'address',
     description: 'If sign by private key.',
     example: '0x1234567890',

@@ -51,7 +51,6 @@ export class IntentionRecordService {
 
   async findListByCodeAndPublickey(
     intentionCode: string,
-    publicKey: string,
     address: string,
     page: number = 1,
     limit: number = 10,
@@ -59,7 +58,6 @@ export class IntentionRecordService {
     const { data, total } =
       await this.intentionRecordRepository.getPagingIntentionRecordListWithTxsByCodeAndPublickey(
         intentionCode,
-        publicKey,
         address,
         page,
         limit,
@@ -75,15 +73,10 @@ export class IntentionRecordService {
     };
   }
 
-  async findListByCode(
-    intentionCode: string,
-    publicKey: string,
-    address: string,
-  ) {
+  async findListByCode(intentionCode: string, address: string) {
     const { data, total } =
       await this.intentionRecordRepository.getIntentionRecordListWithTxsByCodeAndPublickey(
         intentionCode,
-        publicKey,
         address,
       );
     return {
@@ -104,7 +97,6 @@ export class IntentionRecordService {
 
     const intentionRecord = new IntentionRecord();
     intentionRecord.intentionCode = code;
-    intentionRecord.publickey = params.publicKey;
     intentionRecord.address = params.address;
     intentionRecord.opUserHash = params.opUserHash;
     intentionRecord.opUserChainId = params.opUserChainId;

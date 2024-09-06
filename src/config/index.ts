@@ -15,6 +15,7 @@ const configFactory = async () => {
       s3Url: process.env.AWS_S3_URL || '',
     },
     witnessPrivateKey: process.env.WITNESS_PRIVATE_KEY || '',
+    turnkeyApi: process.env.TURNKEY_API || '',
     rpc: {
       810180: process.env.Nova_RPC_URL || '',
       1: process.env.Ethereum_RPC_URL || '',

@@ -1,5 +1,6 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import { TSignedRequest } from '@turnkey/sdk-server';
 import { LRUCache } from 'lru-cache';
 import { nanoid } from 'nanoid';
 
@@ -10,7 +11,6 @@ import { sign_message } from 'src/constants';
 import { BusinessException } from 'src/exception/business.exception';
 
 import {
-  LoginByPasskeyRequestDto,
   LoginByPasskeyResponseDto,
   LoginByPrivatekeyRequestDto,
   LoginByPrivatekeyResponseDto,
@@ -35,18 +35,17 @@ export class AuthController extends BaseController {
   @Post('login/passkey')
   @CommonApiOperation('Login dashboard by passkey.')
   async loginByPasskey(
-    @Body() params: LoginByPasskeyRequestDto,
+    @Body() params: TSignedRequest,
   ): Promise<ResponseDto<LoginByPasskeyResponseDto>> {
-    const message = params.message;
-    const key = Buffer.from(message).toString('base64');
-    if (!cache.has(key)) {
-      throw new BusinessException('Invalid message');
+    const turnKeyInfo = await this.authService.getTurnKeyInfo(params);
+    if (!turnKeyInfo?.address) {
+      throw new BusinessException(
+        'You need to bind the EOA address first',
+        HttpStatus.UNAUTHORIZED,
+      );
     }
-    const result = await this.authService.loginByPasskey(
-      params.id,
-      message,
-      params.signature,
-    );
+    const result = this.authService.signJwtToken(turnKeyInfo.address);
+    await this.authService.updateCreator(turnKeyInfo.address);
     return this.success({
       accessToken: result.accessToken,
       expiresIn: result.expiresIn,
