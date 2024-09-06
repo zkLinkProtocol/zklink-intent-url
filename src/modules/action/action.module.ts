@@ -1,10 +1,4 @@
-import {
-  DynamicModule,
-  Global,
-  Module,
-  OnApplicationBootstrap,
-  OnModuleInit,
-} from '@nestjs/common';
+import { DynamicModule, Global, Module, OnModuleInit } from '@nestjs/common';
 import {
   APP_INTERCEPTOR,
   DiscoveryModule,

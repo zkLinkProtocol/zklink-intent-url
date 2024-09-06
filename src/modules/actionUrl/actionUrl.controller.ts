@@ -438,9 +438,9 @@ export class ActionUrlController extends BaseController {
       (intention.settings as any)?.intentInfo?.network?.chainId ?? 0;
     res.setHeader('X-Blockchain-Ids', `eip155:${chainId}`);
     const allParams = { ...Params, ...body, ...query };
-    allParams.chainId = chainId;
     try {
       const transaction = await this.blinkService.buildTransactions(
+        chainId as number,
         code,
         account,
         allParams,
