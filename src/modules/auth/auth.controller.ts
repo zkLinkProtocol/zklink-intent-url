@@ -45,6 +45,7 @@ export class AuthController extends BaseController {
       );
     }
     const result = this.authService.signJwtToken(turnKeyInfo.address);
+    await this.authService.updateCreator(turnKeyInfo.address);
     return this.success({
       accessToken: result.accessToken,
       expiresIn: result.expiresIn,

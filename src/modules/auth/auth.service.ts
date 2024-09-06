@@ -5,7 +5,7 @@ import { TSignedRequest } from '@turnkey/sdk-server';
 import { verifyMessage } from 'ethers';
 
 import { ConfigType } from 'src/config';
-import { Creator } from 'src/entities/creator.entity';
+import { CreatorStatus } from 'src/entities/creator.entity';
 import { BusinessException } from 'src/exception/business.exception';
 import { CreatorRepository } from 'src/repositories/creator.repository';
 
@@ -26,31 +26,32 @@ export class AuthService {
       headers: {
         [params.stamp.stampHeaderName]: params.stamp.stampHeaderValue,
       },
-      body: JSON.stringify(params.body),
+      body: params.body,
     });
-    const { data, status } = await response.json();
-    if (status != 200) {
-      throw new BusinessException('Internal Error');
+    const res = await response.json();
+
+    if (!response.ok) {
+      throw new BusinessException(res.message);
     }
 
-    const turnKeyInfo = await this.checkTurnkey(data.organizationId);
+    const turnKeyInfo = await this.checkTurnkey(res.activity.organizationId);
     return turnKeyInfo;
   }
 
   async checkTurnkey(subOrgId: string) {
     const turnkeyApi = this.configService.get('turnkeyApi', { infer: true })!;
-    const resp = await fetch(
+    const response = await fetch(
       `${turnkeyApi}/deposit/checkTurnkey?subOrgId=${subOrgId}`,
       {
         method: 'GET',
       },
     );
-    const result: {
-      address: string;
-      subOrgId: string;
-      turnkeyAccount: string;
-      userAA: string;
-    } = await resp.json();
+    if (!response.ok) {
+      throw new BusinessException(
+        `Contract binding information query failed with subOrgId: ${subOrgId}`,
+      );
+    }
+    const { result } = await response.json();
 
     return result; // TODO
     // return this.contractService.checkTurnkeyBind(result.address);
@@ -66,19 +67,7 @@ export class AuthService {
       throw new BusinessException('Invalid signature');
     }
 
-    const creator = await this.creatorRepository.findByAddress(address);
-    if (!creator) {
-      const creator = {
-        address: address,
-        status: 'active',
-      } as Creator;
-
-      try {
-        await this.creatorRepository.add(creator);
-      } catch (err) {
-        throw new BusinessException('Create creator failed');
-      }
-    }
+    await this.updateCreator(address);
 
     return this.signJwtToken(address);
   }
@@ -93,6 +82,21 @@ export class AuthService {
       }),
       expiresIn: jwt.expirationTime,
     };
+  }
+
+  public async updateCreator(address: string) {
+    try {
+      await this.creatorRepository.upsert(
+        {
+          address,
+          status: CreatorStatus.ACTIVE,
+        },
+        true,
+        ['address'],
+      );
+    } catch (error) {
+      throw new Error(`update creator ${address} failed`);
+    }
   }
 
   async validateCreator(payload: any): Promise<any> {
