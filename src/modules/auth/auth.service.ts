@@ -55,7 +55,13 @@ export class AuthService {
     };
   }
 
-  async loginByAddress(address: string, message: string, signature: string) {
+  async loginByAddress(
+    address: string,
+    message: string,
+    signature: string,
+    tgUserId: string,
+    tgUserName: string,
+  ) {
     const validateStatus = await this.validatePrivatekey(
       address,
       message,
@@ -70,12 +76,22 @@ export class AuthService {
       const creator = {
         address: address,
         status: 'active',
+        tgUserId: tgUserId,
+        tgUserName: tgUserName,
       } as Creator;
 
       try {
         await this.creatorRepository.add(creator);
       } catch (err) {
         throw new BusinessException('Create creator failed');
+      }
+    } else {
+      if (tgUserName != '' && tgUserId != '') {
+        if ('' == creator.tgUserId || null == creator.tgUserId) {
+          creator.tgUserId = tgUserId;
+        }
+        creator.tgUserName = tgUserName;
+        await this.creatorRepository.update(creator, { id: creator.id });
       }
     }
 

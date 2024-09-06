@@ -27,6 +27,11 @@ const configFactory = async () => {
       169: process.env.Manta_RPC_URL || '',
       534352: process.env.Scroll_RPC_URL || '',
     },
+    tgbot: {
+      webHookUrl: process.env.TGBOT_WEBHOOK_URL || '',
+      token: process.env.TGBOT_TOKEN,
+      miniApp: process.env.TGBOT_MINI_APP || '',
+    },
   };
 };
 
