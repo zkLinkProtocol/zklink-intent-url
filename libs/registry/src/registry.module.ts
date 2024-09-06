@@ -4,18 +4,18 @@ import { BuyMeACoffeeService } from '@action/buy-me-a-coffee';
 import { CrossChainSwapService } from '@action/cross-chain-swap';
 import { NovaswapService } from '@action/novaswap';
 import { RedEnvelopeService } from '@action/red-envelope';
-import { SplitBillService } from 'libs/split-bill/src';
+import { SplitBillModule } from '@action/slipt-bill';
 
 import { RegistryService } from './registry.service';
 
 @Module({
+  imports: [SplitBillModule],
   providers: [
     RegistryService,
     CrossChainSwapService,
     BuyMeACoffeeService,
     NovaswapService,
     RedEnvelopeService,
-    SplitBillService,
   ],
   exports: [
     RegistryService,
@@ -23,7 +23,6 @@ import { RegistryService } from './registry.service';
     BuyMeACoffeeService,
     NovaswapService,
     RedEnvelopeService,
-    SplitBillService,
   ],
 })
 export class RegistryModule {}
