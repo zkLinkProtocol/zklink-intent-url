@@ -1,6 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ethers } from 'ethers';
 
+import { GenerateTransactionParams } from 'src/common/dto';
+
 import { ActionUrlService } from './actionUrl.service';
 
 @Injectable()
@@ -17,10 +19,10 @@ export class BlinkService {
     const components = new Map();
     const params = new Map();
     componentsArr.forEach((item: any) => {
-      // params.set(item.name, item.value);
-      // components.set(item.name, item);
-      params.set(item.label, item.value);
-      components.set(item.label, item);
+      params.set(item.name, item.value);
+      components.set(item.name, item);
+      // params.set(item.label, item.value);
+      // components.set(item.label, item);
     });
     const intentList = setting.intentList;
     let actions = [];
@@ -44,8 +46,8 @@ export class BlinkService {
               label: item.title,
               parameters: [
                 {
-                  name: component.label,
-                  // name: component.name,
+                  // name: component.label,
+                  name: component.name,
                   label: component.label,
                   required: true,
                 },
@@ -66,16 +68,23 @@ export class BlinkService {
   }
 
   async buildTransactions(
+    chainId: number,
     code: string,
-    sender: string,
+    account: string,
     params: any,
   ): Promise<string> {
-    const data = {
-      code,
-      sender,
-      ...params,
+    const data: GenerateTransactionParams<string> = {
+      additionalData: {
+        chainId,
+        code,
+        account,
+      },
+      formData: params,
     };
     const result = await this.actionUrlService.generateTransaction(data);
+    this.logger.log(
+      `blink : buildTransactions : result: ${JSON.stringify(result)}`,
+    );
     if (!result || result.length == 0) {
       return '';
     }
@@ -85,6 +94,6 @@ export class BlinkService {
     transaction.to = tx.to;
     transaction.value = tx.value;
     transaction.data = tx.data;
-    return transaction.serialized;
+    return transaction.unsignedSerialized;
   }
 }
