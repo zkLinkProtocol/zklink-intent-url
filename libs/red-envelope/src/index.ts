@@ -10,7 +10,14 @@ import {
   parseUnits,
   toUtf8Bytes,
 } from 'ethers';
+import {
+  Action as ActionDto,
+  GenerateFormParams,
+  GenerateTransactionParams,
+  TransactionInfo,
+} from 'src/common/dto';
 import { ConfigType } from 'src/config';
+import { Address } from 'src/types';
 import { utils } from 'zksync-ethers';
 
 import ERC20ABI from './abis/ERC20.json';
@@ -22,20 +29,15 @@ import {
   ClaimRedPacketParams,
   CreateRedPacketParams,
   DistributionModeValue,
+  FormName,
   GasTokenValue,
 } from './type';
-import {
-  Action as ActionDto,
-  ActionMetadata,
-  ActionTransactionParams,
-  GeneratedTransaction,
-} from '../../../src/common/dto';
 
 const PACKET_HASH = ethers.keccak256(ethers.toUtf8Bytes('REDPACKET'));
 
 @RegistryPlug('red-envelope', 'v1')
 @Injectable()
-export class RedEnvelopeService extends ActionDto {
+export class RedEnvelopeService extends ActionDto<FormName> {
   public envelopContract: ethers.Contract;
   private quoter: ethers.Contract;
   private wallet: ethers.Wallet;
@@ -71,7 +73,7 @@ export class RedEnvelopeService extends ActionDto {
     );
   }
 
-  public async getMetadata(): Promise<ActionMetadata> {
+  public async getMetadata() {
     return genMetadata(this.config);
   }
 
@@ -205,12 +207,14 @@ export class RedEnvelopeService extends ActionDto {
     return decimals;
   }
 
-  public async afterActionUrlCreated(data: {
-    code: string;
-    sender: string;
-    params: any;
-  }): Promise<GeneratedTransaction> {
-    const { code, sender, params } = data;
+  public async onMagicLinkCreated(
+    data: GenerateTransactionParams<FormName>,
+  ): Promise<TransactionInfo[]> {
+    const { additionalData, formData } = data;
+    const { code, account } = additionalData;
+    if (!code) {
+      throw new Error('missing code');
+    }
     const hash = keccak256(toUtf8Bytes(code));
     const uint256Value = getBigInt(hash);
     const {
@@ -219,9 +223,9 @@ export class RedEnvelopeService extends ActionDto {
       distributionToken,
       amountOfRedEnvelopes,
       gasToken,
-    } = params;
+    } = formData;
 
-    const totalShare = this.genTotalShare(amountOfRedEnvelopes);
+    const totalShare = this.genTotalShare(parseInt(amountOfRedEnvelopes));
     const packetHash = PACKET_HASH;
     const isRandom =
       distributionMode === DistributionModeValue.RandomAmountPerAddress;
@@ -248,9 +252,9 @@ export class RedEnvelopeService extends ActionDto {
     );
 
     const signature = await this.genCreateSignature({
-      creator: sender,
-      token: distributionToken,
-      totalCount: amountOfRedEnvelopes,
+      creator: account as Address,
+      token: distributionToken as Address,
+      totalCount: parseInt(amountOfRedEnvelopes),
       tokenAmount: totalDistributionAmountBn,
       payForGas: payForGas,
       totalShare: totalShare,
@@ -275,32 +279,27 @@ export class RedEnvelopeService extends ActionDto {
         signature,
       );
 
-    return {
-      txs: [
-        {
-          chainId: this.config.chainId,
-          to: approveData.to,
-          value: '0',
-          data: approveData.data,
-          dataObject: {},
-          shouldSend: true,
-        },
-        {
-          chainId: this.config.chainId,
-          to: createRedPacketData.to,
-          value: '0',
-          data: createRedPacketData.data,
-          dataObject: {},
-          shouldSend: true,
-        },
-      ],
-      tokens: [],
-    };
+    return [
+      {
+        chainId: this.config.chainId,
+        to: approveData.to,
+        value: '0',
+        data: approveData.data,
+        shouldPublishToChain: true,
+      },
+      {
+        chainId: this.config.chainId,
+        to: createRedPacketData.to,
+        value: '0',
+        data: createRedPacketData.data,
+        shouldPublishToChain: true,
+      },
+    ];
   }
 
-  public override async validateIntentParams(params: {
-    [key in string]: string;
-  }): Promise<any> {
+  public override async validateFormData(
+    params: GenerateFormParams<FormName>,
+  ): Promise<any> {
     const { totalDistributionAmount, distributionToken, amountOfRedEnvelopes } =
       params;
     const txGas = await this.claimRedEnvelopeTxGas();
@@ -316,12 +315,19 @@ export class RedEnvelopeService extends ActionDto {
     }
   }
 
-  public async generateTransaction(data: {
-    code: string;
-    sender: string;
-    params: ActionTransactionParams;
-  }): Promise<GeneratedTransaction> {
-    const { code, sender } = data;
+  public async generateTransaction(
+    data: GenerateTransactionParams<FormName>,
+  ): Promise<TransactionInfo[]> {
+    const { additionalData } = data;
+    const { code, account } = additionalData;
+    if (!code) {
+      throw new Error('missing code');
+    }
+
+    if (!account) {
+      throw new Error('missing account');
+    }
+
     const paymasterParams = utils.getPaymasterParams(
       this.config.paymasterContractAddress,
       {
@@ -333,30 +339,26 @@ export class RedEnvelopeService extends ActionDto {
     const signature = this.genClaimSignature({
       id: code,
       expiry,
-      recipient: sender,
+      recipient: account,
     });
     const tx = await this.envelopContract.claimRedPacket.populateTransaction(
       code,
       expiry,
       signature,
     );
-    return {
-      txs: [
-        {
-          chainId: this.config.chainId,
-          to: this.config.redPacketContractAddress,
-          value: '0',
-          data: tx.data,
-          dataObject: {},
-          customData: {
-            gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
-            paymasterParams,
-          },
-          shouldSend: true,
+    return [
+      {
+        chainId: this.config.chainId,
+        to: this.config.redPacketContractAddress,
+        value: '0',
+        data: tx.data,
+        customData: {
+          gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
+          paymasterParams,
         },
-      ],
-      tokens: [],
-    };
+        shouldPublishToChain: true,
+      },
+    ];
   }
 
   public async getRealTimeContent(data: {
@@ -369,7 +371,7 @@ export class RedEnvelopeService extends ActionDto {
     const [_, unClaimedCount] =
       await this.envelopContract.getRedPacketBalance(packetId);
     return {
-      title: 'Red Envelope Info',
+      title: 'Red Envelope Information',
       content: `<p>There are still ${unClaimedCount} red packets unclaimed.</p>`,
     };
   }

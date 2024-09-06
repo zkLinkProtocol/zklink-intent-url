@@ -3,9 +3,8 @@ import { Injectable } from '@nestjs/common';
 import { ethers } from 'ethers';
 import {
   Action as ActionDto,
-  ActionMetadata,
-  ActionTransactionParams,
-  GeneratedTransaction,
+  GenerateTransactionParams,
+  TransactionInfo,
 } from 'src/common/dto';
 
 import {
@@ -16,8 +15,8 @@ import {
   RPC_URL,
   SWAP_ROUTER_CONTRACT_ADDRESS,
 } from './config';
-import { intoParams } from './interface';
 import { NovaSwap } from './swap';
+import { FormName } from './types';
 
 const provider = new ethers.JsonRpcProvider(RPC_URL);
 const novaswap = new NovaSwap(
@@ -29,18 +28,15 @@ const novaswap = new NovaSwap(
 
 @RegistryPlug('novaswap', 'v1')
 @Injectable()
-export class NovaswapService extends ActionDto {
-  async getMetadata(): Promise<ActionMetadata> {
+export class NovaswapService extends ActionDto<FormName> {
+  async getMetadata() {
     return METADATA;
   }
 
-  async generateTransaction(data: {
-    code: string;
-    sender: string;
-    params: ActionTransactionParams;
-  }): Promise<GeneratedTransaction> {
-    const { params } = data;
-    const tx = await novaswap.swapToken(intoParams(params), FEE);
+  async generateTransaction(
+    data: GenerateTransactionParams<FormName>,
+  ): Promise<TransactionInfo[]> {
+    const tx = await novaswap.swapToken(data, FEE);
     return tx;
   }
 }

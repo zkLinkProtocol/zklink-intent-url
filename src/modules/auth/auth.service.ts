@@ -1,9 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { TSignedRequest } from '@turnkey/sdk-server';
 import { verifyMessage } from 'ethers';
 
-import { Creator } from 'src/entities/creator.entity';
+import { ConfigType } from 'src/config';
+import { CreatorStatus } from 'src/entities/creator.entity';
 import { BusinessException } from 'src/exception/business.exception';
 import { CreatorRepository } from 'src/repositories/creator.repository';
 
@@ -13,46 +15,53 @@ export class AuthService {
   constructor(
     private readonly jwtService: JwtService,
     private readonly creatorRepository: CreatorRepository,
-    private readonly configService: ConfigService,
+    private readonly configService: ConfigService<ConfigType>,
   ) {
     this.logger = new Logger(AuthService.name);
   }
 
-  async loginByPasskey(publicId: string, message: string, signature: string) {
-    const publickey = await this.getPublicKey(publicId);
-    const validateStatus = await this.validatePasskey(
-      publickey,
-      message,
-      signature,
+  async getTurnKeyInfo(params: TSignedRequest) {
+    const response = await fetch(params.url, {
+      method: 'post',
+      headers: {
+        [params.stamp.stampHeaderName]: params.stamp.stampHeaderValue,
+      },
+      body: params.body,
+    });
+    const res = await response.json();
+
+    if (!response.ok) {
+      throw new BusinessException(res.message);
+    }
+
+    const turnKeyInfo = await this.checkTurnkey(res.activity.organizationId);
+
+    if (!turnKeyInfo) {
+      throw new BusinessException(
+        `turnKeyInfo not found with organizationId: ${res.activity.organizationId}`,
+      );
+    }
+
+    return turnKeyInfo;
+  }
+
+  async checkTurnkey(subOrgId: string) {
+    const turnkeyApi = this.configService.get('turnkeyApi', { infer: true })!;
+    const response = await fetch(
+      `${turnkeyApi}/deposit/checkTurnkey?subOrgId=${subOrgId}`,
+      {
+        method: 'GET',
+      },
     );
-    if (!validateStatus) {
-      throw new BusinessException('Invalid signature');
+    if (!response.ok) {
+      throw new BusinessException(
+        `Contract binding information query failed with subOrgId: ${subOrgId}`,
+      );
     }
+    const { result } = await response.json();
 
-    const creator = await this.creatorRepository.findByPublicId(publicId);
-    if (!creator) {
-      const creator = {
-        publicId: publicId,
-        publickey: publickey,
-        status: 'active',
-      } as Creator;
-
-      try {
-        await this.creatorRepository.add(creator);
-      } catch (err) {
-        throw new BusinessException('Create creator failed');
-      }
-    }
-
-    const payload = { publickey: publickey };
-    const jwt = this.configService.get('jwt');
-    return {
-      accessToken: this.jwtService.sign(payload, {
-        expiresIn: jwt.expirationTime,
-        secret: jwt.secret,
-      }),
-      expiresIn: jwt.expirationTime,
-    };
+    return result; // TODO
+    // return this.contractService.checkTurnkeyBind(result.address);
   }
 
   async loginByAddress(address: string, message: string, signature: string) {
@@ -65,21 +74,13 @@ export class AuthService {
       throw new BusinessException('Invalid signature');
     }
 
-    const creator = await this.creatorRepository.findByAddress(address);
-    if (!creator) {
-      const creator = {
-        address: address,
-        status: 'active',
-      } as Creator;
+    await this.updateCreator(address);
 
-      try {
-        await this.creatorRepository.add(creator);
-      } catch (err) {
-        throw new BusinessException('Create creator failed');
-      }
-    }
+    return this.signJwtToken(address);
+  }
 
-    const payload = { publickey: address };
+  public signJwtToken(address: string) {
+    const payload = { address: address };
     const jwt = this.configService.get('jwt');
     return {
       accessToken: this.jwtService.sign(payload, {
@@ -90,26 +91,35 @@ export class AuthService {
     };
   }
 
+  public async updateCreator(address: string) {
+    try {
+      await this.creatorRepository.upsert(
+        {
+          address,
+          status: CreatorStatus.ACTIVE,
+        },
+        true,
+        ['address'],
+      );
+    } catch (error) {
+      throw new Error(`update creator ${address} failed`);
+    }
+  }
+
   async validateCreator(payload: any): Promise<any> {
-    const user = await this.creatorRepository.findByPublicKey(
-      payload?.publickey ?? '',
-    );
+    const user = await this.creatorRepository.findByAddress(payload.address);
     if (!user) {
       throw new BusinessException('Invalid token');
     }
     return user;
   }
 
-  async getPublicKey(publicId: string): Promise<string> {
-    return publicId;
-  }
-
   async validatePasskey(
-    publickey: string,
+    address: string,
     message: string,
     signature: string,
   ): Promise<boolean> {
-    this.logger.log(`validatePasskey: ${publickey} ${message} ${signature}`);
+    this.logger.log(`validatePasskey: ${address} ${message} ${signature}`);
     return true;
   }
 

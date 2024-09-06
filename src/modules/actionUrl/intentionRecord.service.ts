@@ -22,7 +22,6 @@ import { IntentionRecordAddRequestDto } from './intentionRecord.dto';
 export class IntentionRecordService {
   logger: Logger;
   constructor(
-    logger: Logger,
     private readonly intentionRepository: IntentionRepository,
     private readonly intentionRecordRepository: IntentionRecordRepository,
     private readonly intentionRecordTxRepository: IntentionRecordTxRepository,
@@ -52,7 +51,6 @@ export class IntentionRecordService {
 
   async findListByCodeAndPublickey(
     intentionCode: string,
-    publicKey: string,
     address: string,
     page: number = 1,
     limit: number = 10,
@@ -60,7 +58,6 @@ export class IntentionRecordService {
     const { data, total } =
       await this.intentionRecordRepository.getPagingIntentionRecordListWithTxsByCodeAndPublickey(
         intentionCode,
-        publicKey,
         address,
         page,
         limit,
@@ -76,6 +73,18 @@ export class IntentionRecordService {
     };
   }
 
+  async findListByCode(intentionCode: string, address: string) {
+    const { data, total } =
+      await this.intentionRecordRepository.getIntentionRecordListWithTxsByCodeAndPublickey(
+        intentionCode,
+        address,
+      );
+    return {
+      data,
+      totalItems: total,
+    };
+  }
+
   async add(
     code: string,
     params: IntentionRecordAddRequestDto,
@@ -88,7 +97,6 @@ export class IntentionRecordService {
 
     const intentionRecord = new IntentionRecord();
     intentionRecord.intentionCode = code;
-    intentionRecord.publickey = params.publicKey;
     intentionRecord.address = params.address;
     intentionRecord.opUserHash = params.opUserHash;
     intentionRecord.opUserChainId = params.opUserChainId;

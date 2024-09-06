@@ -105,7 +105,7 @@ export class ActionService implements OnApplicationBootstrap {
       throw new BusinessException(`ActionId ${id} not found`);
     }
     const actionStore = await this.getActionStore(id);
-    const hasPostTxs = !!actionStore.afterActionUrlCreated;
+    const hasPostTxs = !!actionStore.onMagicLinkCreated;
     return { ...actionMetadata, hasPostTxs };
   }
 
@@ -115,7 +115,7 @@ export class ActionService implements OnApplicationBootstrap {
       async (actionMetadata) => {
         const { id } = actionMetadata;
         const actionStore = await this.getActionStore(id);
-        const hasPostTxs = !!actionStore.afterActionUrlCreated;
+        const hasPostTxs = !!actionStore.onMagicLinkCreated;
         return { ...actionMetadata, hasPostTxs };
       },
     );

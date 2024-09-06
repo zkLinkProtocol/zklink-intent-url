@@ -70,7 +70,6 @@ export class IntentionRecordRepository extends BaseRepository<IntentionRecord> {
         'id',
         'intentionCode',
         'status',
-        'publickey',
         'address',
         'createdAt',
         'intention',
@@ -80,17 +79,13 @@ export class IntentionRecordRepository extends BaseRepository<IntentionRecord> {
     });
   }
 
-  // get paging intention record list with txs by intention code and (publicKey or address)
+  // get paging intention record list with txs by intention code and address
   public async getPagingIntentionRecordListWithTxsByCodeAndPublickey(
     intentionCode: string,
-    publicKey: string,
     address: string,
     page: number = 1,
     limit: number = 10,
   ) {
-    const publickeyHash = publicKey
-      ? Buffer.from(publicKey.substring(2), 'hex')
-      : '';
     const addressHash = address ? Buffer.from(address.substring(2), 'hex') : '';
     const queryBuilder = this.unitOfWork
       .getTransactionManager()
@@ -106,9 +101,7 @@ export class IntentionRecordRepository extends BaseRepository<IntentionRecord> {
       })
       .andWhere(
         new Brackets((qb) => {
-          qb.where('intentionrecord.publickey = :publicKey', {
-            publicKey: publickeyHash,
-          }).orWhere('intentionrecord.address = :address', {
+          qb.where('intentionrecord.address = :address', {
             address: addressHash,
           });
         }),
@@ -116,6 +109,38 @@ export class IntentionRecordRepository extends BaseRepository<IntentionRecord> {
       .orderBy('intentionrecord.createdAt', 'DESC')
       .skip((page - 1) * limit)
       .take(limit);
+
+    const data = await queryBuilder.getRawMany();
+    const total = await queryBuilder.getCount();
+
+    return { data, total };
+  }
+
+  public async getIntentionRecordListWithTxsByCodeAndPublickey(
+    intentionCode: string,
+    address: string,
+  ) {
+    const addressHash = address ? Buffer.from(address.substring(2), 'hex') : '';
+    const queryBuilder = this.unitOfWork
+      .getTransactionManager()
+      .createQueryBuilder(IntentionRecord, 'intentionrecord')
+      .select([
+        'intentionrecord.id as id',
+        'intentionrecord.status as status',
+        'intentionrecord.createdAt as createdAt',
+      ])
+      .addSelect("intentionrecord.intention->>'title'", 'title')
+      .where('intentionrecord.intentionCode = :intentionCode', {
+        intentionCode,
+      });
+
+    if (address) {
+      queryBuilder.andWhere('intentionrecord.address = :address', {
+        address: addressHash,
+      });
+    }
+
+    queryBuilder.orderBy('intentionrecord.createdAt', 'DESC');
 
     const data = await queryBuilder.getRawMany();
     const total = await queryBuilder.getCount();

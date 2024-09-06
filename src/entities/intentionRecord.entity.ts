@@ -19,7 +19,6 @@ export enum IntentionRecordStatus {
 
 @Entity()
 @Index(['intentionCode'])
-@Index(['publickey'])
 @Index(['address'])
 @Index(['opUserHash', 'opUserChainId'], { unique: true })
 export class IntentionRecord extends BaseEntity {
@@ -29,10 +28,7 @@ export class IntentionRecord extends BaseEntity {
   @Column({ type: 'varchar' })
   public intentionCode: string;
 
-  @Column({ type: 'bytea', transformer: hexTransformer, nullable: true })
-  public publickey: string;
-
-  @Column({ type: 'bytea', transformer: hexTransformer, nullable: true })
+  @Column({ type: 'bytea', transformer: hexTransformer })
   public address: string;
 
   @Column({ type: 'enum', enum: IntentionRecordStatus })

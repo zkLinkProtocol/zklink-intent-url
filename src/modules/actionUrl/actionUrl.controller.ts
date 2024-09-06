@@ -21,11 +21,7 @@ import { Response } from 'express';
 
 import { BaseController } from 'src/common/base.controller';
 import { CommonApiOperation } from 'src/common/base.decorators';
-import {
-  ActionTransactionParams,
-  GenerateTransactionData,
-  GeneratedTransaction,
-} from 'src/common/dto';
+import { ActionTransactionParams, TransactionInfo } from 'src/common/dto';
 import { PagingOptionsDto } from 'src/common/pagingOptionsDto.param';
 import { PagingMetaDto, ResponseDto } from 'src/common/response.dto';
 import { BusinessException } from 'src/exception/business.exception';
@@ -47,6 +43,12 @@ import { IntentionRecordService } from './intentionRecord.service';
 import { ActionService } from '../action/action.service';
 import { GetCreator } from '../auth/creator.decorators';
 import { JwtAuthGuard } from '../auth/jwtAuth.guard';
+
+interface TransactionBody {
+  account: string;
+  chainId: string;
+  params: { [key: string]: string };
+}
 
 @Controller('action-url')
 @ApiTags('action-url')
@@ -78,9 +80,7 @@ export class ActionUrlController extends BaseController {
       settings: result.settings,
       logo: result.action.logo,
       creator: {
-        publickey: result.creator.publickey,
         address: result.creator.address,
-        publicId: result.creator.publicId,
       },
     };
     return this.success(response);
@@ -93,22 +93,27 @@ export class ActionUrlController extends BaseController {
   @UseGuards(JwtAuthGuard)
   async getIntentPostTxs(
     @Param('code') code: string,
-    @Body() request: { sender: string; params: ActionTransactionParams },
-  ): Promise<ResponseDto<GeneratedTransaction>> {
+    @Body()
+    request: { sender: string; params: ActionTransactionParams<string> },
+  ): Promise<ResponseDto<TransactionInfo[]>> {
     const { sender, params } = request;
     const intention = await this.actionUrlService.findOneByCode(code);
+
     const actionStore = await this.actionService.getActionVersionStore(
       intention.actionId,
       intention.actionVersion,
     );
-    if (!actionStore.afterActionUrlCreated) {
+    if (!actionStore.onMagicLinkCreated) {
       throw new BusinessException('No post transactions!');
     }
 
-    const data = await actionStore.afterActionUrlCreated({
-      code,
-      sender,
-      params,
+    const data = await actionStore.onMagicLinkCreated({
+      additionalData: {
+        chainId: params.chainId,
+        account: sender,
+        code,
+      },
+      formData: params,
     });
 
     return this.success(data);
@@ -132,12 +137,12 @@ export class ActionUrlController extends BaseController {
       result.actionId,
       result.actionVersion,
     );
-    if (!actionStore.getRealTimeContent) {
+    if (!actionStore.reloadAdvancedInfo) {
       return this.success(null);
     }
-    const data = await actionStore.getRealTimeContent({
+    const data = await actionStore.reloadAdvancedInfo({
       code,
-      sender,
+      account: sender,
     });
     return this.success(data);
   }
@@ -184,7 +189,6 @@ export class ActionUrlController extends BaseController {
       settings: result.settings,
       creator: {
         id: result.creator.id,
-        publickey: result.creator.publickey,
         address: result.creator.address,
       },
     };
@@ -204,7 +208,7 @@ export class ActionUrlController extends BaseController {
     if (!actionStore) {
       return this.error('Action not found');
     }
-    const active = actionStore.afterActionUrlCreated ? false : true;
+    const active = actionStore.onMagicLinkCreated ? false : true;
     const requestData = { ...request, active };
     const result = await this.actionUrlService.add(requestData, creator.id);
     return this.success(result);
@@ -273,7 +277,6 @@ export class ActionUrlController extends BaseController {
           tokenInAddress: '0x6e42d10eB474a17b14f3cfeAC2590bfa604313C7',
           tokenOutAddress: '0x461fE851Cd66e82A274570ED5767c873bE9Ae1ff',
           amountIn: '1',
-          amountInDecimal: '18',
           recipient: '0xE592427A0AEce92De3Edee1F18E0157C05861564',
           deadlineDurationInSec: '3600',
         },
@@ -288,7 +291,10 @@ export class ActionUrlController extends BaseController {
         { $ref: getSchemaPath(ResponseDto) },
         {
           properties: {
-            data: { $ref: getSchemaPath(GeneratedTransaction) },
+            data: {
+              type: 'array',
+              items: { $ref: getSchemaPath(TransactionInfo) },
+            },
           },
         },
       ],
@@ -297,12 +303,18 @@ export class ActionUrlController extends BaseController {
   async generateTransaction(
     @Param('code') code: string,
     @Body()
-    body: GenerateTransactionData,
-  ): Promise<ResponseDto<GeneratedTransaction>> {
-    const response = await this.actionUrlService.generateTransaction(
-      code,
-      body,
-    );
+    body: TransactionBody,
+  ): Promise<ResponseDto<TransactionInfo[]>> {
+    const { params, account, chainId } = body;
+    const data = {
+      additionalData: {
+        code,
+        account: account,
+        chainId: parseInt(chainId),
+      },
+      formData: params,
+    };
+    const response = await this.actionUrlService.generateTransaction(data);
     return this.success(response);
   }
 
@@ -322,14 +334,12 @@ export class ActionUrlController extends BaseController {
   @CommonApiOperation('Get intention record list with txs.')
   async getIntentionRecordList(
     @Param('code') code: string,
-    @Query('publicKey') publicKey: string,
     @Query('address') address: string,
     @Query() pagingOptions: PagingOptionsDto,
   ): Promise<ResponseDto<IntentionRecordListItemResponseDto[]>> {
     const { page = 1, limit = 20 } = pagingOptions;
     const result = await this.intentionRecordService.findListByCodeAndPublickey(
       code,
-      publicKey,
       address,
       page,
       limit,
@@ -349,16 +359,13 @@ export class ActionUrlController extends BaseController {
   @CommonApiOperation('Get intention record with txs by id.')
   async getIntentionRecord(
     @Param('id') id: bigint,
-    @Query('publicKey') publicKey: string,
     @Query('address') address: string,
   ): Promise<ResponseDto<IntentionRecordFindOneResponseDto>> {
     const result = await this.intentionRecordService.findOneById(id);
     if (!result) {
       return this.error('Intention record not found');
     }
-    if (publicKey && result.publickey !== publicKey) {
-      return this.error('Intention record not found under the public key');
-    }
+
     if (address && result.address !== address) {
       return this.error('Intention record not found under the address');
     }
@@ -435,7 +442,6 @@ export class ActionUrlController extends BaseController {
     try {
       const transaction = await this.blinkService.buildTransactions(
         code,
-        intention.actionId,
         account,
         allParams,
       );

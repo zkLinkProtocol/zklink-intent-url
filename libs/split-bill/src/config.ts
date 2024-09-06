@@ -1,6 +1,8 @@
 import { ActionMetadata } from 'src/common/dto';
 
-export const metadata: ActionMetadata = {
+import { FormName } from './types';
+
+export const metadata: ActionMetadata<FormName> = {
   title: 'Split Bill 💰',
   description: 'This action is made for friends to split the bill',
   networks: [
@@ -12,6 +14,16 @@ export const metadata: ActionMetadata = {
     {
       name: 'zkLink Nova',
       chainId: '810180',
+      contractAddress: '0x',
+    },
+    {
+      name: 'zkLink Nova sepolia',
+      chainId: '810181',
+      contractAddress: '0x',
+    },
+    {
+      name: 'zkLink dev',
+      chainId: '270',
       contractAddress: '0x',
     },
   ],
@@ -101,9 +113,10 @@ export const metadata: ActionMetadata = {
         label: 'Amount',
         desc: 'The amount of tokens you receive from each friend.',
         type: 'input',
-        regex: '^[0-9]+$',
+        regex: '^\\d+\\.?\\d*$|^\\d*\\.\\d+$',
         defaultValue: '10',
         regexDesc: 'Must be a number',
+        bind: true,
       },
       {
         name: 'recipient',
@@ -122,4 +135,19 @@ export const providerConfig: { [key in number]: string } = {
   810180: 'https://rpc.zklink.io',
   810181: 'https://sepolia.rpc.zklink.io',
   270: 'http://3.112.15.165:3050',
+};
+
+export const browserConfig: { [key in number]: string } = {
+  42161: 'https://arbiscan.io/tx/',
+  810180: 'https://explorer.zklink.io/tx/',
+  810181: 'https://sepolia.explorer.zklink.io/tx/',
+  270: 'http://3.112.15.165:3050',
+};
+
+export type TransactionResult = {
+  toAddress: string;
+  tokenAddress: string;
+  value: string;
+  txhash: string;
+  chainId: number;
 };
