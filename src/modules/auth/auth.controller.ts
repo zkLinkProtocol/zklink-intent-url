@@ -44,9 +44,11 @@ export class AuthController extends BaseController {
         HttpStatus.UNAUTHORIZED,
       );
     }
+
     const result = this.authService.signJwtToken(turnKeyInfo.address);
     await this.authService.updateCreator(turnKeyInfo.address);
     return this.success({
+      turnKeyInfo: turnKeyInfo,
       accessToken: result.accessToken,
       expiresIn: result.expiresIn,
     });
