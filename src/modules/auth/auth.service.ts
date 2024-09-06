@@ -35,6 +35,13 @@ export class AuthService {
     }
 
     const turnKeyInfo = await this.checkTurnkey(res.activity.organizationId);
+
+    if (!turnKeyInfo) {
+      throw new BusinessException(
+        `turnKeyInfo not found with organizationId: ${res.activity.organizationId}`,
+      );
+    }
+
     return turnKeyInfo;
   }
 
