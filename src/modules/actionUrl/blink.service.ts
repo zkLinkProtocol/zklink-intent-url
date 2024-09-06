@@ -82,6 +82,9 @@ export class BlinkService {
       formData: params,
     };
     const result = await this.actionUrlService.generateTransaction(data);
+    this.logger.log(
+      `blink : buildTransactions : result: ${JSON.stringify(result)}`,
+    );
     if (!result || result.length == 0) {
       return '';
     }
