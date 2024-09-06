@@ -18,8 +18,7 @@ export class ActionsJsonController extends BaseController {
       rules: [
         {
           pathPattern: '/*',
-          apiPath:
-            'https://api-intent.sepolia.zklink.io/api/action-url/*/metadata',
+          apiPath: 'https://api-magic.zklink.io/api/action-url/*/metadata',
         },
       ],
     };
