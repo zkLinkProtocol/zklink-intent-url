@@ -10,11 +10,7 @@ import {
 
 import { BaseController } from 'src/common/base.controller';
 import { CommonApiOperation } from 'src/common/base.decorators';
-import {
-  ActionMetadata,
-  GenerateFormParams,
-  GenerateTransactionParams,
-} from 'src/common/dto';
+import { ActionMetadata, GenerateFormParams } from 'src/common/dto';
 import { ResponseDto } from 'src/common/response.dto';
 
 import { ActionService } from './action.service';
