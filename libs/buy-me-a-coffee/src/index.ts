@@ -1,6 +1,7 @@
 import { RegistryPlug } from '@action/registry';
 import { Injectable } from '@nestjs/common';
 import {
+  Contract,
   JsonRpcProvider,
   dataSlice,
   formatEther,
@@ -21,6 +22,7 @@ import {
 // } from 'src/entities/intentionRecordTx.entity';
 // import { IntentionRecordService } from 'src/modules/actionUrl/intentionRecord.service';
 
+import ERC20ABI from './abis/ERC20.json';
 import {
   TransactionResult,
   browserConfig,
@@ -44,12 +46,32 @@ export class BuyMeACoffeeService extends ActionDto<FormName> {
     data: GenerateTransactionParams<FormName>,
   ): Promise<TransactionInfo[]> {
     const { additionalData, formData } = data;
+    const { chainId } = additionalData;
+    const providerUrl = providerConfig[chainId];
+    const provider = new JsonRpcProvider(providerUrl);
+    let transferTx = { to: formData.recipient, data: '0x' };
+    if (formData.token !== '') {
+      const contract = new Contract(
+        formData.token.toString(),
+        ERC20ABI,
+        provider,
+      );
+      const decimals = await contract.decimals();
+      const amountToSend = parseUnits(formData.value.toString(), decimals);
+      transferTx = await contract.transfer.populateTransaction(
+        formData.recipient,
+        amountToSend,
+      );
+    }
 
     const tx: TransactionInfo = {
-      chainId: additionalData.chainId,
-      to: formData.recipient,
-      value: parseUnits(formData.value, 18).toString(),
-      data: '0x',
+      chainId: chainId,
+      to: transferTx.to,
+      value:
+        formData.token === ''
+          ? parseUnits(formData.value.toString(), 18).toString()
+          : '0',
+      data: transferTx.data,
       shouldPublishToChain: true,
     };
     return [tx];
