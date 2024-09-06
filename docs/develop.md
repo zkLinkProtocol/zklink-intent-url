@@ -81,7 +81,7 @@ abstract class Action {
 
   abstract generateTransaction(
     data: GenerateTransactionData,
-  ): Promise<GeneratedTransaction>;
+  ): Promise<TransactionInfo[]>;
 
   async validateIntentParams(_: ActionTransactionParams): Promise<string> {
     return Promise.resolve('');
@@ -92,9 +92,9 @@ abstract class Action {
     content: string;
   }>;
 
-  async afterActionUrlCreated?(
+  async onMagicLinkCreated?(
     data: GenerateTransactionData,
-  ): Promise<GeneratedTransaction>;
+  ): Promise<TransactionInfo[]>;
 }
 ```
 
@@ -108,7 +108,7 @@ abstract class Action {
 
   After the developer defines the title and rich text content, the display in the magicLink will be similar to the part highlighted in red in the image ![](./img/real-time-example.png)
 
-- Sometimes, after constructing the parameters and creating the magicLink, it may not become active immediately and will remain in an inactive state. You will need to initiate one or more transactions to the smart contract before you can create an active magicLink. For example, with a red packet contract, you need to deposit a red packet asset into the contract before the magicLink can become active. The `afterActionUrlCreated` provides this capability. It returns `GeneratedTransaction`. The frontend will initiate the on-chain transaction based on this information.
+- Sometimes, after constructing the parameters and creating the magicLink, it may not become active immediately and will remain in an inactive state. You will need to initiate one or more transactions to the smart contract before you can create an active magicLink. For example, with a red packet contract, you need to deposit a red packet asset into the contract before the magicLink can become active. The `onMagicLinkCreated` provides this capability. It returns `TransactionInfo[]`. The frontend will initiate the on-chain transaction based on this information.
 
 ### 3.Implement
 
@@ -159,18 +159,16 @@ class MyActionService extends Action {
 
   async generateTransaction(
     params: ActionTransactionParams,
-  ): Promise<GeneratedTransaction> {
+  ): Promise<TransactionInfo[]> {
     // Build and return your transaction
     const tx = {
       chainId: 810180,
       to: params.recipient,
       value: params.value,
       data: '0x',
-      dataObject: {
-        "Sent Value": params.value,
-      },
+     
       // tell the render whether to send the transaction
-      shouldSend: true
+      shouldPublishToChain: true
     }
     return {
       txs: [tx],
@@ -210,10 +208,10 @@ When you allow magicLink can initiate transactions on multiple chains, the `opti
 
 - `regex`: a regular expression that the frontend will use to validate the input.
 
-[`GeneratedTransaction`](../src/common/dto/transaction.dto.ts#57) is a type that describes the transaction that will be sent to the blockchain. It contains the
+[`TransactionInfo[]`](../src/common/dto/transaction.dto.ts#57) is a type that describes the transaction that will be sent to the blockchain. It contains the
 fields `txs` and `tokens`.
 
-- The `txs` field is an array of transactions that will be sent to the blockchain. The field `chainId`, `to`, `value`, `data` are standard Ethereum transaction fields. It has two additional fields: `dataObject` and `shouldSend`. The `dataObject` field is a JSON object that will be displayed on the frontend. The `shouldSend` field tells the frontend whether to send the transaction.
+- The `txs` field is an array of transactions that will be sent to the blockchain. The field `chainId`, `to`, `value`, `data` are standard Ethereum transaction fields. It has an additional fields: `shouldPublishToChain`. The `shouldPublishToChain` field tells the frontend whether to send the transaction.
 - The `tokens` field is a list of tokens that should be prepared in target. You can think of this field as describing the prerequisites for initiating a transaction. The frontend will automatically search and perform cross-chain transactions to meet the prerequisites on your target chain. Then, it starts to send the transaction.
 
 ### 4. Switch `env`
@@ -302,7 +300,7 @@ abstract class Action {
     // Validate the parameters with user custom logic
     validateIntentParams(_: ActionTransactionParams): Promise<string>;
     // Process something after the action URL is created
-    afterActionUrlCreated?(params:GenerateTransactionData): any;
+    onMagicLinkCreated?(params:GenerateTransactionData): any;
 }
 ```
 

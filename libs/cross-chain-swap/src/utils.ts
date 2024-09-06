@@ -1,5 +1,4 @@
 import { ethers } from 'ethers';
-import { Tx } from 'src/common/dto';
 
 import { GAS_COEFFICIENT } from './config';
 import { getQuote } from './okxAPI';

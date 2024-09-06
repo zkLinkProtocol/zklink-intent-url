@@ -1,34 +1,53 @@
+import { ErrorMessage } from 'src/types';
+
 import { ActionMetadata } from './action-metadata.dto';
-import { GeneratedTransaction } from './transaction.dto';
+import { TransactionInfo } from './transaction.dto';
 
 export type ActionId = string;
-export type ActionTransactionParams = { chainId: number } & {
-  [key: string]: string;
+
+export type BasicAdditionalParams = { code?: string; account?: string };
+
+type NetworkAdditionalParams = {
+  chainId: number;
 };
-export interface GenerateTransactionData {
-  code: string;
-  sender: string;
-  params: ActionTransactionParams;
-}
-export abstract class Action {
-  abstract getMetadata(): Promise<ActionMetadata>;
+
+export type GenerateFormParams<T extends string> = {
+  [key in T]: string;
+};
+
+export type AdditionalParams = BasicAdditionalParams & NetworkAdditionalParams;
+
+export type ActionTransactionParams<T extends string> =
+  NetworkAdditionalParams & GenerateFormParams<T>;
+
+export type GenerateTransactionParams<T extends string> = {
+  additionalData: AdditionalParams;
+  formData: {
+    [key in T]: string;
+  };
+};
+
+export abstract class Action<T extends string = string> {
+  abstract getMetadata(): Promise<ActionMetadata<T>>;
 
   abstract generateTransaction(
-    data: GenerateTransactionData,
-  ): Promise<GeneratedTransaction>;
+    data: GenerateTransactionParams<T>,
+  ): Promise<TransactionInfo[]>;
 
-  async validateIntentParams(_: ActionTransactionParams): Promise<string> {
-    return Promise.resolve('');
+  async validateFormData(_: GenerateFormParams<T>): Promise<ErrorMessage> {
+    return '';
   }
 
-  async getRealTimeContent?(
-    data: Omit<GenerateTransactionData, 'params'>,
-  ): Promise<{
+  /**
+   *
+   * @description
+   */
+  async reloadAdvancedInfo?(data: BasicAdditionalParams): Promise<{
     title: string;
     content: string;
   }>;
 
-  async afterActionUrlCreated?(
-    data: GenerateTransactionData,
-  ): Promise<GeneratedTransaction>;
+  async onMagicLinkCreated?(
+    data: GenerateTransactionParams<T>,
+  ): Promise<TransactionInfo[]>;
 }

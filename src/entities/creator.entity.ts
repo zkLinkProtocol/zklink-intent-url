@@ -9,19 +9,12 @@ export enum CreatorStatus {
 }
 
 @Entity()
-@Index(['publickey'], { unique: true })
 @Index(['address'], { unique: true })
 export class Creator extends BaseEntity {
   @PrimaryGeneratedColumn()
   public readonly id: bigint;
 
-  @Column({ type: 'varchar', nullable: true })
-  public publicId: string;
-
-  @Column({ type: 'bytea', transformer: hexTransformer, nullable: true })
-  public publickey: string;
-
-  @Column({ type: 'bytea', transformer: hexTransformer, nullable: true })
+  @Column({ type: 'bytea', transformer: hexTransformer })
   public address: string;
 
   @Column({ type: 'enum', enum: CreatorStatus })

@@ -1,9 +1,9 @@
 import { ActionMetadata } from 'src/common/dto';
 
 import { Value } from './config';
-import { DistributionModeValue, GasTokenValue } from './type';
+import { DistributionModeValue, FormName, GasTokenValue } from './type';
 
-export const genMetadata = (configValue: Value): ActionMetadata => ({
+export const genMetadata = (configValue: Value): ActionMetadata<FormName> => ({
   title: 'RedEnvelope',
   description: 'Send red Envelope',
   networks: [

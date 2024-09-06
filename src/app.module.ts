@@ -4,7 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import config from './config';
+import configFactory from './config';
 import { Action } from './entities/action.entity';
 import { Creator } from './entities/creator.entity';
 import { Intention } from './entities/intention.entity';
@@ -25,7 +25,7 @@ import { UnitOfWorkModule } from './unitOfWork';
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
-      load: [config],
+      load: [configFactory],
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
