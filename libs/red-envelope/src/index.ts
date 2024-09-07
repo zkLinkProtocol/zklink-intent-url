@@ -269,7 +269,7 @@ export class RedEnvelopeService extends ActionDto<FormName> {
         uint256Value,
         distributionToken,
         amountOfRedEnvelopes,
-        totalDistributionAmount,
+        totalDistributionAmountBn,
         payForGas,
         totalShare,
         packetHash,
