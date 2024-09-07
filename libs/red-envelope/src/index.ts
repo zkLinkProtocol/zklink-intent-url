@@ -153,7 +153,7 @@ export class RedEnvelopeService extends ActionDto<FormName> {
   }
 
   private async claimRedEnvelopeTxGas() {
-    const id = '1';
+    const id = '0';
     const expiry = Math.floor(Date.now() / 1000) + 60 * 60;
     const signature = this.genClaimSignature({
       id,
@@ -232,7 +232,7 @@ export class RedEnvelopeService extends ActionDto<FormName> {
     const isGasfree = gasToken === GasTokenValue.DistributedToken;
     const txGas = await this.claimRedEnvelopeTxGas();
     const payForGas = isGasfree
-      ? await this.getQuote(distributionToken, txGas)
+      ? await this.getQuote(distributionToken, txGas * 2n)
       : 0n;
     const decimals = await this.getDecimals(distributionToken);
     const totalDistributionAmountBn = parseUnits(
@@ -249,6 +249,11 @@ export class RedEnvelopeService extends ActionDto<FormName> {
     const approveData = await tokenContract.approve.populateTransaction(
       this.config.redPacketContractAddress,
       totalDistributionAmountBn + payForGas,
+    );
+
+    const allowance = await tokenContract.allowance(
+      additionalData.account,
+      this.config.redPacketContractAddress,
     );
 
     const signature = await this.genCreateSignature({
@@ -279,22 +284,26 @@ export class RedEnvelopeService extends ActionDto<FormName> {
         signature,
       );
 
-    return [
-      {
+    const transactions = [];
+    if (totalDistributionAmountBn + payForGas > allowance) {
+      transactions.push({
         chainId: this.config.chainId,
         to: approveData.to,
         value: '0',
         data: approveData.data,
         shouldPublishToChain: true,
-      },
-      {
-        chainId: this.config.chainId,
-        to: createRedPacketData.to,
-        value: '0',
-        data: createRedPacketData.data,
-        shouldPublishToChain: true,
-      },
-    ];
+      });
+    }
+
+    transactions.push({
+      chainId: this.config.chainId,
+      to: createRedPacketData.to,
+      value: '0',
+      data: createRedPacketData.data,
+      shouldPublishToChain: true,
+    });
+
+    return transactions;
   }
 
   public override async validateFormData(
