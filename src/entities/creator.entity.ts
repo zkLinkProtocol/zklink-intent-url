@@ -17,6 +17,12 @@ export class Creator extends BaseEntity {
   @Column({ type: 'bytea', transformer: hexTransformer })
   public address: string;
 
+  @Column({ type: 'varchar', nullable: true })
+  public tgUserId: string;
+
+  @Column({ type: 'varchar', nullable: true })
+  public tgUserName: string;
+
   @Column({ type: 'enum', enum: CreatorStatus })
   public status: CreatorStatus;
 }

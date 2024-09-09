@@ -17,6 +17,7 @@ import { ActionUrlModule } from './modules/actionUrl/actionUrl.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { FilesModule } from './modules/files/files.module';
 import { HubModule } from './modules/hub/hub.module';
+import { TgbotModule } from './modules/tgbot/tgbot.module';
 import { typeOrmModuleOptions } from './typeorm.config';
 import { UnitOfWorkModule } from './unitOfWork';
 
@@ -53,6 +54,7 @@ import { UnitOfWorkModule } from './unitOfWork';
     FilesModule,
     HubModule,
     ActionsJsonModule,
+    TgbotModule,
   ],
 
   controllers: [AppController],

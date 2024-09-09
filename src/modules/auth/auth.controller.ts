@@ -69,6 +69,8 @@ export class AuthController extends BaseController {
       params.address,
       message,
       params.signature,
+      params.tgUserId ?? '',
+      params.tgUserName ?? '',
     );
     return this.success({
       accessToken: result.accessToken,
