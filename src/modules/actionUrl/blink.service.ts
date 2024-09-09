@@ -90,10 +90,11 @@ export class BlinkService {
     }
     const tx = result[0];
     const transaction = new ethers.Transaction();
-    // transaction.chainId = tx.chainId;
+    transaction.chainId = tx.chainId;
     transaction.to = tx.to;
     transaction.value = tx.value;
     transaction.data = tx.data;
+    transaction.type = 0;
     return transaction.unsignedSerialized;
   }
 }

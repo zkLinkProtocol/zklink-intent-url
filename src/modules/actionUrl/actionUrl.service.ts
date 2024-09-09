@@ -77,25 +77,27 @@ export class ActionUrlService {
       creatorId,
       code,
     });
-    try {
-      this.unitOfWork.useTransaction(async () => {
-        const actionInfo = await this.actionRepository.findOneBy({
-          id: params.actionId,
-        });
-        if (!actionInfo) {
-          throw new BusinessException(`No action ${params.actionId} found`);
-        }
-        actionInfo.intentionCount += 1;
+    return new Promise((resolve) => {
+      try {
+        this.unitOfWork.useTransaction(async () => {
+          const actionInfo = await this.actionRepository.findOneBy({
+            id: params.actionId,
+          });
+          if (!actionInfo) {
+            throw new BusinessException(`No action ${params.actionId} found`);
+          }
+          actionInfo.intentionCount += 1;
 
-        await this.intentionRepository.add(intentionRecord);
-        await this.actionRepository.upsert(actionInfo, true, ['id']);
-        this.logger.log(`a new intention is added ${code}`);
-      });
-    } catch (error) {
-      this.logger.error(error);
-      throw new BusinessException('Failed to add actionUrl');
-    }
-    return code;
+          await this.intentionRepository.add(intentionRecord);
+          await this.actionRepository.upsert(actionInfo, true, ['id']);
+          this.logger.log(`a new intention is added ${code}`);
+          resolve(code);
+        });
+      } catch (error) {
+        this.logger.error(error);
+        throw new BusinessException('Failed to add actionUrl');
+      }
+    });
   }
 
   async updateByCode(code: string, params: any, creatorId: bigint) {

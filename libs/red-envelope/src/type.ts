@@ -31,7 +31,7 @@ export interface CreateRedPacketParams {
 }
 
 export interface ClaimRedPacketParams {
-  id: string;
+  id: bigint;
   recipient: string;
   expiry: number;
 }
