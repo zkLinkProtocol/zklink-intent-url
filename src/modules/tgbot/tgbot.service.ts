@@ -1,4 +1,5 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { ethers } from 'ethers';
 import TelegramBot from 'node-telegram-bot-api';
 import { ParseMode } from 'node-telegram-bot-api';
 
@@ -25,31 +26,67 @@ export class TgbotService implements OnModuleInit {
   }
 
   private async eventInit() {
-    this.bot.onText(/\/start/, (msg: any) => this.onStart(msg.chat.id));
-    this.bot.onText(/\/myMagicLink/, (msg: any) =>
-      this.onMyMagicLink(msg.from.id),
-    );
+    this.bot.onText(/\/start/, (msg: any) => this.onStart(msg.from.id));
+    this.bot.onText(/\/my/, (msg: any) => this.onMyMagicLink(msg.from.id));
   }
 
-  async onStart(chatId: string) {
+  async onStart(tgUserId: string) {
+    const creator = await this.creatorRepository.findOneBy({ tgUserId });
+    let walletAddress = '';
+    let ethBalance = BigInt(0);
+    if (creator) {
+      walletAddress = creator.address;
+      const config = await configFactory();
+      try {
+        const novaRpc = config.rpc[810180];
+        const novaProvider = new ethers.JsonRpcProvider(novaRpc);
+        ethBalance = await novaProvider.getBalance(walletAddress);
+      } catch (error) {
+        this.logger.error(`onStart error`, error);
+      }
+    }
     const photo = 'https://pic.imgdb.cn/item/66bb2b02d9c307b7e9c8ec19.png';
-    const caption = `<b>BTC up 10% in 10 minutes</b>
-    🚨 Breaking News! BTC is up 10% in just 10 minutes! ⏱️  This is why we HODL 💎✋—the thrill of watching the king of crypto make its moves. 🔥 Whether you're stacking sats or just riding the waves, moments like these remind us why we're here. 🌊 The volatility is the heartbeat of this market, and for true believers, it’s just another step toward the moon. 🌕 Buckle up, because in the world of crypto, anything can happen in a blink. ⚡️ Stay sharp, and keep your eyes on the prize! 🎯`;
-    const parse_mode: ParseMode = 'HTML';
+    let caption = `The Magic Link TG Mini APP is a dedicated application under Magic Link, specifically designed for the TG ecosystem. 
+    It offers multi-chain wallet and asset management features, allowing users to quickly create and manage Magic Links across multiple chains, simplifying asset transfers and interactions.     
+    The app supports users in creating and managing Magic Links while providing essential interaction capabilities, enabling seamless connections with other Magic Links.
+    
+    💰 My Wallet Address: \`${walletAddress}\`
+    
+    ETH balance in Nova: ${Number(ethers.formatEther(ethBalance)).toFixed(6)} ETH
+    
+    Don't have ETH yet? Open your account and deposit from here 👇`;
+    caption = caption.replaceAll('.', '\\.').replaceAll('-', '\\-');
+    const parse_mode: ParseMode = 'MarkdownV2';
     const reply_markup = {
       inline_keyboard: [
         [
           {
-            text: '🚀 Add to group',
-            url: 'https://t.me/testintentbot?startgroup=true',
+            text: 'Twitter',
+            url: 'https://x.com/zkLinkNova',
+          },
+          {
+            text: 'Community',
+            url: 'https://t.me/zkLinkorg',
+          },
+        ],
+        [
+          {
+            text: 'Open MagicLink Page',
+            url: 'https://t.me/zkLink_nova_bot/test_nova_mini_app',
+          },
+        ],
+        [
+          {
+            text: 'Create New MagicLink',
+            url: 'https://t.me/zkLink_nova_bot/test_nova_mini_app?start=new',
           },
         ],
       ],
     };
     const options = { reply_markup: reply_markup, parse_mode, caption };
-    console.log(chatId, photo, options);
+    console.log(tgUserId, photo, options);
     try {
-      const res = await this.bot.sendPhoto(chatId, photo, options);
+      const res = await this.bot.sendPhoto(tgUserId, photo, options);
       console.log('onStart success', res);
     } catch (error) {
       console.error(`onStart error`, error);
@@ -102,6 +139,12 @@ export class TgbotService implements OnModuleInit {
     } catch (error) {
       console.error('onMyMagicLink error', error);
     }
+  }
+
+  async handleBlink(chatId: string, domain: string, url: string) {
+    const actionsJson = `${domain}/actions.json`;
+    const actions = await fetch(actionsJson).then((res) => res.json());
+    console.log('handleBlink');
   }
 
   async update(body: any) {
