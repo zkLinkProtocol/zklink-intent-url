@@ -55,7 +55,6 @@ export class LoginByPrivatekeyRequestDto {
     description: 'telegrame user id.',
     example: '123456789',
   })
-  @IsString()
   tgUserId?: string;
 
   @ApiProperty({
@@ -63,7 +62,6 @@ export class LoginByPrivatekeyRequestDto {
     description: 'telegrame user name.',
     example: 'magic_link',
   })
-  @IsString()
   tgUserName?: string;
 
   @ApiProperty({
