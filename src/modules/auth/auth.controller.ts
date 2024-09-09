@@ -46,7 +46,11 @@ export class AuthController extends BaseController {
     }
 
     const result = this.authService.signJwtToken(turnKeyInfo.address);
-    await this.authService.updateCreator(turnKeyInfo.address);
+    await this.authService.updateCreator(
+      turnKeyInfo.address,
+      params.tgUserId ?? '',
+      params.tgUserName ?? '',
+    );
     return this.success({
       turnKeyInfo: turnKeyInfo,
       accessToken: result.accessToken,
