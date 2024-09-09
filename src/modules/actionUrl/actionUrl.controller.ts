@@ -13,6 +13,7 @@ import {
 import {
   ApiBody,
   ApiParam,
+  ApiQuery,
   ApiResponse,
   ApiTags,
   getSchemaPath,
@@ -330,17 +331,21 @@ export class ActionUrlController extends BaseController {
   }
 
   // get intention record list with txs
-  @Get(':code/intention-record')
+  @Get(':address/intention-record')
   @CommonApiOperation('Get intention record list with txs.')
+  @ApiQuery({
+    name: 'status',
+    example: 'pending|success|failed or empty',
+  })
   async getIntentionRecordList(
-    @Param('code') code: string,
-    @Query('address') address: string,
+    @Param('address') address: string,
     @Query() pagingOptions: PagingOptionsDto,
+    @Query('status') status?: string,
   ): Promise<ResponseDto<IntentionRecordListItemResponseDto[]>> {
     const { page = 1, limit = 20 } = pagingOptions;
-    const result = await this.intentionRecordService.findListByCodeAndPublickey(
-      code,
+    const result = await this.intentionRecordService.findListAndPublickey(
       address,
+      status,
       page,
       limit,
     );

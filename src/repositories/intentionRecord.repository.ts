@@ -81,8 +81,8 @@ export class IntentionRecordRepository extends BaseRepository<IntentionRecord> {
 
   // get paging intention record list with txs by intention code and address
   public async getPagingIntentionRecordListWithTxsByCodeAndPublickey(
-    intentionCode: string,
     address: string,
+    status: string | undefined,
     page: number = 1,
     limit: number = 10,
   ) {
@@ -96,9 +96,7 @@ export class IntentionRecordRepository extends BaseRepository<IntentionRecord> {
         'intentionrecord.createdAt as createdAt',
       ])
       .addSelect("intentionrecord.intention->>'title'", 'title')
-      .where('intentionrecord.intentionCode = :intentionCode', {
-        intentionCode,
-      })
+      .addSelect("intentionrecord.intention->>'metadata'", 'metadata')
       .andWhere(
         new Brackets((qb) => {
           qb.where('intentionrecord.address = :address', {
@@ -109,6 +107,11 @@ export class IntentionRecordRepository extends BaseRepository<IntentionRecord> {
       .orderBy('intentionrecord.createdAt', 'DESC')
       .skip((page - 1) * limit)
       .take(limit);
+    if (status) {
+      queryBuilder.andWhere('intentionrecord.status = :status', {
+        status,
+      });
+    }
 
     const data = await queryBuilder.getRawMany();
     const total = await queryBuilder.getCount();

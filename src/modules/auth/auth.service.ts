@@ -104,13 +104,18 @@ export class AuthService {
   ) {
     const creator = await this.creatorRepository.findByAddress(address);
     if (!creator) {
-      const creator = {
-        address: address,
-        status: CreatorStatus.ACTIVE,
-        tgUserId: tgUserId,
-        tgUserName: tgUserName,
-      } as Creator;
-
+      const creator =
+        tgUserId != ''
+          ? ({
+              address: address,
+              status: CreatorStatus.ACTIVE,
+              tgUserId: tgUserId,
+              tgUserName: tgUserName,
+            } as Creator)
+          : ({
+              address: address,
+              status: CreatorStatus.ACTIVE,
+            } as Creator);
       try {
         await this.creatorRepository.add(creator);
       } catch (err) {
