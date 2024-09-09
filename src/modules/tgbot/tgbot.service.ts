@@ -31,12 +31,13 @@ export class TgbotService implements OnModuleInit {
   }
 
   async onStart(tgUserId: string) {
+    const config = await configFactory();
+    const minapp = config.tgbot.miniApp;
     const creator = await this.creatorRepository.findOneBy({ tgUserId });
     let walletAddress = '';
     let ethBalance = BigInt(0);
     if (creator) {
       walletAddress = creator.address;
-      const config = await configFactory();
       try {
         const novaRpc = config.rpc[810180];
         const novaProvider = new ethers.JsonRpcProvider(novaRpc);
@@ -72,13 +73,13 @@ export class TgbotService implements OnModuleInit {
         [
           {
             text: 'Open MagicLink Page',
-            url: 'https://t.me/zkLink_nova_bot/test_nova_mini_app',
+            url: minapp,
           },
         ],
         [
           {
             text: 'Create New MagicLink',
-            url: 'https://t.me/zkLink_nova_bot/test_nova_mini_app?start=new',
+            url: `${minapp}?start=new`,
           },
         ],
       ],
