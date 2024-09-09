@@ -33,6 +33,7 @@ export class TgbotService implements OnModuleInit {
   async onStart(tgUserId: string) {
     const config = await configFactory();
     const minapp = config.tgbot.miniApp;
+    const tgbot = config.tgbot.tgbot;
     const creator = await this.creatorRepository.findOneBy({ tgUserId });
     let walletAddress = '';
     let ethBalance = BigInt(0);
@@ -80,6 +81,12 @@ export class TgbotService implements OnModuleInit {
           {
             text: 'Create New MagicLink',
             url: `${minapp}?start=new`,
+          },
+        ],
+        [
+          {
+            text: 'Add to my group',
+            url: `${tgbot}?startgroup=join&admin=edit_messages`,
           },
         ],
       ],

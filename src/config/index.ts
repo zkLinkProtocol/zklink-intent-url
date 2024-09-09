@@ -29,6 +29,7 @@ const configFactory = async () => {
       534352: process.env.Scroll_RPC_URL || '',
     },
     tgbot: {
+      tgbot: process.env.TGBOT || '',
       webHookUrl: process.env.TGBOT_WEBHOOK_URL || '',
       token: process.env.TGBOT_TOKEN,
       miniApp: process.env.TGBOT_MINI_APP || '',
