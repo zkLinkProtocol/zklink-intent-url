@@ -153,9 +153,9 @@ export class RedEnvelopeService extends ActionDto<FormName> {
   }
 
   private async claimRedEnvelopeTxGas() {
-    const id = '1';
+    const id = 0n;
     const expiry = Math.floor(Date.now() / 1000) + 60 * 60;
-    const signature = this.genClaimSignature({
+    const signature = await this.genClaimSignature({
       id,
       expiry,
       recipient: this.wallet.address,
@@ -207,6 +207,12 @@ export class RedEnvelopeService extends ActionDto<FormName> {
     return decimals;
   }
 
+  private getPacketIDByCode(code: string) {
+    const hash = keccak256(toUtf8Bytes(code));
+    const id = getBigInt(hash);
+    return id;
+  }
+
   public async onMagicLinkCreated(
     data: GenerateTransactionParams<FormName>,
   ): Promise<TransactionInfo[]> {
@@ -215,8 +221,7 @@ export class RedEnvelopeService extends ActionDto<FormName> {
     if (!code) {
       throw new Error('missing code');
     }
-    const hash = keccak256(toUtf8Bytes(code));
-    const uint256Value = getBigInt(hash);
+    const id = this.getPacketIDByCode(code);
     const {
       distributionMode,
       totalDistributionAmount,
@@ -232,7 +237,7 @@ export class RedEnvelopeService extends ActionDto<FormName> {
     const isGasfree = gasToken === GasTokenValue.DistributedToken;
     const txGas = await this.claimRedEnvelopeTxGas();
     const payForGas = isGasfree
-      ? await this.getQuote(distributionToken, txGas)
+      ? await this.getQuote(distributionToken, txGas * 2n)
       : 0n;
     const decimals = await this.getDecimals(distributionToken);
     const totalDistributionAmountBn = parseUnits(
@@ -251,6 +256,11 @@ export class RedEnvelopeService extends ActionDto<FormName> {
       totalDistributionAmountBn + payForGas,
     );
 
+    const allowance = await tokenContract.allowance(
+      additionalData.account,
+      this.config.redPacketContractAddress,
+    );
+
     const signature = await this.genCreateSignature({
       creator: account as Address,
       token: distributionToken as Address,
@@ -266,10 +276,10 @@ export class RedEnvelopeService extends ActionDto<FormName> {
 
     const createRedPacketData =
       await this.envelopContract.createRedPacket.populateTransaction(
-        uint256Value,
+        id,
         distributionToken,
         amountOfRedEnvelopes,
-        totalDistributionAmount,
+        totalDistributionAmountBn,
         payForGas,
         totalShare,
         packetHash,
@@ -279,22 +289,26 @@ export class RedEnvelopeService extends ActionDto<FormName> {
         signature,
       );
 
-    return [
-      {
+    const transactions = [];
+    if (totalDistributionAmountBn + payForGas > allowance) {
+      transactions.push({
         chainId: this.config.chainId,
         to: approveData.to,
         value: '0',
         data: approveData.data,
         shouldPublishToChain: true,
-      },
-      {
-        chainId: this.config.chainId,
-        to: createRedPacketData.to,
-        value: '0',
-        data: createRedPacketData.data,
-        shouldPublishToChain: true,
-      },
-    ];
+      });
+    }
+
+    transactions.push({
+      chainId: this.config.chainId,
+      to: createRedPacketData.to,
+      value: '0',
+      data: createRedPacketData.data,
+      shouldPublishToChain: true,
+    });
+
+    return transactions;
   }
 
   public override async validateFormData(
@@ -335,14 +349,15 @@ export class RedEnvelopeService extends ActionDto<FormName> {
         innerInput: new Uint8Array(),
       },
     );
+    const packetId = this.getPacketIDByCode(code);
     const expiry = Math.floor(Date.now() / 1000) + 60 * 60;
-    const signature = this.genClaimSignature({
-      id: code,
+    const signature = await this.genClaimSignature({
+      id: packetId,
       expiry,
       recipient: account,
     });
     const tx = await this.envelopContract.claimRedPacket.populateTransaction(
-      code,
+      packetId,
       expiry,
       signature,
     );

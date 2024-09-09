@@ -67,7 +67,7 @@ export class ActionService implements OnApplicationBootstrap {
         });
         metadata.magicLinkMetadata = metadata.magicLinkMetadata ?? {};
         metadata.magicLinkMetadata.gallery = galleryWithExt
-          ? `${this.awsConfig.s3Url}/${this.awsConfig.keyPrefix}/logos/${galleryWithExt}`
+          ? `${this.awsConfig.s3Url}/${this.awsConfig.keyPrefix}/galleries/${galleryWithExt}`
           : '';
       }
 
