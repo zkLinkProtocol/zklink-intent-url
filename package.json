@@ -125,7 +125,8 @@
       "^@action/buy-me-a-coffee(|/.*)$": "<rootDir>/libs/buy-me-a-coffee/src/$1",
       "^@action/red-envelope(|/.*)$": "<rootDir>/libs/buy-me-a-coffee/src/$1",
       "^@action/split-bill(|/.*)$": "<rootDir>/libs/split-bill/src/$1",
-      "^@action/registry(|/.*)$": "<rootDir>/libs/registry/src/$1"
+      "^@action/registry(|/.*)$": "<rootDir>/libs/registry/src/$1",
+      "^@action/pump-fun(|/.*)$": "<rootDir>/libs/pump-fun/src/$1"
     }
   }
 }
