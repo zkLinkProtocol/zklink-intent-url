@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ethers } from 'ethers';
+import { IsNull, Not } from 'typeorm';
 
 import configFactory from 'src/config';
 import {
@@ -98,14 +99,17 @@ export class IntentionRecordService {
     const intentionRecord = new IntentionRecord();
     intentionRecord.intentionCode = code;
     intentionRecord.address = params.address;
-    intentionRecord.opUserHash = params.opUserHash;
-    intentionRecord.opUserChainId = params.opUserChainId;
-    intentionRecord.status = IntentionRecordStatus.WAITING;
+    intentionRecord.status = IntentionRecordStatus.PENDING;
     intentionRecord.intention = intention;
 
     const txs = params.txs.map((tx) => {
       const intentionRecordTx = new IntentionRecordTx();
-      intentionRecordTx.txHash = tx.txHash;
+      if (tx.txHash) {
+        intentionRecordTx.txHash = tx.txHash;
+      }
+      if (tx.opUserHash) {
+        intentionRecordTx.opUserHash = tx.opUserHash;
+      }
       intentionRecordTx.intentionRecordId = BigInt(0);
       intentionRecordTx.chainId = tx.chainId;
       intentionRecordTx.createdAt = new Date(tx.createdAt);
@@ -132,6 +136,7 @@ export class IntentionRecordService {
       try {
         this.handleOpUserTxStatus();
         this.handleTxStatus();
+        this.handleRecordStatus();
       } catch (error) {
         this.logger.error(error);
       }
@@ -145,33 +150,55 @@ export class IntentionRecordService {
   }
 
   private async handleOpUserTxStatus() {
-    const intentionRecords = await this.intentionRecordRepository.find({
-      select: ['id', 'opUserChainId', 'opUserHash'],
-      where: { status: IntentionRecordStatus.WAITING },
+    const txs = await this.intentionRecordTxRepository.find({
+      select: ['id', 'chainId', 'opUserHash'],
+      where: {
+        status: IntentionRecordTxStatus.PENDING,
+        txHash: IsNull(), // txHash = null
+        opUserHash: Not(IsNull()), // opUserHash ！= null
+      },
       order: { id: 'ASC' },
     });
-    if (intentionRecords.length === 0) {
+    if (txs.length === 0) {
       return;
     }
-    for (const intentionRecord of intentionRecords) {
-      const txHashs = await this.fetchTxReceipt(
-        intentionRecord.opUserChainId,
-        intentionRecord.opUserHash,
-      );
+    for (const tx of txs) {
+      const txHashs = await this.fetchTxReceipt(tx.chainId, tx.opUserHash);
       if (txHashs.length === 0) {
         continue;
       }
-      const intentionRecordTxs = txHashs.map((txHash) => {
-        const intentionRecordTx = new IntentionRecordTx();
-        intentionRecordTx.txHash = txHash;
-        intentionRecordTx.intentionRecordId = intentionRecord.id;
-        intentionRecordTx.status = IntentionRecordTxStatus.PENDING;
-        intentionRecordTx.chainId = intentionRecord.opUserChainId;
-        return intentionRecordTx;
-      });
-      await this.intentionRecordRepository.updateIntentionRecordPendingAndTx(
-        intentionRecord.id,
-        intentionRecordTxs,
+      const txHash = txHashs[0] ?? '';
+      if (!txHash) {
+        continue;
+      }
+      await this.intentionRecordTxRepository.updateTxhasById(tx.id, txHash);
+    }
+  }
+
+  private async handleRecordStatus() {
+    // set success
+    const successRecords =
+      await this.intentionRecordRepository.getIntentionRecordListTxStatus(
+        IntentionRecordTxStatus.SUCCESS,
+      );
+    if (successRecords.length > 0) {
+      const successRecordIds = successRecords.map((item) => item.id);
+      await this.intentionRecordRepository.updateStatusByIds(
+        successRecordIds,
+        IntentionRecordStatus.SUCCESS,
+      );
+    }
+
+    //set faild
+    const faildRecords =
+      await this.intentionRecordRepository.getIntentionRecordListTxStatus(
+        IntentionRecordTxStatus.FAILD,
+      );
+    if (faildRecords.length > 0) {
+      const faildRecordIds = faildRecords.map((item) => item.id);
+      await this.intentionRecordRepository.updateStatusByIds(
+        faildRecordIds,
+        IntentionRecordStatus.FAILD,
       );
     }
   }
@@ -179,7 +206,7 @@ export class IntentionRecordService {
   private async handleTxStatus() {
     const txs = await this.intentionRecordTxRepository.find({
       select: ['id', 'txHash', 'chainId'],
-      where: { status: IntentionRecordTxStatus.PENDING },
+      where: { status: IntentionRecordTxStatus.PENDING, txHash: Not(IsNull()) }, // txHash ！= null
       order: { id: 'ASC' },
     });
     for (const tx of txs) {

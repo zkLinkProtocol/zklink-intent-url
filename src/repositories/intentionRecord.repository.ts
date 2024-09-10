@@ -1,11 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { Brackets } from 'typeorm';
+import { Brackets, In } from 'typeorm';
 
 import {
   IntentionRecord,
   IntentionRecordStatus,
 } from 'src/entities/intentionRecord.entity';
-import { IntentionRecordTx } from 'src/entities/intentionRecordTx.entity';
+import {
+  IntentionRecordTx,
+  IntentionRecordTxStatus,
+} from 'src/entities/intentionRecordTx.entity';
 
 import { BaseRepository } from './base.repository';
 import { UnitOfWork } from '../unitOfWork';
@@ -23,13 +26,6 @@ export class IntentionRecordRepository extends BaseRepository<IntentionRecord> {
   ) {
     const transactionManager = this.unitOfWork.getTransactionManager();
     await transactionManager.transaction(async (manager) => {
-      const exists = await manager.findOneBy(IntentionRecord, {
-        opUserHash: intentionRecord.opUserHash,
-        opUserChainId: intentionRecord.opUserChainId,
-      });
-      if (exists) {
-        return;
-      }
       const savedIntentionRecord = await manager.save(
         IntentionRecord,
         intentionRecord,
@@ -149,5 +145,20 @@ export class IntentionRecordRepository extends BaseRepository<IntentionRecord> {
     const total = await queryBuilder.getCount();
 
     return { data, total };
+  }
+
+  async getIntentionRecordListTxStatus(
+    status: IntentionRecordTxStatus,
+  ): Promise<IntentionRecord[]> {
+    const manager = this.unitOfWork.getTransactionManager();
+    return await manager.query(
+      `select a.id from "intention_record" as a left join "intention_record_tx" as b on a."id" = b."intentionRecordId" where b.status='${status}'`,
+    );
+  }
+
+  async updateStatusByIds(ids: bigint[], status: IntentionRecordStatus) {
+    await this.unitOfWork
+      .getTransactionManager()
+      .update(IntentionRecord, { id: In(ids) }, { status });
   }
 }

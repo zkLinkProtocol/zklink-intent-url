@@ -20,7 +20,6 @@ export enum IntentionRecordStatus {
 @Entity()
 @Index(['intentionCode'])
 @Index(['address'])
-@Index(['opUserHash', 'opUserChainId'], { unique: true })
 export class IntentionRecord extends BaseEntity {
   @PrimaryGeneratedColumn()
   public readonly id: bigint;
@@ -43,10 +42,4 @@ export class IntentionRecord extends BaseEntity {
     (intentionRecordTx) => intentionRecordTx.intentionRecord,
   )
   public intentionRecordTxs: IntentionRecordTx[];
-
-  @Column({ type: 'bytea', transformer: hexTransformer, nullable: true })
-  public opUserHash: string;
-
-  @Column({ type: 'int' })
-  public opUserChainId: number;
 }
