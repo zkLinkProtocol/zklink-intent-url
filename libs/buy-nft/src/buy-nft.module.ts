@@ -6,6 +6,6 @@ import { BuyNftService } from './buy-nft.service';
 @Module({
   imports: [ActionUrlModule],
   providers: [BuyNftService],
-  exports: [BuyNftService, ActionUrlModule],
+  exports: [BuyNftService],
 })
 export class BuyNftModule {}

@@ -25,6 +25,9 @@ export class BuyNftService extends ActionDto<FormName> {
     data: GenerateTransactionParams<FormName>,
   ): Promise<TransactionInfo[]> {
     const { additionalData, formData } = data;
+    if (!additionalData.account) {
+      throw new Error('Missing account!');
+    }
     const MAGIC_EDEN_API = apiConfig[additionalData.chainId];
     const queryParams = Object.entries(formData)
       .map(([key, val]) => `${key}=${encodeURIComponent(val)}`)
@@ -43,10 +46,15 @@ export class BuyNftService extends ActionDto<FormName> {
     if (!floorOrderId) {
       throw new Error('No sale order for given NFT');
     }
+
     const floorPrice = nftInfo[0]['floorAsk']['price']['amount']['decimal'];
     const priceSymbol = nftInfo[0]['floorAsk']['price']['currency']['symbol'];
     console.log(
-      `Floor Price ${floorPrice} ${priceSymbol} with OrderId ${floorOrderId}`,
+      `Found NFT floor price ${floorPrice} ${priceSymbol} with OrderId ${floorOrderId}`,
+    );
+    const floorToken = nftInfo[0]['floorAsk']['token'];
+    console.log(
+      `NFT ID: ${floorToken['contract']}:${floorToken['tokenId']}, Image: ${nftInfo[0]['image']}`,
     );
 
     const txs: TransactionInfo[] = [];
