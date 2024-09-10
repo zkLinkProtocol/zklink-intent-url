@@ -33,8 +33,14 @@
       "@action/red-envelope/*": ["libs/red-envelope/src/*"],
       "@action/slipt-bill": ["libs/split-bill/src"],
       "@action/slipt-bill/*": ["libs/split-bill/src/*"],
+      "@action/news": ["libs/news/src"],
+      "@action/news/*": ["libs/news/src/*"],
       "@action/registry": ["libs/registry/src", "libs/registry/src/index.ts"],
-      "@action/registry/*": ["libs/registry/src/*"]
+      "@action/registry/*": ["libs/registry/src/*"],
+      "@action/pump-fun": ["libs/pump-fun/src"],
+      "@action/pump-fun/*": ["libs/pump-fun/src/*"],
+      "@action/buy-nft": ["libs/buy-nft/src"],
+      "@action/buy-nft/*": ["libs/buy-nft/src/*"],
     }
   }
 }

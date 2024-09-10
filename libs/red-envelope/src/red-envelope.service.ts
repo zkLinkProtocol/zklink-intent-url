@@ -4,10 +4,15 @@ import { ConfigService } from '@nestjs/config';
 import BigNumber from 'bignumber.js';
 import {
   JsonRpcProvider,
+  dataSlice,
   ethers,
+  formatEther,
+  getAddress,
   getBigInt,
+  id,
   keccak256,
   parseUnits,
+  toBigInt,
   toUtf8Bytes,
 } from 'ethers';
 import {
@@ -17,13 +22,24 @@ import {
   TransactionInfo,
 } from 'src/common/dto';
 import { ConfigType } from 'src/config';
+import {
+  IntentionRecordTx,
+  IntentionRecordTxStatus,
+} from 'src/entities/intentionRecordTx.entity';
+import { IntentionRecordService } from 'src/modules/actionUrl/intentionRecord.service';
 import { Address } from 'src/types';
 import { utils } from 'zksync-ethers';
 
 import ERC20ABI from './abis/ERC20.json';
 import QuoterV2 from './abis/QuoterV2.json';
 import RedPacketABI from './abis/RedPacket.json';
-import { Value, configuration } from './config';
+import {
+  TransactionResult,
+  Value,
+  browserConfig,
+  configuration,
+  providerConfig,
+} from './config';
 import { genMetadata } from './metadata';
 import {
   ClaimRedPacketParams,
@@ -46,7 +62,10 @@ export class RedEnvelopeService extends ActionDto<FormName> {
   readonly witnessPrivateKey: ConfigType['witnessPrivateKey'];
   readonly config: Value;
 
-  constructor(readonly configService: ConfigService) {
+  constructor(
+    readonly configService: ConfigService,
+    private readonly intentionRecordService: IntentionRecordService,
+  ) {
     super();
     this.env = configService.get('env', { infer: true })!;
     this.witnessPrivateKey = configService.get('witnessPrivateKey', {
@@ -332,7 +351,9 @@ export class RedEnvelopeService extends ActionDto<FormName> {
   public async generateTransaction(
     data: GenerateTransactionParams<FormName>,
   ): Promise<TransactionInfo[]> {
-    const { additionalData } = data;
+    const { additionalData, formData } = data;
+    const { gasToken } = formData;
+    const isGasfree = gasToken === GasTokenValue.DistributedToken;
     const { code, account } = additionalData;
     if (!code) {
       throw new Error('missing code');
@@ -367,10 +388,12 @@ export class RedEnvelopeService extends ActionDto<FormName> {
         to: this.config.redPacketContractAddress,
         value: '0',
         data: tx.data,
-        customData: {
-          gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
-          paymasterParams,
-        },
+        customData: isGasfree
+          ? {
+              gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
+              paymasterParams,
+            }
+          : null,
         shouldPublishToChain: true,
       },
     ];
@@ -381,13 +404,111 @@ export class RedEnvelopeService extends ActionDto<FormName> {
     sender: string;
   }): Promise<{ title: string; content: string }> {
     const { code } = data;
+    if (!code) {
+      throw new Error('missing code');
+    }
+
+    const result = await this.intentionRecordService.findListByCode(code, '');
+    const transferInfos: TransactionResult[] = [];
+
+    for (const item of result.data) {
+      const intentionRecordTxs: IntentionRecordTx[] = item.intentionRecordTxs;
+      for (const recordTx of intentionRecordTxs) {
+        if (recordTx.status !== IntentionRecordTxStatus.SUCCESS) {
+          continue;
+        }
+        const transferInfo: TransactionResult = await this.parseTransaction(
+          recordTx.txHash,
+          recordTx.chainId,
+        );
+        transferInfos.push(transferInfo);
+      }
+    }
+
     const hash = keccak256(toUtf8Bytes(code));
     const packetId = getBigInt(hash);
-    const [_, unClaimedCount] =
+    const [, unClaimedCount] =
       await this.envelopContract.getRedPacketBalance(packetId);
+    const [_, , , totalCount] =
+      await this.envelopContract.getRedPacketInfo(packetId);
     return {
-      title: 'Red Envelope Information',
-      content: `<p>There are still ${unClaimedCount} red packets unclaimed.</p>`,
+      title: 'Recipients',
+      content:
+        `${totalCount - unClaimedCount}/${totalCount} red packet(s) opened` +
+        (await this.generateHTML(transferInfos)),
     };
+  }
+
+  public async parseTransaction(txhash: string, chainId: number) {
+    const transferEventHash = id('Transfer(address,address,uint256)');
+    const providerUrl = providerConfig[chainId];
+    const provider = new JsonRpcProvider(providerUrl);
+
+    const receipt = await provider.getTransactionReceipt(txhash);
+    if (!receipt) {
+      throw new Error('Transaction receipt not found');
+    }
+
+    let toAddress: string;
+    let tokenAddress: string;
+    let value: bigint;
+
+    for (const log of receipt.logs) {
+      console.log(log);
+      if (log.topics[0] === transferEventHash) {
+        if (log.address === '0x000000000000000000000000000000000000800A') {
+          continue;
+        }
+        const from = getAddress(dataSlice(log.topics[1], 12));
+        const to = getAddress(dataSlice(log.topics[2], 12));
+        value = toBigInt(log.data);
+        tokenAddress = log.address;
+        toAddress = to;
+        console.log(
+          `ERC-20 Transfer: from ${from} to ${to}, amount ${formatEther(value.toString())} tokens at ${tokenAddress}`,
+        );
+        return {
+          toAddress,
+          tokenAddress,
+          value: formatEther(value.toString()),
+          txhash,
+          chainId,
+        } as TransactionResult;
+      }
+    }
+    // If no ERC-20 transfer event was found, check if it's an ETH transfer
+    const tx = await provider.getTransaction(txhash);
+    if (tx) {
+      toAddress = tx.to || '';
+      const ethValue = tx.value.toString();
+      console.log(
+        `ETH Transfer: from ${tx.from} to ${tx.to}, amount ${formatEther(ethValue)} ETH`,
+      );
+      return {
+        toAddress,
+        tokenAddress: '',
+        value: formatEther(ethValue),
+        txhash,
+        chainId,
+      } as TransactionResult;
+    }
+
+    throw new Error('Transaction parsing failed');
+  }
+
+  public async generateHTML(
+    transactions: TransactionResult[],
+  ): Promise<string> {
+    return transactions
+      .map((tx) => {
+        const option = this.config.tokens.find(
+          (option) => option.value === tx.tokenAddress,
+        );
+        const browserUrl = browserConfig[tx.chainId];
+        const tokenName = option?.label;
+        const prefixedTxhash = `${browserUrl}${tx.txhash}`;
+        return `<p>${tx.toAddress}   ${tx.value} ${tokenName}   ${prefixedTxhash}</p>`;
+      })
+      .join('');
   }
 }
