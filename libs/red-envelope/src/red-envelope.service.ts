@@ -351,7 +351,9 @@ export class RedEnvelopeService extends ActionDto<FormName> {
   public async generateTransaction(
     data: GenerateTransactionParams<FormName>,
   ): Promise<TransactionInfo[]> {
-    const { additionalData } = data;
+    const { additionalData, formData } = data;
+    const { gasToken } = formData;
+    const isGasfree = gasToken === GasTokenValue.DistributedToken;
     const { code, account } = additionalData;
     if (!code) {
       throw new Error('missing code');
@@ -386,10 +388,12 @@ export class RedEnvelopeService extends ActionDto<FormName> {
         to: this.config.redPacketContractAddress,
         value: '0',
         data: tx.data,
-        customData: {
-          gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
-          paymasterParams,
-        },
+        customData: isGasfree
+          ? {
+              gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
+              paymasterParams,
+            }
+          : null,
         shouldPublishToChain: true,
       },
     ];
