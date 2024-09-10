@@ -31,7 +31,6 @@ export const METADATA: ActionMetadata<FormName> = {
     {
       name: 'Arbitrum',
       chainId: '42161',
-      contractAddress: '0x',
     },
   ],
   dApp: { name: 'NovaSwap' },

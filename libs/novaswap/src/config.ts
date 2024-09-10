@@ -19,7 +19,6 @@ export const METADATA: ActionMetadata<FormName> = {
     {
       name: 'zkLink Nova',
       chainId: '810180',
-      contractAddress: SWAP_ROUTER_CONTRACT_ADDRESS,
     },
   ],
   dApp: { name: 'NovaSwap' },
@@ -67,7 +66,6 @@ export const METADATA: ActionMetadata<FormName> = {
         regex: '^[0-9]+$',
         regexDesc: 'Must be a number',
         defaultValue: '1000000',
-        bind: true,
       },
     ],
   },

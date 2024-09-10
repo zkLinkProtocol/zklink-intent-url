@@ -10,7 +10,6 @@ export const genMetadata = (configValue: Value): ActionMetadata<FormName> => ({
     {
       name: 'zkLink Nova',
       chainId: configValue.chainId.toString(),
-      contractAddress: '',
     },
   ],
   dApp: { name: 'Red Packet 🧧' },
