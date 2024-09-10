@@ -63,6 +63,15 @@
       "compilerOptions": {
         "tsConfigPath": "libs/registry/tsconfig.lib.json"
       }
+    },
+    "pump-fun": {
+      "type": "library",
+      "root": "libs/pump-fun",
+      "entryFile": "index",
+      "sourceRoot": "libs/pump-fun/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/pump-fun/tsconfig.lib.json"
+      }
     }
   }
 }
