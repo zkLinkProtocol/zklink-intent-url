@@ -1,1 +1,1 @@
-export type FormName = 'name' | 'slug' | 'id';
+export type FormName = 'queryType' | 'queryValue';
