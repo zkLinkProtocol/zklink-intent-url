@@ -14,10 +14,8 @@ export const metadata: ActionMetadata<FormName> = {
     {
       name: 'zkLink Nova sepolia',
       chainId: '810181',
-      contractAddress: '0x',
     },
   ],
-  dApp: { name: 'PumpFun' },
   author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
   magicLinkMetadata: {},
   intent: {

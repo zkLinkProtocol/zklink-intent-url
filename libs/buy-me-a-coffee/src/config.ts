@@ -24,7 +24,6 @@ export const metadata: ActionMetadata<FormName> = {
       chainId: '270',
     },
   ],
-  dApp: { name: 'Buy me a coffee' },
   author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
   magicLinkMetadata: {
     description:

@@ -23,7 +23,6 @@ export const metadata: ActionMetadata<FormName> = {
       chainId: '270',
     },
   ],
-  dApp: { name: 'Split bill' },
   author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
   magicLinkMetadata: {
     description: 'Each friend will pay you the same amount',

@@ -12,7 +12,6 @@ export const genMetadata = (configValue: Value): ActionMetadata<FormName> => ({
       chainId: configValue.chainId.toString(),
     },
   ],
-  dApp: { name: 'Red Packet 🧧' },
   author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
   magicLinkMetadata: {
     description: 'Best wishes!',
