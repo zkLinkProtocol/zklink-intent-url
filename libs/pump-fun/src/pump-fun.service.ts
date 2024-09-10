@@ -14,7 +14,7 @@ import PumpFunFactoryABI from './abis/PumpFunFactory.json';
 import { PUMP_FUN_FACTORY_ADDRESS, metadata } from './config';
 import { FormName } from './types';
 
-@RegistryPlug('pump-fun', 'v1')
+@RegistryPlug('pumpfun', 'v1')
 @Injectable()
 export class PumpFunService extends ActionDto<FormName> {
   private pumpFunFactory: ethers.Contract;
