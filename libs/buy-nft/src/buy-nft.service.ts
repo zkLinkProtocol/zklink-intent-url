@@ -29,9 +29,7 @@ export class BuyNftService extends ActionDto<FormName> {
       throw new Error('Missing account!');
     }
     const MAGIC_EDEN_API = apiConfig[additionalData.chainId];
-    const queryParams = Object.entries(formData)
-      .map(([key, val]) => `${key}=${encodeURIComponent(val)}`)
-      .join('&');
+    const queryParams = `${formData.queryType}=${encodeURIComponent(formData.queryValue)}`;
     const queryResp = await fetch(
       `${MAGIC_EDEN_API}collections/v7?${queryParams}&limit=1`,
       {
@@ -58,7 +56,6 @@ export class BuyNftService extends ActionDto<FormName> {
     );
 
     const txs: TransactionInfo[] = [];
-    const taker = additionalData.account;
     const buyResp = await fetch(`${MAGIC_EDEN_API}execute/buy/v7`, {
       method: 'post',
       headers: { 'content-type': 'application/json' },
@@ -68,7 +65,7 @@ export class BuyNftService extends ActionDto<FormName> {
             orderId: floorOrderId,
           },
         ],
-        taker: taker,
+        taker: additionalData.account,
       }),
     });
     const buySteps = (await buyResp.json()).steps;
