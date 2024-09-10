@@ -21,9 +21,7 @@ export class PumpFunService extends ActionDto<FormName> {
   private provider: ethers.Provider;
   constructor() {
     super();
-    this.provider = new ethers.JsonRpcProvider(
-      'https://sepolia.explorer.zklink.io',
-    );
+    this.provider = new ethers.JsonRpcProvider('https://sepolia.rpc.zklink.io');
     this.pumpFunFactory = new ethers.Contract(
       PUMP_FUN_FACTORY_ADDRESS,
       PumpFunFactoryABI.abi,
