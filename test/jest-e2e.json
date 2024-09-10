@@ -18,6 +18,8 @@
     "@action/split-bill/(.*)": "<rootDir>/../libs/split-bill/src/$1",
     "@action/split-bill": "<rootDir>/../libs/split-bill/src",
     "@action/registry/(.*)": "<rootDir>/../libs/registry/src/$1",
-    "@action/registry": "<rootDir>/../libs/registry/src"
+    "@action/registry": "<rootDir>/../libs/registry/src",
+    "@action/pump-fun/(.*)": "<rootDir>/../libs/pump-fun/src/$1",
+    "@action/pump-fun": "<rootDir>/../libs/pump-fun/src"
   }
 }

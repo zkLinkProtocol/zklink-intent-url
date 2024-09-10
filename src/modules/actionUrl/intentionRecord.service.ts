@@ -49,16 +49,16 @@ export class IntentionRecordService {
     return intentionRecord;
   }
 
-  async findListByCodeAndPublickey(
-    intentionCode: string,
+  async findListAndPublickey(
     address: string,
+    status: string | undefined,
     page: number = 1,
     limit: number = 10,
   ) {
     const { data, total } =
       await this.intentionRecordRepository.getPagingIntentionRecordListWithTxsByCodeAndPublickey(
-        intentionCode,
         address,
+        status,
         page,
         limit,
       );

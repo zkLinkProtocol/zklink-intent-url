@@ -55,16 +55,14 @@ export class LoginByPrivatekeyRequestDto {
     description: 'telegrame user id.',
     example: '123456789',
   })
-  @IsString()
-  tgUserId: string;
+  tgUserId?: string;
 
   @ApiProperty({
     name: 'tgUserName',
     description: 'telegrame user name.',
     example: 'magic_link',
   })
-  @IsString()
-  tgUserName: string;
+  tgUserName?: string;
 
   @ApiProperty({
     name: 'message',
