@@ -7,10 +7,8 @@ import {
   TransactionInfo,
 } from 'src/common/dto';
 
-import { metadata } from './config';
+import { apiConfig, metadata } from './config';
 import { FormName } from './types';
-
-const MAGIC_EDEN_API = 'https://api-sepolia.reservoir.tools/';
 
 @RegistryPlug('buy-nft', 'v1')
 @Injectable()
@@ -27,6 +25,7 @@ export class BuyNftService extends ActionDto<FormName> {
     data: GenerateTransactionParams<FormName>,
   ): Promise<TransactionInfo[]> {
     const { additionalData, formData } = data;
+    const MAGIC_EDEN_API = apiConfig[additionalData.chainId];
     const queryParams = Object.entries(formData)
       .map(([key, val]) => `${key}=${encodeURIComponent(val)}`)
       .join('&');
@@ -69,10 +68,11 @@ export class BuyNftService extends ActionDto<FormName> {
       if (step['kind'] == 'transaction') {
         for (const item of step['items']) {
           txs.push({
-            chainId: 11155111,
+            chainId: additionalData.chainId,
             to: item['data']['to'],
             value: item['data']['value'],
             data: item['data']['data'],
+            shouldPublishToChain: true,
           });
         }
       }

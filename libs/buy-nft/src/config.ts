@@ -8,6 +8,11 @@ export const metadata: ActionMetadata<FormName> = {
     'This action allows you to create a Magic Link to buy NFT through Magic Eden API',
   networks: [
     {
+      name: 'Ethereum',
+      chainId: '1',
+      contractAddress: '0x',
+    },
+    {
       name: 'Sepolia',
       chainId: '11155111',
       contractAddress: '0x',
@@ -47,4 +52,9 @@ export const metadata: ActionMetadata<FormName> = {
       },
     ],
   },
+};
+
+export const apiConfig: { [key in number]: string } = {
+  1: 'https://api.reservoir.tools/',
+  11155111: 'https://api-sepolia.reservoir.tools/',
 };
