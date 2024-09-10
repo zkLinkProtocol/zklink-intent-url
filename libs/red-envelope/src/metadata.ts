@@ -4,8 +4,8 @@ import { Value } from './config';
 import { DistributionModeValue, FormName, GasTokenValue } from './type';
 
 export const genMetadata = (configValue: Value): ActionMetadata<FormName> => ({
-  title: 'RedEnvelope',
-  description: 'Send red Envelope',
+  title: 'Red Packet 🧧',
+  description: 'This action is designed to distribute token rewards',
   networks: [
     {
       name: 'zkLink Nova',
@@ -13,14 +13,16 @@ export const genMetadata = (configValue: Value): ActionMetadata<FormName> => ({
       contractAddress: '',
     },
   ],
-  dApp: { name: 'RedEnvelope' },
+  dApp: { name: 'Red Packet 🧧' },
   author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
-  magicLinkMetadata: {},
+  magicLinkMetadata: {
+    description: 'Best wishes!',
+  },
   intent: {
     components: [
       {
         name: 'distributionMode',
-        label: 'Distribution Mode',
+        label: 'Distribution Method',
         desc: 'Choose Mode to distribute Red Envelopes',
         type: 'searchSelect',
         regex: '^[a-zA-Z0-9]+$',
@@ -38,15 +40,15 @@ export const genMetadata = (configValue: Value): ActionMetadata<FormName> => ({
       },
       {
         name: 'totalDistributionAmount',
-        label: 'Total Distribution Amount',
-        desc: 'Total amount you want to distribute',
+        label: 'Total Token Amount',
+        desc: 'The total number of tokens to be distributed',
         type: 'input',
         regex: '^[1-9]\\d*$',
         regexDesc: 'Int',
       },
       {
         name: 'distributionToken',
-        label: 'Distribution Token',
+        label: 'Token to Distribute',
         desc: 'Choose a token to distribute',
         type: 'searchSelectErc20',
         regex: '^0x[a-fA-F0-9]{40}$',
@@ -55,8 +57,8 @@ export const genMetadata = (configValue: Value): ActionMetadata<FormName> => ({
       },
       {
         name: 'amountOfRedEnvelopes',
-        label: 'Amount Of Red Envelopes',
-        desc: 'How many Red Envelopes want to distribute',
+        label: 'Number of Red Packets',
+        desc: 'Total number of Red Packets',
         type: 'input',
         regex: '^[1-9]\\d*$',
         regexDesc: 'Int',

@@ -12,8 +12,9 @@ export const RPC_URL = 'https://sepolia.rpc.zklink.io';
 export const FEE = 3000; // fee level, 0.3% fee is 3000
 
 export const METADATA: ActionMetadata<FormName> = {
-  title: 'NovaSwap',
-  description: 'Swap tokens',
+  title: 'Buy the dip!!!',
+  description:
+    'This action is design to allow you to create token swap on [Novaswap](https://novaswap.fi/)',
   networks: [
     {
       name: 'zkLink Nova',
@@ -23,12 +24,15 @@ export const METADATA: ActionMetadata<FormName> = {
   ],
   dApp: { name: 'NovaSwap' },
   author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
+  magicLinkMetadata: {
+    description: 'Now’s the perfect moment to buy the dip!!!',
+  },
   intent: {
     components: [
       {
         name: 'tokenInAddress',
-        label: 'Token In Address',
-        desc: 'The address of the token you want to swap',
+        label: 'From Token',
+        desc: 'The amount of tokens to spend',
         type: 'searchSelect',
         regex: '^0x[a-fA-F0-9]{40}$',
         regexDesc: 'Address',
@@ -36,12 +40,13 @@ export const METADATA: ActionMetadata<FormName> = {
           {
             label: 'WETH',
             value: '0x6e42d10eB474a17b14f3cfeAC2590bfa604313C7',
+            default: true,
           },
         ],
       },
       {
         name: 'tokenOutAddress',
-        label: 'Token Out Address',
+        label: 'To Token',
         desc: 'The address of the token you want to receive',
         type: 'searchSelect',
         regex: '^0x[a-fA-F0-9]{40}$',
@@ -50,6 +55,7 @@ export const METADATA: ActionMetadata<FormName> = {
           {
             label: 'USDC',
             value: '0x461fE851Cd66e82A274570ED5767c873bE9Ae1ff',
+            default: true,
           },
         ],
       },
@@ -62,22 +68,6 @@ export const METADATA: ActionMetadata<FormName> = {
         regexDesc: 'Must be a number',
         defaultValue: '1000000',
         bind: true,
-      },
-      {
-        name: 'recipient',
-        label: 'Recipient',
-        desc: 'The recipient of the swapped tokens',
-        type: 'input',
-        regex: '^0x[a-fA-F0-9]{40}$',
-        regexDesc: 'Address',
-      },
-      {
-        name: 'deadlineDurationInSec',
-        label: 'Deadline Duration in Seconds',
-        desc: 'The deadline duration in seconds',
-        type: 'input',
-        regex: '^[0-9]+$',
-        regexDesc: 'Must be a number',
       },
     ],
   },
