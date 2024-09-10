@@ -33,6 +33,8 @@
       "@action/red-envelope/*": ["libs/red-envelope/src/*"],
       "@action/slipt-bill": ["libs/split-bill/src"],
       "@action/slipt-bill/*": ["libs/split-bill/src/*"],
+      "@action/news": ["libs/news/src"],
+      "@action/news/*": ["libs/news/src/*"],
       "@action/registry": ["libs/registry/src", "libs/registry/src/index.ts"],
       "@action/registry/*": ["libs/registry/src/*"]
     }
