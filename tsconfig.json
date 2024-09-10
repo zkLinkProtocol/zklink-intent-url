@@ -38,7 +38,9 @@
       "@action/registry": ["libs/registry/src", "libs/registry/src/index.ts"],
       "@action/registry/*": ["libs/registry/src/*"],
       "@action/pump-fun": ["libs/pump-fun/src"],
-      "@action/pump-fun/*": ["libs/pump-fun/src/*"]
+      "@action/pump-fun/*": ["libs/pump-fun/src/*"],
+      "@action/buy-nft": ["libs/buy-nft/src"],
+      "@action/buy-nft/*": ["libs/buy-nft/src/*"],
     }
   }
 }

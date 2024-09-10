@@ -81,6 +81,15 @@
       "compilerOptions": {
         "tsConfigPath": "libs/news/tsconfig.lib.json"
       }
+    },
+    "buy-nft": {
+      "type": "library",
+      "root": "libs/buy-nft",
+      "entryFile": "index",
+      "sourceRoot": "libs/buy-nft/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/buy-nft/tsconfig.lib.json"
+      }
     }
   }
 }
