@@ -122,7 +122,7 @@ export class AuthService {
         throw new BusinessException(`create creator ${address} failed`);
       }
     } else {
-      if (tgUserName != '' && tgUserId != '') {
+      if (tgUserName && tgUserId) {
         if ('' == creator.tgUserId || null == creator.tgUserId) {
           creator.tgUserId = tgUserId ?? '';
         }

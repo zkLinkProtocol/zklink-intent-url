@@ -6,7 +6,7 @@ export class UpdateCreatorTableTgUserId1725552731495
   name = 'UpdateCreatorTableTgUserId1725552731495';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`update creator set "tgUserId" = null;`);
+    await queryRunner.query(`update creator set "tgUserId" = null`);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {}
