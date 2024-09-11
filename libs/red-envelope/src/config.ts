@@ -1,13 +1,13 @@
 import { DistributionTokenValue } from './type';
 
 export const configuration = {
-  prod: {
+  dev: {
     chainId: 810181,
     rpcUrl: 'https://sepolia.rpc.zklink.io',
     wethAddress: '0x8280a4e7D5B3B658ec4580d3Bc30f5e50454F169',
     quoterContractAddress: '0x86Fc6ab84CFc6a506d51FC722D3aDe959599A98A',
-    redPacketContractAddress: '0xf092A853a56D14137F4ccf8DEcA358576f682F8D',
-    paymasterContractAddress: '0x60D176844F4E2173f6bc02b2FB9b1a853403536B',
+    redPacketContractAddress: '0x5e0ae89cCcCbFc8199a8147200eBcB97A5e8cC2d',
+    paymasterContractAddress: '0xC8Eb1749e5da9bc6db43d488E1a3a0Bd74138A6C',
     tokens: [
       {
         label: 'DTN',
@@ -15,7 +15,7 @@ export const configuration = {
       },
     ],
   },
-  dev: {
+  prod: {
     chainId: 810180,
     rpcUrl: 'https://rpc.zklink.io',
     wethAddress: '0x8280a4e7D5B3B658ec4580d3Bc30f5e50454F169',
@@ -51,6 +51,12 @@ export const browserConfig: { [key in number]: string } = {
   810180: 'https://explorer.zklink.io/tx/',
   810181: 'https://sepolia.explorer.zklink.io/tx/',
   270: 'http://3.112.15.165:3050',
+};
+
+export const feeMap: { [key in string]: number } = {
+  [DistributionTokenValue.USDC]: 3000,
+  [DistributionTokenValue.USDT]: 3000,
+  [DistributionTokenValue.ZKL]: 10000,
 };
 
 export type TransactionResult = {
