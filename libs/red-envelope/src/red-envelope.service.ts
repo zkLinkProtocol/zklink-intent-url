@@ -38,6 +38,7 @@ import {
   Value,
   browserConfig,
   configuration,
+  feeMap,
   providerConfig,
 } from './config';
 import { genMetadata } from './metadata';
@@ -45,6 +46,7 @@ import {
   ClaimRedPacketParams,
   CreateRedPacketParams,
   DistributionModeValue,
+  DistributionTokenValue,
   FormName,
   GasTokenValue,
 } from './type';
@@ -199,18 +201,21 @@ export class RedEnvelopeService extends ActionDto<FormName> {
   }
 
   private async getQuote(tokenOut: string, ethAmountIn: bigint) {
-    const fee = 3000;
+    const fee = feeMap[tokenOut];
     try {
       const [amountOut] = await this.quoter.quoteExactInputSingle.staticCall({
         tokenIn: this.config.wethAddress,
-        tokenOut: tokenOut,
+        tokenOut:
+          tokenOut === DistributionTokenValue.DTN
+            ? DistributionTokenValue.ZKL
+            : tokenOut,
         amountIn: ethAmountIn,
         fee: fee,
         sqrtPriceLimitX96: 0,
       });
       return amountOut;
     } catch (error) {
-      console.error('Error fetching quote:', error);
+      throw new Error(`Error fetching quote:, ${error.message}`);
     }
   }
 
