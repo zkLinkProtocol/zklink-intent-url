@@ -9,7 +9,7 @@ export type FormName =
 
 export const METADATA: ActionMetadata<FormName> = {
   title: 'News',
-  description: 'Perform news seamlessly across multiple networks',
+  description: '<div>Perform news seamlessly across multiple networks</div>',
   logo: 'https://placehold.co/40x40',
   networks: [
     {

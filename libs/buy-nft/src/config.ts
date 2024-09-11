@@ -5,7 +5,7 @@ import { FormName } from './types';
 export const metadata: ActionMetadata<FormName> = {
   title: 'Buy NFT',
   description:
-    'This action allows you to create a Magic Link to buy NFT through Magic Eden API',
+    '<div>This action allows you to create a Magic Link to buy NFT through Magic Eden API</div>',
   networks: [
     {
       name: 'Ethereum',
