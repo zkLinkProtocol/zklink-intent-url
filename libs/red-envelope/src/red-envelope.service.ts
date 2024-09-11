@@ -201,14 +201,16 @@ export class RedEnvelopeService extends ActionDto<FormName> {
   }
 
   private async getQuote(tokenOut: string, ethAmountIn: bigint) {
-    const fee = feeMap[tokenOut];
+    const replacedTokenOut =
+      tokenOut === DistributionTokenValue.DTN
+        ? DistributionTokenValue.ZKL
+        : tokenOut;
+    const fee = feeMap[replacedTokenOut];
+
     try {
       const [amountOut] = await this.quoter.quoteExactInputSingle.staticCall({
         tokenIn: this.config.wethAddress,
-        tokenOut:
-          tokenOut === DistributionTokenValue.DTN
-            ? DistributionTokenValue.ZKL
-            : tokenOut,
+        tokenOut: replacedTokenOut,
         amountIn: ethAmountIn,
         fee: fee,
         sqrtPriceLimitX96: 0,

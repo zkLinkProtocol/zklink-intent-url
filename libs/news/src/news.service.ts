@@ -1,4 +1,4 @@
-import { CrossChainSwapService } from '@action/cross-chain-swap';
+import { NovaswapService } from '@action/novaswap';
 import { RegistryPlug } from '@action/registry';
 import { Injectable } from '@nestjs/common';
 import {
@@ -12,7 +12,7 @@ import { FormName, METADATA } from './config';
 @RegistryPlug('news', 'v1')
 @Injectable()
 export class NewsService extends ActionDto<FormName> {
-  constructor(private readonly crossChainSwapService: CrossChainSwapService) {
+  constructor(private readonly novaswapService: NovaswapService) {
     super();
   }
   async getMetadata() {
@@ -22,6 +22,6 @@ export class NewsService extends ActionDto<FormName> {
   async generateTransaction(
     data: GenerateTransactionParams<FormName>,
   ): Promise<TransactionInfo[]> {
-    return await this.crossChainSwapService.generateTransaction(data);
+    return await this.novaswapService.generateTransaction(data);
   }
 }

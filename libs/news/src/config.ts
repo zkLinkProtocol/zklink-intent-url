@@ -1,9 +1,14 @@
 import { ActionMetadata } from 'src/common/dto';
 
-export type FormName = 'amountToBuy' | 'tokenIn' | 'tokenOutAddress';
+export type FormName =
+  | 'tokenInAddress'
+  | 'tokenOutAddress'
+  | 'amountIn'
+  | 'recipient'
+  | 'deadlineDurationInSec';
 
 export const METADATA: ActionMetadata<FormName> = {
-  title: 'news',
+  title: 'News',
   description: '<div>Perform news seamlessly across multiple networks</div>',
   logo: 'https://placehold.co/40x40',
   networks: [
@@ -19,46 +24,44 @@ export const METADATA: ActionMetadata<FormName> = {
   intent: {
     components: [
       {
-        name: 'amountToBuy',
-        label: 'Amount to Buy',
-        desc: 'The amount of input tokens used to buy output tokens',
-        type: 'input',
-        regex: '^[0-9]+(.[0-9]+)?$',
-        regexDesc: 'Positive number',
-      },
-      {
-        name: 'tokenIn',
-        label: 'Token In ',
-        desc: 'The token you want to swap',
+        name: 'tokenInAddress',
+        label: 'From Token',
+        desc: 'The amount of tokens to spend',
         type: 'searchSelect',
-        regex: '^[a-zA-Z0-9]+$',
-        regexDesc: 'Token Symbol',
+        regex: '^0x[a-fA-F0-9]{40}$',
+        regexDesc: 'Address',
         options: [
           {
             label: 'WETH',
-            value: 'weth',
-          },
-          {
-            label: 'WBTC',
-            value: 'wbtc',
-          },
-          {
-            label: 'USDT',
-            value: 'usdt',
-          },
-          {
-            label: 'USDC',
-            value: 'usdc',
+            value: '0x6e42d10eB474a17b14f3cfeAC2590bfa604313C7',
+            default: true,
           },
         ],
       },
       {
         name: 'tokenOutAddress',
-        label: 'Token Out Address',
+        label: 'To Token',
         desc: 'The address of the token you want to receive',
-        type: 'input',
+        type: 'searchSelect',
         regex: '^0x[a-fA-F0-9]{40}$',
         regexDesc: 'Address',
+        options: [
+          {
+            label: 'USDC',
+            value: '0x461fE851Cd66e82A274570ED5767c873bE9Ae1ff',
+            default: true,
+          },
+        ],
+      },
+      {
+        name: 'amountIn',
+        label: 'Amount',
+        desc: 'The amount of tokens you pay',
+        type: 'input',
+        regex: '^[0-9]+$',
+        regexDesc: 'Must be a number',
+        defaultValue: '1',
+        bind: true,
       },
     ],
   },
