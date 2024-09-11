@@ -69,6 +69,7 @@ export class BuyNftService extends ActionDto<FormName> {
           },
         ],
         taker: additionalData.account,
+        skipBalanceCheck: true,
       }),
     });
     const buySteps = (await buyResp.json()).steps;
