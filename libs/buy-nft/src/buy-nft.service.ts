@@ -29,7 +29,10 @@ export class BuyNftService extends ActionDto<FormName> {
       throw new Error('Missing account!');
     }
     const MAGIC_EDEN_API = apiConfig[additionalData.chainId];
-    const queryParams = `${formData.queryType}=${encodeURIComponent(formData.queryValue)}`;
+    const queryParams =
+      formData.queryType == 'contract'
+        ? `id=${formData.queryValue}`
+        : `slug=${encodeURIComponent(formData.queryValue.substring(formData.queryValue.lastIndexOf('/') + 1))}`;
     const queryResp = await fetch(
       `${MAGIC_EDEN_API}collections/v7?${queryParams}&limit=1`,
       {
