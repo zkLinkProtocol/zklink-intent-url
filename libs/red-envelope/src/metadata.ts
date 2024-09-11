@@ -5,7 +5,7 @@ import { DistributionModeValue, FormName, GasTokenValue } from './type';
 
 export const genMetadata = (configValue: Value): ActionMetadata<FormName> => ({
   title: 'Red Packet 🧧',
-  description: 'This action is designed to distribute token rewards',
+  description: '<div>This action is designed to distribute token rewards</div>',
   networks: [
     {
       name: configValue.networkName,

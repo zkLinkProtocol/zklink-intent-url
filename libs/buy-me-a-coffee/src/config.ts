@@ -5,7 +5,7 @@ import { FormName } from './types';
 export const metadata: ActionMetadata<FormName> = {
   title: 'Buy me a coffee ☕',
   description:
-    'This action allows you to create a Magic Link to receive donations',
+    '<div>This action allows you to create a Magic Link to receive donations</div>',
   networks: [
     {
       name: 'Arbitrum',

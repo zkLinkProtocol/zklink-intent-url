@@ -4,7 +4,7 @@ export type FormName = 'amountToBuy' | 'tokenIn' | 'tokenOutAddress';
 
 export const METADATA: ActionMetadata<FormName> = {
   title: 'news',
-  description: 'Perform news seamlessly across multiple networks',
+  description: '<div>Perform news seamlessly across multiple networks</div>',
   logo: 'https://placehold.co/40x40',
   networks: [
     {

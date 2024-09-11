@@ -8,7 +8,7 @@ export const PUMP_FUN_FACTORY_ADDRESS =
 export const metadata: ActionMetadata<FormName> = {
   title: 'PumpFun',
   description:
-    'PumpFun is a platform for creating and participating in token pump events',
+    '<div>PumpFun is a platform for creating and participating in token pump events</div>',
   logo: 'https://placehold.co/40x40',
   networks: [
     {
