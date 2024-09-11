@@ -4,3 +4,4 @@ export * from './creator.repository';
 export * from './intention.repository';
 export * from './intentionRecord.repository';
 export * from './intentionRecordTx.repository';
+export * from './messagePoll.repository';

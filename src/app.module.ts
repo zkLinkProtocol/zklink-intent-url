@@ -10,6 +10,7 @@ import { Creator } from './entities/creator.entity';
 import { Intention } from './entities/intention.entity';
 import { IntentionRecord } from './entities/intentionRecord.entity';
 import { IntentionRecordTx } from './entities/intentionRecordTx.entity';
+import { MessagePoll } from './entities/messagePoll.entity';
 import { MetricsModule } from './metrics';
 import { ActionModule } from './modules/action/action.module';
 import { ActionsJsonModule } from './modules/actions.json/actionsJson.module';
@@ -45,6 +46,7 @@ import { UnitOfWorkModule } from './unitOfWork';
       Intention,
       IntentionRecord,
       IntentionRecordTx,
+      MessagePoll,
     ]),
     ActionModule.forRoot(),
     MetricsModule,

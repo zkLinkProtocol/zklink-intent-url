@@ -4,7 +4,14 @@ import TelegramBot from 'node-telegram-bot-api';
 import { ParseMode } from 'node-telegram-bot-api';
 
 import configFactory from 'src/config';
-import { CreatorRepository, IntentionRepository } from 'src/repositories';
+import {
+  CreatorRepository,
+  IntentionRepository,
+  MessagePollRepository,
+} from 'src/repositories';
+
+import { ActionUrlService } from '../actionUrl/actionUrl.service';
+import { BlinkService } from '../actionUrl/blink.service';
 
 @Injectable()
 export class TgbotService implements OnModuleInit {
@@ -14,6 +21,9 @@ export class TgbotService implements OnModuleInit {
   constructor(
     private readonly intentionRepository: IntentionRepository,
     private readonly creatorRepository: CreatorRepository,
+    private readonly actionUrlService: ActionUrlService,
+    private readonly blinkService: BlinkService,
+    private readonly messagePollRepository: MessagePollRepository,
   ) {}
 
   async onModuleInit() {
@@ -44,7 +54,7 @@ export class TgbotService implements OnModuleInit {
         const novaProvider = new ethers.JsonRpcProvider(novaRpc);
         ethBalance = await novaProvider.getBalance(walletAddress);
       } catch (error) {
-        this.logger.error(`onStart error`, error);
+        this.logger.error(`onStart error`, error.stack);
       }
     }
     const photo = 'https://pic.imgdb.cn/item/66bb2b02d9c307b7e9c8ec19.png';
@@ -92,19 +102,17 @@ export class TgbotService implements OnModuleInit {
       ],
     };
     const options = { reply_markup: reply_markup, parse_mode, caption };
-    console.log(tgUserId, photo, options);
     try {
       const res = await this.bot.sendPhoto(tgUserId, photo, options);
-      console.log('onStart success', res);
+      this.logger.log(`onStart success : `, JSON.stringify(res));
     } catch (error) {
-      console.error(`onStart error`, error);
+      this.logger.error(`onStart error`, error.stack);
     }
   }
 
   async onMyMagicLink(tgUserId: string) {
     const creator = await this.creatorRepository.findOneBy({ tgUserId });
     if (!creator) {
-      console.log(tgUserId, creator);
       this.bot.sendMessage(tgUserId, 'You are not a creator');
       return;
     }
@@ -113,7 +121,6 @@ export class TgbotService implements OnModuleInit {
       order: { createdAt: 'DESC' },
     });
     if (!intentions || intentions.length === 0) {
-      console.log(tgUserId, intentions);
       this.bot.sendMessage(tgUserId, 'You have no intentions');
       return;
     }
@@ -140,23 +147,150 @@ export class TgbotService implements OnModuleInit {
         `;
     }
     const options = { parse_mode: 'MarkdownV2' as ParseMode };
-    console.log(tgUserId, caption, options);
     try {
       const res = await this.bot.sendMessage(tgUserId, caption, options);
-      console.log('onMyMagicLink success', res);
+      this.logger.log('onMyMagicLink success', JSON.stringify(res));
     } catch (error) {
-      console.error('onMyMagicLink error', error);
+      this.logger.error('onMyMagicLink error', error.stack);
     }
   }
 
-  async handleBlink(chatId: string, domain: string, url: string) {
-    const actionsJson = `${domain}/actions.json`;
-    const actions = await fetch(actionsJson).then((res) => res.json());
-    console.log('handleBlink');
+  async update(body: any) {
+    this.logger.log('new messages:', JSON.stringify(body));
+    this.bot.processUpdate(body);
   }
 
-  async update(body: any) {
-    console.log(body);
-    this.bot.processUpdate(body);
+  async sendNews(code: string) {
+    const config = await configFactory();
+    const newsChannelId = config.tgbot.newsChannelId;
+    const miniApp = config.tgbot.miniApp;
+    const pollApi = config.tgbot.pollApi;
+    const news = await this.actionUrlService.findOneByCode(code);
+    const settings = news.settings as {
+      newsType: string;
+    };
+    const photo = news.metadata;
+    const caption = news.description;
+    const parse_mode: ParseMode = 'HTML';
+    const postHref = `${miniApp}`;
+
+    const inlineKeyboard = [];
+    const newsType = settings.newsType ?? '';
+    if (newsType == 'poll') {
+      const actions = [
+        {
+          text: 'Long(0)',
+          url: `${pollApi}?chatId=&messageId=&longOrShort=long`,
+        },
+        {
+          text: 'Short(0)',
+          url: `${pollApi}?chatId=&messageId=&longOrShort=short`,
+        },
+      ];
+      inlineKeyboard.push(actions);
+    } else {
+      const actions = this.blinkService.magicLinkToBlinkActions(
+        postHref,
+        news.settings,
+      );
+      let lineButtons = [];
+      for (let i = 0; i < actions.length; i++) {
+        const action = actions[i];
+        lineButtons.push({
+          text: action.label,
+          url: action.href + `&startapp=${code}`,
+        });
+        if ((i + 1) % 3 === 0) {
+          inlineKeyboard.push(lineButtons);
+          lineButtons = [];
+        }
+      }
+    }
+    const reply_markup = {
+      inline_keyboard: inlineKeyboard,
+    };
+    try {
+      let res = null;
+      if (photo === '') {
+        const options = { reply_markup, parse_mode };
+        res = await this.bot.sendMessage(newsChannelId, caption, options);
+      } else {
+        const options = { reply_markup, parse_mode, caption };
+        res = await this.bot.sendPhoto(newsChannelId, photo, options);
+      }
+      this.logger.log('sendNews success', JSON.stringify(res));
+      if (newsType == 'poll') {
+        const chatId = res.chat.id;
+        const messageId = res.message_id;
+        await this.messagePollRepository.add({
+          chatId: '' + chatId,
+          messageId: '' + messageId,
+          long: 0,
+          short: 0,
+        });
+        await this.editMessageReplyMarkupPollText('' + chatId, '' + messageId);
+      }
+    } catch (error) {
+      this.logger.error(`sendNews error`, error.stack);
+    }
+  }
+
+  async editMessageReplyMarkupPollText(
+    chatId: string,
+    messageId: string,
+    longOrShort: string = '',
+  ) {
+    const config = await configFactory();
+    const pollApi = config.tgbot.pollApi;
+    let long = 0;
+    let short = 0;
+    const message = await this.messagePollRepository.findOneBy({
+      chatId,
+      messageId,
+    });
+    if (!message) {
+      return;
+    }
+    long = message.long;
+    short = message.short;
+
+    if (longOrShort != '') {
+      if (longOrShort === 'long') {
+        long++;
+      } else if (longOrShort === 'short') {
+        short++;
+      }
+      await this.messagePollRepository.update(
+        { long, short },
+        { chatId, messageId },
+      );
+    }
+
+    try {
+      const reply_markup = {
+        inline_keyboard: [
+          [
+            {
+              text: `Long(${long})`,
+              url: `${pollApi}?chatId=${chatId}&messageId=${messageId}&longOrShort=long`,
+            },
+            {
+              text: `Short(${short})`,
+              url: `${pollApi}?chatId=${chatId}&messageId=${messageId}&longOrShort=short`,
+            },
+          ],
+        ],
+      };
+      const res = await this.bot.editMessageReplyMarkup(reply_markup, {
+        chat_id: chatId,
+        message_id: Number(messageId),
+      });
+      this.logger.log(
+        `editMessageReplyMarkupPollText success`,
+        JSON.stringify(res),
+      );
+    } catch (error) {
+      this.logger.error('editMessageReplyMarkupPollText error', error.stack);
+    }
   }
 }

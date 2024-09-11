@@ -1,4 +1,4 @@
-import { Body, Controller, Logger, Post } from '@nestjs/common';
+import { Body, Controller, Get, Logger, Post, Query } from '@nestjs/common';
 
 import { BaseController } from 'src/common/base.controller';
 
@@ -22,6 +22,25 @@ export class TgbotController extends BaseController {
     }
   }
 
+  @Get('editMessageReplyMarkupPollText')
+  async editMessageReplyMarkupPollText(
+    @Query('chatId') chatId: string,
+    @Query('messageId') messageId: string,
+    @Query('longOrShort') longOrShort: string,
+  ) {
+    try {
+      this.tgbotService.editMessageReplyMarkupPollText(
+        chatId,
+        messageId,
+        longOrShort,
+      );
+      return true;
+    } catch (error) {
+      this.logger.error(error);
+      return false;
+    }
+  }
+
   @Post('testStart')
   async testStart() {
     try {
@@ -37,6 +56,17 @@ export class TgbotController extends BaseController {
   async testMyMagicLink() {
     try {
       this.tgbotService.onMyMagicLink('1352553794');
+      return true;
+    } catch (error) {
+      this.logger.error(error);
+      return false;
+    }
+  }
+
+  @Get('testSendNews')
+  async testSendNews(@Query('code') code: string) {
+    try {
+      this.tgbotService.sendNews(code);
       return true;
     } catch (error) {
       this.logger.error(error);
