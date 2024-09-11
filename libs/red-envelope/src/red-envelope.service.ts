@@ -171,7 +171,9 @@ export class RedEnvelopeService extends ActionDto<FormName> {
     return signature;
   }
 
-  private async claimRedEnvelopeTxGas() {
+  private async claimRedEnvelopeMinGas(formData: GenerateFormParams<FormName>) {
+    const { gasToken, distributionToken, amountOfRedEnvelopes } = formData;
+    const isGasfree = gasToken === GasTokenValue.DistributedToken;
     const id = 0n;
     const expiry = Math.floor(Date.now() / 1000) + 60 * 60;
     const signature = await this.genClaimSignature({
@@ -186,17 +188,22 @@ export class RedEnvelopeService extends ActionDto<FormName> {
       signature,
     );
     const { maxFeePerGas } = await this.provider.getFeeData();
-    const txCost = gasEstimate * (maxFeePerGas ?? 0n);
-    return txCost;
+    const txCost = BigNumber((gasEstimate * (maxFeePerGas ?? 0n)).toString())
+      .multipliedBy(1.5)
+      .multipliedBy(amountOfRedEnvelopes);
+
+    const payForGas = isGasfree
+      ? await this.getQuote(distributionToken, BigInt(txCost.toString()))
+      : 0n;
+    return payForGas;
   }
 
   private async getQuote(tokenOut: string, ethAmountIn: bigint) {
     const fee = 3000;
-    console.log('todo', tokenOut);
     try {
       const [amountOut] = await this.quoter.quoteExactInputSingle.staticCall({
         tokenIn: this.config.wethAddress,
-        tokenOut: '0xDa4AaEd3A53962c83B35697Cd138cc6df43aF71f', // todo tokenOut
+        tokenOut: tokenOut,
         amountIn: ethAmountIn,
         fee: fee,
         sqrtPriceLimitX96: 0,
@@ -254,10 +261,8 @@ export class RedEnvelopeService extends ActionDto<FormName> {
     const isRandom =
       distributionMode === DistributionModeValue.RandomAmountPerAddress;
     const isGasfree = gasToken === GasTokenValue.DistributedToken;
-    const txGas = await this.claimRedEnvelopeTxGas();
-    const payForGas = isGasfree
-      ? await this.getQuote(distributionToken, txGas * 2n)
-      : 0n;
+    const payForGas = await this.claimRedEnvelopeMinGas(formData);
+
     const decimals = await this.getDecimals(distributionToken);
     const totalDistributionAmountBn = parseUnits(
       totalDistributionAmount,
@@ -330,28 +335,12 @@ export class RedEnvelopeService extends ActionDto<FormName> {
     return transactions;
   }
 
-  public override async validateFormData(
-    params: GenerateFormParams<FormName>,
-  ): Promise<any> {
-    const { totalDistributionAmount, distributionToken, amountOfRedEnvelopes } =
-      params;
-    const txGas = await this.claimRedEnvelopeTxGas();
-    const decimals = await this.getDecimals(distributionToken);
-
-    if (
-      BigNumber(txGas.toString())
-        .multipliedBy(amountOfRedEnvelopes)
-        .multipliedBy(1.5)
-        .gte(parseUnits(totalDistributionAmount, decimals).toString())
-    ) {
-      return 'The amount of the pool is too low to cover gas fee';
-    }
-  }
-
   public async generateTransaction(
     data: GenerateTransactionParams<FormName>,
   ): Promise<TransactionInfo[]> {
-    const { additionalData } = data;
+    const { additionalData, formData } = data;
+    const { gasToken } = formData;
+    const isGasfree = gasToken === GasTokenValue.DistributedToken;
     const { code, account } = additionalData;
     if (!code) {
       throw new Error('missing code');
@@ -386,10 +375,12 @@ export class RedEnvelopeService extends ActionDto<FormName> {
         to: this.config.redPacketContractAddress,
         value: '0',
         data: tx.data,
-        customData: {
-          gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
-          paymasterParams,
-        },
+        customData: isGasfree
+          ? {
+              gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
+              paymasterParams,
+            }
+          : null,
         shouldPublishToChain: true,
       },
     ];

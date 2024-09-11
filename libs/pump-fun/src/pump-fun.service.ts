@@ -79,7 +79,8 @@ export class PumpFunService extends ActionDto<FormName> {
 
     return [
       {
-        chainId: additionalData.chainId,
+        //TODO
+        chainId: 810181,
         to: PUMP_FUN_FACTORY_ADDRESS,
         value: ethers.parseEther(formData.creatorInitialBuyAmount).toString(),
         data: createPumpFunData.data,

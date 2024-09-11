@@ -22,6 +22,8 @@
     "@action/pump-fun/(.*)": "<rootDir>/../libs/pump-fun/src/$1",
     "@action/pump-fun": "<rootDir>/../libs/pump-fun/src",
     "@action/news/(.*)": "<rootDir>/../libs/news/src/$1",
-    "@action/news": "<rootDir>/../libs/news/src"
+    "@action/news": "<rootDir>/../libs/news/src",
+    "@action/buy-nft/(.*)": "<rootDir>/../libs/buy-nft/src/$1",
+    "@action/buy-nft": "<rootDir>/../libs/buy-nft/src"
   }
 }
