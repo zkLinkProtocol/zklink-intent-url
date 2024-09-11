@@ -173,7 +173,7 @@ export class TgbotService implements OnModuleInit {
     const caption = news.description
       .replaceAll(`<p>`, '<b>')
       .replaceAll(`</p>`, '</b>')
-      .replace(/<img[^>]*>/g, '');
+      .replaceAll(/<img[^>]*>/g, '');
     const parse_mode: ParseMode = 'HTML';
     const postHref = `${miniApp}`;
 
