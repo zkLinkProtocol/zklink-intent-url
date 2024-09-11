@@ -4,7 +4,7 @@ import { FormName } from './types';
 
 export const metadata: ActionMetadata<FormName> = {
   title: 'Split Bill 💰',
-  description: 'This action is made for friends to split the bill',
+  description: '<div>This action is made for friends to split the bill</div>',
   networks: [
     {
       name: 'Arbitrum',
@@ -30,6 +30,7 @@ export const metadata: ActionMetadata<FormName> = {
   dApp: { name: 'Split bill' },
   author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
   magicLinkMetadata: {
+    title: 'Split Bill 💰',
     description: 'Each friend will pay you the same amount',
   },
   intent: {

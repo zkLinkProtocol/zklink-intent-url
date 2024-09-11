@@ -8,7 +8,7 @@ export const PUMP_FUN_FACTORY_ADDRESS =
 export const metadata: ActionMetadata<FormName> = {
   title: 'PumpFun',
   description:
-    'PumpFun is a platform for creating and participating in token pump events',
+    '<div>PumpFun is a platform for creating and participating in token pump events</div>',
   logo: 'https://placehold.co/40x40',
   networks: [
     {
@@ -40,10 +40,10 @@ export const metadata: ActionMetadata<FormName> = {
       },
       {
         name: 'creatorInitialBuyAmount',
-        label: 'Initial Buy Amount',
-        desc: 'The amount of the token you want to buy first',
+        label: 'Creator Initial Buy Amount(in ETH)',
+        desc: 'The amount of ETH you want to buy the token with',
         type: 'input',
-        regex: '^[0-9]+$',
+        regex: '^[0-9]+(\\.[0-9]+)?$',
         regexDesc: 'Initial Buy Amount',
       },
       {
@@ -51,8 +51,8 @@ export const metadata: ActionMetadata<FormName> = {
         label: 'Buy Amount (in ETH)',
         desc: 'The amount of ETH you want to buy the token with',
         type: 'input',
-        regex: '^[0-9]+$',
-        regexDesc: 'Initial Buy Amount',
+        regex: '^[0-9]+(\\.[0-9]+)?$',
+        regexDesc: 'Buy Amount',
       },
     ],
   },

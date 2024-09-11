@@ -5,7 +5,7 @@ import { FormName } from './types';
 export const metadata: ActionMetadata<FormName> = {
   title: 'Buy NFT',
   description:
-    'This action allows you to create a Magic Link to buy NFT through Magic Eden API',
+    '<div>This action allows you to create a Magic Link to buy NFT through Magic Eden API</div>',
   networks: [
     {
       name: 'Ethereum',
@@ -27,28 +27,46 @@ export const metadata: ActionMetadata<FormName> = {
   intent: {
     components: [
       {
-        name: 'name',
-        label: 'NFT Name',
-        desc: 'The name of NFT',
-        type: 'input',
-        regex: '^.+$',
-        regexDesc: 'Name',
+        name: 'queryType',
+        label: 'NFT Query Type',
+        desc: 'Specify how to find the NFT',
+        type: 'searchSelect',
+        regex: '^[a-zA-Z]+$',
+        regexDesc: 'Query Type',
+        options: [
+          {
+            label: 'NFT Name',
+            value: 'name',
+          },
+          {
+            label: 'Slug Name',
+            value: 'slug',
+          },
+          {
+            label: 'NFT ID',
+            value: 'id',
+          },
+          {
+            label: 'Collection Set',
+            value: 'collectionsSetId',
+          },
+          {
+            label: 'Community',
+            value: 'community',
+          },
+          {
+            label: 'Contract Address',
+            value: 'contract',
+          },
+        ],
       },
       {
-        name: 'slug',
-        label: 'NFT Slug Name',
-        desc: 'The slug name of NFT',
+        name: 'queryValue',
+        label: 'NFT Query Value',
+        desc: 'Specify how to find the NFT',
         type: 'input',
         regex: '^.+$',
-        regexDesc: 'Name',
-      },
-      {
-        name: 'id',
-        label: 'NFT Collection ID',
-        desc: 'The collection id of NFT',
-        type: 'input',
-        regex: '^0x[a-fA-F0-9:]$',
-        regexDesc: 'Address',
+        regexDesc: 'Query Value',
       },
     ],
   },
