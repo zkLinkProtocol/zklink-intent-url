@@ -408,7 +408,7 @@ export class ActionUrlController extends BaseController {
     res.setHeader('X-Blockchain-Ids', `eip155:${chainId}`);
     metadata.icon = intention.metadata;
     metadata.title = intention.title;
-    metadata.description = intention.description;
+    metadata.description = intention.description.replaceAll(/<[^>]+>/g, '');
 
     metadata.links.actions = await this.blinkService.getMetadataActions(
       code,
