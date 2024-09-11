@@ -14,7 +14,7 @@ export const FEE = 3000; // fee level, 0.3% fee is 3000
 export const METADATA: ActionMetadata<FormName> = {
   title: 'Novaswap',
   description:
-    'This action is designed to allow you to create token swap on https://novaswap.fi',
+    '<div>This action is designed to allow you to create token swap on <a href="https://novaswap.fi">https://novaswap.fi</a></div>',
   networks: [
     {
       name: 'zkLink Nova',
