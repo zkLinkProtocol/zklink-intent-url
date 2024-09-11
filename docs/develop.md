@@ -5,14 +5,26 @@ Comprehensive Guide for Creating, Registering, and Utilizing Actions with MagicL
 
 ## Overview
 
-MagicLink is a feature launched by zkLink that converts the act of constructing a transaction into an actionable link. MagicLink is a sharable short link to complete specified action in the zkLink Nova network. User who has the MagicLink can build a certain transaction easily. They can preview, sign the transaction and finally send it to the zkLink Nova network, without understanding the details of the transaction. MagicLink can be used for various on-chain activities such as token swaps, voting, and sponsorship. It greatly lowers the barrier to entry into the blockchain world. More importantly, MagicLink is short, easy to share on social media and webpage.
+MagicLink is a tool provided by zkLink that simplifies blockchain transactions into a shareable short link. With MagicLink, users don’t need to understand complex blockchain operations. They can click the link, set a few simple parameters, and generate, preview, and sign the transaction, which can then be sent to various networks. This short link can easily be shared on social media or websites, making the user experience straightforward and smooth.
+
+Key uses of MagicLink:
+
+- Simplified Transactions: Wrap complex on-chain operations into a simple link. Users click the link, enter parameters, confirm, and initiate a transaction.
+- Cross-chain Support: MagicLink handles transactions across multiple EVM-compatible networks. Users don’t need to worry about lacking tokens on a specific chain—this is managed in the background.
+- Low Barrier of Entry: Users don’t need to understand the details of transactions; just simple inputs and clicks are enough to complete the process.
+- Multiple Use Cases: Supports on-chain activities like token swaps, voting, and sponsorships.
+
+Imagine you're building an on-chain voting dApp or a red packet dApp. Traditionally, beyond deploying smart contracts, you would need to develop and host front-end and back-end services, register domain names, and integrate with Twitter/Telegram for promotion. With MagicLink, the development process is greatly simplified. You only need to focus on developing the Action. Once everything is ready, your dApp is essentially complete. Isn't that cool?
+
+For developers, MagicLink is created through the Action API, where you can define the business logic and customize the behavior based on the use case. MagicLink provides a simple, efficient way to interact with the blockchain while giving users a seamless experience.
 
 **Key Concepts**
 
-- **Action**: An Action is a standardized API implementation created by developers. It accepts certain parameters and returns signable transaction or message, enabling specific on-chain or off-chain activities. Actions allow developers to abstract their services to meet user's potential intents, while being maximally flexible by allowing anyone to set parameters when creating a magicLink. Actions simplify the process of integrating the "actionables" throughout EVM-compatible networks right into specific environment, allowing users to execute blockchain transactions without switching between different apps or websites. 
-- **MagicLink**: It is a shareable short link that serves as the entry point for executing an action. On the page of this short link, users can set a few parameters using selection boxes or input fields. After clicking confirm, they can generate and preview the transaction. If everything is correct, the user can sign and send it to the zkLink Nova network. While on a website, a magicLink might immediately initiate a transaction preview in a wallet without redirecting users to a dApp. In Telegram, a bot can be used to expand a magicLink into an interactive set of buttons. In the future iteration, this function will be expanded to Discord. 
+- **Action**: An Action is a target implementation for developers and serves as the core functionality behind different MagicLinks. Simply put, it’s an abstract class that developers need to implement, which defines a standard interface for Action implementations. Through an Action, developers are required to set some necessary metadata, such as the `id`, `version`, `title`, `logo`, and `description`. Additionally, they need to guide how the MagicLink constructs transactions. Actions also allow for defining data validation, displaying information to MagicLink users, and more. We will go into further details in the following sections 
+- **MagicLink**: It is a shareable short link that serves as the entry point for executing an action. On the page of this short link, users can set a few parameters using selection boxes or input fields. After clicking confirm, they can generate and preview the transaction. If everything is correct, the user can sign and send it to the different networks. While on a website, a magicLink might immediately initiate a transaction preview in a wallet without redirecting users to a dApp. In Telegram, a bot can be used to expand a magicLink into an interactive set of buttons. In the future iteration, this function will be expanded to Discord. 
 
 ## Role
+MagicLink involves three key roles from development to sharing and usage:
 
 - Developer: The role responsible for developing Actions. Developers need to implement the Action specifications and submit the code to the repository. We (zkLink) will register the reviewed Actions.
 - Intent Creator: The role responsible for creating magicLinks. They select a registered Action, configure it, and generate a shareable short link.
@@ -22,21 +34,23 @@ MagicLink is a feature launched by zkLink that converts the act of constructing 
 
 # Getting Started
 
-## Develop an Action
+## How It Works
 
-We provide a toolkit that allows you to create actions that fulfill users’ intent of achieving an outcome on any of Nova’s connected chains. An action could consist of multiple transactions on multiple chains, interacting with multiple DApps. The complexity of multi-chain transactions is abstracted away from the user experience, and users don’t need to be concerned about having enough funds for a transaction on one specific chain.
-
-Our framework maintains the registration of actions. Once you complete an action and register it in our repository, our server will automatically route requests to your action.
-
-Here is the workflow.
-
+The image below illustrates the flow from the user's transaction initiation to the core logic call of the **Action** created by the developer. The user initiates a request from the MagicLink frontend. Since each MagicLink is unique, when the backend service receives the request, it finds the corresponding **Action ID** from our **Action Registry** and retrieves the Action instance. At this point, the core functionality within the Action converts the parameters carried by the MagicLink into a constructed transaction, which is then returned to the frontend. The frontend constructs the correct transaction and guides the user to send the transaction.
 ![](./img/backend-action-flow.png)
+
+## Create an Action
+
+Next, we will walk you through a real-world example: **Donation**. This will demonstrate, step by step, how to create a fully functional Action from scratch.
+
+In this case, we will describe all the features and functionalities you might need as thoroughly as possible.
+
 
 ### 0. Prepare
 
-The toolkit is based on Node.js and NestJS framework, so make sure you have already installed Node.js before developing an action.
+We use _npm_ as package manager. We develop using _TypeScript_ and have chosen _NestJS_, a Node.js framework, as the foundational framework for our entire system. You will need a basic understanding of TypeScript and a general knowledge of NestJS's dependency injection and IoC (Inversion of Control).
 
-You must develop your action under our repository. To get started, clone the repository:
+To get started, clone the repository:
 
 ```shell
 git clone git@github.com:zkLinkProtocol/zklink-intent-url.git
@@ -48,10 +62,16 @@ Then install the dependencies:
 npm install
 ```
 
-Build the project at first to make sure everything is OK:
+Create a .env file from .env.example and make sure all necessary environment variables are correctly assigned.
 
 ```shell
-npm run build
+cp .env.example .env
+```
+
+Start the local service.
+
+```shell
+npm run start:debug
 ```
 
 From now you can start to develop your action.
@@ -61,17 +81,247 @@ From now you can start to develop your action.
 All Action implementations must be in the `libs` directory as a nest sub-project. So you must initiate your action project here. Run the following command:
 
 ```shell
-cd lib
 npx nest g library my-action
 ```
 
-According to the command line prompt, enter **action** and press _Enter_. You will see `nest-cli.json` in repository root is modified, and a new directory named `my-action` in the `libs` directory. This directory contains the basic structure of a nest project.
+According to the command line prompt
+```shell
+? What prefix would you like to use for the library (default: 
+@app or 'defaultLibraryPrefix' setting value)? @action
+```
+enter **'@action'** and press _Enter_. You will see `nest-cli.json` in repository root is modified, and a new directory named `my-action` in the `libs` directory. This directory contains the basic structure of a nest project.
+
+``` shell
+# terminal output
+CREATE libs/my-action/tsconfig.lib.json (223 bytes)
+CREATE libs/my-action/src/index.ts (73 bytes)
+CREATE libs/my-action/src/my-action.module.ts (203 bytes)
+CREATE libs/my-action/src/my-action.service.spec.ts (475 bytes)
+CREATE libs/my-action/src/my-action.service.ts (92 bytes)
+UPDATE nest-cli.json (2000 bytes)
+UPDATE package.json (4323 bytes)
+UPDATE test/jest-e2e.json (1136 bytes)
+UPDATE tsconfig.json (1855 bytes)
+
+# generated files
+libs/
+│
+├── tsconfig.lib.json
+└── src/
+    ├── index.ts
+    ├── my-action.module.ts
+    ├── my-action.service.ts
+    └── my-action.service.spec.ts
+```
+Congratulations! You've successfully taken the first step.
 
 ### 2. Action Definition
 
-We provide an abstract class that you must extend to implement your action.
+Next, what you need to do next is to complete the development of the `Action` in the `my-action.service.ts` file. We provide an abstract class [`Action`](../src/common/dto/action.dto.ts) that you must extend to implement your action. 
 
-The action is described by the `Action` class defined in [`action.dto.ts`](../src/common/dto/action.dto.ts). The abstract class is structured as follows:
+```ts
+import { Injectable } from '@nestjs/common';
+
+import {
+  Action,
+  GenerateTransactionParams,
+  TransactionInfo,
+} from 'src/common/dto';
+
+@Injectable()
+export class MyActionService extends Action<T> {
+  async getMetadata() {}
+
+  async generateTransaction(
+    data: GenerateTransactionParams<T>,
+  ): Promise<TransactionInfo[]> {}
+}
+```
+
+There are two abstract methods that must be implemented: `getMetadata` and `generateTransaction`. We'll start by adding placeholders for them. TypeScript will show errors, but don’t worry—we'll implement them later. The generic `T` will also be set to the correct type based on the needs of the action.
+
+#### 2.1 ActionMetadata
+Let's start by implementing `getMetadata`. It returns what appears to be a complex object literal of type `ActionMetadata<T>`. You can check the meaning of each field [here](../src/common/dto/action-metadata.dto.ts). 
+
+```ts
+
+async getMetadata() {
+  return {
+    title: 'Action Title',
+    description:
+      'This action allows you to create a Magic Link... This is an action example description.',
+    networks: [
+      {
+        name: 'Arbitrum',
+        chainId: '42161',
+      },
+      {
+        name: 'zkLink Nova',
+        chainId: '810180',
+      }
+    ],
+    author: { name: 'Action Author', github: 'https://github.com/zkLinkProtocol' },
+    magicLinkMetadata: {
+      description:
+        'Magic Link Enthusiast | Donate with your love for zkLink magic',
+      title: 'This is a magic link'
+    },
+    intent: {
+      components: [
+        {
+          name: 'token',
+          label: 'Token',
+          desc: 'The token you want to cost',
+          type: 'searchSelect',
+          regex: '^[a-zA-Z0-9]+$',
+          regexDesc: 'Token Symbol',
+          options: [
+            {
+              label: 'ETH',
+              value: '',
+              chainId: '42161',
+              default: true,
+            },
+            {
+              label: 'USDT',
+              value: '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9',
+              chainId: '42161',
+            },
+            {
+              label: 'USDC',
+              value: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831',
+              chainId: '42161',
+            },
+            {
+              label: 'ETH',
+              value: '',
+              chainId: '810180',
+              default: true,
+            },
+            {
+              label: 'USDT',
+              value: '0x2F8A25ac62179B31D62D7F80884AE57464699059',
+              chainId: '810180',
+            },
+            {
+              label: 'USDC',
+              value: '0x1a1A3b2ff016332e866787B311fcB63928464509',
+              chainId: '810180',
+            },
+            {
+              label: 'ETH',
+              value: '',
+              chainId: '810181',
+              default: true,
+            },
+            {
+              label: 'USDT',
+              value: '0x0efDC9f3948BE4509e8c57d49Df97660CF038F9a',
+              chainId: '810181',
+            },
+            {
+              label: 'USDC',
+              value: '0xAC4a95747cB3f291BC4a26630862FfA0A4b01B44',
+              chainId: '810181',
+            },
+            {
+              label: 'ETH',
+              value: '',
+              chainId: '270',
+              default: true,
+            },
+            {
+              label: 'USDT',
+              value: '0xDBBD57f02DdbC9f1e2B80D8DAcfEC34BC8B287e3',
+              chainId: '270',
+            },
+            {
+              label: 'USDC',
+              value: '0x09B141F8a41BA6d2A0Ec1d55d67De3C8f3846921',
+              chainId: '270',
+            },
+          ],
+        },
+        {
+          name: 'value',
+          label: 'Amount',
+          desc: 'The amount to sponsor',
+          type: 'input',
+          regex: '^\\d+\\.?\\d*$|^\\d*\\.\\d+$',
+          regexDesc: 'Must be a number',
+        },
+        {
+          name: 'recipient',
+          label: 'Recipient',
+          desc: 'The address that is sponsored',
+          type: 'input',
+          regex: '^0x[a-fA-F0-9]{40}$',
+          regexDesc: 'Address',
+        },
+      ],
+      preset: [
+        {
+          field: 'value',
+          title: 'Donate 0.01 ETH',
+          type: 'Button',
+          value: '0.01',
+        },
+      ],
+    },
+  }
+};
+```
+
+Now, follow along with me as we explore each field in the metadata and understand its meaning in conjunction with the UI.
+
+The left side of this image is the Magic Link creation area, and the right side is the Magic Link preview area, where creators can create their own Magic Link by setting and modifying metadata.
+
+The metadata defined above will be reflected in the corresponding UI controls on the frontend and the highlighted fields correspond to the metadata object literals you defined.
+
+![UI](./img/create-action.png)
+
+I will provide further explanations for some fields that need clarification.
+
+- *networks*: It is an array, indicating which network the target chain of the created Magic Link belongs to. For example, you allow the creation of a donation link, enabling users to donate to you on Ethereum, and also allow the creation of a Magic Link for donations on the Arbitrum network
+
+  ![](./img/select-network.png)
+- *magicLinkMetadata*: You can set the default values for the Magic Link's title, main image, and description here, as shown in the image above. You might be curious about where to set this main image. There are two ways to set it: you can explicitly set the 'gallery' field, whose value is a URL of an image accessible over the internet. Alternatively, you can set it implicitly by uploading an image with the same name as the id in the assets/galleries directory. We will help you upload it to S3 and set it as the value for the `gallery`. Therefore, the default image in the preview section of the Magic Link above is because there is an image in assets/galleries with the same name as the id.
+  ```ts
+  // 1. explicitly
+  magicLinkMetadata: {
+    description:
+      'Magic Link Enthusiast | Donate with your love for zkLink magic',
+    title: 'This is a magic link',
+    gallery: 'https://zklink-nova-nft.s3.ap-northeast-1.amazonaws.com/cuboimage-test/193.png'
+  }
+
+  // 2. implicitly
+  magicLinkMetadata: {
+    description:
+      'Magic Link Enthusiast | Donate with your love for zkLink magic',
+    title: 'This is a magic link',
+  }
+  // main image location
+  assets/
+  │
+  └── galleries/
+      ├── my-action.png
+      ├── ...
+  ```
+- *components*: The fields defined here are generally those that you need the **creator** to flexibly fill in. These parameters will eventually be passed in as part of the arguments in `generateTransaction` and used flexibly for constructing transactions or making conditional judgments and etc.
+  
+  Among them, it can be of various types such as input (allowing user input), text (fixed display parameters), or select (dropdown menu selection).
+
+  If the type is 'select', it will have `options`, which are the choices in the dropdown menu. There are two required fields: `label` & `value` - label is used for menu display, and value acts as the value for `name`. There are two optional items: `chainId`, which specifies that this option is only selectable when the same chainId is selected in `networks`, and `default
+  : true` indicates that it is the default selected value.
+
+  ![](./img/select-option.png)
+
+- preset: 
+This field presets the default trigger for the Magic Link. 'field' refers to the name of a specific 'name', 'value' is the value of 'name', 'title' is used for display, and 'type' can be set to either 'Button' or 'Input'.
+
+  ![](./img/preset.png)
+
 
 ```ts
 type ActionTransactionParams = { [key: string]: string };
@@ -130,7 +380,6 @@ class MyActionService extends Action {
         {
           name: 'zkLink Nova',
           chainId: '810180',,
-          contractAddress: '0x',
         },
       ],
       dApp: { name: 'An Action Example' },
