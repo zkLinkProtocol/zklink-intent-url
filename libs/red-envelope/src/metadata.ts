@@ -8,7 +8,7 @@ export const genMetadata = (configValue: Value): ActionMetadata<FormName> => ({
   description: 'This action is designed to distribute token rewards',
   networks: [
     {
-      name: 'zkLink Nova',
+      name: configValue.networkName,
       chainId: configValue.chainId.toString(),
       contractAddress: '',
     },
