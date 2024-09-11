@@ -31,6 +31,7 @@ export const metadata: ActionMetadata<FormName> = {
   dApp: { name: 'Buy me a coffee' },
   author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
   magicLinkMetadata: {
+    title: 'Buy me a coffee ☕',
     description:
       'Magic Link Enthusiast | Donate with your love for zkLink magic',
   },
