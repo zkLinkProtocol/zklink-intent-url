@@ -256,7 +256,7 @@ export class ActionUrlController extends BaseController {
     return this.success(result);
   }
 
-  @Post(':code/transaction/validation')
+  @Post(':code/validate-transaction')
   @CommonApiOperation('Generate transaction by action Id.')
   @ApiParam({
     name: 'id',

@@ -106,13 +106,6 @@ export class BaseComponentDto<T extends string> {
   })
   @IsString()
   defaultValue?: string;
-
-  @ApiPropertyOptional({
-    type: String,
-    description: 'should bind value with submit button',
-  })
-  @IsBoolean()
-  bind?: boolean;
 }
 export class PlainComponentDto<T extends string> extends BaseComponentDto<T> {
   @ApiProperty({
@@ -181,6 +174,14 @@ export class IntentDto<N extends string> {
   @IsArray()
   @ValidateNested({ each: true })
   components: Array<PlainComponentDto<N> | OptionComponentDto<N>>;
+
+  @ApiPropertyOptional({
+    type: String,
+    description: 'should bind value with submit button',
+  })
+  @IsOptional()
+  bind?: N | true;
+
   @ApiPropertyOptional({ description: 'Human-readable description (optional)' })
   @IsOptional()
   @IsString()
