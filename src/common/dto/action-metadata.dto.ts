@@ -180,7 +180,7 @@ export class IntentDto<N extends string> {
     description: 'should bind value with submit button',
   })
   @IsOptional()
-  bind?: N | true;
+  binding?: N | true;
 
   @ApiPropertyOptional({ description: 'Human-readable description (optional)' })
   @IsOptional()

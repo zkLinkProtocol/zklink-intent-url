@@ -22,6 +22,7 @@ export const METADATA: ActionMetadata<FormName> = {
   author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
   magicLinkMetadata: {},
   intent: {
+    binding: 'amountIn',
     components: [
       {
         name: 'tokenInAddress',
@@ -61,7 +62,6 @@ export const METADATA: ActionMetadata<FormName> = {
         regex: '^[0-9]+$',
         regexDesc: 'Must be a number',
         defaultValue: '1',
-        bind: true,
       },
     ],
   },

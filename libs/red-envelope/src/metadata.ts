@@ -20,7 +20,7 @@ export const genMetadata = (configValue: Value): ActionMetadata<FormName> => ({
     description: 'Best wishes!',
   },
   intent: {
-    bind: true,
+    binding: true,
     components: [
       {
         name: 'distributionMode',

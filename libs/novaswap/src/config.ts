@@ -29,6 +29,7 @@ export const METADATA: ActionMetadata<FormName> = {
     description: 'Now’s the perfect moment to buy the dip!!!',
   },
   intent: {
+    binding: 'amountIn',
     components: [
       {
         name: 'tokenInAddress',
@@ -68,7 +69,6 @@ export const METADATA: ActionMetadata<FormName> = {
         regex: '^[0-9]+$',
         regexDesc: 'Must be a number',
         defaultValue: '1',
-        bind: true,
       },
     ],
   },
