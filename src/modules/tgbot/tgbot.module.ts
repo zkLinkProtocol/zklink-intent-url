@@ -24,6 +24,7 @@ import { BlinkService } from '../actionUrl/blink.service';
     BlinkService,
     MessagePollRepository,
   ],
+  exports: [TgbotService],
   controllers: [TgbotController],
 })
 export class TgbotModule {}

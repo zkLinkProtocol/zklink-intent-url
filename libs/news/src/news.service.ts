@@ -7,12 +7,16 @@ import {
   TransactionInfo,
 } from 'src/common/dto';
 
+import { TgbotService } from './../../../src/modules/tgbot/tgbot.service';
 import { FormName, METADATA } from './config';
 
 @RegistryPlug('news', 'v1')
 @Injectable()
 export class NewsService extends ActionDto<FormName> {
-  constructor(private readonly novaswapService: NovaswapService) {
+  constructor(
+    private readonly novaswapService: NovaswapService,
+    private readonly tgbotService: TgbotService,
+  ) {
     super();
   }
   async getMetadata() {
@@ -23,5 +27,12 @@ export class NewsService extends ActionDto<FormName> {
     data: GenerateTransactionParams<FormName>,
   ): Promise<TransactionInfo[]> {
     return await this.novaswapService.generateTransaction(data);
+  }
+
+  public async onMagicLinkCreated(
+    data: GenerateTransactionParams<FormName>,
+  ): Promise<TransactionInfo[]> {
+    await this.tgbotService.sendNews(data.additionalData.code!);
+    return [];
   }
 }
