@@ -22,6 +22,11 @@ export class TgbotService implements OnModuleInit {
     private readonly blinkService: BlinkService,
   ) {}
 
+  async update(body: any) {
+    this.logger.log('new messages:', JSON.stringify(body));
+    this.bot.processUpdate(body);
+  }
+
   async onModuleInit() {
     const config = await configFactory();
     const token = config.tgbot.token as string;
@@ -34,11 +39,11 @@ export class TgbotService implements OnModuleInit {
   private async eventInit() {
     this.bot.onText(/\/start/, (msg: any) => this.onStart(msg.from.id));
     this.bot.onText(/\/my/, (msg: any) => this.onMyMagicLink(msg.from.id));
-    this.bot.on('callback_query', (msg: any) => {
-      this.logger.log(`callback_query:`, JSON.stringify(msg));
-      const chatId = msg.message.chat.id;
-      const messageId = msg.message.message_id;
-      const data = msg.data;
+    this.bot.on('callback_query', (callbackQuery: any) => {
+      this.logger.log(`callback_query:`, JSON.stringify(callbackQuery));
+      const chatId = callbackQuery.message.chat.id;
+      const messageId = callbackQuery.message.message_id;
+      const data = callbackQuery.data;
       const [longOrShort, originLong, originShort] = data.split('_');
       this.editMessageReplyMarkupPollText(
         chatId,
@@ -165,11 +170,6 @@ export class TgbotService implements OnModuleInit {
     }
   }
 
-  async update(body: any) {
-    this.logger.log('new messages:', JSON.stringify(body));
-    this.bot.processUpdate(body);
-  }
-
   async sendNews(code: string) {
     const config = await configFactory();
     const newsChannelId = config.tgbot.newsChannelId;
@@ -213,6 +213,9 @@ export class TgbotService implements OnModuleInit {
           inlineKeyboard.push(lineButtons);
           lineButtons = [];
         }
+      }
+      if (lineButtons.length > 0) {
+        inlineKeyboard.push(lineButtons);
       }
     }
     const reply_markup = {
