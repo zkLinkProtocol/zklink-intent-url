@@ -1,5 +1,6 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ethers } from 'ethers';
+import html2md from 'html-to-md';
 import TelegramBot from 'node-telegram-bot-api';
 import { ParseMode } from 'node-telegram-bot-api';
 
@@ -170,11 +171,8 @@ export class TgbotService implements OnModuleInit {
       newsType: string;
     };
     const photo = news.metadata;
-    const caption = news.description
-      .replaceAll(`<p>`, '<b>')
-      .replaceAll(`</p>`, '</b>')
-      .replaceAll(/<img[^>]*>/g, '');
-    const parse_mode: ParseMode = 'HTML';
+    const caption = html2md(news.description.replaceAll(/<img[^>]*>/g, ''));
+    const parse_mode: ParseMode = 'MarkdownV2';
     const postHref = `${miniApp}`;
 
     const inlineKeyboard = [];
