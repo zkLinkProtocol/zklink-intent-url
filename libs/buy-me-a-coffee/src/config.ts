@@ -36,6 +36,7 @@ export const metadata: ActionMetadata<FormName> = {
       'Magic Link Enthusiast | Donate with your love for zkLink magic',
   },
   intent: {
+    bind: 'value',
     components: [
       {
         name: 'token',

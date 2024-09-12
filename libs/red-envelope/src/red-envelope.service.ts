@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import BigNumber from 'bignumber.js';
 import {
+  Interface,
   JsonRpcProvider,
   dataSlice,
   ethers,
@@ -340,6 +341,60 @@ export class RedEnvelopeService extends ActionDto<FormName> {
     });
 
     return transactions;
+  }
+
+  public async preCheckTransaction(data: GenerateTransactionParams<FormName>) {
+    const { additionalData } = data;
+    const { code, account } = additionalData;
+    if (!code) {
+      throw new Error('missing code');
+    }
+    const packetId = this.getPacketIDByCode(code);
+    const hasClaimed = await this.envelopContract.isClaimed(packetId, account);
+    if (hasClaimed) {
+      return { enable: false, reason: 'User has already received' };
+    } else {
+      return { enable: true };
+    }
+  }
+
+  getTokenNameByAddress(address: string): string | undefined {
+    const entries = Object.entries(DistributionTokenValue) as [
+      string,
+      string,
+    ][];
+    const foundEntry = entries.find(([_, value]) => value === address);
+    return foundEntry ? foundEntry[0] : undefined;
+  }
+
+  async reportTransaction(
+    data: GenerateTransactionParams<FormName>,
+    txHash: string,
+  ): Promise<{ message: string }> {
+    const { formData } = data;
+    const { distributionToken } = formData;
+    const iface = new Interface(RedPacketABI);
+    const eventTopic = ethers.id('RedPacketClaimed(uint256,address,uint256)');
+    try {
+      const receipt = await this.provider.getTransactionReceipt(txHash);
+      if (!receipt) {
+        throw new Error('wrong transaction hash');
+      }
+      const log = receipt.logs.find(async (log) => {
+        return log.topics[0] === eventTopic;
+      });
+      if (!log) {
+        throw new Error('parse log error');
+      }
+      const event = iface.parseLog(log);
+      const { amount } = event?.args ?? { amount: 0 };
+      const decimals = await this.getDecimals(distributionToken);
+      const symbol = this.getTokenNameByAddress(distributionToken);
+      const claimedAmount = parseUnits(amount, decimals);
+      return { message: `claim ${symbol} ${claimedAmount}!` };
+    } catch (error) {
+      throw new Error(`Failed to fetch transaction receipt: ${error.message}`);
+    }
   }
 
   public async generateTransaction(
