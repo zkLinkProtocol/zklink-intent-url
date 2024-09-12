@@ -22,17 +22,21 @@ export class TgbotController extends BaseController {
     }
   }
 
-  @Get('editMessageReplyMarkupPollText')
-  async editMessageReplyMarkupPollText(
+  @Get('testEditMessageReplyMarkupPollText')
+  async testEditMessageReplyMarkupPollText(
     @Query('chatId') chatId: string,
     @Query('messageId') messageId: string,
     @Query('longOrShort') longOrShort: string,
+    @Query('long') long: number,
+    @Query('short') short: number,
   ) {
     try {
       this.tgbotService.editMessageReplyMarkupPollText(
         chatId,
         messageId,
         longOrShort,
+        long,
+        short,
       );
       return true;
     } catch (error) {

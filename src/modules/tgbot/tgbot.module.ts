@@ -4,7 +4,6 @@ import {
   ActionRepository,
   CreatorRepository,
   IntentionRepository,
-  MessagePollRepository,
 } from 'src/repositories';
 import { UnitOfWorkModule } from 'src/unitOfWork';
 
@@ -22,7 +21,6 @@ import { BlinkService } from '../actionUrl/blink.service';
     ActionUrlService,
     ActionRepository,
     BlinkService,
-    MessagePollRepository,
   ],
   exports: [TgbotService],
   controllers: [TgbotController],

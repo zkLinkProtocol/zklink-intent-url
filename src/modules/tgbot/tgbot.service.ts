@@ -5,11 +5,7 @@ import TelegramBot from 'node-telegram-bot-api';
 import { ParseMode } from 'node-telegram-bot-api';
 
 import configFactory from 'src/config';
-import {
-  CreatorRepository,
-  IntentionRepository,
-  MessagePollRepository,
-} from 'src/repositories';
+import { CreatorRepository, IntentionRepository } from 'src/repositories';
 
 import { ActionUrlService } from '../actionUrl/actionUrl.service';
 import { BlinkService } from '../actionUrl/blink.service';
@@ -24,7 +20,6 @@ export class TgbotService implements OnModuleInit {
     private readonly creatorRepository: CreatorRepository,
     private readonly actionUrlService: ActionUrlService,
     private readonly blinkService: BlinkService,
-    private readonly messagePollRepository: MessagePollRepository,
   ) {}
 
   async onModuleInit() {
@@ -39,6 +34,20 @@ export class TgbotService implements OnModuleInit {
   private async eventInit() {
     this.bot.onText(/\/start/, (msg: any) => this.onStart(msg.from.id));
     this.bot.onText(/\/my/, (msg: any) => this.onMyMagicLink(msg.from.id));
+    this.bot.on('callback_query', (msg: any) => {
+      this.logger.log(`callback_query:`, JSON.stringify(msg));
+      const chatId = msg.message.chat.id;
+      const messageId = msg.message.message_id;
+      const data = msg.data;
+      const [longOrShort, originLong, originShort] = data.split('_');
+      this.editMessageReplyMarkupPollText(
+        chatId,
+        messageId,
+        longOrShort,
+        originLong,
+        originShort,
+      );
+    });
   }
 
   async onStart(tgUserId: string) {
@@ -165,7 +174,6 @@ export class TgbotService implements OnModuleInit {
     const config = await configFactory();
     const newsChannelId = config.tgbot.newsChannelId;
     const miniApp = config.tgbot.miniApp;
-    const pollApi = config.tgbot.pollApi;
     const news = await this.actionUrlService.findOneByCode(code);
     const settings = news.settings as {
       newsType: string;
@@ -181,11 +189,11 @@ export class TgbotService implements OnModuleInit {
       const actions = [
         {
           text: 'Long(0)',
-          url: `${pollApi}?chatId=&messageId=&longOrShort=long`,
+          callback_data: `long_0_0`,
         },
         {
           text: 'Short(0)',
-          url: `${pollApi}?chatId=&messageId=&longOrShort=short`,
+          callback_data: `short_0_0`,
         },
       ];
       inlineKeyboard.push(actions);
@@ -220,17 +228,6 @@ export class TgbotService implements OnModuleInit {
         res = await this.bot.sendPhoto(newsChannelId, photo, options);
       }
       this.logger.log('sendNews success', JSON.stringify(res));
-      if (newsType == 'poll') {
-        const chatId = res.chat.id;
-        const messageId = res.message_id;
-        await this.messagePollRepository.add({
-          chatId: '' + chatId,
-          messageId: '' + messageId,
-          long: 0,
-          short: 0,
-        });
-        await this.editMessageReplyMarkupPollText('' + chatId, '' + messageId);
-      }
     } catch (error) {
       this.logger.error(`sendNews error`, error.stack);
     }
@@ -239,32 +236,14 @@ export class TgbotService implements OnModuleInit {
   async editMessageReplyMarkupPollText(
     chatId: string,
     messageId: string,
-    longOrShort: string = '',
+    longOrShort: string,
+    long: number,
+    short: number,
   ) {
-    const config = await configFactory();
-    const pollApi = config.tgbot.pollApi;
-    let long = 0;
-    let short = 0;
-    const message = await this.messagePollRepository.findOneBy({
-      chatId,
-      messageId,
-    });
-    if (!message) {
-      return;
-    }
-    long = message.long;
-    short = message.short;
-
-    if (longOrShort != '') {
-      if (longOrShort === 'long') {
-        long++;
-      } else if (longOrShort === 'short') {
-        short++;
-      }
-      await this.messagePollRepository.update(
-        { long, short },
-        { chatId, messageId },
-      );
+    if (longOrShort === 'long') {
+      long++;
+    } else if (longOrShort === 'short') {
+      short++;
     }
 
     try {
@@ -273,11 +252,11 @@ export class TgbotService implements OnModuleInit {
           [
             {
               text: `Long(${long})`,
-              url: `${pollApi}?chatId=${chatId}&messageId=${messageId}&longOrShort=long`,
+              callback_data: `long_${long}_${short}`,
             },
             {
               text: `Short(${short})`,
-              url: `${pollApi}?chatId=${chatId}&messageId=${messageId}&longOrShort=short`,
+              callback_data: `short_${long}_${short}`,
             },
           ],
         ],
