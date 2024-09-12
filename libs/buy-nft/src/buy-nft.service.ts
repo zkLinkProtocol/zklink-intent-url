@@ -88,10 +88,10 @@ export class BuyNftService extends ActionDto<FormName> {
     return txs;
   }
 
-  public async getRealTimeContent(): Promise<{
-    title: string;
-    content: string;
-  }> {
+  public async getRealTimeContent(data: {
+    code: string;
+    sender: string;
+  }): Promise<{ title: string; content: string }> {
     return {
       title: this.nftName,
       content: this.nftHtmlInfo,
