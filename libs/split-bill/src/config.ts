@@ -34,6 +34,7 @@ export const metadata: ActionMetadata<FormName> = {
     description: 'Each friend will pay you the same amount',
   },
   intent: {
+    binding: 'value',
     components: [
       {
         name: 'token',
@@ -117,7 +118,6 @@ export const metadata: ActionMetadata<FormName> = {
         regex: '^\\d+\\.?\\d*$|^\\d*\\.\\d+$',
         defaultValue: '10',
         regexDesc: 'Must be a number',
-        bind: true,
       },
       {
         name: 'recipient',

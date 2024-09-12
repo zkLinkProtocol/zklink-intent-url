@@ -34,6 +34,23 @@ export abstract class Action<T extends string = string> {
     data: GenerateTransactionParams<T>,
   ): Promise<TransactionInfo[]>;
 
+  async preCheckTransaction(
+    _: GenerateTransactionParams<T>,
+  ): Promise<{ enable: boolean; reason?: string }> {
+    return {
+      enable: true,
+    };
+  }
+
+  async reportTransaction(
+    _data: GenerateTransactionParams<T>,
+    _txHash: string,
+  ): Promise<{ message: string }> {
+    return {
+      message: 'Transaction Success',
+    };
+  }
+
   async validateFormData(_: GenerateFormParams<T>): Promise<ErrorMessage> {
     return '';
   }
