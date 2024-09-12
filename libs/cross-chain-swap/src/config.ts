@@ -48,8 +48,8 @@ export const METADATA: ActionMetadata<FormName> = {
         regexDesc: 'Positive number',
       },
       {
-        name: 'tokenIn',
-        label: 'Token In ',
+        name: 'tokenFrom',
+        label: 'Token From ',
         desc: 'The token you want to swap',
         type: 'searchSelect',
         regex: '^[a-zA-Z0-9]+$',
@@ -74,8 +74,8 @@ export const METADATA: ActionMetadata<FormName> = {
         ],
       },
       {
-        name: 'tokenOutAddress',
-        label: 'Token Out Address',
+        name: 'tokenTo',
+        label: 'Token To',
         desc: 'The address of the token you want to receive',
         type: 'input',
         regex: '^0x[a-fA-F0-9]{40}$',

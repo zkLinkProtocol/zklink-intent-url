@@ -42,7 +42,8 @@ export class CrossChainSwapService extends ActionDto<FormName> {
 
     let approveTx: TransactionInfo;
     let swapTx: TransactionInfo;
-    const tokenInAddress = TOKEN_CONFIG[additionalData.chainId][params.tokenIn];
+    const tokenInAddress =
+      TOKEN_CONFIG[additionalData.chainId][params.tokenFrom];
     const provider = new ethers.JsonRpcProvider(RPC_URL[chainId]) as any;
 
     const tokens: TransactionInfo['requiredTokenAmount'] = [
@@ -52,14 +53,14 @@ export class CrossChainSwapService extends ActionDto<FormName> {
       },
     ];
 
-    if (params.tokenIn === 'weth') {
+    if (params.tokenFrom === 'weth') {
       console.log(params);
       console.log(account);
       swapTx = await getSwapData(
         account,
         chainId,
         '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
-        params.tokenOutAddress,
+        params.tokenTo,
         params.amountToBuy,
       );
       const gasCost = await getGasCost(
@@ -78,7 +79,7 @@ export class CrossChainSwapService extends ActionDto<FormName> {
         account,
         chainId,
         '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
-        params.tokenOutAddress,
+        params.tokenTo,
         BigInt(params.amountToBuy) - BigInt(totalFee),
       );
       swapTx.requiredTokenAmount = tokens;
@@ -101,7 +102,7 @@ export class CrossChainSwapService extends ActionDto<FormName> {
         account,
         chainId,
         tokenInAddress,
-        params.tokenOutAddress,
+        params.tokenTo,
         params.amountToBuy,
       );
       const swapGasCost = await getGasCost(
@@ -127,7 +128,7 @@ export class CrossChainSwapService extends ActionDto<FormName> {
         account,
         chainId,
         tokenInAddress,
-        params.tokenOutAddress,
+        params.tokenTo,
         BigInt(params.amountToBuy) - BigInt(totalFee),
       );
       swapTx.requiredTokenAmount = tokens;
