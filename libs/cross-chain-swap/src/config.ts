@@ -26,7 +26,6 @@ export const METADATA: ActionMetadata<FormName> = {
   title: 'Cross Chain Swap',
   description:
     '<div>Perform cross-chain token swaps seamlessly across multiple networks</div>',
-  logo: 'https://placehold.co/40x40',
   networks: [
     {
       name: 'Arbitrum',

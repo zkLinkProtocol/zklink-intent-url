@@ -9,7 +9,6 @@ export const metadata: ActionMetadata<FormName> = {
   title: 'PumpFun',
   description:
     '<div>PumpFun is a platform for creating and participating in token pump events</div>',
-  logo: 'https://placehold.co/40x40',
   networks: [
     {
       name: 'zkLink Nova sepolia',
