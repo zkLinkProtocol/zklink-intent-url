@@ -12,9 +12,9 @@ export const RPC_URL = 'https://sepolia.rpc.zklink.io';
 export const FEE = 3000; // fee level, 0.3% fee is 3000
 
 export const METADATA: ActionMetadata<FormName> = {
-  title: 'Buy the dip!!!',
+  title: 'Novaswap',
   description:
-    'This action is design to allow you to create token swap on [Novaswap](https://novaswap.fi/)',
+    '<div>This action is designed to allow you to create token swap on <a href="https://novaswap.fi">https://novaswap.fi</a></div>',
   networks: [
     {
       name: 'zkLink Nova',
@@ -23,9 +23,11 @@ export const METADATA: ActionMetadata<FormName> = {
   ],
   author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
   magicLinkMetadata: {
+    title: 'Buy the dip!!!',
     description: 'Now’s the perfect moment to buy the dip!!!',
   },
   intent: {
+    binding: 'amountIn',
     components: [
       {
         name: 'tokenInAddress',
@@ -60,7 +62,7 @@ export const METADATA: ActionMetadata<FormName> = {
       {
         name: 'amountIn',
         label: 'Amount',
-        desc: 'The amount of tokens you want to swap',
+        desc: 'The amount of tokens you pay',
         type: 'input',
         regex: '^[0-9]+$',
         regexDesc: 'Must be a number',

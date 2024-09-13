@@ -77,7 +77,7 @@ export class BuyMeACoffeeService extends ActionDto<FormName> {
     return [tx];
   }
 
-  public async getRealTimeContent(data: {
+  public async reloadAdvancedInfo(data: {
     code: string;
     sender: string;
   }): Promise<{ title: string; content: string }> {

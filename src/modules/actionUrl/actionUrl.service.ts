@@ -47,15 +47,27 @@ export class ActionUrlService {
         'createdAt',
         'updatedAt',
       ],
+      relations: ['action'],
       take: limit,
       skip: offset,
       order: { createdAt: 'DESC' },
     });
 
+    const filteredActionUrls = actionUrls.map((item) => ({
+      ...item,
+      action: item.action
+        ? {
+            title: item.action.title,
+            logo: item.action.logo,
+            networks: item.action.networks.length,
+          }
+        : null,
+    }));
+
     const totalPages = Math.ceil(total / limit);
 
     return {
-      data: actionUrls,
+      data: filteredActionUrls,
       currentPage: page,
       totalPages,
       totalItems: total,

@@ -12,9 +12,7 @@ export class BlinkService {
     this.logger = new Logger(BlinkService.name);
   }
 
-  async getMetadataActions(code: string, setting: any) {
-    const postHref = `/api/action-url/${code}/build-transactions`;
-
+  magicLinkToBlinkActions(postHref: string, setting: any) {
     const componentsArr = setting.intentInfo.components;
     const components = new Map();
     const params = new Map();
@@ -65,6 +63,11 @@ export class BlinkService {
       });
     }
     return actions;
+  }
+
+  async getMetadataActions(code: string, setting: any) {
+    const postHref = `/api/action-url/${code}/build-transactions`;
+    return this.magicLinkToBlinkActions(postHref, setting);
   }
 
   async buildTransactions(

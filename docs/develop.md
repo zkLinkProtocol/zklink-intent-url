@@ -1,6 +1,9 @@
 
 # zkLink Nova Actions & MagicLink SDK
 
+> [!NOTE]  
+> Actions & MagicLink is in beta and undergoing audit. Please [Contact Us](https://t.me/laniakeiaa) if you plan on going live with it.
+
 Comprehensive Guide for Creating, Registering, and Utilizing Actions with MagicLinks in the zkLink Nova Network
 
 ## Overview
@@ -415,7 +418,7 @@ Our framework will register your Action implementation into the routing system. 
 ### 3. Advanced Function
 
 - The `validateIntentParams` method allows developers to create more flexible validation rules. It takes `ActionTransactionParams` as input and returns a string containing error messages. When the frontend creates an magicLink, the parameters passed can be validated against custom rules using this hook function. If an error message is returned, the frontend will display it.
-- The `getRealTimeContent` optional function processes real-time contract information that should be displayed to users through the magicLink. 
+- The `reloadAdvancedInfo` optional function processes real-time contract information that should be displayed to users through the magicLink. 
 
   For example, for a red packet contract, it might show something like _"There are 20 red packets in total, and 3 red packets have been claimed."_  Developers can use this method to return a title and an HTML string based on the contract's stored information, making it easier for users to refresh and view the information. 
 

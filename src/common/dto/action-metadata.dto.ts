@@ -214,6 +214,13 @@ export class IntentDto<N extends string> {
   @ValidateNested({ each: true })
   components: Array<PlainComponentDto<N> | OptionComponentDto<N>>;
 
+  @ApiPropertyOptional({
+    type: String,
+    description: 'should bind value with submit button',
+  })
+  @IsOptional()
+  binding?: N | true;
+
   // @ApiPropertyOptional({ description: 'Human-readable description (optional)' })
   // @IsOptional()
   // @IsString()

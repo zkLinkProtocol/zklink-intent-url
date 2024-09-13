@@ -13,6 +13,9 @@ import { FormName } from './types';
 @RegistryPlug('buy-nft', 'v1')
 @Injectable()
 export class BuyNftService extends ActionDto<FormName> {
+  nftName = '';
+  nftHtmlInfo = '';
+
   constructor() {
     super();
   }
@@ -29,7 +32,10 @@ export class BuyNftService extends ActionDto<FormName> {
       throw new Error('Missing account!');
     }
     const MAGIC_EDEN_API = apiConfig[additionalData.chainId];
-    const queryParams = `${formData.queryType}=${encodeURIComponent(formData.queryValue)}`;
+    const queryParams =
+      formData.queryType == 'contract'
+        ? `id=${formData.queryValue}`
+        : `slug=${encodeURIComponent(formData.queryValue.substring(formData.queryValue.lastIndexOf('/') + 1))}`;
     const queryResp = await fetch(
       `${MAGIC_EDEN_API}collections/v7?${queryParams}&limit=1`,
       {
@@ -47,13 +53,9 @@ export class BuyNftService extends ActionDto<FormName> {
 
     const floorPrice = nftInfo[0]['floorAsk']['price']['amount']['decimal'];
     const priceSymbol = nftInfo[0]['floorAsk']['price']['currency']['symbol'];
-    console.log(
-      `Found NFT floor price ${floorPrice} ${priceSymbol} with OrderId ${floorOrderId}`,
-    );
     const floorToken = nftInfo[0]['floorAsk']['token'];
-    console.log(
-      `NFT ID: ${floorToken['contract']}:${floorToken['tokenId']}, Image: ${nftInfo[0]['image']}`,
-    );
+    this.nftName = `${floorToken['name']}`;
+    this.nftHtmlInfo = `<img src="${floorToken['image']}"><p>Price: ${floorPrice} ${priceSymbol}</p>`;
 
     const txs: TransactionInfo[] = [];
     const buyResp = await fetch(`${MAGIC_EDEN_API}execute/buy/v7`, {
@@ -66,6 +68,7 @@ export class BuyNftService extends ActionDto<FormName> {
           },
         ],
         taker: additionalData.account,
+        skipBalanceCheck: true,
       }),
     });
     const buySteps = (await buyResp.json()).steps;
@@ -83,5 +86,15 @@ export class BuyNftService extends ActionDto<FormName> {
       }
     }
     return txs;
+  }
+
+  public async reloadAdvancedInfo(data: {
+    code: string;
+    sender: string;
+  }): Promise<{ title: string; content: string }> {
+    return {
+      title: this.nftName,
+      content: this.nftHtmlInfo,
+    };
   }
 }

@@ -3,12 +3,12 @@ import { ActionMetadata } from 'src/common/dto';
 import { FormName } from './types';
 
 export const PUMP_FUN_FACTORY_ADDRESS =
-  '0x089Fac5c9B202114f466bF1a23f366403D69BA4d';
+  '0x7f19656b47F3878c176e2A18cfF962c35240c5BD';
 
 export const metadata: ActionMetadata<FormName> = {
   title: 'PumpFun',
   description:
-    'PumpFun is a platform for creating and participating in token pump events',
+    '<div>PumpFun is a platform for creating and participating in token pump events</div>',
   logo: 'https://placehold.co/40x40',
   networks: [
     {

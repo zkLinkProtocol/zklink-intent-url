@@ -1,4 +1,4 @@
-import { CrossChainSwapService } from '@action/cross-chain-swap';
+import { NovaswapService } from '@action/novaswap';
 import { RegistryPlug } from '@action/registry';
 import { Injectable } from '@nestjs/common';
 import {
@@ -7,12 +7,17 @@ import {
   TransactionInfo,
 } from 'src/common/dto';
 
+import { TgbotService } from './../../../src/modules/tgbot/tgbot.service';
 import { FormName, METADATA } from './config';
 
+//magic news
 @RegistryPlug('news', 'v1')
 @Injectable()
 export class NewsService extends ActionDto<FormName> {
-  constructor(private readonly crossChainSwapService: CrossChainSwapService) {
+  constructor(
+    private readonly novaswapService: NovaswapService,
+    private readonly tgbotService: TgbotService,
+  ) {
     super();
   }
   async getMetadata() {
@@ -22,6 +27,13 @@ export class NewsService extends ActionDto<FormName> {
   async generateTransaction(
     data: GenerateTransactionParams<FormName>,
   ): Promise<TransactionInfo[]> {
-    return await this.crossChainSwapService.generateTransaction(data);
+    return await this.novaswapService.generateTransaction(data);
+  }
+
+  public async onMagicLinkCreated(
+    data: GenerateTransactionParams<FormName>,
+  ): Promise<TransactionInfo[]> {
+    await this.tgbotService.sendNews(data.additionalData.code!);
+    return [];
   }
 }

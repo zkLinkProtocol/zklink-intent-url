@@ -5,18 +5,20 @@ import { DistributionModeValue, FormName, GasTokenValue } from './type';
 
 export const genMetadata = (configValue: Value): ActionMetadata<FormName> => ({
   title: 'Red Packet 🧧',
-  description: 'This action is designed to distribute token rewards',
+  description: '<div>This action is designed to distribute token rewards</div>',
   networks: [
     {
-      name: 'zkLink Nova',
+      name: configValue.networkName,
       chainId: configValue.chainId.toString(),
     },
   ],
   author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
   magicLinkMetadata: {
+    title: 'Red Packet 🧧',
     description: 'Best wishes!',
   },
   intent: {
+    binding: true,
     components: [
       {
         name: 'distributionMode',
@@ -39,9 +41,9 @@ export const genMetadata = (configValue: Value): ActionMetadata<FormName> => ({
       {
         name: 'totalDistributionAmount',
         label: 'Total Token Amount',
-        desc: 'The total number of tokens to be distributed',
+        desc: 'The total amount of tokens to be distributed',
         type: 'input',
-        regex: '^[1-9]\\d*$',
+        regex: '^\\d+\\.?\\d*$|^\\d*\\.\\d+$',
         regexDesc: 'Int',
       },
       {
@@ -63,18 +65,18 @@ export const genMetadata = (configValue: Value): ActionMetadata<FormName> => ({
       },
       {
         name: 'gasToken',
-        label: 'Gas Token',
+        label: 'Who should pay for the claiming gas fee',
         desc: 'Gas can be deducted from distributed amount, allowing recipient to grab red envelope with 0 gas',
         type: 'searchSelect',
         regex: '^[a-zA-Z0-9]+$',
         regexDesc: 'String',
         options: [
           {
-            label: 'ETH(Pay By Recipient)',
+            label: 'Recipient',
             value: GasTokenValue.Eth,
           },
           {
-            label: 'Distributed Token(No Gas)',
+            label: 'Red Packet Creator (Requires additional tokens)',
             value: GasTokenValue.DistributedToken,
           },
         ],

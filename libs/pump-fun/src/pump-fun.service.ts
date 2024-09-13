@@ -38,7 +38,7 @@ export class PumpFunService extends ActionDto<FormName> {
   ): Promise<TransactionInfo[]> {
     const { additionalData, formData } = data;
     const stringSalt = additionalData.code;
-    const creator = '0x';
+    const creator = '0x330bd48140cf1796e3795a6b374a673d7a4461d0';
     const tokenAddress = await this.pumpFunFactory.getCreate2Address(
       formData.tokenName,
       formData.tokenSymbol,
@@ -79,7 +79,6 @@ export class PumpFunService extends ActionDto<FormName> {
 
     return [
       {
-        //TODO
         chainId: 810181,
         to: PUMP_FUN_FACTORY_ADDRESS,
         value: ethers.parseEther(formData.creatorInitialBuyAmount).toString(),
