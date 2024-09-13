@@ -1,6 +1,9 @@
 
 # zkLink Nova Actions & MagicLink SDK
 
+> [!NOTE]  
+> Actions & MagicLink is in beta and undergoing audit. Please [Contact Us](https://t.me/laniakeiaa) if you plan on going live with it.
+
 Comprehensive Guide for Creating, Registering, and Utilizing Actions with MagicLinks in the zkLink Nova Network
 
 ## Overview
