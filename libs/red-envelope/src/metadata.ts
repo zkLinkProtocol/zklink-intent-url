@@ -10,10 +10,8 @@ export const genMetadata = (configValue: Value): ActionMetadata<FormName> => ({
     {
       name: configValue.networkName,
       chainId: configValue.chainId.toString(),
-      contractAddress: '',
     },
   ],
-  dApp: { name: 'Red Packet 🧧' },
   author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
   magicLinkMetadata: {
     title: 'Red Packet 🧧',
@@ -45,7 +43,7 @@ export const genMetadata = (configValue: Value): ActionMetadata<FormName> => ({
         label: 'Total Token Amount',
         desc: 'The total amount of tokens to be distributed',
         type: 'input',
-        regex: '^[1-9]\\d*$',
+        regex: '^\\d+\\.?\\d*$|^\\d*\\.\\d+$',
         regexDesc: 'Int',
       },
       {

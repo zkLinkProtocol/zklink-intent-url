@@ -78,7 +78,7 @@ export class SplitBillService extends ActionDto<FormName> {
     return [tx];
   }
 
-  public async getRealTimeContent(
+  public async reloadAdvancedInfo(
     data: BasicAdditionalParams,
   ): Promise<{ title: string; content: string }> {
     const { code } = data;

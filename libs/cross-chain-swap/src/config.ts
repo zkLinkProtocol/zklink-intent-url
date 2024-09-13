@@ -26,15 +26,12 @@ export const METADATA: ActionMetadata<FormName> = {
   title: 'Cross Chain Swap',
   description:
     '<div>Perform cross-chain token swaps seamlessly across multiple networks</div>',
-  logo: 'https://placehold.co/40x40',
   networks: [
     {
       name: 'Arbitrum',
       chainId: '42161',
-      contractAddress: '0x',
     },
   ],
-  dApp: { name: 'NovaSwap' },
   author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
   magicLinkMetadata: {},
   intent: {

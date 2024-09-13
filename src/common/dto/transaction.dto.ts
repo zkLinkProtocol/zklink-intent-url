@@ -20,17 +20,17 @@ export class TransactionInfo {
   })
   data: string;
 
-  @ApiPropertyOptional({
-    description: 'paymaster customData',
-  })
-  customData?: any;
-
   @ApiProperty({
     description:
       'Flag indicating whether the transaction should be sent on-chain',
   })
   @IsBoolean()
   shouldPublishToChain?: boolean = true;
+
+  @ApiPropertyOptional({
+    description: 'paymaster customData',
+  })
+  customData?: any;
 
   @ApiPropertyOptional({
     description: 'Token information required by the target chain',

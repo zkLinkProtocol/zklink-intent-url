@@ -47,7 +47,7 @@ export abstract class Action<T extends string = string> {
     _txHash: string,
   ): Promise<{ message: string }> {
     return {
-      message: 'Transaction Success',
+      message: '',
     };
   }
 

@@ -19,10 +19,8 @@ export const METADATA: ActionMetadata<FormName> = {
     {
       name: 'zkLink Nova',
       chainId: '810180',
-      contractAddress: SWAP_ROUTER_CONTRACT_ADDRESS,
     },
   ],
-  dApp: { name: 'Novaswap' },
   author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
   magicLinkMetadata: {
     title: 'Buy the dip!!!',

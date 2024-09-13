@@ -106,7 +106,7 @@ export class NovaSwap {
   ) {
     const { additionalData, formData } = data;
     const params = formData;
-    const amountInDecimal = await this.tokenDecimal(formData.amountIn);
+    const amountInDecimal = await this.tokenDecimal(formData.tokenInAddress);
     const amountIn = ethers.parseUnits(
       params.amountIn.toString(),
       amountInDecimal,

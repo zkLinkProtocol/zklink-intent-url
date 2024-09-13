@@ -77,7 +77,6 @@ export class ActionService implements OnApplicationBootstrap {
         description,
         networks,
         intent,
-        dApp,
         author,
         magicLinkMetadata,
       } = metadata;
@@ -89,7 +88,6 @@ export class ActionService implements OnApplicationBootstrap {
         networks,
         description,
         author,
-        dApp,
         intent,
         magicLinkMetadata,
       });

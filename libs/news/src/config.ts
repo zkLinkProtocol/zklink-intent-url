@@ -10,15 +10,12 @@ export type FormName =
 export const METADATA: ActionMetadata<FormName> = {
   title: 'Magic News',
   description: '<div>Perform news seamlessly across multiple networks</div>',
-  logo: 'https://placehold.co/40x40',
   networks: [
     {
       name: 'Arbitrum',
       chainId: '42161',
-      contractAddress: '0x',
     },
   ],
-  dApp: { name: 'Magic News' },
   author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
   magicLinkMetadata: {},
   intent: {

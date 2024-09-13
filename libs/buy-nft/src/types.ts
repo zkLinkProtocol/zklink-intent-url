@@ -1,1 +1,1 @@
-export type FormName = 'queryType' | 'queryValue';
+export type FormName = 'queryType' | 'queryValue' | 'quantity';

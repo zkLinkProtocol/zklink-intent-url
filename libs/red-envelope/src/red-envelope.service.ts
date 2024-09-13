@@ -18,6 +18,7 @@ import {
 } from 'ethers';
 import {
   Action as ActionDto,
+  BasicAdditionalParams,
   GenerateFormParams,
   GenerateTransactionParams,
   TransactionInfo,
@@ -196,7 +197,7 @@ export class RedEnvelopeService extends ActionDto<FormName> {
       .multipliedBy(amountOfRedEnvelopes);
 
     const payForGas = isGasfree
-      ? await this.getQuote(distributionToken, BigInt(txCost.toString()))
+      ? 0n // await this.getQuote(distributionToken, BigInt(txCost.toString())) TODO
       : 0n;
     return payForGas;
   }
@@ -448,10 +449,9 @@ export class RedEnvelopeService extends ActionDto<FormName> {
     ];
   }
 
-  public async getRealTimeContent(data: {
-    code: string;
-    sender: string;
-  }): Promise<{ title: string; content: string }> {
+  public async reloadAdvancedInfo(
+    data: BasicAdditionalParams,
+  ): Promise<{ title: string; content: string }> {
     const { code } = data;
     if (!code) {
       throw new Error('missing code');
