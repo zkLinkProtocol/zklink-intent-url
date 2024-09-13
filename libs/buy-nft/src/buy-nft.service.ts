@@ -13,8 +13,7 @@ import { FormName } from './types';
 @RegistryPlug('buy-nft', 'v1')
 @Injectable()
 export class BuyNftService extends ActionDto<FormName> {
-  nftName = '';
-  nftHtmlInfo = '';
+  nftHtmlInfo: string[] = [];
 
   constructor() {
     super();
@@ -32,41 +31,55 @@ export class BuyNftService extends ActionDto<FormName> {
       throw new Error('Missing account!');
     }
     const MAGIC_EDEN_API = apiConfig[additionalData.chainId];
-    const queryParams =
-      formData.queryType == 'contract'
-        ? `id=${formData.queryValue}`
-        : `slug=${encodeURIComponent(formData.queryValue.substring(formData.queryValue.lastIndexOf('/') + 1))}`;
+    let collection = formData.queryValue;
+    if (formData.queryType == 'link') {
+      const queryParams = `slug=${encodeURIComponent(formData.queryValue.substring(formData.queryValue.lastIndexOf('/') + 1))}`;
+      const queryResp = await fetch(
+        `${MAGIC_EDEN_API}collections/v7?${queryParams}&limit=1`,
+        {
+          method: 'get',
+        },
+      );
+      const nftInfo = (await queryResp.json()).collections;
+      if (nftInfo.length == 0) {
+        throw new Error('NFT Not Found');
+      }
+      collection = nftInfo[0]['id'];
+    }
+
+    const quantity = Number(formData.quantity);
     const queryResp = await fetch(
-      `${MAGIC_EDEN_API}collections/v7?${queryParams}&limit=1`,
+      `${MAGIC_EDEN_API}tokens/v6?collection=${collection}&limit=${quantity}`,
       {
         method: 'get',
       },
     );
-    const nftInfo = (await queryResp.json()).collections;
-    if (nftInfo.length == 0) {
-      throw new Error('NFT Not Found');
+    const nftInfo = (await queryResp.json()).tokens;
+    if (nftInfo.length < quantity) {
+      throw new Error("Don't have enough items for sale at the moment");
     }
-    const floorOrderId = nftInfo[0]['floorAsk']['id'];
-    if (!floorOrderId) {
-      throw new Error('No sale order for given NFT');
-    }
-
-    const floorPrice = nftInfo[0]['floorAsk']['price']['amount']['decimal'];
-    const priceSymbol = nftInfo[0]['floorAsk']['price']['currency']['symbol'];
-    const floorToken = nftInfo[0]['floorAsk']['token'];
-    this.nftName = `${floorToken['name']}`;
-    this.nftHtmlInfo = `<img src="${floorToken['image']}"><p>Price: ${floorPrice} ${priceSymbol}</p>`;
+    const floorOrderIds = nftInfo.map((info: any) => {
+      const floorAsk = info['market']['floorAsk'];
+      const floorOrderId = floorAsk['id'];
+      if (!floorOrderId) {
+        throw new Error('No sale order for given NFT');
+      }
+      const floorPrice = floorAsk['price']['amount']['decimal'];
+      const priceSymbol = floorAsk['price']['currency']['symbol'];
+      this.nftHtmlInfo.push(
+        `<p>${info['token']['name']}<br>Price: ${floorPrice} ${priceSymbol}</p><img src="${info['token']['imageSmall']}">`,
+      );
+      return {
+        orderId: floorOrderId,
+      };
+    });
 
     const txs: TransactionInfo[] = [];
     const buyResp = await fetch(`${MAGIC_EDEN_API}execute/buy/v7`, {
       method: 'post',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
-        items: [
-          {
-            orderId: floorOrderId,
-          },
-        ],
+        items: floorOrderIds,
         taker: additionalData.account,
         skipBalanceCheck: true,
       }),
@@ -93,8 +106,8 @@ export class BuyNftService extends ActionDto<FormName> {
     sender: string;
   }): Promise<{ title: string; content: string }> {
     return {
-      title: this.nftName,
-      content: this.nftHtmlInfo,
+      title: 'NFT Info',
+      content: this.nftHtmlInfo.join('<br>'),
     };
   }
 }
