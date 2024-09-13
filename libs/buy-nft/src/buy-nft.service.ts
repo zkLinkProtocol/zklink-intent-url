@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import fetch from 'node-fetch';
 import {
   Action as ActionDto,
+  BasicAdditionalParams,
   GenerateTransactionParams,
   TransactionInfo,
 } from 'src/common/dto';
@@ -88,10 +89,9 @@ export class BuyNftService extends ActionDto<FormName> {
     return txs;
   }
 
-  public async reloadAdvancedInfo(data: {
-    code: string;
-    sender: string;
-  }): Promise<{ title: string; content: string }> {
+  public async reloadAdvancedInfo(
+    data: BasicAdditionalParams,
+  ): Promise<{ title: string; content: string }> {
     return {
       title: this.nftName,
       content: this.nftHtmlInfo,

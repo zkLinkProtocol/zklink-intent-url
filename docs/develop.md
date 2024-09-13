@@ -373,7 +373,7 @@ After the above steps, you have created a simple action. The final, we need to r
 
 We provide the `RegistryPlug` decorator, which requires two input parameters: args[0] is the action ID, and args[1] is the version number.
 
-The **action ID** should follow the snake case naming convention and match the name used in the command `npx nest g library my-action`, which is the name of your Action folder. This ensures that it is unique and does not conflict with other actions. This ID will be used as a runtime index throughout the system, guiding the runtime code to load and execute the Action.
+The **action ID** should follow the snake case naming convention and match the name used in the command `npx nest g library my-action`, which is the name of your Action folder. This ensures that it is unique and does not conflict with other actions. This ID will be used as a runtime index throughout the system, guiding the runtime code to load and execute the Action. **Keep the naming consistent and do not allow further modifications.**
 
 The **version** represents the version of your action, and the version number should start from `v1`. Each time you upgrade the action, increment the version by 1. For example, the initial submission of the action should be version `v1`. If you upgrade the action multiple times in the future, the version number should be updated to **v2**, **v3**, **v4**, and so on. For upgrading an action, please refer to the [Action Upgrade](#1-how-do-i-update-or-upgrade-an-action) section.
 
@@ -415,18 +415,48 @@ export class RegistryModule {}
 
 Our framework will register your Action implementation into the routing system. When a request arrives, it will locate your Action implementation based on your ID, pass in the parameters, and execute your business logic, ultimately generating a transaction for the user to sign and send.
 
-### 3. Advanced Function
+### 3. Advanced Methods
 
-- The `validateIntentParams` method allows developers to create more flexible validation rules. It takes `ActionTransactionParams` as input and returns a string containing error messages. When the frontend creates an magicLink, the parameters passed can be validated against custom rules using this hook function. If an error message is returned, the frontend will display it.
+- The `validateFormData` method allows developers to create more flexible validation rules. It takes `validateFormData` as input and returns a string containing error messages. When the frontend creates an magicLink, the parameters passed can be validated against custom rules using this hook function. If an error message is returned, the frontend will display it.
+
+  ```ts
+  // amountIn and recipient are parameters input by the intents component
+  // pseudocode below: 
+  async validateFormData(formData: GenerateFormParams<FormData>): Promise<ErrorMessage> {
+    const { amountIn, recipient } = formData
+    if(Number(amountIn) > 20 && restrictList.includes(recipient)) {
+      return 'Restrict-listed address cannot receive donations greater than 20'
+    }
+  }
+  ```
+  ![alt text](./img/validate-form-data.png)
 - The `reloadAdvancedInfo` optional function processes real-time contract information that should be displayed to users through the magicLink. 
 
   For example, for a red packet contract, it might show something like _"There are 20 red packets in total, and 3 red packets have been claimed."_  Developers can use this method to return a title and an HTML string based on the contract's stored information, making it easier for users to refresh and view the information. 
 
-  After the developer defines the title and rich text content, the display in the magicLink will be similar to the part highlighted in red in the image ![](./img/real-time-example.png)
+  After the developer defines the title and rich text content, the display in the magicLink will be similar to the part highlighted in red in the image
+  
+   ```ts
+  // You can obtain status information from the contract or through other APIs and return the results
+  // pseudocode below: 
+  async reloadAdvancedInfo(data: BasicAdditionalParams): Promise<{ title: string; content: string }> {
+    const price = await fetchApi('price')
+    const marketCap = await fetchApi('marketCap')
+    return {
+      title: 'Token Info'
+      content: `<p>price: ${price}<p><p>Market Cap: ${marketCap}</p>`
+    }
+  }
+  ```
+  ![](./img/real-time-example.png)
 
-- Sometimes, after constructing the parameters and creating the magicLink, it may not become active immediately and will remain in an inactive state. You will need to initiate one or more transactions to the smart contract before you can create an active magicLink. For example, with a red packet contract, you need to deposit a red packet asset into the contract before the magicLink can become active. The `onMagicLinkCreated` provides this capability. It returns `TransactionInfo[]`. The frontend will initiate the on-chain transaction based on this information.
+- **MagicLink binds to on-chain transactions**. After creating the magicLink, it may not become active immediately and you need to initiate one or more transactions to the smart contract before you can create an active magicLink. For example, with a red packet contract, you need to deposit a red packet asset into the contract before the magicLink can become active. This way, users can claim the red envelope created through your Magic Link.
 
+  The `onMagicLinkCreated` provides this capability. It returns `TransactionInfo[]`. Its signature is the same as `generateTransaction`, but it is an on-chain transaction executed immediately after the Magic Link is created.
 
+  ![](./img/on-magic-link-created.png)
+
+  In the image above, we can see that after creating an inactive Magic Link, the transaction returned by `onMagicLinkCreated` is constructed and sent as an on-chain transaction.
 
 ### 4. Switch `env`
 We offer two environment variables, `dev` and `prod`, that allow you to configure contract addresses or settings for both environments. The env variable for the **dev** branch is set to `dev`, while the env variable for the **main** branch is set to `prod`. In the **dev** branch, you can test with the test-network's magicLink, and once the code is merged into the main branch, it will read the mainnet network's contract configurations.
@@ -463,31 +493,13 @@ export class RedEnvelopeService extends ActionDto {
 This setup ensures that your Actions uses the correct configuration based on the environment it is running in.
 
 
-### 5. Register
-
-
-### 6. Submit
+### 5. Submit
 
 After implementing your action, you need to submit a PR to the repository. We will review your code and consider whether to accept it.
 
 ## Example
 
 The [buy-me-a-coffee](../libs/buy-me-a-coffee/) and [`novaswap`](../libs/novaswap/) Actions are good examples for you to learn how to implement an action.
-
-## Advanced Usage
-
-Our action definition provides two more optional methods for advanced usage.
-
-```ts
-abstract class Action {
-    // Validate the parameters with user custom logic
-    validateIntentParams(_: ActionTransactionParams): Promise<string>;
-    // Process something after the action URL is created
-    onMagicLinkCreated?(params:GenerateTransactionData): any;
-}
-```
-
-Most of the time, you don't need to implement these methods. But if you have some special requirements, you can override them. See the [red-envelope](../libs/red-envelope/) Action for an example.
 
 ## Tips and Tricks
 
@@ -530,7 +542,12 @@ When you encounter issues, you can observe the logs in the command line console 
 
 ## FAQs
 
-### 1. How do I update or upgrade an action?
+### 1. How to set the logo and main image for the Magic Link.
+
+You have two ways to set it. One is to set it directly in the metadata as literals, under `logo` and `magicLinkMetadata.gallery` for the logo and the main image of the Magic Link, respectively. The other way is to upload images with the same action id in the 'assets' directory at the root."
+
+
+### 2. How do I update or upgrade an action?
 
 Whether you update or upgrade your action depends on which part of the logic you have modified. It is crucial to consider "**whether the changes impact the creation of on-chain transactions**".
 
@@ -598,7 +615,9 @@ Test Thoroughly: Ensure all changes are thoroughly tested, including unit, integ
     
 2. Submit a Pull Request (PR): Create a PR with a detailed description of the changes and the reasons for the update.
 3. Code Review: The zkLink team will review your PR for quality, security, and compliance with standards.
-4. Approval and Registration: Once approved, your updated action will be registered and available for use.
+4. Approval and Registration: Once approved, your updated action will be registered and available for use. <font color="red">The action-id cannot be changed arbitrarily; it will remain fixed and unchanged</font>
+
+
 
 ### 2. What if my action requires external data?
 

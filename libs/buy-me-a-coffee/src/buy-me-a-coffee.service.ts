@@ -12,6 +12,7 @@ import {
 } from 'ethers';
 import {
   Action as ActionDto,
+  BasicAdditionalParams,
   GenerateTransactionParams,
   TransactionInfo,
   isOptionComponentDto,
@@ -77,11 +78,13 @@ export class BuyMeACoffeeService extends ActionDto<FormName> {
     return [tx];
   }
 
-  public async reloadAdvancedInfo(data: {
-    code: string;
-    sender: string;
-  }): Promise<{ title: string; content: string }> {
+  public async reloadAdvancedInfo(
+    data: BasicAdditionalParams,
+  ): Promise<{ title: string; content: string }> {
     const { code } = data;
+    if (!code) {
+      throw new Error('missing code in buy me a coffee');
+    }
     const result = await this.intentionRecordService.findListByCode(code, '');
     const transferInfos: TransactionResult[] = [];
 

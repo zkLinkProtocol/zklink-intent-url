@@ -18,6 +18,7 @@ import {
 } from 'ethers';
 import {
   Action as ActionDto,
+  BasicAdditionalParams,
   GenerateFormParams,
   GenerateTransactionParams,
   TransactionInfo,
@@ -448,10 +449,9 @@ export class RedEnvelopeService extends ActionDto<FormName> {
     ];
   }
 
-  public async reloadAdvancedInfo(data: {
-    code: string;
-    sender: string;
-  }): Promise<{ title: string; content: string }> {
+  public async reloadAdvancedInfo(
+    data: BasicAdditionalParams,
+  ): Promise<{ title: string; content: string }> {
     const { code } = data;
     if (!code) {
       throw new Error('missing code');
