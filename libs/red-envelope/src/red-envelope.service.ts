@@ -448,7 +448,7 @@ export class RedEnvelopeService extends ActionDto<FormName> {
     ];
   }
 
-  public async getRealTimeContent(data: {
+  public async reloadAdvancedInfo(data: {
     code: string;
     sender: string;
   }): Promise<{ title: string; content: string }> {
