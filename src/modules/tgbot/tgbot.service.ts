@@ -44,13 +44,17 @@ export class TgbotService implements OnModuleInit {
       const chatId = callbackQuery.message.chat.id;
       const messageId = callbackQuery.message.message_id;
       const data = callbackQuery.data;
-      const [longOrShort, originLong, originShort] = data.split('_');
+      const replyMarkup = callbackQuery.message.reply_markup;
+      const [longOrShort, originLong, originShort, pollOrIntent] =
+        data.split('_');
       this.editMessageReplyMarkupPollText(
         chatId,
         messageId,
         longOrShort,
+        pollOrIntent,
         originLong,
         originShort,
+        replyMarkup,
       );
     });
   }
@@ -189,34 +193,46 @@ export class TgbotService implements OnModuleInit {
       const actions = [
         {
           text: 'Long(0)',
-          callback_data: `long_0_0`,
+          callback_data: `long_0_0_poll`,
         },
         {
           text: 'Short(0)',
-          callback_data: `short_0_0`,
+          callback_data: `short_0_0_poll`,
         },
       ];
       inlineKeyboard.push(actions);
     } else {
-      const actions = this.blinkService.magicLinkToBlinkActions(
-        postHref,
-        news.settings,
-      );
-      let lineButtons = [];
-      for (let i = 0; i < actions.length; i++) {
-        const action = actions[i];
-        lineButtons.push({
-          text: action.label,
-          url: action.href + `&startapp=${code}`,
-        });
-        if ((i + 1) % 3 === 0) {
-          inlineKeyboard.push(lineButtons);
-          lineButtons = [];
-        }
-      }
-      if (lineButtons.length > 0) {
+      const actions = [
+        {
+          text: 'Support(0)',
+          callback_data: `long_0_0_intent`,
+        },
+        {
+          text: 'Oppose(0)',
+          callback_data: `short_0_0_intent`,
+        },
+      ];
+      inlineKeyboard.push(actions);
+    }
+
+    const actions = this.blinkService.magicLinkToBlinkActions(
+      postHref,
+      news.settings,
+    );
+    let lineButtons = [];
+    for (let i = 0; i < actions.length; i++) {
+      const action = actions[i];
+      lineButtons.push({
+        text: action.label,
+        url: action.href + `&startapp=${code}`,
+      });
+      if ((i + 1) % 3 === 0) {
         inlineKeyboard.push(lineButtons);
+        lineButtons = [];
       }
+    }
+    if (lineButtons.length > 0) {
+      inlineKeyboard.push(lineButtons);
     }
     const reply_markup = {
       inline_keyboard: inlineKeyboard,
@@ -240,29 +256,44 @@ export class TgbotService implements OnModuleInit {
     chatId: string,
     messageId: string,
     longOrShort: string,
+    pollOrIntent: string,
     long: number,
     short: number,
+    replyMarkup: any,
   ) {
     if (longOrShort === 'long') {
       long++;
     } else if (longOrShort === 'short') {
       short++;
     }
+    const inlineKeyboard = replyMarkup.inline_keyboard;
+    if (pollOrIntent === 'poll') {
+      inlineKeyboard[0] = [
+        {
+          text: `Long(${long})`,
+          callback_data: `long_${long}_${short}_poll`,
+        },
+        {
+          text: `Short(${short})`,
+          callback_data: `short_${long}_${short}_poll`,
+        },
+      ];
+    } else {
+      inlineKeyboard[0] = [
+        {
+          text: `Support(${long})`,
+          callback_data: `long_${long}_${short}_intent`,
+        },
+        {
+          text: `Oppose(${short})`,
+          callback_data: `short_${long}_${short}_intent`,
+        },
+      ];
+    }
 
     try {
       const reply_markup = {
-        inline_keyboard: [
-          [
-            {
-              text: `Long(${long})`,
-              callback_data: `long_${long}_${short}`,
-            },
-            {
-              text: `Short(${short})`,
-              callback_data: `short_${long}_${short}`,
-            },
-          ],
-        ],
+        inline_keyboard: inlineKeyboard,
       };
       const res = await this.bot.editMessageReplyMarkup(reply_markup, {
         chat_id: chatId,

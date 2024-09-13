@@ -27,6 +27,7 @@ export class TgbotController extends BaseController {
     @Query('chatId') chatId: string,
     @Query('messageId') messageId: string,
     @Query('longOrShort') longOrShort: string,
+    @Query('pollOrIntent') pollOrIntent: string,
     @Query('long') long: number,
     @Query('short') short: number,
   ) {
@@ -35,8 +36,10 @@ export class TgbotController extends BaseController {
         chatId,
         messageId,
         longOrShort,
+        pollOrIntent,
         long,
         short,
+        { inline_keyboard: [[]] },
       );
       return true;
     } catch (error) {
