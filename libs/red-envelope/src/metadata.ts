@@ -45,7 +45,7 @@ export const genMetadata = (configValue: Value): ActionMetadata<FormName> => ({
         label: 'Total Token Amount',
         desc: 'The total amount of tokens to be distributed',
         type: 'input',
-        regex: '^[1-9]\\d*$',
+        regex: '^\\d+\\.?\\d*$|^\\d*\\.\\d+$',
         regexDesc: 'Int',
       },
       {
