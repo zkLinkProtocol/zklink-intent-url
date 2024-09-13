@@ -159,7 +159,6 @@ export class TgbotService implements OnModuleInit {
 *Metadata* : ${intent.metadata.replaceAll('.', '\\.')} 
 *Description* : ${intent.description}
 *Create Time* : ${date.replaceAll('-', '\\-')}
-*Participant* : 0 
 [Go to tg mini app](${miniApp}?startapp=${intent.code})              [Share to others](https://t.me/share?url=${shareUrl}&text=${intent.title})
 ✅️ *Verified zkLink official team*
 \\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\n
@@ -183,7 +182,17 @@ export class TgbotService implements OnModuleInit {
       newsType: string;
     };
     const photo = news.metadata;
-    const caption = html2md(news.description.replaceAll(/<img[^>]*>/g, ''));
+    const content = html2md(news.description.replaceAll(/<img[^>]*>/g, ''));
+    const date =
+      news.createdAt?.toISOString().split('T')[0] +
+      ` ${news.createdAt?.toISOString().split('T')[1].split('.')[0]}`;
+    const caption = `
+*Title* : \`${news.title}\`
+*Description* : ${content}
+*Create Time* : ${date.replaceAll('-', '\\-')}
+[Go to tg mini app](${miniApp}?startapp=${news.code}) 
+✅️ *_Verified zkLink official team_*
+`;
     const parse_mode: ParseMode = 'MarkdownV2';
     const postHref = `${miniApp}`;
 
@@ -267,7 +276,7 @@ export class TgbotService implements OnModuleInit {
       short++;
     }
     const inlineKeyboard = replyMarkup.inline_keyboard;
-    if (pollOrIntent === 'poll') {
+    if (pollOrIntent == 'poll') {
       inlineKeyboard[0] = [
         {
           text: `Long(${long})`,

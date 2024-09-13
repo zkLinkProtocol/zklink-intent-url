@@ -10,6 +10,7 @@ export enum CreatorStatus {
 
 @Entity()
 @Index(['address'], { unique: true })
+@Index(['tgUserId'], { unique: true })
 export class Creator extends BaseEntity {
   @PrimaryGeneratedColumn()
   public readonly id: bigint;
