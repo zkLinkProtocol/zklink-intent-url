@@ -49,6 +49,14 @@ export const metadata: ActionMetadata<FormName> = {
           '^(0x[a-fA-F0-9]{40}(:d+)?)|(https?://magiceden..+/collections/ethereum/.+)$',
         regexDesc: 'NFT Query Value',
       },
+      {
+        name: 'quantity',
+        label: 'Quantity',
+        desc: 'Quantity of NFTs to buy',
+        type: 'input',
+        regex: '^d+',
+        regexDesc: 'Quantity',
+      },
     ],
   },
 };
