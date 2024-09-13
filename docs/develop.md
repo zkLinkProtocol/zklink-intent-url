@@ -322,35 +322,98 @@ This field presets the default trigger for the Magic Link. 'field' refers to the
 
   ![](./img/preset.png)
 
+#### 2.2 generateTransaction
+Another function signature that must be implemented is `generateTransaction`, whose return signature is [`TransactionInfo[]`](../src/common/dto/transaction.dto.ts#57). When a user clicks the **0.001ETH** button on the Magic Link page, the `TransactionInfo` will be sequentially constructed into on-chain transactions and sent to the network.
+
+Next, we will implement a straightforward generateTransaction method
 
 ```ts
-type ActionTransactionParams = { [key: string]: string };
-
-abstract class Action {
-  abstract getMetadata(): Promise<ActionMetadata>;
-
-  abstract generateTransaction(
-    data: GenerateTransactionData,
-  ): Promise<TransactionInfo[]>;
-
-  async validateIntentParams(_: ActionTransactionParams): Promise<string> {
-    return Promise.resolve('');
+async generateTransaction(
+    params: ActionTransactionParams,
+): Promise<TransactionInfo[]> {
+  // Build and return your transaction
+  const tx = {
+    chainId: 810180,
+    to: params.recipient,
+    value: params.value,
+    data: '0x',
   }
-
-  async getRealTimeContent?(data: GenerateTransactionData): Promise<{
-    title: string;
-    content: string;
-  }>;
-
-  async onMagicLinkCreated?(
-    data: GenerateTransactionData,
-  ): Promise<TransactionInfo[]>;
+  return [tx];
 }
 ```
+As you can see, the simplest version of `TransactionInfo` only needs to define four fields related to the transaction. There are also three unused fields here, which are useful in certain scenarios and require further introduction to you.
 
-- The `getMetadata` method returns metadata (`ActionMetadata`) that describes the action for display on the frontend. 
-- validateIntentParams
-- The `generateTransaction` method is responsible for constructing transactions. When a user confirms the action in magicLink page, this method executes in the background to construct and return the transaction, which will subsequently be sent to the blockchain.
+- _shouldPublishToChain_: TODO
+- _customData_: TODO
+- _requiredTokenAmount_: Magic Link has the capability to allow developers to implement **Nova cross-chain** functionality with simple configurations. For example, the aforementioned transaction occurs on the Arbitrum chain, but if you want to allow users to attempt a cross-chain transfer of a corresponding amount of tokens from the Nova network when they do not have enough tokens on Arbitrum, you only need to configure this parameter, and it will try to execute the corresponding cross-chain request.
+  ```ts
+  async generateTransaction(
+      params: ActionTransactionParams,
+  ): Promise<TransactionInfo[]> {
+    // Build and return your transaction
+    const tx = {
+      chainId: 42161, // arbitrum chain ID
+      to: params.recipient,
+      value: params.value,
+      data: '0x',
+      requiredTokenAmount: [{
+        token: params.token,
+        amount: params.value,
+      }]
+    }
+    return [tx];
+  }
+  ```
+#### 2.3 Registry an action
+
+After the above steps, you have created a simple action. The final, we need to register it in our registry so that the system can properly run this action's functionality.
+
+We provide the `RegistryPlug` decorator, which requires two input parameters: args[0] is the action ID, and args[1] is the version number.
+
+The **action ID** should follow the snake case naming convention and match the name used in the command `npx nest g library my-action`, which is the name of your Action folder. This ensures that it is unique and does not conflict with other actions. This ID will be used as a runtime index throughout the system, guiding the runtime code to load and execute the Action.
+
+The **version** represents the version of your action, and the version number should start from `v1`. Each time you upgrade the action, increment the version by 1. For example, the initial submission of the action should be version `v1`. If you upgrade the action multiple times in the future, the version number should be updated to **v2**, **v3**, **v4**, and so on. For upgrading an action, please refer to the [Action Upgrade](#1-how-do-i-update-or-upgrade-an-action) section.
+
+```typescript
+// my-action.module.ts
+import { Module } from '@nestjs/common';
+
+import { MyActionService } from './my-action.service';
+
+@Module({
+  providers: [MyActionService],
+  exports: [MyActionService],
+})
+export class MyActionModule {}
+
+
+// my-action.service.ts
+@RegistryPlug('my-action', 'v1')
+@Injectable()
+class MyActionService extends ActionDto<FormName> {
+  ...
+}
+```
+In the `libs` folder, we have defined the `RegistryPlug` decorator. Additionally, we have defined the `Registry Module`. This module acts as a registry for all the actions developed by developers. It uses NestJS's IoC to inject all the actions into our application, making them effective.
+
+The application will scan all action classes decorated with **RegistryPlug** in the **registry module**. It will register the action IDs into the application and use the highest version number for each ID as the currently available action for the intent creator. Meanwhile, for *already* created magic links, they will continue to use their originally corresponding version number.
+
+```typescript
+@Module({
+  imports: [
+    MyActionModule,
+    ... // other actions
+  ]
+  providers: [RegistryService],
+  exports: [RegistryService],
+})
+export class RegistryModule {}
+```
+
+Our framework will register your Action implementation into the routing system. When a request arrives, it will locate your Action implementation based on your ID, pass in the parameters, and execute your business logic, ultimately generating a transaction for the user to sign and send.
+
+### 3. Advanced Function
+
 - The `validateIntentParams` method allows developers to create more flexible validation rules. It takes `ActionTransactionParams` as input and returns a string containing error messages. When the frontend creates an magicLink, the parameters passed can be validated against custom rules using this hook function. If an error message is returned, the frontend will display it.
 - The `getRealTimeContent` optional function processes real-time contract information that should be displayed to users through the magicLink. 
 
@@ -360,108 +423,7 @@ abstract class Action {
 
 - Sometimes, after constructing the parameters and creating the magicLink, it may not become active immediately and will remain in an inactive state. You will need to initiate one or more transactions to the smart contract before you can create an active magicLink. For example, with a red packet contract, you need to deposit a red packet asset into the contract before the magicLink can become active. The `onMagicLinkCreated` provides this capability. It returns `TransactionInfo[]`. The frontend will initiate the on-chain transaction based on this information.
 
-### 3.Implement
 
-To implement this functionality, you must extend the `Action` abstract class based on your specific business logic and use the `RegistryPlug` decorator on it. 
-
-Here's an example code, and we will dive into it:
-
-```ts
-@RegistryPlug('my-action', 'v1')
-@Injectable()
-class MyActionService extends Action {
-  async getMetadata(): Promise<ActionMetadata> {
-    return {
-      title: 'An Action Example',
-      description: 'This is a simple action',
-
-      description: 'Support the works you love',
-      networks: [
-        {
-          name: 'zkLink Nova',
-          chainId: '810180',,
-        },
-      ],
-      dApp: { name: 'An Action Example' },
-      intent: {
-        components: [
-          {
-            name: 'value',
-            label: 'Amount',
-            desc: 'The amount to sponsor',
-            type: 'input',
-            regex: '^[0-9]+$',
-            regexDesc: 'Must be a number',
-          },
-         {
-            name: 'recipient',
-            label: 'Recipient',
-            desc: 'The address that is sponsored',
-            type: 'input',
-            regex: '^0x[a-fA-F0-9]{40}$',
-            regexDesc: 'Address',
-          },
-        ]
-      },
-    };
-  }
-
-  async generateTransaction(
-    params: ActionTransactionParams,
-  ): Promise<TransactionInfo[]> {
-    // Build and return your transaction
-    const tx = {
-      chainId: 810180,
-      to: params.recipient,
-      value: params.value,
-      data: '0x',
-     
-      // tell the render whether to send the transaction
-      shouldPublishToChain: true
-    }
-    return {
-      txs: [tx],
-      tokens: [],
-    };
-  }
-}
-```
-`networks`: `networks` is an array that represents the networks on which the magicLink can initiate transactions. If the length is greater than 1, it means that the magicLink can initiate transactions on multiple chains.
-
-`intent`: it must be noticeable that the `intent` field describes the parameters that the **intent creator** or **user** can set in magicLink, which will be displayed on the frontend.
-
-The filed `components` is an array of objects that describe the parameters that the user can set. There are some fields to pay attention to：
-
-- `type`: describes the type that the frontend will render. It can be `input` (user inputs), `searchSelect` (drop-down box), `searchSelectErc20` (drop-down box for ERC20 token), `text` (action creator inputs). If you choose `searchSelect` or `searchSelectErc20`, you need to provide available value in `options` field like this:
-  ```ts
-  components: [
-    {
-      name: "token",
-      options: [
-        {
-          label: 'WETH',
-          value: '0x8280a4e7D5B3B658ec4580d3Bc30f5e50454F169',
-          chainId: '1',
-        },
-        {
-          label: 'USDC',
-          value: '0x1a1A3b2ff016332e866787B311fcB63928464509',
-          chainId: '1',
-        },
-      ]
-    }
-
-  ]
-  ```
-When you allow magicLink can initiate transactions on multiple chains, the `option` here should include `chainId` to indicate that it is available for selection only on the corresponding `chainId`.
-
-- `regex`: a regular expression that the frontend will use to validate the input.
-
-[`TransactionInfo[]`](../src/common/dto/transaction.dto.ts#57) is a type that describes the transaction that will be sent to the blockchain. It contains the
-fields `txs` and `tokens`.
-
-- The `txs` field is an array of transactions that will be sent to the blockchain. The field `chainId`, `to`, `value`, `data` are standard Ethereum transaction fields. It has an additional fields: `shouldPublishToChain`. The `shouldPublishToChain` field tells the frontend whether to send the transaction.
-- The `tokens` field is a list of tokens that should be prepared in target. You can think of this field as describing the prerequisites for initiating a transaction. The frontend will automatically search and perform cross-chain transactions to meet the prerequisites on your target chain. Then, it starts to send the transaction.
 
 ### 4. Switch `env`
 We offer two environment variables, `dev` and `prod`, that allow you to configure contract addresses or settings for both environments. The env variable for the **dev** branch is set to `dev`, while the env variable for the **main** branch is set to `prod`. In the **dev** branch, you can test with the test-network's magicLink, and once the code is merged into the main branch, it will read the mainnet network's contract configurations.
@@ -499,38 +461,7 @@ This setup ensures that your Actions uses the correct configuration based on the
 
 
 ### 5. Register
-The final step is to register **Action** on our platform. We provide the `RegistryPlug` decorator, which requires two input parameters: args[0] is the action ID, and args[1] is the version number.
 
-The action ID should follow the snake case naming convention and match the name used in the command `npx nest g library my-action`, which is the name of your Action folder. This ensures that it is unique and does not conflict with other actions. This ID will be used as a runtime index throughout the system, guiding the runtime code to load and execute the Action.
-
-The version represents the version of your action, and the version number should start from `v1`. Each time you upgrade the action, increment the version by 1. For example, the initial submission of the action should be version `v1`. If you upgrade the action multiple times in the future, the version number should be updated to **v2**, **v3**, **v4**, and so on. For upgrading an action, please refer to the [Action Upgrade](#1-how-do-i-update-or-upgrade-an-action) section.
-
-```typescript
-@RegistryPlug('my-action', 'v1')
-@Injectable()
-class MyActionService extends Action {
-  ...
-}
-```
-In the `libs` folder, we have defined the `RegistryPlug` decorator. Additionally, we have defined the `Registry Module`. This module acts as a registry for all the actions developed by developers. It uses NestJS's IoC to inject all the actions into our application, making them effective.
-
-The application will scan all action classes decorated with **RegistryPlug** in the **registry module**. It will register the action IDs into the application and use the highest version number for each ID as the currently available action for the intent creator. Meanwhile, for *already* created magic links, they will continue to use their originally corresponding version number.
-
-```typescript
-@Module({
-  providers: [
-    MyActionService,
-    ... // other actions
-  ],
-  exports: [
-    MyActionService
-    ... // other actions
-  ],
-})
-export class RegistryModule {}
-```
-
-Our framework will register your Action implementation into the routing system. When a request arrives, it will locate your Action implementation based on your ID, pass in the parameters, and execute your business logic, ultimately generating a transaction for the user to sign and send.
 
 ### 6. Submit
 
