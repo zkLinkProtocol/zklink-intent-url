@@ -10,6 +10,7 @@ import {
 import { TgbotService } from './../../../src/modules/tgbot/tgbot.service';
 import { FormName, METADATA } from './config';
 
+//magic news
 @RegistryPlug('news', 'v1')
 @Injectable()
 export class NewsService extends ActionDto<FormName> {
