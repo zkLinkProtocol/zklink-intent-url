@@ -66,7 +66,7 @@ export const METADATA: ActionMetadata<FormName> = {
         type: 'input',
         regex: '^[0-9]+$',
         regexDesc: 'Must be a number',
-        defaultValue: '1000000',
+        defaultValue: '1',
       },
     ],
   },
