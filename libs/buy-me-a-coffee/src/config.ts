@@ -10,25 +10,20 @@ export const metadata: ActionMetadata<FormName> = {
     {
       name: 'Arbitrum',
       chainId: '42161',
-      contractAddress: '0x',
     },
     {
       name: 'zkLink Nova',
       chainId: '810180',
-      contractAddress: '0x',
     },
     {
       name: 'zkLink Nova sepolia',
       chainId: '810181',
-      contractAddress: '0x',
     },
     {
       name: 'zkLink dev',
       chainId: '270',
-      contractAddress: '0x',
     },
   ],
-  dApp: { name: 'Buy me a coffee' },
   author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
   magicLinkMetadata: {
     title: 'Buy me a coffee ☕',

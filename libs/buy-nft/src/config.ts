@@ -9,7 +9,6 @@ export const metadata: ActionMetadata<FormName> = {
     {
       name: 'Ethereum',
       chainId: '1',
-      contractAddress: '0x',
     },
     // {
     //   name: 'Sepolia',
@@ -17,7 +16,6 @@ export const metadata: ActionMetadata<FormName> = {
     //   contractAddress: '0x',
     // },
   ],
-  dApp: { name: 'Buy NFT' },
   author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
   magicLinkMetadata: {
     description: '',
