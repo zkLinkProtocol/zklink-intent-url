@@ -30,9 +30,6 @@ export abstract class Action extends BaseEntity {
   @Column({ type: 'jsonb' })
   public readonly author: AuthorDto;
 
-  @Column({ type: 'jsonb', name: 'dApp' })
-  public readonly dApp: DAppDto;
-
   @Column({ type: 'jsonb', default: {} })
   public readonly magicLinkMetadata: MagicLinkMetadataDto;
 
