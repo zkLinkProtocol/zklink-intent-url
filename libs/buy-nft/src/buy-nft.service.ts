@@ -88,7 +88,7 @@ export class BuyNftService extends ActionDto<FormName> {
     return txs;
   }
 
-  public async getRealTimeContent(data: {
+  public async reloadAdvancedInfo(data: {
     code: string;
     sender: string;
   }): Promise<{ title: string; content: string }> {

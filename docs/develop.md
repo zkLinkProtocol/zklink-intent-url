@@ -90,7 +90,7 @@ abstract class Action {
     return Promise.resolve('');
   }
 
-  async getRealTimeContent?(data: GenerateTransactionData): Promise<{
+  async reloadAdvancedInfo?(data: GenerateTransactionData): Promise<{
     title: string;
     content: string;
   }>;
@@ -105,7 +105,7 @@ abstract class Action {
 - validateIntentParams
 - The `generateTransaction` method is responsible for constructing transactions. When a user confirms the action in magicLink page, this method executes in the background to construct and return the transaction, which will subsequently be sent to the blockchain.
 - The `validateIntentParams` method allows developers to create more flexible validation rules. It takes `ActionTransactionParams` as input and returns a string containing error messages. When the frontend creates an magicLink, the parameters passed can be validated against custom rules using this hook function. If an error message is returned, the frontend will display it.
-- The `getRealTimeContent` optional function processes real-time contract information that should be displayed to users through the magicLink. 
+- The `reloadAdvancedInfo` optional function processes real-time contract information that should be displayed to users through the magicLink. 
 
   For example, for a red packet contract, it might show something like _"There are 20 red packets in total, and 3 red packets have been claimed."_  Developers can use this method to return a title and an HTML string based on the contract's stored information, making it easier for users to refresh and view the information. 
 
