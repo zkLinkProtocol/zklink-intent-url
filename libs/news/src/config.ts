@@ -8,7 +8,7 @@ export type FormName =
   | 'deadlineDurationInSec';
 
 export const METADATA: ActionMetadata<FormName> = {
-  title: 'News',
+  title: 'Magic News',
   description: '<div>Perform news seamlessly across multiple networks</div>',
   logo: 'https://placehold.co/40x40',
   networks: [
@@ -18,7 +18,7 @@ export const METADATA: ActionMetadata<FormName> = {
       contractAddress: '0x',
     },
   ],
-  dApp: { name: 'News' },
+  dApp: { name: 'Magic News' },
   author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
   magicLinkMetadata: {},
   intent: {
