@@ -196,7 +196,7 @@ export class RedEnvelopeService extends ActionDto<FormName> {
       .multipliedBy(amountOfRedEnvelopes);
 
     const payForGas = isGasfree
-      ? await this.getQuote(distributionToken, BigInt(txCost.toString()))
+      ? 0n // await this.getQuote(distributionToken, BigInt(txCost.toString())) TODO
       : 0n;
     return payForGas;
   }

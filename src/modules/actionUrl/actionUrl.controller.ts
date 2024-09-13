@@ -75,6 +75,7 @@ export class ActionUrlController extends BaseController {
     const response = {
       code: result.code,
       actionAuthor: result.action.author,
+      actionId: result.action.id,
       title: result.title,
       description: result.description,
       metadata: result.metadata,
