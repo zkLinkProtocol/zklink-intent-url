@@ -8,6 +8,7 @@ import {
   dataSlice,
   ethers,
   formatEther,
+  formatUnits,
   getAddress,
   getBigInt,
   id,
@@ -381,18 +382,20 @@ export class RedEnvelopeService extends ActionDto<FormName> {
       if (!receipt) {
         throw new Error('wrong transaction hash');
       }
-      const log = receipt.logs.find(async (log) => {
+      const log = receipt.logs.find((log) => {
         return log.topics[0] === eventTopic;
       });
       if (!log) {
         throw new Error('parse log error');
       }
       const event = iface.parseLog(log);
-      const { amount } = event?.args ?? { amount: 0 };
+      const { amount } = event?.args ?? { amount: 0n };
       const decimals = await this.getDecimals(distributionToken);
       const symbol = this.getTokenNameByAddress(distributionToken);
-      const claimedAmount = parseUnits(amount, decimals);
-      return { message: `claim ${symbol} ${claimedAmount}!` };
+      const claimedAmount = formatUnits(amount.toString(), decimals);
+      return {
+        message: `You have received ${claimedAmount} ${symbol} in red packet amount!`,
+      };
     } catch (error) {
       throw new Error(`Failed to fetch transaction receipt: ${error.message}`);
     }
