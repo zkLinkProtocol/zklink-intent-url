@@ -281,13 +281,18 @@ The left side of this image is the Magic Link creation area, and the right side 
 
 The metadata defined above will be reflected in the corresponding UI controls on the frontend and the highlighted fields correspond to the metadata object literals you defined.
 
-![UI](./img/create-action.png)
+<div align="center">
+ <img src="./img/create-action.png" width="500">
+</div>
+
 
 I will provide further explanations for some fields that need clarification.
 
 - *networks*: It is an array, indicating which network the target chain of the created Magic Link belongs to. For example, you allow the creation of a donation link, enabling users to donate to you on Ethereum, and also allow the creation of a Magic Link for donations on the Arbitrum network
 
-  ![](./img/select-network.png)
+  <div align="center">
+  <img src="./img/select-network.png" width="500">
+  </div>
 - *magicLinkMetadata*: You can set the default values for the Magic Link's title, main image, and description here, as shown in the image above. You might be curious about where to set this main image. There are two ways to set it: you can explicitly set the 'gallery' field, whose value is a URL of an image accessible over the internet. Alternatively, you can set it implicitly by uploading an image with the same name as the id in the assets/galleries directory. We will help you upload it to S3 and set it as the value for the `gallery`. Therefore, the default image in the preview section of the Magic Link above is because there is an image in assets/galleries with the same name as the id.
   ```ts
   // 1. explicitly
@@ -318,12 +323,16 @@ I will provide further explanations for some fields that need clarification.
   If the type is 'select', it will have `options`, which are the choices in the dropdown menu. There are two required fields: `label` & `value` - label is used for menu display, and value acts as the value for `name`. There are two optional items: `chainId`, which specifies that this option is only selectable when the same chainId is selected in `networks`, and `default
   : true` indicates that it is the default selected value.
 
-  ![](./img/select-option.png)
+  <div align="center">
+    <img src="./img/select-option.png" width="500">
+  </div>
 
 - preset: 
 This field presets the default trigger for the Magic Link. 'field' refers to the name of a specific 'name', 'value' is the value of 'name', 'title' is used for display, and 'type' can be set to either 'Button' or 'Input'.
 
-  ![](./img/preset.png)
+  <div align="center">
+    <img src="./img/preset.png" width="500">
+  </div>
 
 #### 2.2 generateTransaction
 Another function signature that must be implemented is `generateTransaction`, whose return signature is [`TransactionInfo[]`](../src/common/dto/transaction.dto.ts#57). When a user clicks the **0.001ETH** button on the Magic Link page, the `TransactionInfo` will be sequentially constructed into on-chain transactions and sent to the network.
@@ -429,7 +438,10 @@ Our framework will register your Action implementation into the routing system. 
     }
   }
   ```
-  ![alt text](./img/validate-form-data.png)
+  <div align="center">
+    <img src="./img/validate-form-data.png" width="500">
+  </div>
+  
 - The `reloadAdvancedInfo` optional function processes real-time contract information that should be displayed to users through the magicLink. 
 
   For example, for a red packet contract, it might show something like _"There are 20 red packets in total, and 3 red packets have been claimed."_  Developers can use this method to return a title and an HTML string based on the contract's stored information, making it easier for users to refresh and view the information. 
@@ -448,13 +460,17 @@ Our framework will register your Action implementation into the routing system. 
     }
   }
   ```
-  ![](./img/real-time-example.png)
+  <div align="center">
+    <img src="./img/real-time-example.png" width="300">
+  </div>
 
 - **MagicLink binds to on-chain transactions**. After creating the magicLink, it may not become active immediately and you need to initiate one or more transactions to the smart contract before you can create an active magicLink. For example, with a red packet contract, you need to deposit a red packet asset into the contract before the magicLink can become active. This way, users can claim the red envelope created through your Magic Link.
 
   The `onMagicLinkCreated` provides this capability. It returns `TransactionInfo[]`. Its signature is the same as `generateTransaction`, but it is an on-chain transaction executed immediately after the Magic Link is created.
 
-  ![](./img/on-magic-link-created.png)
+  <div align="center">
+    <img src="./img/on-magic-link-created.png" width="300">
+  </div>
 
   In the image above, we can see that after creating an inactive Magic Link, the transaction returned by `onMagicLinkCreated` is constructed and sent as an on-chain transaction.
 
