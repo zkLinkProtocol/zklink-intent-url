@@ -27,19 +27,19 @@ export class NetworkDto {
   chainId: string;
 }
 
-export class DAppDto {
-  @ApiProperty({
-    type: String,
-    description: 'The name of the dApp to which the Action belongs.',
-  })
-  @IsString()
-  name: string;
+// export class DAppDto {
+//   @ApiProperty({
+//     type: String,
+//     description: 'The name of the dApp to which the Action belongs.',
+//   })
+//   @IsString()
+//   name: string;
 
-  @ApiPropertyOptional({ type: String, description: 'DApp URL (optional)' })
-  @IsOptional()
-  @IsString()
-  url?: string;
-}
+//   @ApiPropertyOptional({ type: String, description: 'DApp URL (optional)' })
+//   @IsOptional()
+//   @IsString()
+//   url?: string;
+// }
 
 export class AuthorDto {
   @ApiProperty({ type: String, description: 'Action developer name' })

@@ -4,7 +4,7 @@ import { BaseEntity } from './base.entity';
 import { Intention } from './intention.entity';
 import {
   AuthorDto,
-  DAppDto,
+  // DAppDto,
   IntentDto,
   MagicLinkMetadataDto,
   NetworkDto,
@@ -47,4 +47,8 @@ export abstract class Action extends BaseEntity {
   @Index()
   @Column({ type: 'int', default: 0 })
   public interaction: number;
+
+  @Index()
+  @Column({ type: 'int', default: 0 })
+  public sortOrder: number;
 }

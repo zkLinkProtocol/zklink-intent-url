@@ -13,11 +13,11 @@ import { RegistryService } from './registry.service';
 
 @Module({
   imports: [
+    RedEnvelopeModule,
+    SplitBillModule,
     BuyMeACoffeeModule,
     CrossChainSwapModule,
     NovaswapModule,
-    RedEnvelopeModule,
-    SplitBillModule,
     PumpFunModule,
     NewsModule,
     BuyNftModule,
