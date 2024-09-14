@@ -152,14 +152,14 @@ export class TgbotService implements OnModuleInit {
       const date =
         intent.createdAt?.toISOString().split('T')[0] +
         ` ${intent.createdAt?.toISOString().split('T')[1].split('.')[0]}`;
-      const shareUrl = `${userMiniApp}?startapp%3Dcode%3D${intent.code}`;
+      const shareUrl = `${userMiniApp}?startapp%3D${intent.code}`;
       caption += `
 *${++count}*
 *Title* : \`${intent.title}\`
 *Metadata* : ${intent.metadata.replaceAll('.', '\\.')} 
 *Description* : ${intent.description}
 *Create Time* : ${date.replaceAll('-', '\\-')}
-[Go to tg mini app](${userMiniApp}?startapp=code=${intent.code})              [Share to others](https://t.me/share?url=${shareUrl}&text=${intent.title})
+[Go to tg mini app](${userMiniApp}?startapp=${intent.code})              [Share to others](https://t.me/share?url=${shareUrl}&text=${intent.title})
 ✅️ *Verified zkLink official team*
 \\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\n
         `;
@@ -190,16 +190,17 @@ export class TgbotService implements OnModuleInit {
 *Title* : \`${news.title}\`
 *Description* : ${content}
 *Create Time* : ${date.replaceAll('-', '\\-')}
-[Go to tg mini app](${userMiniApp}?startapp=code=${news.code}) 
-✅️ *_Verified zkLink official team_*
+[Go to mini app](${userMiniApp}?startapp=${news.code}) 
+✅️ *Verified zkLink official team*
 `;
     const parse_mode: ParseMode = 'MarkdownV2';
-    const postHref = `${userMiniApp}?startapp=code=${news.code}&`;
+    const postHref = `${userMiniApp}?startapp=${news.code}&`;
 
     const inlineKeyboard = [];
     const newsType = settings.newsType ?? '';
+    let typeActions = [];
     if (newsType == 'poll') {
-      const actions = [
+      typeActions = [
         {
           text: 'Long(0)',
           callback_data: `long_0_0_poll`,
@@ -209,9 +210,8 @@ export class TgbotService implements OnModuleInit {
           callback_data: `short_0_0_poll`,
         },
       ];
-      inlineKeyboard.push(actions);
     } else {
-      const actions = [
+      typeActions = [
         {
           text: 'Support(0)',
           callback_data: `long_0_0_intent`,
@@ -221,9 +221,8 @@ export class TgbotService implements OnModuleInit {
           callback_data: `short_0_0_intent`,
         },
       ];
-      inlineKeyboard.push(actions);
     }
-
+    inlineKeyboard.push(typeActions);
     const actions = this.blinkService.magicLinkToBlinkActions(
       postHref,
       news.settings,
