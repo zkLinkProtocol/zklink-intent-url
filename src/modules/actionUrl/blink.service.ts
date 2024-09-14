@@ -58,7 +58,10 @@ export class BlinkService {
         params.forEach((value, key) => {
           paramsStr += `${key}=${value}&`;
         });
-        res.href = `${postHref}?${paramsStr.substring(0, paramsStr.length - 1)}`;
+        res.href =
+          postHref.indexOf('?') != -1
+            ? `${postHref}${paramsStr.substring(0, paramsStr.length - 1)}`
+            : `${postHref}?${paramsStr.substring(0, paramsStr.length - 1)}`;
         return res;
       });
     }

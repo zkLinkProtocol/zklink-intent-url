@@ -61,7 +61,7 @@ export class TgbotService implements OnModuleInit {
 
   async onStart(tgUserId: string) {
     const config = await configFactory();
-    const minapp = config.tgbot.miniApp;
+    const miniapp = config.tgbot.miniApp;
     const tgbot = config.tgbot.tgbot;
     const creator = await this.creatorRepository.findOneBy({ tgUserId });
     let walletAddress = '';
@@ -103,13 +103,13 @@ export class TgbotService implements OnModuleInit {
         [
           {
             text: 'Open MagicLink Page',
-            url: minapp,
+            url: miniapp,
           },
         ],
         [
           {
             text: 'Create New MagicLink',
-            url: `${minapp}?start=new`,
+            url: `${miniapp}?start=redirect=create`,
           },
         ],
         [
@@ -146,20 +146,20 @@ export class TgbotService implements OnModuleInit {
     let caption = '';
     let count = 0;
     const config = await configFactory();
-    const miniApp = config.tgbot.miniApp;
+    const userMiniApp = config.tgbot.userMiniApp;
     for (const intent of intentions) {
       // Y-m-d H:i:s
       const date =
         intent.createdAt?.toISOString().split('T')[0] +
         ` ${intent.createdAt?.toISOString().split('T')[1].split('.')[0]}`;
-      const shareUrl = `${miniApp}?startapp%3D${intent.code}`;
+      const shareUrl = `${userMiniApp}?startapp%3Dcode%3D${intent.code}`;
       caption += `
 *${++count}*
 *Title* : \`${intent.title}\`
 *Metadata* : ${intent.metadata.replaceAll('.', '\\.')} 
 *Description* : ${intent.description}
 *Create Time* : ${date.replaceAll('-', '\\-')}
-[Go to tg mini app](${miniApp}?startapp=${intent.code})              [Share to others](https://t.me/share?url=${shareUrl}&text=${intent.title})
+[Go to tg mini app](${userMiniApp}?startapp=code=${intent.code})              [Share to others](https://t.me/share?url=${shareUrl}&text=${intent.title})
 ✅️ *Verified zkLink official team*
 \\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\n
         `;
@@ -176,7 +176,7 @@ export class TgbotService implements OnModuleInit {
   async sendNews(code: string) {
     const config = await configFactory();
     const newsChannelId = config.tgbot.newsChannelId;
-    const miniApp = config.tgbot.miniApp;
+    const userMiniApp = config.tgbot.userMiniApp;
     const news = await this.actionUrlService.findOneByCode(code);
     const settings = news.settings as {
       newsType: string;
@@ -190,11 +190,11 @@ export class TgbotService implements OnModuleInit {
 *Title* : \`${news.title}\`
 *Description* : ${content}
 *Create Time* : ${date.replaceAll('-', '\\-')}
-[Go to tg mini app](${miniApp}?startapp=${news.code}) 
+[Go to tg mini app](${userMiniApp}?startapp=code=${news.code}) 
 ✅️ *_Verified zkLink official team_*
 `;
     const parse_mode: ParseMode = 'MarkdownV2';
-    const postHref = `${miniApp}`;
+    const postHref = `${userMiniApp}?startapp=code=${news.code}&`;
 
     const inlineKeyboard = [];
     const newsType = settings.newsType ?? '';
@@ -233,7 +233,7 @@ export class TgbotService implements OnModuleInit {
       const action = actions[i];
       lineButtons.push({
         text: action.label,
-        url: action.href + `&startapp=${code}`,
+        url: action.href,
       });
       if ((i + 1) % 3 === 0) {
         inlineKeyboard.push(lineButtons);
