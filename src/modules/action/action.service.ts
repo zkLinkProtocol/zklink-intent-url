@@ -36,7 +36,9 @@ export class ActionService implements OnApplicationBootstrap {
   onApplicationBootstrap() {
     this.uniqueActionPlugs = _.chain(this.allActionPlugs)
       .groupBy('id')
-      .map((actions) => _.maxBy(actions, 'version'))
+      .map((actions) =>
+        _.maxBy(actions, (action) => parseInt(action.version.substring(1), 10)),
+      )
       .compact()
       .value();
 
