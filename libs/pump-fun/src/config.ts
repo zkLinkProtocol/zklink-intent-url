@@ -3,7 +3,7 @@ import { ActionMetadata } from 'src/common/dto';
 import { FormName } from './types';
 
 export const PUMP_FUN_FACTORY_ADDRESS =
-  '0x7f19656b47F3878c176e2A18cfF962c35240c5BD';
+  '0xb24848Eb0F6fb1F46615D8cc4b2644f02cde7d05';
 
 export const metadata: ActionMetadata<FormName> = {
   title: 'PumpFun',
