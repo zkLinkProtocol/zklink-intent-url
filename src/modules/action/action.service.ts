@@ -36,7 +36,9 @@ export class ActionService implements OnApplicationBootstrap {
   onApplicationBootstrap() {
     this.uniqueActionPlugs = _.chain(this.allActionPlugs)
       .groupBy('id')
-      .map((actions) => _.maxBy(actions, 'version'))
+      .map((actions) =>
+        _.maxBy(actions, (action) => parseInt(action.version.substring(1), 10)),
+      )
       .compact()
       .value();
 
@@ -45,7 +47,7 @@ export class ActionService implements OnApplicationBootstrap {
   }
 
   private async initializeActionsMetadata(actionPlugs: Array<RegistryAction>) {
-    for (const { id, service } of actionPlugs) {
+    for (const [index, { id, service }] of actionPlugs.entries()) {
       const metadata = await service.getMetadata();
 
       if (!metadata.logo) {
@@ -90,6 +92,7 @@ export class ActionService implements OnApplicationBootstrap {
         author,
         intent,
         magicLinkMetadata,
+        sortOrder: index,
       });
       await this.actionRepository.initAction(newAction);
     }
@@ -102,17 +105,21 @@ export class ActionService implements OnApplicationBootstrap {
     if (!actionMetadata) {
       throw new BusinessException(`ActionId ${id} not found`);
     }
-    const actionStore = await this.getActionStore(id);
+    const actionStore = this.getActionStore(id);
     const hasPostTxs = !!actionStore.onMagicLinkCreated;
     return { ...actionMetadata, hasPostTxs };
   }
 
   async getAllActionMetadata(): Promise<ActionResponseDto[]> {
-    const allActionMetadataRaw = await this.actionRepository.find({});
+    const allActionMetadataRaw = await this.actionRepository.find({
+      order: {
+        sortOrder: 'asc',
+      },
+    });
     const allActionMetadata = allActionMetadataRaw.map(
       async (actionMetadata) => {
         const { id } = actionMetadata;
-        const actionStore = await this.getActionStore(id);
+        const actionStore = this.getActionStore(id);
         const hasPostTxs = !!actionStore.onMagicLinkCreated;
         return { ...actionMetadata, hasPostTxs };
       },
