@@ -86,7 +86,7 @@ export class TgbotService implements OnModuleInit {
     ETH balance in Nova: ${Number(ethers.formatEther(ethBalance)).toFixed(6)} ETH
     
     Don't have ETH yet? Open your account and deposit from here 👇`;
-    caption = caption.replaceAll('.', '\\.').replaceAll('-', '\\-');
+    caption = this.formatMarkdownV2(caption);
     const parse_mode: ParseMode = 'MarkdownV2';
     const reply_markup = {
       inline_keyboard: [
@@ -155,10 +155,9 @@ export class TgbotService implements OnModuleInit {
       const shareUrl = `${userMiniApp}?startapp%3D${intent.code}`;
       caption += `
 *${++count}*
-*Title* : \`${intent.title}\`
-*Metadata* : ${intent.metadata.replaceAll('.', '\\.')} 
+*Title* : ${intent.title}
 *Description* : ${intent.description}
-*Create Time* : ${date.replaceAll('-', '\\-')}
+*Create Time* : ${date}
 [Go to tg mini app](${userMiniApp}?startapp=${intent.code})              [Share to others](https://t.me/share?url=${shareUrl}&text=${intent.title})
 ✅️ *Verified zkLink official team*
 \\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\n
@@ -166,6 +165,7 @@ export class TgbotService implements OnModuleInit {
     }
     const options = { parse_mode: 'MarkdownV2' as ParseMode };
     try {
+      caption = this.formatMarkdownV2(caption);
       const res = await this.bot.sendMessage(tgUserId, caption, options);
       this.logger.log('onMyMagicLink success', JSON.stringify(res));
     } catch (error) {
@@ -186,10 +186,10 @@ export class TgbotService implements OnModuleInit {
     const date =
       news.createdAt?.toISOString().split('T')[0] +
       ` ${news.createdAt?.toISOString().split('T')[1].split('.')[0]}`;
-    const caption = `
-*Title* : \`${news.title}\`
+    let caption = `
+*Title* : ${news.title}
 *Description* : ${content}
-*Create Time* : ${date.replaceAll('-', '\\-')}
+*Create Time* : ${date}
 [Go to mini app](${userMiniApp}?startapp=${news.code}) 
 ✅️ *Verified zkLink official team*
 `;
@@ -247,6 +247,8 @@ export class TgbotService implements OnModuleInit {
     };
     try {
       let res = null;
+      caption = this.formatMarkdownV2(caption);
+      console.log('caption', caption);
       if (photo === '') {
         const options = { reply_markup, parse_mode };
         res = await this.bot.sendMessage(newsChannelId, caption, options);
@@ -314,5 +316,13 @@ export class TgbotService implements OnModuleInit {
     } catch (error) {
       this.logger.error('editMessageReplyMarkupPollText error', error.stack);
     }
+  }
+
+  formatMarkdownV2(text: string) {
+    return text
+      .replaceAll('.', '\\.')
+      .replaceAll('-', '\\-')
+      .replaceAll('?', '\\?')
+      .replaceAll('=', '\\=');
   }
 }
