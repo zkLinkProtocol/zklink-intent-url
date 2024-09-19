@@ -355,8 +355,8 @@ async generateTransaction(
 ```
 As you can see, the simplest version of `TransactionInfo` only needs to define four fields related to the transaction. There are also three unused fields here, which are useful in certain scenarios and require further introduction to you.
 
-- _shouldPublishToChain_: TODO
-- _customData_: TODO
+- _shouldPublishToChain_: In most cases where a user needs to send an on-chain transaction, this field needs to be set to true.
+- _customData_: If you are familiar with [paymaster](https://docs.zksync.io/build/start-coding/zksync-101/paymaster), then you will be quite accustomed to this. [Learn how to send a transaction through a paymaster](https://docs.zksync.io/build/start-coding/quick-start/paymasters-introduction#how-to-send-a-transaction-through-a-paymaster) 
 - _requiredTokenAmount_: Magic Link has the capability to allow developers to implement **Nova cross-chain** functionality with simple configurations. For example, the aforementioned transaction occurs on the Arbitrum chain, but if you want to allow users to attempt a cross-chain transfer of a corresponding amount of tokens from the Nova network when they do not have enough tokens on Arbitrum, you only need to configure this parameter, and it will try to execute the corresponding cross-chain request.
   ```ts
   async generateTransaction(
