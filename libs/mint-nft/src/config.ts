@@ -36,7 +36,7 @@ export const metadata: ActionMetadata<FormName> = {
         label: 'Quantity',
         desc: "Quantity of NFTs to mint, leave it to 0 if the NFT contract don't support batch mint",
         type: 'input',
-        regex: '^d+',
+        regex: '^\\d+$',
         regexDesc: 'Quantity',
         defaultValue: '1',
       },

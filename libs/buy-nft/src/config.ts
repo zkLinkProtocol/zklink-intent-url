@@ -46,7 +46,7 @@ export const metadata: ActionMetadata<FormName> = {
         desc: 'Enter the contract address or URL (e.g., https://magiceden.io/collections/ethereum/cryptopunks)',
         type: 'input',
         regex:
-          '^(0x[a-fA-F0-9]{40}(:d+)?)|(https?://magiceden..+/collections/ethereum/.+)$',
+          '^(0x[a-fA-F0-9]{40}(:\\d+)?)|(https?://magiceden..+/collections/ethereum/.+)$',
         regexDesc: 'NFT Query Value',
       },
       {
@@ -54,7 +54,7 @@ export const metadata: ActionMetadata<FormName> = {
         label: 'Quantity',
         desc: 'Quantity of NFTs to buy',
         type: 'input',
-        regex: '^d+',
+        regex: '^\\d+$',
         regexDesc: 'Quantity',
         defaultValue: '1',
       },
