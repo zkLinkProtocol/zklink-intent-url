@@ -4,8 +4,7 @@ import { nanoid } from 'nanoid';
 import { GenerateTransactionParams, TransactionInfo } from 'src/common/dto';
 import { BusinessException } from 'src/exception/business.exception';
 import { ActionService } from 'src/modules/action/action.service';
-import { ActionRepository } from 'src/repositories';
-import { IntentionRepository } from 'src/repositories/intention.repository';
+import { ActionRepository, IntentionRepository } from 'src/repositories';
 import { UnitOfWork } from 'src/unitOfWork';
 
 import { ActionUrlAddRequestDto } from './actionUrl.dto';
@@ -23,10 +22,7 @@ export class ActionUrlService {
   }
 
   async findOneByCode(code: string) {
-    const intention = await this.intentionRepository.findOne({
-      where: [{ code }],
-      relations: ['creator', 'action'],
-    });
+    const intention = await this.intentionRepository.queryIntentionByCode(code);
     if (!intention) throw new BusinessException(`intention ${code} not found`);
     return intention;
   }
