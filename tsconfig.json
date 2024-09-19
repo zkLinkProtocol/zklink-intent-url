@@ -20,27 +20,76 @@
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
-      "@types/*": ["types/*"],
-      "@action/utils": ["libs/utils/src"],
-      "@action/utils/*": ["libs/utils/src/*"],
-      "@action/novaswap": ["libs/novaswap/src"],
-      "@action/novaswap/*": ["libs/novaswap/src/*"],
-      "@action/buy-me-a-coffee": ["libs/buy-me-a-coffee/src"],
-      "@action/buy-me-a-coffee/*": ["libs/buy-me-a-coffee/src/*"],
-      "@action/cross-chain-swap": ["libs/cross-chain-swap/src"],
-      "@action/cross-chain-swap/*": ["libs/cross-chain-swap/src/*"],
-      "@action/red-envelope": ["libs/red-envelope/src"],
-      "@action/red-envelope/*": ["libs/red-envelope/src/*"],
-      "@action/slipt-bill": ["libs/split-bill/src"],
-      "@action/slipt-bill/*": ["libs/split-bill/src/*"],
-      "@action/news": ["libs/news/src"],
-      "@action/news/*": ["libs/news/src/*"],
-      "@action/registry": ["libs/registry/src", "libs/registry/src/index.ts"],
-      "@action/registry/*": ["libs/registry/src/*"],
-      "@action/pump-fun": ["libs/pump-fun/src"],
-      "@action/pump-fun/*": ["libs/pump-fun/src/*"],
-      "@action/buy-nft": ["libs/buy-nft/src"],
-      "@action/buy-nft/*": ["libs/buy-nft/src/*"],
+      "@types/*": [
+        "types/*"
+      ],
+      "@core/utils": [
+        "libs/utils/src"
+      ],
+      "@core/utils/*": [
+        "libs/utils/src/*"
+      ],
+      "@action/novaswap": [
+        "libs/novaswap/src"
+      ],
+      "@action/novaswap/*": [
+        "libs/novaswap/src/*"
+      ],
+      "@action/buy-me-a-coffee": [
+        "libs/buy-me-a-coffee/src"
+      ],
+      "@action/buy-me-a-coffee/*": [
+        "libs/buy-me-a-coffee/src/*"
+      ],
+      "@action/cross-chain-swap": [
+        "libs/cross-chain-swap/src"
+      ],
+      "@action/cross-chain-swap/*": [
+        "libs/cross-chain-swap/src/*"
+      ],
+      "@action/red-envelope": [
+        "libs/red-envelope/src"
+      ],
+      "@action/red-envelope/*": [
+        "libs/red-envelope/src/*"
+      ],
+      "@action/slipt-bill": [
+        "libs/split-bill/src"
+      ],
+      "@action/slipt-bill/*": [
+        "libs/split-bill/src/*"
+      ],
+      "@action/news": [
+        "libs/news/src"
+      ],
+      "@action/news/*": [
+        "libs/news/src/*"
+      ],
+      "@action/registry": [
+        "libs/registry/src",
+        "libs/registry/src/index.ts"
+      ],
+      "@action/registry/*": [
+        "libs/registry/src/*"
+      ],
+      "@action/pump-fun": [
+        "libs/pump-fun/src"
+      ],
+      "@action/pump-fun/*": [
+        "libs/pump-fun/src/*"
+      ],
+      "@action/buy-nft": [
+        "libs/buy-nft/src"
+      ],
+      "@action/buy-nft/*": [
+        "libs/buy-nft/src/*"
+      ],
+      "@core/data": [
+        "libs/data/src"
+      ],
+      "@core/data/*": [
+        "libs/data/src/*"
+      ]
     }
   }
 }
