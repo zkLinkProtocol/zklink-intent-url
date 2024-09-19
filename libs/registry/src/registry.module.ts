@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 import { BuyMeACoffeeModule } from '@action/buy-me-a-coffee';
 import { BuyNftModule } from '@action/buy-nft';
 import { CrossChainSwapModule } from '@action/cross-chain-swap';
+import { MintNftModule } from '@action/mint-nft';
 import { NewsModule } from '@action/news';
 import { NovaswapModule } from '@action/novaswap';
 import { PumpFunModule } from '@action/pump-fun';
@@ -21,6 +22,7 @@ import { RegistryService } from './registry.service';
     PumpFunModule,
     NewsModule,
     BuyNftModule,
+    MintNftModule,
   ],
   providers: [RegistryService],
   exports: [RegistryService],

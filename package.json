@@ -133,6 +133,7 @@
       "^@action/pump-fun(|/.*)$": "<rootDir>/libs/pump-fun/src/$1",
       "^@action/news(|/.*)$": "<rootDir>/libs/news/src/$1",
       "^@action/buy-nft(|/.*)$": "<rootDir>/libs/buy-nft/src/$1",
+      "^@action/mint-nft(|/.*)$": "<rootDir>/libs/mint-nft/src/$1",
       "^@core/data(|/.*)$": "<rootDir>/libs/data/src/$1"
     }
   }

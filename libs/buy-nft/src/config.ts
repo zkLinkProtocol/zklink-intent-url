@@ -56,6 +56,7 @@ export const metadata: ActionMetadata<FormName> = {
         type: 'input',
         regex: '^d+',
         regexDesc: 'Quantity',
+        defaultValue: '1',
       },
     ],
   },

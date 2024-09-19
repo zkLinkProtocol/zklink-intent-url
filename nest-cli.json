@@ -89,6 +89,15 @@
         "tsConfigPath": "libs/buy-nft/tsconfig.lib.json"
       }
     },
+    "mint-nft": {
+      "type": "library",
+      "root": "libs/mint-nft",
+      "entryFile": "index",
+      "sourceRoot": "libs/mint-nft/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/mint-nft/tsconfig.lib.json"
+      }
+    },
     "data": {
       "type": "library",
       "root": "libs/data",
