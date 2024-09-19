@@ -99,11 +99,17 @@ export class OptionDto {
   @IsBoolean()
   default?: boolean;
 }
+
+export interface ConditionalRendering<T extends string> {
+  value: Array<string>; // An array of values that determine the condition for rendering. When the selected value matches any of these, the specified component will be rendered.
+  component: ConditionalComponentDto<T>;
+}
+
 export class BaseComponentDto<T extends string> {
   @ApiProperty({
     type: String,
     description:
-      'The name will serve as the key in the formData within generateTransaction.',
+      'The component name, and the name will serve as the key in the formData within generateTransaction.',
   })
   @IsString()
   name: T;
@@ -145,7 +151,16 @@ export class BaseComponentDto<T extends string> {
   })
   @IsString()
   defaultValue?: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Defines the conditions under which certain components should be rendered.',
+  })
+  @IsOptional()
+  @ValidateNested()
+  conditionalRendering?: ConditionalRendering<T>;
 }
+
 export class PlainComponentDto<T extends string> extends BaseComponentDto<T> {
   @ApiProperty({
     type: String,
@@ -159,11 +174,11 @@ export class PlainComponentDto<T extends string> extends BaseComponentDto<T> {
 export class OptionComponentDto<T extends string> extends BaseComponentDto<T> {
   @ApiProperty({
     type: String,
-    enum: ['searchSelect', 'searchSelectErc20'],
+    enum: ['searchSelect'],
     description: 'This component is a dropdown menu.',
   })
-  @IsEnum(['searchSelect', 'searchSelectErc20'])
-  type: 'searchSelect' | 'searchSelectErc20';
+  @IsEnum(['searchSelect'])
+  type: 'searchSelect';
 
   @ApiProperty({
     type: 'array',
@@ -173,7 +188,31 @@ export class OptionComponentDto<T extends string> extends BaseComponentDto<T> {
   @IsArray()
   @Type(() => OptionDto)
   @ValidateNested({ each: true })
-  @ValidateIf((o) => ['select', 'searchSelectErc20'].includes(o.type))
+  @ValidateIf((o) => ['searchSelect'].includes(o.type))
+  @ValidateOptions({ message: 'Invalid options based on type value' })
+  options: OptionDto[];
+}
+
+export class ConditionalComponentDto<
+  T extends string,
+> extends BaseComponentDto<T> {
+  @ApiProperty({
+    type: String,
+    enum: ['conditionalSelect'],
+    description: 'This component is a dropdown menu.',
+  })
+  @IsEnum(['conditionalSelect'])
+  type: 'conditionalSelect';
+
+  @ApiProperty({
+    type: 'array',
+    items: { $ref: getSchemaPath(OptionDto) },
+    description: 'Dropdown menu option configuration.',
+  })
+  @IsArray()
+  @Type(() => OptionDto)
+  @ValidateNested({ each: true })
+  @ValidateIf((o) => ['conditionalSelect'].includes(o.type))
   @ValidateOptions({ message: 'Invalid options based on type value' })
   options: OptionDto[];
 }
@@ -207,12 +246,14 @@ export class PresetItemDto<N extends string> {
 
 export class IntentDto<N extends string> {
   @ApiProperty({
-    type: [PlainComponentDto, OptionComponentDto],
+    type: [PlainComponentDto, OptionComponentDto, ConditionalComponentDto],
     description: 'Form configuration items for constructing a transaction.',
   })
   @IsArray()
   @ValidateNested({ each: true })
-  components: Array<PlainComponentDto<N> | OptionComponentDto<N>>;
+  components: Array<
+    PlainComponentDto<N> | OptionComponentDto<N> | ConditionalComponentDto<N>
+  >;
 
   @ApiPropertyOptional({
     type: String,
@@ -328,11 +369,15 @@ export class ActionMetadata<N extends string> {
 }
 
 export function isOptionComponentDto<N extends string>(
-  component: OptionComponentDto<N> | PlainComponentDto<N> | undefined,
-): component is OptionComponentDto<N> {
+  component:
+    | OptionComponentDto<N>
+    | PlainComponentDto<N>
+    | ConditionalComponentDto<N>
+    | undefined,
+): component is OptionComponentDto<N> | ConditionalComponentDto<N> {
   return (
     !!component &&
     (component.type === 'searchSelect' ||
-      component.type === 'searchSelectErc20')
+      component.type === 'conditionalSelect')
   );
 }
