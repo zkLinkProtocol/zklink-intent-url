@@ -50,7 +50,7 @@ export const genMetadata = (configValue: Value): ActionMetadata<FormName> => ({
         name: 'distributionToken',
         label: 'Token to Distribute',
         desc: 'Choose a token to distribute',
-        type: 'searchSelectErc20',
+        type: 'searchSelect',
         regex: '^0x[a-fA-F0-9]{40}$',
         regexDesc: 'Address',
         options: configValue.tokens,
