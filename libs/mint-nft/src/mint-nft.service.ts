@@ -36,9 +36,11 @@ export class MintNftService extends ActionDto<FormName> {
     );
     let mintTx;
     if (formData.quantity == '0') {
-      mintTx = await contract.mint.populateTransaction(additionalData.account);
+      mintTx = await contract['mint(address)'].populateTransaction(
+        additionalData.account,
+      );
     } else {
-      mintTx = await contract.mint.populateTransaction(
+      mintTx = await contract['mint(address, uint256)'].populateTransaction(
         additionalData.account,
         Number(formData.quantity),
       );
