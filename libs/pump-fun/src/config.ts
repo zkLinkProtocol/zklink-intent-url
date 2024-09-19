@@ -5,6 +5,14 @@ import { FormName } from './types';
 export const PUMP_FUN_FACTORY_ADDRESS =
   '0xb24848Eb0F6fb1F46615D8cc4b2644f02cde7d05';
 
+export const POOL_FACTORY_CONTRACT_ADDRESS =
+  '0x0c283f1a3C6981eE623cb4E8AcC4f450f39D0815';
+export const QUOTER_CONTRACT_ADDRESS =
+  '0xa73A1d496dd147e68F557Dd73A28Ad6330777350';
+export const SWAP_ROUTER_CONTRACT_ADDRESS =
+  '0x2c98143431993e4CBD5eFD4B93c099432cacEBcE';
+
+export const CHAIN_ID = 810181;
 export const metadata: ActionMetadata<FormName> = {
   title: 'PumpFun',
   description:
