@@ -2,4 +2,6 @@ export type FormName =
   | 'tokenName'
   | 'tokenSymbol'
   | 'creatorInitialBuyAmount'
-  | 'buyAmount';
+  | 'buyAmount'
+  | 'sellPercent'
+  | 'orderType';
