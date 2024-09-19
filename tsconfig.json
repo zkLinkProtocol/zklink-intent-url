@@ -84,6 +84,12 @@
       "@action/buy-nft/*": [
         "libs/buy-nft/src/*"
       ],
+      "@action/mint-nft": [
+        "libs/mint-nft/src"
+      ],
+      "@action/mint-nft/*": [
+        "libs/mint-nft/src/*"
+      ],
       "@core/data": [
         "libs/data/src"
       ],
