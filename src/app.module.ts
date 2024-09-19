@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { nanoid } from 'nanoid';
+import { ClsModule } from 'nestjs-cls';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -23,6 +25,14 @@ import { UnitOfWorkModule } from './unitOfWork';
 
 @Module({
   imports: [
+    ClsModule.forRoot({
+      global: true,
+      interceptor: {
+        mount: true,
+        generateId: true,
+        idGenerator: () => nanoid(),
+      },
+    }),
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
