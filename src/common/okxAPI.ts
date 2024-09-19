@@ -1,6 +1,7 @@
 import CryptoJS from 'crypto-js';
 import { ethers } from 'ethers';
 import fetch from 'node-fetch';
+
 import { TransactionInfo } from 'src/common/dto/transaction.dto';
 type HeadersParams = {
   'Content-Type': string;
@@ -114,6 +115,52 @@ export async function getSwapData(
     shouldPublishToChain: true,
     estimateGasFee: estimateGasFee,
   };
+}
+
+export async function getSupportedChain() {
+  const timestamp = new Date().toISOString();
+  const supportedUrl = `${apiBaseUrl}supported/chain`;
+  const toSignUrl = supportedUrl.replace('https://www.okx.com', '');
+  console.log(supportedUrl);
+  const headers = getHeaders(timestamp, toSignUrl);
+  const resp = await fetch(supportedUrl, {
+    method: 'get',
+    headers,
+  });
+  const chains: {
+    code: string;
+    data: {
+      chainId: string;
+      chainName: string;
+      dexTokenApproveAddress: string;
+    }[];
+    msg: string;
+  } = await resp.json();
+  return chains;
+}
+
+export async function getAllTokens(chainId: number) {
+  const timestamp = new Date().toISOString();
+  const allTokenUrl = `${apiBaseUrl}all-tokens?chainId=${chainId}`;
+  const toSignUrl = allTokenUrl.replace('https://www.okx.com', '');
+  const headers = getHeaders(timestamp, toSignUrl);
+
+  const resp = await fetch(allTokenUrl, {
+    method: 'get',
+    headers,
+  });
+  const tokens: {
+    code: string;
+    data: {
+      decimals: string;
+      tokenContractAddress: string;
+      tokenLogoUrl: string;
+      tokenName: string;
+      tokenSymbol: string;
+    }[];
+    msg: string;
+  } = await resp.json();
+  return tokens;
 }
 
 function getAccessSign(

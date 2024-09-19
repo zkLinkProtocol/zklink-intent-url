@@ -3,11 +3,6 @@ import { Address } from 'src/types';
 
 import { FormName } from './types';
 
-export const RPC_URL: { [key: string]: string } = {
-  '42161':
-    'https://arb-mainnet.g.alchemy.com/v2/I-ZVEdUQy4Mk3rwbsNAIp_MVql6coseO',
-};
-
 export const ESTIMATED_GAS_WALLET: { [key: string]: string } = {
   '42161': '0x5ABC821cf6267534f8650189745B170Eeeff030D',
 };

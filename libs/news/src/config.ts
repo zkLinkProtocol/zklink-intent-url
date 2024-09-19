@@ -1,11 +1,22 @@
 import { ActionMetadata } from 'src/common/dto';
+import { Address } from 'src/types';
+export type FormName = 'amountToBuy' | 'tokenFrom' | 'tokenTo';
 
-export type FormName =
-  | 'tokenInAddress'
-  | 'tokenOutAddress'
-  | 'amountIn'
-  | 'recipient'
-  | 'deadlineDurationInSec';
+export const TOKEN_CONFIG: { [key: string]: { [key: string]: Address } } = {
+  42161: {
+    weth: '0x82af49447d8a07e3bd95bd0d56f35241523fbab1',
+    wbtc: '0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f',
+    usdt: '0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9',
+    usdc: '0xff970a61a04b1ca14834a43f5de4533ebddb5cc8',
+  },
+  1: {
+    eth: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
+    wbtc: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599',
+    usdt: '0xdac17f958d2ee523a2206206994597c13d831ec7',
+    usdc: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+    bnb: '0xB8c77482e45F1F44dE1745F52C74426C631bDD52',
+  },
+};
 
 export const METADATA: ActionMetadata<FormName> = {
   title: 'Magic News',
@@ -15,50 +26,67 @@ export const METADATA: ActionMetadata<FormName> = {
       name: 'Arbitrum',
       chainId: '42161',
     },
+    {
+      name: 'Ethereum',
+      chainId: '1',
+    },
   ],
   author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
   magicLinkMetadata: {},
   intent: {
-    binding: 'amountIn',
     components: [
       {
-        name: 'tokenInAddress',
-        label: 'From Token',
-        desc: 'The amount of tokens to spend',
+        name: 'amountToBuy',
+        label: 'Amount to Buy',
+        desc: 'The amount of input tokens used to buy output tokens',
+        type: 'input',
+        regex: '^[0-9]+(.[0-9]+)?$',
+        regexDesc: 'Positive number',
+      },
+      {
+        name: 'tokenFrom',
+        label: 'Token From ',
+        desc: 'The token you want to swap',
         type: 'searchSelect',
-        regex: '^0x[a-fA-F0-9]{40}$',
-        regexDesc: 'Address',
+        regex: '^[a-zA-Z0-9]+$',
+        regexDesc: 'Token Symbol',
         options: [
           {
             label: 'WETH',
-            value: '0x6e42d10eB474a17b14f3cfeAC2590bfa604313C7',
-            default: true,
+            value: 'weth',
+            chainId: '42161',
           },
-        ],
-      },
-      {
-        name: 'tokenOutAddress',
-        label: 'To Token',
-        desc: 'The address of the token you want to receive',
-        type: 'searchSelect',
-        regex: '^0x[a-fA-F0-9]{40}$',
-        regexDesc: 'Address',
-        options: [
+          {
+            label: 'ETH',
+            value: 'eth',
+            chainId: '1',
+          },
+          {
+            label: 'BNB',
+            value: 'bnb',
+            chainId: '1',
+          },
+          {
+            label: 'WBTC',
+            value: 'wbtc',
+          },
+          {
+            label: 'USDT',
+            value: 'usdt',
+          },
           {
             label: 'USDC',
-            value: '0x461fE851Cd66e82A274570ED5767c873bE9Ae1ff',
-            default: true,
+            value: 'usdc',
           },
         ],
       },
       {
-        name: 'amountIn',
-        label: 'Amount',
-        desc: 'The amount of tokens you pay',
+        name: 'tokenTo',
+        label: 'Token To',
+        desc: 'The address of the token you want to receive',
         type: 'input',
-        regex: '^[0-9]+$',
-        regexDesc: 'Must be a number',
-        defaultValue: '1',
+        regex: '^0x[a-fA-F0-9]{40}$',
+        regexDesc: 'Address',
       },
     ],
   },
