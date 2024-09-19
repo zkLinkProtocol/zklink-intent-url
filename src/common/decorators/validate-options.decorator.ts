@@ -14,7 +14,7 @@ export function ValidateOptions(validationOptions?: ValidationOptions) {
       validator: {
         validate(value: any, args: ValidationArguments) {
           const type = (args.object as any).type;
-          if (['searchSelect', 'searchSelectErc20'].includes(type)) {
+          if (['searchSelect', 'conditionalSelect'].includes(type)) {
             return (
               Array.isArray(value) &&
               value.every((item) => typeof item === 'object')
@@ -25,10 +25,10 @@ export function ValidateOptions(validationOptions?: ValidationOptions) {
         },
         defaultMessage(args: ValidationArguments) {
           const type = (args.object as any).type;
-          if (['searchSelect', 'searchSelectErc20'].includes(type)) {
-            return `options must be an array of objects when type is 'select' or 'searchSelectErc20'`;
+          if (['searchSelect', 'conditionalSelect'].includes(type)) {
+            return `options must be an array of objects when type is 'select' or 'conditionalSelect'`;
           } else {
-            return `options must be empty or not provided when type is not 'select' or 'searchSelectErc20'`;
+            return `options must be empty or not provided when type is not 'select' or 'conditionalSelect'`;
           }
         },
       },
