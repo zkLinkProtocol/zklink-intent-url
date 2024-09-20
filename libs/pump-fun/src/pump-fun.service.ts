@@ -55,9 +55,14 @@ export class PumpFunService extends ActionDto<FormName> {
     const { additionalData, formData } = data;
     const stringSalt = additionalData.code;
 
-    const creator = await this.dataService.getMagicLinkCreatorInfoByCode(
+    const creatorInfo = await this.dataService.getMagicLinkCreatorInfoByCode(
       additionalData.code!,
     );
+    if (!creatorInfo) {
+      throw new Error('Creator information not found for the given code.');
+    }
+    const creator = creatorInfo.address;
+
     const tokenAddress = await this.pumpFunFactory.getCreate2Address(
       formData.tokenName,
       formData.tokenSymbol,
@@ -71,7 +76,6 @@ export class PumpFunService extends ActionDto<FormName> {
       this.provider,
     );
 
-    const buyData = await tokenContract.buy.populateTransaction();
     const isPaused = await tokenContract.isPaused();
     if (isPaused) {
       return await this.novaswap.swapToken(
@@ -82,15 +86,35 @@ export class PumpFunService extends ActionDto<FormName> {
         3000,
       );
     } else {
-      return [
-        {
-          chainId: additionalData.chainId,
-          to: tokenAddress,
-          value: ethers.parseEther(formData.buyAmount).toString(),
-          data: buyData.data,
-          shouldPublishToChain: true,
-        },
-      ];
+      if (formData.buyAmount) {
+        const buyData = await tokenContract.buy.populateTransaction();
+        return [
+          {
+            chainId: additionalData.chainId,
+            to: tokenAddress,
+            value: ethers.parseEther(formData.buyAmount).toString(),
+            data: buyData.data,
+            shouldPublishToChain: true,
+          },
+        ];
+      } else {
+        const userBalance = await tokenContract.balanceOf(
+          additionalData.account!,
+        );
+        const sellAmount =
+          (Number(formData.sellPercent) * Number(userBalance)) / 100;
+        const sellData =
+          await tokenContract.sell.populateTransaction(sellAmount);
+        return [
+          {
+            chainId: additionalData.chainId,
+            to: tokenAddress,
+            value: '0',
+            data: sellData.data,
+            shouldPublishToChain: true,
+          },
+        ];
+      }
     }
   }
 
