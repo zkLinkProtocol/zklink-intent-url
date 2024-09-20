@@ -1,6 +1,7 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ethers } from 'ethers';
 import html2md from 'html-to-md';
+import { LRUCache } from 'lru-cache';
 import TelegramBot from 'node-telegram-bot-api';
 import { ParseMode } from 'node-telegram-bot-api';
 
@@ -9,6 +10,12 @@ import { CreatorRepository, IntentionRepository } from 'src/repositories';
 
 import { ActionUrlService } from '../actionUrl/actionUrl.service';
 import { BlinkService } from '../actionUrl/blink.service';
+
+const options = {
+  max: 240 * 7 * 10000,
+};
+
+const cache = new LRUCache<string, string>(options);
 
 @Injectable()
 export class TgbotService implements OnModuleInit {
@@ -43,6 +50,7 @@ export class TgbotService implements OnModuleInit {
       this.logger.log(`callback_query:`, JSON.stringify(callbackQuery));
       const chatId = callbackQuery.message.chat.id;
       const messageId = callbackQuery.message.message_id;
+      const userId = callbackQuery.from.id;
       const data = callbackQuery.data;
       const replyMarkup = callbackQuery.message.reply_markup;
       const [longOrShort, originLong, originShort, pollOrIntent] =
@@ -55,6 +63,7 @@ export class TgbotService implements OnModuleInit {
         originLong,
         originShort,
         replyMarkup,
+        userId,
       );
     });
   }
@@ -270,7 +279,12 @@ export class TgbotService implements OnModuleInit {
     long: number,
     short: number,
     replyMarkup: any,
+    userId: string,
   ) {
+    const cacheId = `${chatId}_${messageId}_${userId}`;
+    if (cache.get(cacheId)) {
+      return;
+    }
     if (longOrShort === 'long') {
       long++;
     } else if (longOrShort === 'short') {
@@ -313,6 +327,7 @@ export class TgbotService implements OnModuleInit {
         `editMessageReplyMarkupPollText success`,
         JSON.stringify(res),
       );
+      cache.set(cacheId, '1');
     } catch (error) {
       this.logger.error('editMessageReplyMarkupPollText error', error.stack);
     }

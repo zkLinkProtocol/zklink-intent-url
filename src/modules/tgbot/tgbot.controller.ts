@@ -24,6 +24,7 @@ export class TgbotController extends BaseController {
 
   @Get('testEditMessageReplyMarkupPollText')
   async testEditMessageReplyMarkupPollText(
+    @Query('userId') userId: string,
     @Query('chatId') chatId: string,
     @Query('messageId') messageId: string,
     @Query('longOrShort') longOrShort: string,
@@ -40,6 +41,7 @@ export class TgbotController extends BaseController {
         long,
         short,
         { inline_keyboard: [[]] },
+        userId,
       );
       return true;
     } catch (error) {

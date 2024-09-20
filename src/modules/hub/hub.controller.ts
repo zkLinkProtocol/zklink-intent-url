@@ -12,7 +12,7 @@ import { HubRequestDto } from './hub.dto';
 
 const options = {
   // Cache item time-to-live (TTL) in milliseconds
-  ttl: 1000 * 100,
+  ttl: 1000 * 60 * 60,
   // Should stale items be returned before removal?
   allowStale: false,
   // Automatically purge expired items
