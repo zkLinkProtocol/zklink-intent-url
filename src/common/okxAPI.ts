@@ -3,6 +3,7 @@ import { ethers } from 'ethers';
 import fetch from 'node-fetch';
 
 import { TransactionInfo } from 'src/common/dto/transaction.dto';
+import { BusinessException } from 'src/exception/business.exception';
 import logger from 'src/logger';
 type HeadersParams = {
   'Content-Type': string;
@@ -94,6 +95,7 @@ export async function getSwapData(
     slippage: '0.1',
     userWalletAddress: userAddress,
   };
+  logger.log('swapparams', JSON.stringify(swapParams));
   const swapURL = getAggregatorRequestUrl('swap', swapParams);
 
   const swapToSignUrl = swapURL.replace('https://www.okx.com', '');
@@ -104,8 +106,19 @@ export async function getSwapData(
     method: 'get',
     headers,
   });
-  const result = await swapRes.json();
+  const result: {
+    code: string;
+    data: {
+      routerResult: { estimateGasFee: string };
+      tx: { to: string; value: string; data: any };
+    }[];
+    msg: string;
+  } = await swapRes.json();
   logger.log('swapresult:', JSON.stringify(result));
+
+  if (result.code != '0') {
+    throw new BusinessException(`okx swap failed: ${result.msg}`);
+  }
   const resData = result.data[0];
   const estimateGasFee = resData.routerResult.estimateGasFee;
   return {
