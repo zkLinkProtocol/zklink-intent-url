@@ -28,6 +28,8 @@
     "@action/mint-nft/(.*)": "<rootDir>/../libs/mint-nft/src/$1",
     "@action/mint-nft": "<rootDir>/../libs/mint-nft/src",
     "@core/data/(.*)": "<rootDir>/../libs/data/src/$1",
-    "@core/data": "<rootDir>/../libs/data/src"
+    "@core/data": "<rootDir>/../libs/data/src",
+    "@action/shared-red-packet/(.*)": "<rootDir>/../libs/shared-red-packet/src/$1",
+    "@action/shared-red-packet": "<rootDir>/../libs/shared-red-packet/src"
   }
 }
