@@ -3,6 +3,7 @@ import { ethers } from 'ethers';
 import fetch from 'node-fetch';
 
 import { TransactionInfo } from 'src/common/dto/transaction.dto';
+import logger from 'src/logger';
 type HeadersParams = {
   'Content-Type': string;
   'OK-ACCESS-KEY': string;
@@ -104,7 +105,7 @@ export async function getSwapData(
     headers,
   });
   const resData = (await swapRes.json()).data[0];
-  console.log('resData', resData);
+  logger.log('resData', resData);
   const estimateGasFee = resData.routerResult.estimateGasFee;
   return {
     chainId,
@@ -121,7 +122,6 @@ export async function getSupportedChain() {
   const timestamp = new Date().toISOString();
   const supportedUrl = `${apiBaseUrl}supported/chain`;
   const toSignUrl = supportedUrl.replace('https://www.okx.com', '');
-  console.log(supportedUrl);
   const headers = getHeaders(timestamp, toSignUrl);
   const resp = await fetch(supportedUrl, {
     method: 'get',
