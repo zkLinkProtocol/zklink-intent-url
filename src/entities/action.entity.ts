@@ -35,7 +35,7 @@ export abstract class Action extends BaseEntity {
 
   @Column({ type: 'jsonb' })
   @Index('idx_dapp_name_gin', { synchronize: false })
-  public readonly intent: IntentDto<string>;
+  public readonly intent: IntentDto;
 
   @OneToMany(() => Intention, (intention) => intention.actionId)
   public intentions: Intention[];

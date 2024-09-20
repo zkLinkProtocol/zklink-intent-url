@@ -1,7 +1,7 @@
 import { ActionMetadata } from 'src/common/dto';
 import { Address } from 'src/types';
 
-import { FormName } from './types';
+import { FieldTypes } from './types';
 
 export const ESTIMATED_GAS_WALLET: { [key: string]: string } = {
   '42161': '0x5ABC821cf6267534f8650189745B170Eeeff030D',
@@ -22,7 +22,7 @@ export const TOKEN_CONFIG: {
   },
 };
 
-export const METADATA: ActionMetadata<FormName> = {
+export const METADATA: ActionMetadata<FieldTypes> = {
   title: 'Cross Chain Swap',
   description:
     '<div>Perform cross-chain token swaps seamlessly across multiple networks</div>',

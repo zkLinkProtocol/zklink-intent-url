@@ -1,8 +1,8 @@
 import { ActionMetadata } from 'src/common/dto';
 
-import { FormName } from './types';
+import { FieldTypes } from './types';
 
-export const metadata: ActionMetadata<FormName> = {
+export const metadata: ActionMetadata<FieldTypes> = {
   title: 'Mint NFT',
   description: '<div>This action allows you to mint NFT</div>',
   networks: [

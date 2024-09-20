@@ -16,7 +16,7 @@ import {
   SWAP_ROUTER_CONTRACT_ADDRESS,
 } from './config';
 import { NovaSwap } from './swap';
-import { FormName } from './types';
+import { FieldTypes } from './types';
 
 const provider = new ethers.JsonRpcProvider(RPC_URL);
 const novaswap = new NovaSwap(
@@ -28,13 +28,13 @@ const novaswap = new NovaSwap(
 
 @RegistryPlug('novaswap', 'v1')
 @Injectable()
-export class NovaswapService extends ActionDto<FormName> {
+export class NovaswapService extends ActionDto<FieldTypes> {
   async getMetadata() {
     return METADATA;
   }
 
   async generateTransaction(
-    data: GenerateTransactionParams<FormName>,
+    data: GenerateTransactionParams<FieldTypes>,
   ): Promise<TransactionInfo[]> {
     const tx = await novaswap.swapToken(data, FEE);
     return tx;

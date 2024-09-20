@@ -96,7 +96,7 @@ export class ActionUrlController extends BaseController {
   async getIntentPostTxs(
     @Param('code') code: string,
     @Body()
-    request: { sender: string; params: ActionTransactionParams<string> },
+    request: { sender: string; params: ActionTransactionParams },
   ): Promise<ResponseDto<TransactionInfo[]>> {
     const { sender, params } = request;
     const intention = await this.actionUrlService.findOneByCode(code);

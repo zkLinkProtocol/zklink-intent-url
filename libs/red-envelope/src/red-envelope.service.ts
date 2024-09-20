@@ -50,7 +50,7 @@ import {
   CreateRedPacketParams,
   DistributionModeValue,
   DistributionTokenValue,
-  FormName,
+  FieldTypes,
   GasTokenValue,
 } from './type';
 
@@ -58,7 +58,7 @@ const PACKET_HASH = ethers.keccak256(ethers.toUtf8Bytes('REDPACKET'));
 
 @RegistryPlug('red-envelope', 'v1')
 @Injectable()
-export class RedEnvelopeService extends ActionDto<FormName> {
+export class RedEnvelopeService extends ActionDto<FieldTypes> {
   public envelopContract: ethers.Contract;
   private quoter: ethers.Contract;
   private wallet: ethers.Wallet;
@@ -176,7 +176,9 @@ export class RedEnvelopeService extends ActionDto<FormName> {
     return signature;
   }
 
-  private async claimRedEnvelopeMinGas(formData: GenerateFormParams<FormName>) {
+  private async claimRedEnvelopeMinGas(
+    formData: GenerateFormParams<FieldTypes>,
+  ) {
     const { gasToken, distributionToken, amountOfRedEnvelopes } = formData;
     const isGasfree = gasToken === GasTokenValue.DistributedToken;
     const id = 0n;
@@ -250,7 +252,7 @@ export class RedEnvelopeService extends ActionDto<FormName> {
   }
 
   public async onMagicLinkCreated(
-    data: GenerateTransactionParams<FormName>,
+    data: GenerateTransactionParams<FieldTypes>,
   ): Promise<TransactionInfo[]> {
     const { additionalData, formData } = data;
     const { code, account } = additionalData;
@@ -345,7 +347,9 @@ export class RedEnvelopeService extends ActionDto<FormName> {
     return transactions;
   }
 
-  public async preCheckTransaction(data: GenerateTransactionParams<FormName>) {
+  public async preCheckTransaction(
+    data: GenerateTransactionParams<FieldTypes>,
+  ) {
     const { additionalData } = data;
     const { code, account } = additionalData;
     if (!code) {
@@ -370,7 +374,7 @@ export class RedEnvelopeService extends ActionDto<FormName> {
   }
 
   async reportTransaction(
-    data: GenerateTransactionParams<FormName>,
+    data: GenerateTransactionParams<FieldTypes>,
     txHash: string,
   ): Promise<{ message: string }> {
     const { formData } = data;
@@ -402,7 +406,7 @@ export class RedEnvelopeService extends ActionDto<FormName> {
   }
 
   public async generateTransaction(
-    data: GenerateTransactionParams<FormName>,
+    data: GenerateTransactionParams<FieldTypes>,
   ): Promise<TransactionInfo[]> {
     const { additionalData, formData } = data;
     const { gasToken } = formData;

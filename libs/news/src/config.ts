@@ -1,6 +1,10 @@
 import { ActionMetadata } from 'src/common/dto';
 import { Address } from 'src/types';
-export type FormName = 'amountToBuy' | 'tokenFrom' | 'tokenTo';
+export type FieldTypes = {
+  amountToBuy: string;
+  tokenFrom: string;
+  tokenTo: string;
+};
 
 export const TOKEN_CONFIG: {
   [key: string]: { [key: string]: { address: Address; decimal: number } };
@@ -23,7 +27,7 @@ export const TOKEN_CONFIG: {
   },
 };
 
-export const METADATA: ActionMetadata<FormName> = {
+export const METADATA: ActionMetadata<FieldTypes> = {
   title: 'Magic News',
   description: '<div>Perform news seamlessly across multiple networks</div>',
   networks: [
