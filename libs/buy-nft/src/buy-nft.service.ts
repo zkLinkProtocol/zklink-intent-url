@@ -9,11 +9,11 @@ import {
 } from 'src/common/dto';
 
 import { apiConfig, metadata } from './config';
-import { FormName } from './types';
+import { FieldTypes } from './types';
 
 @RegistryPlug('buy-nft', 'v1')
 @Injectable()
-export class BuyNftService extends ActionDto<FormName> {
+export class BuyNftService extends ActionDto<FieldTypes> {
   nftHtmlInfo: string[] = [];
 
   constructor() {
@@ -25,7 +25,7 @@ export class BuyNftService extends ActionDto<FormName> {
   }
 
   async generateTransaction(
-    data: GenerateTransactionParams<FormName>,
+    data: GenerateTransactionParams<FieldTypes>,
   ): Promise<TransactionInfo[]> {
     const { additionalData, formData } = data;
     if (!additionalData.account) {

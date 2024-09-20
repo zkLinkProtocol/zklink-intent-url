@@ -1,8 +1,8 @@
 import { ActionMetadata } from 'src/common/dto';
 
-import { FormName } from './types';
+import { FieldTypes } from './types';
 
-export const metadata: ActionMetadata<FormName> = {
+export const metadata: ActionMetadata<FieldTypes> = {
   title: 'Buy NFT from Magic Eden',
   description: '<div>This action allows you to buy NFT from Magic Eden</div>',
   networks: [

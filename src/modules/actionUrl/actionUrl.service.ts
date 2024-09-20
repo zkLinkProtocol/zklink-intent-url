@@ -167,7 +167,7 @@ export class ActionUrlService {
   }
 
   async generateTransaction(
-    data: GenerateTransactionParams<string>,
+    data: GenerateTransactionParams,
   ): Promise<TransactionInfo[]> {
     const actionUrl = await this.findOneByCode(data.additionalData.code!);
     const { actionId, actionVersion } = actionUrl;

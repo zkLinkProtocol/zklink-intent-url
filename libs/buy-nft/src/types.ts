@@ -1,1 +1,5 @@
-export type FormName = 'queryType' | 'queryValue' | 'quantity';
+export type FieldTypes = {
+  queryType: 'link' | 'contract';
+  queryValue: string;
+  quantity: string;
+};

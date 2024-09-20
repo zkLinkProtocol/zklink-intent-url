@@ -16,16 +16,15 @@ import {
   CHAIN_ID,
   POOL_FACTORY_CONTRACT_ADDRESS,
   PUMP_FUN_FACTORY_ADDRESS,
-  QUOTER_CONTRACT_ADDRESS,
   SWAP_ROUTER_CONTRACT_ADDRESS,
   metadata,
 } from './config';
 import { NovaSwap } from './swap';
-import { FormName } from './types';
+import { FieldTypes } from './types';
 
 @RegistryPlug('pump-fun', 'v1')
 @Injectable()
-export class PumpFunService extends ActionDto<FormName> {
+export class PumpFunService extends ActionDto<FieldTypes> {
   private pumpFunFactory: ethers.Contract;
   private provider: ethers.Provider;
   private novaswap: NovaSwap;
@@ -50,7 +49,7 @@ export class PumpFunService extends ActionDto<FormName> {
   }
 
   async generateTransaction(
-    data: GenerateTransactionParams<FormName>,
+    data: GenerateTransactionParams<FieldTypes>,
   ): Promise<TransactionInfo[]> {
     const { additionalData, formData } = data;
     const stringSalt = additionalData.code;
@@ -119,7 +118,7 @@ export class PumpFunService extends ActionDto<FormName> {
   }
 
   public async onMagicLinkCreated(
-    data: GenerateTransactionParams<FormName>,
+    data: GenerateTransactionParams<FieldTypes>,
   ): Promise<TransactionInfo[]> {
     const { additionalData, formData } = data;
     const stringSalt = additionalData.code;

@@ -1,9 +1,11 @@
 import { ActionMetadata } from 'src/common/dto';
 
 import { Value } from './config';
-import { DistributionModeValue, FormName, GasTokenValue } from './type';
+import { DistributionModeValue, FieldTypes, GasTokenValue } from './type';
 
-export const genMetadata = (configValue: Value): ActionMetadata<FormName> => ({
+export const genMetadata = (
+  configValue: Value,
+): ActionMetadata<FieldTypes> => ({
   title: 'Red Packet 🧧',
   description: '<div>This action is designed to distribute token rewards</div>',
   networks: [

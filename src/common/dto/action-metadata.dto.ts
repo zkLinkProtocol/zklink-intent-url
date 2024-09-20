@@ -8,7 +8,6 @@ import {
   IsArray,
   IsBoolean,
   IsEnum,
-  IsObject,
   IsOptional,
   IsString,
   ValidateIf,
@@ -100,19 +99,19 @@ export class OptionDto {
   default?: boolean;
 }
 
-export interface ConditionalRendering<T extends string> {
+export interface ConditionalRendering<R extends Record<string, any>> {
   value: Array<string>; // An array of values that determine the condition for rendering. When the selected value matches any of these, the specified component will be rendered.
-  component: ConditionalComponentDto<T>;
+  component: ConditionalComponentDto<R>;
 }
 
-export class BaseComponentDto<T extends string> {
+export class BaseComponentDto<R extends Record<string, any>> {
   @ApiProperty({
     type: String,
     description:
       'The component name, and the name will serve as the key in the formData within generateTransaction.',
   })
   @IsString()
-  name: T;
+  name: keyof R;
 
   @ApiProperty({
     type: String,
@@ -150,7 +149,7 @@ export class BaseComponentDto<T extends string> {
     description: 'default value (optional)',
   })
   @IsString()
-  defaultValue?: string;
+  defaultValue?: R[typeof this.name];
 
   @ApiPropertyOptional({
     description:
@@ -158,10 +157,12 @@ export class BaseComponentDto<T extends string> {
   })
   @IsOptional()
   @ValidateNested()
-  conditionalRendering?: ConditionalRendering<T>;
+  conditionalRendering?: ConditionalRendering<R>;
 }
 
-export class PlainComponentDto<T extends string> extends BaseComponentDto<T> {
+export class PlainComponentDto<
+  R extends Record<string, any>,
+> extends BaseComponentDto<R> {
   @ApiProperty({
     type: String,
     enum: ['input', 'text'],
@@ -171,7 +172,9 @@ export class PlainComponentDto<T extends string> extends BaseComponentDto<T> {
   type: 'input' | 'text';
 }
 
-export class OptionComponentDto<T extends string> extends BaseComponentDto<T> {
+export class OptionComponentDto<
+  R extends Record<string, any>,
+> extends BaseComponentDto<R> {
   @ApiProperty({
     type: String,
     enum: ['searchSelect'],
@@ -194,8 +197,8 @@ export class OptionComponentDto<T extends string> extends BaseComponentDto<T> {
 }
 
 export class ConditionalComponentDto<
-  T extends string,
-> extends BaseComponentDto<T> {
+  R extends Record<string, any>,
+> extends BaseComponentDto<R> {
   @ApiProperty({
     type: String,
     enum: ['conditionalSelect'],
@@ -217,12 +220,12 @@ export class ConditionalComponentDto<
   options: OptionDto[];
 }
 
-export class PresetItemDto<N extends string> {
+export class PresetItemDto<R extends Record<string, any>> {
   @ApiProperty({
     type: String,
     description: 'Pre-set which form field the MagicLink trigger is bound to.',
   })
-  field: N;
+  field: keyof R;
 
   @ApiProperty({
     type: String,
@@ -244,7 +247,7 @@ export class PresetItemDto<N extends string> {
   value: string;
 }
 
-export class IntentDto<N extends string> {
+export class IntentDto<R extends Record<string, any> = Record<string, any>> {
   @ApiProperty({
     type: [PlainComponentDto, OptionComponentDto, ConditionalComponentDto],
     description: 'Form configuration items for constructing a transaction.',
@@ -252,7 +255,7 @@ export class IntentDto<N extends string> {
   @IsArray()
   @ValidateNested({ each: true })
   components: Array<
-    PlainComponentDto<N> | OptionComponentDto<N> | ConditionalComponentDto<N>
+    PlainComponentDto<R> | OptionComponentDto<R> | ConditionalComponentDto<R>
   >;
 
   @ApiPropertyOptional({
@@ -260,7 +263,7 @@ export class IntentDto<N extends string> {
     description: 'should bind value with submit button',
   })
   @IsOptional()
-  binding?: N | true;
+  binding?: keyof R | true;
 
   // @ApiPropertyOptional({ description: 'Human-readable description (optional)' })
   // @IsOptional()
@@ -268,12 +271,12 @@ export class IntentDto<N extends string> {
   // humanize?: string;
 
   @ApiPropertyOptional({
-    type: [PlainComponentDto, OptionComponentDto],
+    type: [PresetItemDto<R>],
     description: 'List of components',
   })
   @IsArray()
   @ValidateNested({ each: true })
-  preset?: Array<PresetItemDto<N>>;
+  preset?: Array<PresetItemDto<R>>;
 }
 
 export class MagicLinkMetadataDto {
@@ -300,7 +303,9 @@ export class MagicLinkMetadataDto {
   gallery?: string;
 }
 
-export class ActionMetadata<N extends string> {
+export class ActionMetadata<
+  R extends Record<string, any> = Record<string, any>,
+> {
   @ApiProperty({
     type: String,
     description:
@@ -355,9 +360,9 @@ export class ActionMetadata<N extends string> {
   @ValidateNested()
   author: AuthorDto;
 
-  @ApiProperty({ type: IntentDto<N>, description: 'Intent details' })
+  @ApiProperty({ type: IntentDto<R>, description: 'Intent details' })
   @ValidateNested()
-  intent: IntentDto<N>;
+  intent: IntentDto<R>;
 
   @ApiPropertyOptional({
     type: MagicLinkMetadataDto,
@@ -368,13 +373,13 @@ export class ActionMetadata<N extends string> {
   magicLinkMetadata?: MagicLinkMetadataDto;
 }
 
-export function isOptionComponentDto<N extends string>(
+export function isOptionComponentDto<R extends Record<string, any>>(
   component:
-    | OptionComponentDto<N>
-    | PlainComponentDto<N>
-    | ConditionalComponentDto<N>
+    | OptionComponentDto<R>
+    | PlainComponentDto<R>
+    | ConditionalComponentDto<R>
     | undefined,
-): component is OptionComponentDto<N> | ConditionalComponentDto<N> {
+): component is OptionComponentDto<R> | ConditionalComponentDto<R> {
   return (
     !!component &&
     (component.type === 'searchSelect' ||
