@@ -1,11 +1,11 @@
+import { DataModule } from '@core/data';
 import { Module } from '@nestjs/common';
-import { ActionUrlModule } from 'src/modules/actionUrl/actionUrl.module';
 
 import { PumpFunService } from './pump-fun.service';
 
 @Module({
-  imports: [ActionUrlModule],
+  imports: [DataModule],
   providers: [PumpFunService],
-  exports: [PumpFunService, ActionUrlModule],
+  exports: [PumpFunService],
 })
 export class PumpFunModule {}
