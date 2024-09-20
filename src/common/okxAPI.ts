@@ -104,8 +104,9 @@ export async function getSwapData(
     method: 'get',
     headers,
   });
-  const resData = (await swapRes.json()).data[0];
-  logger.log('resData', resData);
+  const result = await swapRes.json();
+  logger.log('swapresult:', JSON.stringify(result));
+  const resData = result.data[0];
   const estimateGasFee = resData.routerResult.estimateGasFee;
   return {
     chainId,
