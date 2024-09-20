@@ -95,7 +95,7 @@ export async function getSwapData(
     slippage: '0.1',
     userWalletAddress: userAddress,
   };
-  logger.log('swapparams', JSON.stringify(swapParams));
+  logger.log('swapparams', swapParams.amount);
   const swapURL = getAggregatorRequestUrl('swap', swapParams);
 
   const swapToSignUrl = swapURL.replace('https://www.okx.com', '');
