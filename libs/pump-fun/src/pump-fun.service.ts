@@ -1,4 +1,5 @@
 import { RegistryPlug } from '@action/registry';
+import { DataService } from '@core/data';
 import { Injectable } from '@nestjs/common';
 import { ethers } from 'ethers';
 import {
@@ -28,7 +29,7 @@ export class PumpFunService extends ActionDto<FormName> {
   private pumpFunFactory: ethers.Contract;
   private provider: ethers.Provider;
   private novaswap: NovaSwap;
-  constructor() {
+  constructor(private readonly dataService: DataService) {
     super();
     this.provider = new ethers.JsonRpcProvider('https://sepolia.rpc.zklink.io');
     this.pumpFunFactory = new ethers.Contract(
@@ -53,7 +54,10 @@ export class PumpFunService extends ActionDto<FormName> {
   ): Promise<TransactionInfo[]> {
     const { additionalData, formData } = data;
     const stringSalt = additionalData.code;
-    const creator = '0x330bd48140cf1796e3795a6b374a673d7a4461d0';
+
+    const creator = await this.dataService.getMagicLinkCreatorInfoByCode(
+      additionalData.code!,
+    );
     const tokenAddress = await this.pumpFunFactory.getCreate2Address(
       formData.tokenName,
       formData.tokenSymbol,
