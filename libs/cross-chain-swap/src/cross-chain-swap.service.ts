@@ -34,17 +34,21 @@ export class CrossChainSwapService extends ActionDto<FormName> {
       throw new Error('Missing account!');
     }
     const { amountToBuy, ...restParams } = formData;
-    const params = { ...restParams, amountToBuy: BigInt(amountToBuy) };
+    const tokenFrom = TOKEN_CONFIG[additionalData.chainId][formData.tokenFrom];
+    const tokenInAddress = tokenFrom.address;
+    const params = {
+      ...restParams,
+      amountToBuy: ethers.parseUnits(amountToBuy, tokenFrom.decimal),
+    };
 
     let approveTx: TransactionInfo;
     let swapTx: TransactionInfo;
-    const tokenInAddress =
-      TOKEN_CONFIG[additionalData.chainId][params.tokenFrom];
+
     const provider = new ethers.JsonRpcProvider(RPC_URL[chainId]) as any;
 
     const tokens: TransactionInfo['requiredTokenAmount'] = [
       {
-        token: tokenInAddress,
+        token: tokenFrom.address,
         amount: params.amountToBuy.toString(),
       },
     ];
