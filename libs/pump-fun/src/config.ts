@@ -2,7 +2,7 @@ import { ActionMetadata, ConditionalComponentDto } from 'src/common/dto';
 
 import { FieldTypes } from './types';
 export const PUMP_FUN_FACTORY_ADDRESS =
-  '0xb24848Eb0F6fb1F46615D8cc4b2644f02cde7d05';
+  '0xC7A067f0A5E6Ed88De69DD5c3cE8138B56fa56A7';
 
 export const POOL_FACTORY_CONTRACT_ADDRESS =
   '0x0c283f1a3C6981eE623cb4E8AcC4f450f39D0815';
