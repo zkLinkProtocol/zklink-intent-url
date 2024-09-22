@@ -80,17 +80,18 @@ export class NovaSwap {
     recipient: string,
     _fee: number,
   ) {
+    let value = '0';
+    if (tokenIn == ethers.ZeroAddress) {
+      tokenIn = await this.swapRouterContract.WETH9();
+      value = amountIn.toString();
+    }
     const { poolContract, fee } = await this.getPoolInfo(
       this.factoryContract,
       tokenIn,
       tokenOut,
       _fee,
     );
-    let value = '0';
-    if (tokenIn == ethers.ZeroAddress) {
-      tokenIn = await this.swapRouterContract.WETH9();
-      value = amountIn.toString();
-    }
+
     const swapParams = {
       tokenIn,
       tokenOut,
