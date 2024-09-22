@@ -3,6 +3,8 @@ import { ethers } from 'ethers';
 import fetch from 'node-fetch';
 
 import { TransactionInfo } from 'src/common/dto/transaction.dto';
+import { BusinessException } from 'src/exception/business.exception';
+import logger from 'src/logger';
 type HeadersParams = {
   'Content-Type': string;
   'OK-ACCESS-KEY': string;
@@ -93,6 +95,7 @@ export async function getSwapData(
     slippage: '0.1',
     userWalletAddress: userAddress,
   };
+  logger.log('swapparams', swapParams.amount);
   const swapURL = getAggregatorRequestUrl('swap', swapParams);
 
   const swapToSignUrl = swapURL.replace('https://www.okx.com', '');
@@ -103,8 +106,20 @@ export async function getSwapData(
     method: 'get',
     headers,
   });
-  const resData = (await swapRes.json()).data[0];
-  console.log('resData', resData);
+  const result: {
+    code: string;
+    data: {
+      routerResult: { estimateGasFee: string };
+      tx: { to: string; value: string; data: any };
+    }[];
+    msg: string;
+  } = await swapRes.json();
+  logger.log('swapresult:', JSON.stringify(result));
+
+  if (result.code != '0') {
+    throw new BusinessException(`okx swap failed: ${result.msg}`);
+  }
+  const resData = result.data[0];
   const estimateGasFee = resData.routerResult.estimateGasFee;
   return {
     chainId,
@@ -121,7 +136,6 @@ export async function getSupportedChain() {
   const timestamp = new Date().toISOString();
   const supportedUrl = `${apiBaseUrl}supported/chain`;
   const toSignUrl = supportedUrl.replace('https://www.okx.com', '');
-  console.log(supportedUrl);
   const headers = getHeaders(timestamp, toSignUrl);
   const resp = await fetch(supportedUrl, {
     method: 'get',

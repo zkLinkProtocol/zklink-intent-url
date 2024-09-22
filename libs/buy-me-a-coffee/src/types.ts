@@ -1,1 +1,5 @@
-export type FormName = 'token' | 'value' | 'recipient';
+export type FieldTypes = {
+  token: string;
+  value: string;
+  recipient: string;
+};

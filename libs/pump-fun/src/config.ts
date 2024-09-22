@@ -1,7 +1,6 @@
-import { ActionMetadata } from 'src/common/dto';
-import { ConditionalComponentDto } from 'src/common/dto';
+import { ActionMetadata, ConditionalComponentDto } from 'src/common/dto';
 
-import { FormName } from './types';
+import { FieldTypes } from './types';
 export const PUMP_FUN_FACTORY_ADDRESS =
   '0xC7A067f0A5E6Ed88De69DD5c3cE8138B56fa56A7';
 
@@ -13,7 +12,7 @@ export const SWAP_ROUTER_CONTRACT_ADDRESS =
   '0x38B313c483ADC7ca4038AE322ec09fAd4c1a8cFC';
 
 export const CHAIN_ID = 810181;
-const orderType: ConditionalComponentDto<FormName> = {
+const orderType: ConditionalComponentDto<FieldTypes> = {
   name: 'orderType',
   label: 'Order Type',
   desc: 'The type of the order',
@@ -26,7 +25,7 @@ const orderType: ConditionalComponentDto<FormName> = {
   ],
 };
 
-export const metadata: ActionMetadata<FormName> = {
+export const metadata: ActionMetadata<FieldTypes> = {
   title: 'PumpFun',
   description:
     '<div>PumpFun is a platform for creating and participating in token pump events</div>',

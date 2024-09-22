@@ -10,7 +10,7 @@ import {
 import { getApproveData, getSwapData } from 'src/common/okxAPI';
 
 import { ESTIMATED_GAS_WALLET, METADATA, TOKEN_CONFIG } from './config';
-import { FormName } from './types';
+import { FieldTypes } from './types';
 import {
   getERC20GasCost,
   getEstimatedGasCost,
@@ -20,13 +20,13 @@ import {
 
 @RegistryPlug('cross-chain-swap', 'v1')
 @Injectable()
-export class CrossChainSwapService extends ActionDto<FormName> {
+export class CrossChainSwapService extends ActionDto<FieldTypes> {
   async getMetadata() {
     return METADATA;
   }
 
   async generateTransaction(
-    data: GenerateTransactionParams<FormName>,
+    data: GenerateTransactionParams<FieldTypes>,
   ): Promise<TransactionInfo[]> {
     const { additionalData, formData } = data;
     const { chainId, account } = additionalData;
@@ -34,17 +34,21 @@ export class CrossChainSwapService extends ActionDto<FormName> {
       throw new Error('Missing account!');
     }
     const { amountToBuy, ...restParams } = formData;
-    const params = { ...restParams, amountToBuy: BigInt(amountToBuy) };
+    const tokenFrom = TOKEN_CONFIG[additionalData.chainId][formData.tokenFrom];
+    const tokenInAddress = tokenFrom.address;
+    const params = {
+      ...restParams,
+      amountToBuy: ethers.parseUnits(amountToBuy, tokenFrom.decimal),
+    };
 
     let approveTx: TransactionInfo;
     let swapTx: TransactionInfo;
-    const tokenInAddress =
-      TOKEN_CONFIG[additionalData.chainId][params.tokenFrom];
+
     const provider = new ethers.JsonRpcProvider(RPC_URL[chainId]) as any;
 
     const tokens: TransactionInfo['requiredTokenAmount'] = [
       {
-        token: tokenInAddress,
+        token: tokenFrom.address,
         amount: params.amountToBuy.toString(),
       },
     ];

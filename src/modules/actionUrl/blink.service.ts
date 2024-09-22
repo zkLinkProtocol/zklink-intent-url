@@ -79,7 +79,7 @@ export class BlinkService {
     account: string,
     params: any,
   ): Promise<string> {
-    const data: GenerateTransactionParams<string> = {
+    const data: GenerateTransactionParams = {
       additionalData: {
         chainId,
         code,

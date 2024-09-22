@@ -10,12 +10,12 @@ import {
 import { getApproveData, getSwapData } from 'src/common/okxAPI';
 import { TgbotService } from 'src/modules/tgbot/tgbot.service';
 
-import { FormName, METADATA, TOKEN_CONFIG } from './config';
+import { FieldTypes, METADATA, TOKEN_CONFIG } from './config';
 
 //magic news
 @RegistryPlug('news', 'v1')
 @Injectable()
-export class NewsService extends ActionDto<FormName> {
+export class NewsService extends ActionDto<FieldTypes> {
   constructor(private readonly tgbotService: TgbotService) {
     super();
   }
@@ -24,7 +24,7 @@ export class NewsService extends ActionDto<FormName> {
   }
 
   async generateTransaction(
-    data: GenerateTransactionParams<FormName>,
+    data: GenerateTransactionParams<FieldTypes>,
   ): Promise<TransactionInfo[]> {
     const { additionalData, formData } = data;
     const { chainId, account } = additionalData;
@@ -32,13 +32,16 @@ export class NewsService extends ActionDto<FormName> {
       throw new Error('Missing account!');
     }
     const { amountToBuy, ...restParams } = formData;
-    const params = { ...restParams, amountToBuy: BigInt(amountToBuy) };
+    const tokenFrom = TOKEN_CONFIG[additionalData.chainId][formData.tokenFrom];
+
+    const params = {
+      ...restParams,
+      amountToBuy: ethers.parseUnits(amountToBuy, tokenFrom.decimal),
+    };
 
     let approveTx: TransactionInfo;
     let swapTx: TransactionInfo;
-    const tokenInAddress =
-      TOKEN_CONFIG[additionalData.chainId][params.tokenFrom];
-    const provider = new ethers.JsonRpcProvider(RPC_URL[chainId]) as any;
+    const tokenInAddress = tokenFrom.address;
 
     const tokens: TransactionInfo['requiredTokenAmount'] = [
       {
@@ -82,7 +85,7 @@ export class NewsService extends ActionDto<FormName> {
   }
 
   public async onMagicLinkCreated(
-    data: GenerateTransactionParams<FormName>,
+    data: GenerateTransactionParams<FieldTypes>,
   ): Promise<TransactionInfo[]> {
     await this.tgbotService.sendNews(data.additionalData.code!);
     return [];

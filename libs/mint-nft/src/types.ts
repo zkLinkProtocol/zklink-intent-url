@@ -1,1 +1,1 @@
-export type FormName = 'contract' | 'quantity';
+export type FieldTypes = { contract: string; quantity: string };

@@ -108,7 +108,7 @@ export class ActionController extends BaseController {
   async validateTransaction(
     @Param('id') id: string,
     @Body()
-    body: GenerateFormParams<string>,
+    body: GenerateFormParams,
   ): Promise<ResponseDto<string>> {
     const actionStore = await this.actionStoreService.getActionStore(id);
     const response = await actionStore.validateFormData(body);

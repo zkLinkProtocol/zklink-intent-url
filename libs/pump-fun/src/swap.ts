@@ -8,7 +8,7 @@ import FACTORY_ABI from './abis/factory.json';
 import POOL_ABI from './abis/pool.json';
 import QUOTER_ABI from './abis/quoter.json';
 import SWAP_ROUTER_ABI from './abis/swaprouter.json';
-import { FormName } from './types';
+import { FieldTypes } from './types';
 
 export class NovaSwap {
   private chainId: number;

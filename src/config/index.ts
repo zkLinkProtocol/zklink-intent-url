@@ -17,6 +17,7 @@ const configFactory = async () => {
     witnessPrivateKey: process.env.WITNESS_PRIVATE_KEY || '',
     turnkeyApi: process.env.TURNKEY_API || '',
     rpc: {
+      810181: process.env.Nova_Sepolia_RPC_URL || '',
       810180: process.env.Nova_RPC_URL || '',
       1: process.env.Ethereum_RPC_URL || '',
       324: process.env.Zksync_RPC_URL || '',
