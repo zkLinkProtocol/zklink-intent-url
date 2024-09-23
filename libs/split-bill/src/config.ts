@@ -1,8 +1,8 @@
 import { ActionMetadata } from 'src/common/dto';
 
-import { FormName } from './types';
+import { FieldTypes } from './types';
 
-export const metadata: ActionMetadata<FormName> = {
+export const metadata: ActionMetadata<FieldTypes> = {
   title: 'Split Bill 💰',
   description: '<div>This action is made for friends to split the bill</div>',
   networks: [

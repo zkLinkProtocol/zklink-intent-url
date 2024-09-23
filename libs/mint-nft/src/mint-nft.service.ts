@@ -9,11 +9,11 @@ import {
 
 import ERC721ABI from './abis/ERC721.json';
 import { metadata, providerConfig } from './config';
-import { FormName } from './types';
+import { FieldTypes } from './types';
 
 @RegistryPlug('mint-nft', 'v1')
 @Injectable()
-export class MintNftService extends ActionDto<FormName> {
+export class MintNftService extends ActionDto<FieldTypes> {
   constructor() {
     super();
   }
@@ -23,7 +23,7 @@ export class MintNftService extends ActionDto<FormName> {
   }
 
   async generateTransaction(
-    data: GenerateTransactionParams<FormName>,
+    data: GenerateTransactionParams<FieldTypes>,
   ): Promise<TransactionInfo[]> {
     const { additionalData, formData } = data;
     const { chainId } = additionalData;

@@ -36,9 +36,10 @@ export interface ClaimRedPacketParams {
   expiry: number;
 }
 
-export type FormName =
-  | 'distributionMode'
-  | 'totalDistributionAmount'
-  | 'distributionToken'
-  | 'amountOfRedEnvelopes'
-  | 'gasToken';
+export type FieldTypes = {
+  distributionMode: string;
+  totalDistributionAmount: string;
+  distributionToken: string;
+  amountOfRedEnvelopes: string;
+  gasToken: string;
+};

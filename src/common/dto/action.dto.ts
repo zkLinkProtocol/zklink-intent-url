@@ -5,29 +5,38 @@ import { TransactionInfo } from './transaction.dto';
 
 export type ActionId = string;
 
-export type BasicAdditionalParams = { code?: string; account?: string };
+export type BasicAdditionalParams = {
+  code?: string;
+  account?: string;
+  inviter?: string;
+};
 
 type NetworkAdditionalParams = {
   chainId: number;
 };
 
-export type GenerateFormParams<T extends string> = {
-  [key in T]: string;
+export type GenerateFormParams<
+  T extends Record<string, any> = Record<string, any>,
+> = {
+  [key in keyof T]: T[key];
 };
 
 export type AdditionalParams = BasicAdditionalParams & NetworkAdditionalParams;
 
-export type ActionTransactionParams<T extends string> =
-  NetworkAdditionalParams & GenerateFormParams<T>;
+export type ActionTransactionParams<
+  T extends Record<string, any> = Record<string, any>,
+> = NetworkAdditionalParams & GenerateFormParams<T>;
 
-export type GenerateTransactionParams<T extends string> = {
+export type GenerateTransactionParams<
+  T extends Record<string, any> = Record<string, any>,
+> = {
   additionalData: AdditionalParams;
-  formData: {
-    [key in T]: string;
-  };
+  formData: GenerateFormParams<T>;
 };
 
-export abstract class Action<T extends string = string> {
+export abstract class Action<
+  T extends Record<string, any> = Record<string, any>,
+> {
   abstract getMetadata(): Promise<ActionMetadata<T>>;
 
   abstract generateTransaction(

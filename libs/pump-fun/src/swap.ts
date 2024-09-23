@@ -8,7 +8,7 @@ import FACTORY_ABI from './abis/factory.json';
 import POOL_ABI from './abis/pool.json';
 import QUOTER_ABI from './abis/quoter.json';
 import SWAP_ROUTER_ABI from './abis/swaprouter.json';
-import { FormName } from './types';
+import { FieldTypes } from './types';
 
 export class NovaSwap {
   private chainId: number;
@@ -80,17 +80,22 @@ export class NovaSwap {
     recipient: string,
     _fee: number,
   ) {
+    let value = '0';
+    if (tokenIn == ethers.ZeroAddress) {
+      tokenIn = await this.swapRouterContract.WETH9();
+      value = amountIn.toString();
+    }
+
+    if (tokenOut == ethers.ZeroAddress) {
+      tokenOut = await this.swapRouterContract.WETH9();
+    }
     const { poolContract, fee } = await this.getPoolInfo(
       this.factoryContract,
       tokenIn,
       tokenOut,
       _fee,
     );
-    let value = '0';
-    if (tokenIn == ethers.ZeroAddress) {
-      tokenIn = await this.swapRouterContract.WETH9();
-      value = amountIn.toString();
-    }
+
     const swapParams = {
       tokenIn,
       tokenOut,

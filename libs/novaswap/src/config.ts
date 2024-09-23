@@ -1,6 +1,6 @@
 import { ActionMetadata } from 'src/common/dto';
 
-import { FormName } from './types';
+import { FieldTypes } from './types';
 
 export const POOL_FACTORY_CONTRACT_ADDRESS =
   '0x0c283f1a3C6981eE623cb4E8AcC4f450f39D0815';
@@ -11,7 +11,7 @@ export const SWAP_ROUTER_CONTRACT_ADDRESS =
 export const RPC_URL = 'https://sepolia.rpc.zklink.io';
 export const FEE = 3000; // fee level, 0.3% fee is 3000
 
-export const METADATA: ActionMetadata<FormName> = {
+export const METADATA: ActionMetadata<FieldTypes> = {
   title: 'Novaswap',
   description:
     '<div>This action is designed to allow you to create token swap on <a href="https://novaswap.fi">https://novaswap.fi</a></div>',

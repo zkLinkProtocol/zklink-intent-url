@@ -30,11 +30,11 @@ import {
   metadata,
   providerConfig,
 } from './config';
-import { FormName } from './types';
+import { FieldTypes } from './types';
 
 @RegistryPlug('split-bill', 'v1')
 @Injectable()
-export class SplitBillService extends ActionDto<FormName> {
+export class SplitBillService extends ActionDto<FieldTypes> {
   constructor(private readonly intentionRecordService: IntentionRecordService) {
     super();
   }
@@ -44,7 +44,7 @@ export class SplitBillService extends ActionDto<FormName> {
   }
 
   async generateTransaction(
-    data: GenerateTransactionParams<FormName>,
+    data: GenerateTransactionParams<FieldTypes>,
   ): Promise<TransactionInfo[]> {
     const { additionalData, formData } = data;
     const { chainId } = additionalData;

@@ -16,16 +16,15 @@ import {
   CHAIN_ID,
   POOL_FACTORY_CONTRACT_ADDRESS,
   PUMP_FUN_FACTORY_ADDRESS,
-  QUOTER_CONTRACT_ADDRESS,
   SWAP_ROUTER_CONTRACT_ADDRESS,
   metadata,
 } from './config';
 import { NovaSwap } from './swap';
-import { FormName } from './types';
+import { FieldTypes } from './types';
 
 @RegistryPlug('pump-fun', 'v1')
 @Injectable()
-export class PumpFunService extends ActionDto<FormName> {
+export class PumpFunService extends ActionDto<FieldTypes> {
   private pumpFunFactory: ethers.Contract;
   private provider: ethers.Provider;
   private novaswap: NovaSwap;
@@ -50,7 +49,7 @@ export class PumpFunService extends ActionDto<FormName> {
   }
 
   async generateTransaction(
-    data: GenerateTransactionParams<FormName>,
+    data: GenerateTransactionParams<FieldTypes>,
   ): Promise<TransactionInfo[]> {
     const { additionalData, formData } = data;
     const stringSalt = additionalData.code;
@@ -78,15 +77,44 @@ export class PumpFunService extends ActionDto<FormName> {
 
     const isPaused = await tokenContract.isPaused();
     if (isPaused) {
-      return await this.novaswap.swapToken(
-        ethers.ZeroAddress,
-        tokenAddress,
-        ethers.parseEther(formData.buyAmount),
-        additionalData.account!,
-        3000,
-      );
+      if (formData.orderType === 'buy') {
+        return await this.novaswap.swapToken(
+          ethers.ZeroAddress,
+          tokenAddress,
+          ethers.parseEther(formData.buyAmount),
+          additionalData.account!,
+          3000,
+        );
+      } else {
+        const userBalance = await tokenContract.balanceOf(
+          additionalData.account!,
+        );
+        const sellAmount =
+          (Number(formData.sellPercent) * Number(userBalance)) / 100;
+        const approveData = await tokenContract.approve.populateTransaction(
+          SWAP_ROUTER_CONTRACT_ADDRESS,
+          BigInt(sellAmount),
+        );
+        const sellTx = await this.novaswap.swapToken(
+          tokenAddress,
+          ethers.ZeroAddress,
+          BigInt(sellAmount),
+          additionalData.account!,
+          3000,
+        );
+        return [
+          {
+            chainId: additionalData.chainId,
+            to: tokenAddress,
+            value: '0',
+            data: approveData.data,
+            shouldPublishToChain: true,
+          },
+          sellTx[0],
+        ];
+      }
     } else {
-      if (formData.buyAmount) {
+      if (formData.orderType === 'buy') {
         const buyData = await tokenContract.buy.populateTransaction();
         return [
           {
@@ -119,7 +147,7 @@ export class PumpFunService extends ActionDto<FormName> {
   }
 
   public async onMagicLinkCreated(
-    data: GenerateTransactionParams<FormName>,
+    data: GenerateTransactionParams<FieldTypes>,
   ): Promise<TransactionInfo[]> {
     const { additionalData, formData } = data;
     const stringSalt = additionalData.code;

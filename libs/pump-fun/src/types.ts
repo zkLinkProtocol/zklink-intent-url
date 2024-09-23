@@ -1,7 +1,8 @@
-export type FormName =
-  | 'tokenName'
-  | 'tokenSymbol'
-  | 'creatorInitialBuyAmount'
-  | 'buyAmount'
-  | 'sellPercent'
-  | 'orderType';
+export type FieldTypes = {
+  tokenName: string;
+  tokenSymbol: string;
+  creatorInitialBuyAmount: string;
+  buyAmount: string;
+  sellPercent: string;
+  orderType: string;
+};
