@@ -282,21 +282,6 @@ export class RedEnvelopeService extends ActionDto<FieldTypes> {
     );
     const expiry = Math.floor(Date.now() / 1000) + 60 * 60;
 
-    const tokenContract = new ethers.Contract(
-      distributionToken,
-      ERC20ABI,
-      this.provider,
-    );
-    const approveData = await tokenContract.approve.populateTransaction(
-      this.config.redPacketContractAddress,
-      totalDistributionAmountBn + payForGas,
-    );
-
-    const allowance = await tokenContract.allowance(
-      additionalData.account,
-      this.config.redPacketContractAddress,
-    );
-
     const signature = await this.genCreateSignature({
       creator: account as Address,
       token: distributionToken as Address,
@@ -326,14 +311,30 @@ export class RedEnvelopeService extends ActionDto<FieldTypes> {
       );
 
     const transactions = [];
-    if (totalDistributionAmountBn + payForGas > allowance) {
-      transactions.push({
-        chainId: this.config.chainId,
-        to: approveData.to,
-        value: '0',
-        data: approveData.data,
-        shouldPublishToChain: true,
-      });
+
+    if (distributionToken !== DistributionTokenValue.ETH) {
+      const tokenContract = new ethers.Contract(
+        distributionToken,
+        ERC20ABI,
+        this.provider,
+      );
+      const allowance = await tokenContract.allowance(
+        additionalData.account,
+        this.config.redPacketContractAddress,
+      );
+      if (totalDistributionAmountBn + payForGas > allowance) {
+        const approveData = await tokenContract.approve.populateTransaction(
+          this.config.redPacketContractAddress,
+          totalDistributionAmountBn + payForGas,
+        );
+        transactions.push({
+          chainId: this.config.chainId,
+          to: approveData.to,
+          value: '0',
+          data: approveData.data,
+          shouldPublishToChain: true,
+        });
+      }
     }
 
     transactions.push({
