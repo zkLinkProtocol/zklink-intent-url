@@ -1,13 +1,12 @@
 import { RegistryPlug } from '@action/registry';
 import { Injectable } from '@nestjs/common';
-import { Contract, JsonRpcProvider } from 'ethers';
+import { Contract, Interface, JsonRpcProvider } from 'ethers';
 import {
   Action as ActionDto,
   GenerateTransactionParams,
   TransactionInfo,
 } from 'src/common/dto';
 
-import ERC721ABI from './abis/ERC721.json';
 import { metadata, providerConfig } from './config';
 import { FieldTypes } from './types';
 
@@ -29,26 +28,42 @@ export class MintNftService extends ActionDto<FieldTypes> {
     const { chainId } = additionalData;
     const providerUrl = providerConfig[chainId];
     const provider = new JsonRpcProvider(providerUrl);
-    const contract = new Contract(
-      formData.contract.toString(),
-      ERC721ABI,
-      provider,
-    );
-    let mintTx;
-    if (formData.quantity == '0') {
-      mintTx = await contract['mint(address)'].populateTransaction(
-        additionalData.account,
-      );
-    } else {
-      mintTx = await contract['mint(address, uint256)'].populateTransaction(
-        additionalData.account,
-        Number(formData.quantity),
-      );
+
+    const payable = Number(formData.value) > 0 ? ' payable' : '';
+    const abiParams = [];
+    const funcParams = [];
+    const txParams = [];
+    if (formData.recipient != 'none') {
+      abiParams.push('address recipient');
+      funcParams.push('address');
+      if (formData.recipient == 'sender') {
+        txParams.push(additionalData.account);
+      } else {
+        txParams.push(formData.recipient);
+      }
     }
+    if (Number(formData.quantity) > 0) {
+      abiParams.push('uint quantity');
+      funcParams.push('uint');
+      txParams.push(Number(formData.quantity));
+    }
+    if (formData.ext != 'none') {
+      abiParams.push('string ext');
+      funcParams.push('string');
+      txParams.push(formData.ext);
+    }
+    const abi = new Interface([
+      `function ${formData.entrypoint}(${abiParams.join(',')})${payable}`,
+    ]);
+
+    const contract = new Contract(formData.contract.toString(), abi, provider);
+    const mintTx = await contract[
+      `${formData.entrypoint}(${funcParams.join(',')})`
+    ].populateTransaction.apply(this, txParams);
     const tx: TransactionInfo = {
       chainId: chainId,
       to: mintTx.to,
-      value: '0',
+      value: formData.value,
       data: mintTx.data,
       shouldPublishToChain: true,
     };
