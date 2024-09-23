@@ -131,8 +131,9 @@ export class PumpFunService extends ActionDto<FieldTypes> {
         );
         const sellAmount =
           (Number(formData.sellPercent) * Number(userBalance)) / 100;
-        const sellData =
-          await tokenContract.sell.populateTransaction(sellAmount);
+        const sellData = await tokenContract.sell.populateTransaction(
+          BigInt(sellAmount),
+        );
         return [
           {
             chainId: additionalData.chainId,
