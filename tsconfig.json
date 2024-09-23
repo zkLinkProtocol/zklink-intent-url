@@ -95,6 +95,12 @@
       ],
       "@core/data/*": [
         "libs/data/src/*"
+      ],
+      "@action/shared-red-packet": [
+        "libs/shared-red-packet/src"
+      ],
+      "@action/shared-red-packet/*": [
+        "libs/shared-red-packet/src/*"
       ]
     }
   }

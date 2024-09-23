@@ -8,6 +8,7 @@ import { NewsModule } from '@action/news';
 import { NovaswapModule } from '@action/novaswap';
 import { PumpFunModule } from '@action/pump-fun';
 import { RedEnvelopeModule } from '@action/red-envelope';
+import { SharedRedPacketModule } from '@action/shared-red-packet';
 import { SplitBillModule } from '@action/slipt-bill';
 
 import { RegistryService } from './registry.service';
@@ -23,6 +24,7 @@ import { RegistryService } from './registry.service';
     NewsModule,
     BuyNftModule,
     MintNftModule,
+    SharedRedPacketModule,
   ],
   providers: [RegistryService],
   exports: [RegistryService],

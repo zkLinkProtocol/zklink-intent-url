@@ -165,11 +165,11 @@ export class PlainComponentDto<
 > extends BaseComponentDto<R> {
   @ApiProperty({
     type: String,
-    enum: ['input', 'text'],
+    enum: ['input', 'text', 'switch'],
     description: 'Component type',
   })
-  @IsEnum(['input', 'text'])
-  type: 'input' | 'text';
+  @IsEnum(['input', 'text', 'switch'])
+  type: 'input' | 'text' | 'switch';
 }
 
 export class OptionComponentDto<

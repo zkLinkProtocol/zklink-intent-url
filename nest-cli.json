@@ -5,7 +5,9 @@
   "compilerOptions": {
     "deleteOutDir": true,
     "webpack": true,
-    "plugins": ["@nestjs/swagger"]
+    "plugins": [
+      "@nestjs/swagger"
+    ]
   },
   "projects": {
     "utils": {
@@ -105,6 +107,15 @@
       "sourceRoot": "libs/data/src",
       "compilerOptions": {
         "tsConfigPath": "libs/data/tsconfig.lib.json"
+      }
+    },
+    "shared-red-packet": {
+      "type": "library",
+      "root": "libs/shared-red-packet",
+      "entryFile": "index",
+      "sourceRoot": "libs/shared-red-packet/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/shared-red-packet/tsconfig.lib.json"
       }
     }
   }
