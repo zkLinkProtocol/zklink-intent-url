@@ -240,6 +240,9 @@ export class RedEnvelopeService extends ActionDto<FieldTypes> {
   }
 
   private async getDecimals(tokenAddress: string): Promise<bigint> {
+    if (tokenAddress === DistributionTokenValue.ETH) {
+      return 18n;
+    }
     const contract = new ethers.Contract(tokenAddress, ERC20ABI, this.provider);
     const decimals = await contract.decimals();
     return decimals;
