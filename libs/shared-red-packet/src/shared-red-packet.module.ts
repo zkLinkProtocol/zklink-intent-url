@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 
 import { ActionUrlModule } from 'src/modules/actionUrl/actionUrl.module';
 
-import { SharedRedPacketService } from './shared-red-packetservice';
+import { SharedRedPacketService } from './shared-red-packet.service';
 
 @Module({
   imports: [ActionUrlModule],

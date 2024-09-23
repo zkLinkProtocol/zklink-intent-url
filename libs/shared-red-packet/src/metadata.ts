@@ -6,7 +6,7 @@ import { DistributionModeValue, FieldTypes, GasTokenValue } from './type';
 export const genMetadata = (
   configValue: Value,
 ): ActionMetadata<FieldTypes> => ({
-  title: 'Red Packet 🧧',
+  title: 'Shared Red Packet 🧧',
   description: '<div>This action is designed to distribute token rewards</div>',
   networks: [
     {
@@ -16,7 +16,7 @@ export const genMetadata = (
   ],
   author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
   magicLinkMetadata: {
-    title: 'Red Packet 🧧',
+    title: 'Shared Red Packet 🧧',
     description: 'Best wishes!',
   },
   intent: {
@@ -67,7 +67,7 @@ export const genMetadata = (
       {
         name: 'gasToken',
         label: 'Who should pay for the claiming gas fee',
-        desc: 'Gas can be deducted from distributed amount, allowing recipient to grab red envelope with 0 gas',
+        desc: 'Gas Token',
         type: 'searchSelect',
         regex: '^[a-zA-Z0-9]+$',
         regexDesc: 'String',
@@ -80,21 +80,11 @@ export const genMetadata = (
       },
       {
         name: 'isInvitable',
-        label: 'Who should pay for the claiming gas fee',
-        desc: 'Gas can be deducted from distributed amount, allowing recipient to grab red envelope with 0 gas',
-        type: 'searchSelect',
-        regex: '^[a-zA-Z0-9]+$',
-        regexDesc: 'String',
-        options: [
-          {
-            label: 'Recipient',
-            value: GasTokenValue.Eth,
-          },
-          {
-            label: 'Red Packet Creator (Requires additional tokens)',
-            value: GasTokenValue.DistributedToken,
-          },
-        ],
+        label: 'whether to give a commission to the inviter',
+        desc: 'When this switch is turned on, users who share the Magic Link will receive a portion of the recipient’s red envelope reward.',
+        type: 'switch',
+        regex: '',
+        regexDesc: '',
       },
     ],
   },

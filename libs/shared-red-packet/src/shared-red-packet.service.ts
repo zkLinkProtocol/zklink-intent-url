@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import BigNumber from 'bignumber.js';
 import {
   Interface,
   JsonRpcProvider,
@@ -16,13 +15,11 @@ import {
   toBigInt,
   toUtf8Bytes,
 } from 'ethers';
-import { utils } from 'zksync-ethers';
 
 import { RegistryPlug } from '@action/registry';
 import {
   Action as ActionDto,
   BasicAdditionalParams,
-  GenerateFormParams,
   GenerateTransactionParams,
   TransactionInfo,
 } from 'src/common/dto';
@@ -36,13 +33,11 @@ import { Address } from 'src/types';
 
 import ERC20ABI from './abis/ERC20.json';
 import MemeRedPacketABI from './abis/MemeRedPacket.json';
-import QuoterV2 from './abis/QuoterV2.json';
 import {
   TransactionResult,
   Value,
   browserConfig,
   configuration,
-  feeMap,
   providerConfig,
 } from './config';
 import { genMetadata } from './metadata';
@@ -50,9 +45,7 @@ import {
   ClaimRedPacketParams,
   CreateRedPacketParams,
   DistributionModeValue,
-  DistributionTokenValue,
   FieldTypes,
-  GasTokenValue,
 } from './type';
 
 const PACKET_HASH = ethers.keccak256(ethers.toUtf8Bytes('REDPACKET'));
@@ -61,7 +54,6 @@ const PACKET_HASH = ethers.keccak256(ethers.toUtf8Bytes('REDPACKET'));
 @Injectable()
 export class SharedRedPacketService extends ActionDto<FieldTypes> {
   public redPacketContract: ethers.Contract;
-  private quoter: ethers.Contract;
   private wallet: ethers.Wallet;
   private provider: ethers.Provider;
   readonly env: ConfigType['env'];
@@ -79,22 +71,13 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
     })!;
     this.config = configuration[this.env];
     this.provider = new JsonRpcProvider(this.config.rpcUrl);
-    const mainNetProvider = new JsonRpcProvider('https://rpc.zklink.io');
 
     this.wallet = new ethers.Wallet(this.witnessPrivateKey, this.provider);
-    const mainWallet = new ethers.Wallet(
-      this.witnessPrivateKey,
-      mainNetProvider,
-    );
+
     this.redPacketContract = new ethers.Contract(
       this.config.redPacketContractAddress,
       MemeRedPacketABI,
       this.wallet,
-    );
-    this.quoter = new ethers.Contract(
-      this.config.quoterContractAddress,
-      QuoterV2,
-      mainWallet,
     );
   }
 
@@ -104,14 +87,14 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
 
   private async genCreateSignature(params: CreateRedPacketParams) {
     const domain = {
-      name: 'RedPacket',
+      name: 'MemeRedPacket',
       version: '0',
       chainId: this.config.chainId,
       verifyingContract: this.config.redPacketContractAddress,
     };
 
     const types = {
-      CreateRedPacket: [
+      CreateMemeRedPacket: [
         { name: 'creator', type: 'address' },
         { name: 'token', type: 'address' },
         { name: 'totalCount', type: 'uint256' },
@@ -119,7 +102,6 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
         { name: 'totalShare', type: 'uint256' },
         { name: 'packetHash', type: 'bytes32' },
         { name: 'isRandom', type: 'bool' },
-        // { name: 'isGasfree', type: 'bool' },
         { name: 'isInvitable', type: 'bool' },
         { name: 'expiry', type: 'uint256' },
       ],
@@ -130,11 +112,9 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
       token: params.token,
       totalCount: params.totalCount,
       tokenAmount: params.tokenAmount,
-      // payForGas: params.payForGas,
       totalShare: params.totalShare,
       packetHash: params.packetHash,
       isRandom: params.isRandom,
-      // isGasfree: params.isGasfree,
       isInvitable: params.isInvitable,
       expiry: params.expiry,
     };
@@ -149,16 +129,17 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
 
   private async genClaimSignature(params: ClaimRedPacketParams) {
     const domain = {
-      name: 'RedPacket',
+      name: 'MemeRedPacket',
       version: '0',
       chainId: this.config.chainId,
       verifyingContract: this.config.redPacketContractAddress,
     };
 
     const types = {
-      RedPacketClaim: [
+      MemeRedPacketClaim: [
         { name: 'id', type: 'uint256' },
         { name: 'recipient', type: 'address' },
+        { name: ' inviter', type: 'address' },
         { name: 'expiry', type: 'uint256' },
       ],
     };
@@ -176,27 +157,6 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
     );
 
     return signature;
-  }
-
-  private async getQuote(tokenOut: string, ethAmountIn: bigint) {
-    const replacedTokenOut =
-      tokenOut === DistributionTokenValue.DTN
-        ? DistributionTokenValue.ZKL
-        : tokenOut;
-    const fee = feeMap[replacedTokenOut];
-
-    try {
-      const [amountOut] = await this.quoter.quoteExactInputSingle.staticCall({
-        tokenIn: this.config.wethAddress,
-        tokenOut: replacedTokenOut,
-        amountIn: ethAmountIn,
-        fee: fee,
-        sqrtPriceLimitX96: 0,
-      });
-      return amountOut;
-    } catch (error) {
-      throw new Error(`Error fetching quote:, ${error.message}`);
-    }
   }
 
   private genTotalShare(count: number): number {
@@ -238,7 +198,6 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
       totalDistributionAmount,
       distributionToken,
       amountOfRedEnvelopes,
-      gasToken,
       isInvitable,
     } = formData;
 
@@ -246,7 +205,6 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
     const packetHash = PACKET_HASH;
     const isRandom =
       distributionMode === DistributionModeValue.RandomAmountPerAddress;
-    const isGasfree = gasToken === GasTokenValue.DistributedToken;
 
     const decimals = await this.getDecimals(distributionToken);
     const totalDistributionAmountBn = parseUnits(
@@ -275,7 +233,6 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
       token: distributionToken as Address,
       totalCount: parseInt(amountOfRedEnvelopes),
       tokenAmount: totalDistributionAmountBn,
-      // payForGas: payForGas,
       totalShare: totalShare,
       packetHash: packetHash,
       isRandom: isRandom,
@@ -289,11 +246,9 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
         distributionToken,
         amountOfRedEnvelopes,
         totalDistributionAmountBn,
-        // payForGas,
         totalShare,
         packetHash,
         isRandom,
-        isGasfree,
         isInvitable,
         expiry,
         signature,
@@ -341,15 +296,6 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
     }
   }
 
-  getTokenNameByAddress(address: string): string | undefined {
-    const entries = Object.entries(DistributionTokenValue) as [
-      string,
-      string,
-    ][];
-    const foundEntry = entries.find(([_, value]) => value === address);
-    return foundEntry ? foundEntry[0] : undefined;
-  }
-
   async reportTransaction(
     data: GenerateTransactionParams<FieldTypes>,
     txHash: string,
@@ -372,10 +318,9 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
       const event = iface.parseLog(log);
       const { amount } = event?.args ?? { amount: 0n };
       const decimals = await this.getDecimals(distributionToken);
-      const symbol = this.getTokenNameByAddress(distributionToken);
       const claimedAmount = formatUnits(amount.toString(), decimals);
       return {
-        message: `You have received ${claimedAmount} ${symbol} in red packet amount!`,
+        message: `You have received ${claimedAmount} in red packet amount!`,
       };
     } catch (error) {
       throw new Error(`Failed to fetch transaction receipt: ${error.message}`);
@@ -385,9 +330,7 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
   public async generateTransaction(
     data: GenerateTransactionParams<FieldTypes>,
   ): Promise<TransactionInfo[]> {
-    const { additionalData, formData } = data;
-    const { gasToken } = formData;
-    const isGasfree = gasToken === GasTokenValue.DistributedToken;
+    const { additionalData } = data;
     const { code, account, inviter } = additionalData;
     if (!code) {
       throw new Error('missing code');
@@ -397,13 +340,6 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
       throw new Error('missing account');
     }
 
-    const paymasterParams = utils.getPaymasterParams(
-      this.config.paymasterContractAddress,
-      {
-        type: 'General',
-        innerInput: new Uint8Array(),
-      },
-    );
     const packetId = this.getPacketIDByCode(code);
     const expiry = Math.floor(Date.now() / 1000) + 60 * 60;
     const signature = await this.genClaimSignature({
@@ -423,12 +359,6 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
         to: this.config.redPacketContractAddress,
         value: '0',
         data: tx.data,
-        customData: isGasfree
-          ? {
-              gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
-              paymasterParams,
-            }
-          : null,
         shouldPublishToChain: true,
       },
     ];
@@ -535,13 +465,9 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
   ): Promise<string> {
     return transactions
       .map((tx) => {
-        const option = this.config.tokens.find(
-          (option) => option.value === tx.tokenAddress,
-        );
         const browserUrl = browserConfig[tx.chainId];
-        const tokenName = option?.label;
         const prefixedTxhash = `${browserUrl}${tx.txhash}`;
-        return `<p>${tx.toAddress}   ${tx.value} ${tokenName}   ${prefixedTxhash}</p>`;
+        return `<p>${tx.toAddress}   ${tx.value}  ${prefixedTxhash}</p>`;
       })
       .join('');
   }

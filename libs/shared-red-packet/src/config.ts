@@ -1,23 +1,15 @@
-import { DistributionTokenValue } from './type';
-
 export const configuration = {
-  prod: {
+  dev: {
     chainId: 810181,
     networkName: 'zkLink Nova Sepolia',
     rpcUrl: 'https://sepolia.rpc.zklink.io',
-    wethAddress: '0x8280a4e7D5B3B658ec4580d3Bc30f5e50454F169',
-    quoterContractAddress: '0x86Fc6ab84CFc6a506d51FC722D3aDe959599A98A',
-    redPacketContractAddress: '0x5e0ae89cCcCbFc8199a8147200eBcB97A5e8cC2d',
-    paymasterContractAddress: '0xC8Eb1749e5da9bc6db43d488E1a3a0Bd74138A6C',
+    redPacketContractAddress: '0x70E17f5A10f88e8F40F602338a979635699EE5e5',
   },
-  dev: {
+  prod: {
     chainId: 810180,
     networkName: 'zkLink Nova',
     rpcUrl: 'https://rpc.zklink.io',
-    wethAddress: '0x8280a4e7D5B3B658ec4580d3Bc30f5e50454F169',
-    quoterContractAddress: '0x86Fc6ab84CFc6a506d51FC722D3aDe959599A98A',
     redPacketContractAddress: '0x583ba818E70418c99829F21Dce4A0A188bbc871F',
-    paymasterContractAddress: '0x036CD64D20018148Df37C6ffDb971273EAC2E127',
   },
 };
 
@@ -33,12 +25,6 @@ export const browserConfig: { [key in number]: string } = {
   810180: 'https://explorer.zklink.io/tx/',
   810181: 'https://sepolia.explorer.zklink.io/tx/',
   270: 'http://3.112.15.165:3050',
-};
-
-export const feeMap: { [key in string]: number } = {
-  [DistributionTokenValue.USDC]: 3000,
-  [DistributionTokenValue.USDT]: 3000,
-  [DistributionTokenValue.ZKL]: 10000,
 };
 
 export type TransactionResult = {
