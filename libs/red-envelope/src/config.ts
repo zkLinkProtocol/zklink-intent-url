@@ -26,6 +26,10 @@ export const configuration = {
     paymasterContractAddress: '0x036CD64D20018148Df37C6ffDb971273EAC2E127',
     tokens: [
       {
+        label: 'ETH',
+        value: DistributionTokenValue.ETH,
+      },
+      {
         label: 'USDC',
         value: DistributionTokenValue.USDC,
       },
