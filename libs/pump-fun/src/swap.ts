@@ -85,6 +85,10 @@ export class NovaSwap {
       tokenIn = await this.swapRouterContract.WETH9();
       value = amountIn.toString();
     }
+
+    if (tokenOut == ethers.ZeroAddress) {
+      tokenOut = await this.swapRouterContract.WETH9();
+    }
     const { poolContract, fee } = await this.getPoolInfo(
       this.factoryContract,
       tokenIn,

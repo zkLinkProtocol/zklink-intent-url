@@ -77,15 +77,44 @@ export class PumpFunService extends ActionDto<FieldTypes> {
 
     const isPaused = await tokenContract.isPaused();
     if (isPaused) {
-      return await this.novaswap.swapToken(
-        ethers.ZeroAddress,
-        tokenAddress,
-        ethers.parseEther(formData.buyAmount),
-        additionalData.account!,
-        3000,
-      );
+      if (formData.orderType === 'buy') {
+        return await this.novaswap.swapToken(
+          ethers.ZeroAddress,
+          tokenAddress,
+          ethers.parseEther(formData.buyAmount),
+          additionalData.account!,
+          3000,
+        );
+      } else {
+        const userBalance = await tokenContract.balanceOf(
+          additionalData.account!,
+        );
+        const sellAmount =
+          (Number(formData.sellPercent) * Number(userBalance)) / 100;
+        const approveData = await tokenContract.approve.populateTransaction(
+          SWAP_ROUTER_CONTRACT_ADDRESS,
+          BigInt(sellAmount),
+        );
+        const sellTx = await this.novaswap.swapToken(
+          tokenAddress,
+          ethers.ZeroAddress,
+          BigInt(sellAmount),
+          additionalData.account!,
+          3000,
+        );
+        return [
+          {
+            chainId: additionalData.chainId,
+            to: tokenAddress,
+            value: '0',
+            data: approveData.data,
+            shouldPublishToChain: true,
+          },
+          sellTx[0],
+        ];
+      }
     } else {
-      if (formData.buyAmount) {
+      if (formData.orderType === 'buy') {
         const buyData = await tokenContract.buy.populateTransaction();
         return [
           {
