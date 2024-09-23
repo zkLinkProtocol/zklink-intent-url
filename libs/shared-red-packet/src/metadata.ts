@@ -80,7 +80,7 @@ export const genMetadata = (
       },
       {
         name: 'isInvitable',
-        label: 'whether to give a commission to the inviter',
+        label: 'Whether to give a commission to the inviter',
         desc: 'When this switch is turned on, users who share the Magic Link will receive a portion of the recipient’s red envelope reward.',
         type: 'switch',
         regex: '',
