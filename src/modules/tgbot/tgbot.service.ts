@@ -2,8 +2,7 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ethers } from 'ethers';
 import html2md from 'html-to-md';
 import { LRUCache } from 'lru-cache';
-import TelegramBot from 'node-telegram-bot-api';
-import { ParseMode } from 'node-telegram-bot-api';
+import TelegramBot, { ParseMode } from 'node-telegram-bot-api';
 
 import configFactory from 'src/config';
 import { CreatorRepository, IntentionRepository } from 'src/repositories';

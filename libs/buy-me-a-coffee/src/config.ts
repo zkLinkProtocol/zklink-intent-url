@@ -38,8 +38,6 @@ export const metadata: ActionMetadata<FieldTypes> = {
         label: 'Token',
         desc: 'The token you want to cost',
         type: 'searchSelect',
-        regex: '^[a-zA-Z0-9]+$',
-        regexDesc: 'Token Symbol',
         options: [
           {
             label: 'ETH',
@@ -121,7 +119,7 @@ export const metadata: ActionMetadata<FieldTypes> = {
         desc: 'The address that is sponsored',
         type: 'input',
         regex: '^0x[a-fA-F0-9]{40}$',
-        regexDesc: 'Address',
+        regexDesc: 'Invalid Address',
       },
     ],
     preset: [

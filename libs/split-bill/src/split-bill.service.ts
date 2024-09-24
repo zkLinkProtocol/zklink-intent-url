@@ -173,6 +173,9 @@ export class SplitBillService extends ActionDto<FieldTypes> {
         const tokenComponent = metadata.intent.components.find(
           (component) => component.name === 'token',
         );
+        if (!tokenComponent) {
+          throw new Error('Missing token component');
+        }
         if (isOptionComponentDto(tokenComponent)) {
           const option = tokenComponent?.options?.find(
             (option) =>

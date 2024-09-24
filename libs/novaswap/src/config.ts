@@ -34,8 +34,6 @@ export const METADATA: ActionMetadata<FieldTypes> = {
         label: 'From Token',
         desc: 'The amount of tokens to spend',
         type: 'searchSelect',
-        regex: '^0x[a-fA-F0-9]{40}$',
-        regexDesc: 'Address',
         options: [
           {
             label: 'WETH',
@@ -49,8 +47,6 @@ export const METADATA: ActionMetadata<FieldTypes> = {
         label: 'To Token',
         desc: 'The address of the token you want to receive',
         type: 'searchSelect',
-        regex: '^0x[a-fA-F0-9]{40}$',
-        regexDesc: 'Address',
         options: [
           {
             label: 'USDC',

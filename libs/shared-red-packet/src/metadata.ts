@@ -27,8 +27,6 @@ export const genMetadata = (
         label: 'Distribution Method',
         desc: 'Choose Mode to distribute Red Envelopes',
         type: 'searchSelect',
-        regex: '^[a-zA-Z0-9]+$',
-        regexDesc: 'String',
         options: [
           {
             label: 'Equal Amount Per Address',
@@ -62,15 +60,13 @@ export const genMetadata = (
         desc: 'Total number of Red Packets',
         type: 'input',
         regex: '^[1-9]\\d*$',
-        regexDesc: 'It must be between 200 and 10000',
+        regexDesc: 'It should be a positive integer.',
       },
       {
         name: 'gasToken',
         label: 'Who should pay for the claiming gas fee',
         desc: 'Gas Token',
         type: 'searchSelect',
-        regex: '^[a-zA-Z0-9]+$',
-        regexDesc: 'It should be string',
         options: [
           {
             label: 'Recipient',
@@ -83,8 +79,6 @@ export const genMetadata = (
         label: 'Whether to give a commission to the inviter',
         desc: 'When this switch is turned on, users who share the Magic Link will receive a portion of the recipient’s red envelope reward.',
         type: 'switch',
-        regex: '',
-        regexDesc: '',
       },
     ],
   },

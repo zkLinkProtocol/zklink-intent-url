@@ -17,8 +17,6 @@ const orderType: ConditionalComponentDto<FieldTypes> = {
   label: 'Order Type',
   desc: 'The type of the order',
   type: 'conditionalSelect',
-  regex: '^[a-zA-Z0-9]+$',
-  regexDesc: 'Order Type',
   options: [
     { label: 'Buy', value: 'buy' },
     { label: 'Sell', value: 'sell' },

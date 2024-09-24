@@ -26,20 +26,6 @@ export class NetworkDto {
   chainId: string;
 }
 
-// export class DAppDto {
-//   @ApiProperty({
-//     type: String,
-//     description: 'The name of the dApp to which the Action belongs.',
-//   })
-//   @IsString()
-//   name: string;
-
-//   @ApiPropertyOptional({ type: String, description: 'DApp URL (optional)' })
-//   @IsOptional()
-//   @IsString()
-//   url?: string;
-// }
-
 export class AuthorDto {
   @ApiProperty({ type: String, description: 'Action developer name' })
   @IsString()
@@ -128,22 +114,6 @@ export class BaseComponentDto<R extends Record<string, any>> {
   @IsString()
   desc: string;
 
-  @ApiProperty({
-    type: String,
-    description:
-      'Simple regex validation, informing the frontend of the form field rules, which the frontend will use for validation.',
-  })
-  @IsString()
-  regex: string;
-
-  @ApiProperty({
-    type: String,
-    description:
-      'Error message for regex validation; if the regex validation fails, this configuration will serve as a prompt to tell the creator the rules for filling in this field.',
-  })
-  @IsString()
-  regexDesc: string;
-
   @ApiPropertyOptional({
     type: String,
     description: 'default value (optional)',
@@ -160,16 +130,42 @@ export class BaseComponentDto<R extends Record<string, any>> {
   conditionalRendering?: ConditionalRendering<R>;
 }
 
-export class PlainComponentDto<
+export class AgnosticComponentDto<
   R extends Record<string, any>,
 > extends BaseComponentDto<R> {
   @ApiProperty({
     type: String,
-    enum: ['input', 'text', 'switch'],
+    enum: ['text', 'switch'],
     description: 'Component type',
   })
-  @IsEnum(['input', 'text', 'switch'])
-  type: 'input' | 'text' | 'switch';
+  @IsEnum(['text', 'switch'])
+  type: 'text' | 'switch';
+}
+
+export class InputComponentDto<
+  R extends Record<string, any>,
+> extends BaseComponentDto<R> {
+  @ApiProperty({
+    type: String,
+    description: 'Component type',
+  })
+  type: 'input';
+
+  @ApiProperty({
+    type: String,
+    description:
+      'Simple regex validation, informing the frontend of the form field rules, which the frontend will use for validation.',
+  })
+  @IsString()
+  regex: string;
+
+  @ApiProperty({
+    type: String,
+    description:
+      'Error message for regex validation; if the regex validation fails, this configuration will serve as a prompt to tell the creator the rules for filling in this field.',
+  })
+  @IsString()
+  regexDesc: string;
 }
 
 export class OptionComponentDto<
@@ -249,13 +245,21 @@ export class PresetItemDto<R extends Record<string, any>> {
 
 export class IntentDto<R extends Record<string, any> = Record<string, any>> {
   @ApiProperty({
-    type: [PlainComponentDto, OptionComponentDto, ConditionalComponentDto],
+    type: [
+      AgnosticComponentDto,
+      InputComponentDto,
+      OptionComponentDto,
+      ConditionalComponentDto,
+    ],
     description: 'Form configuration items for constructing a transaction.',
   })
   @IsArray()
   @ValidateNested({ each: true })
   components: Array<
-    PlainComponentDto<R> | OptionComponentDto<R> | ConditionalComponentDto<R>
+    | AgnosticComponentDto<R>
+    | InputComponentDto<R>
+    | OptionComponentDto<R>
+    | ConditionalComponentDto<R>
   >;
 
   @ApiPropertyOptional({
@@ -376,9 +380,9 @@ export class ActionMetadata<
 export function isOptionComponentDto<R extends Record<string, any>>(
   component:
     | OptionComponentDto<R>
-    | PlainComponentDto<R>
+    | InputComponentDto<R>
     | ConditionalComponentDto<R>
-    | undefined,
+    | AgnosticComponentDto<R>,
 ): component is OptionComponentDto<R> | ConditionalComponentDto<R> {
   return (
     !!component &&
