@@ -298,6 +298,8 @@ export class RedEnvelopeService extends ActionDto<FieldTypes> {
       expiry: expiry,
     });
 
+    const totalValue = totalDistributionAmountBn + payForGas;
+
     const createRedPacketData =
       await this.envelopContract.createRedPacket.populateTransaction(
         id,
@@ -325,10 +327,10 @@ export class RedEnvelopeService extends ActionDto<FieldTypes> {
         additionalData.account,
         this.config.redPacketContractAddress,
       );
-      if (totalDistributionAmountBn + payForGas > allowance) {
+      if (totalValue > allowance) {
         const approveData = await tokenContract.approve.populateTransaction(
           this.config.redPacketContractAddress,
-          totalDistributionAmountBn + payForGas,
+          totalValue,
         );
         transactions.push({
           chainId: this.config.chainId,
@@ -343,7 +345,10 @@ export class RedEnvelopeService extends ActionDto<FieldTypes> {
     transactions.push({
       chainId: this.config.chainId,
       to: createRedPacketData.to,
-      value: '0',
+      value:
+        DistributionTokenValue.ETH === distributionToken
+          ? totalValue.toString()
+          : '0',
       data: createRedPacketData.data,
       shouldPublishToChain: true,
     });

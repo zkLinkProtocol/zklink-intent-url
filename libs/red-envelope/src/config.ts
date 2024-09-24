@@ -1,22 +1,26 @@
 import { DistributionTokenValue } from './type';
 
 export const configuration = {
-  prod: {
+  dev: {
     chainId: 810181,
     networkName: 'zkLink Nova Sepolia',
     rpcUrl: 'https://sepolia.rpc.zklink.io',
     wethAddress: '0x8280a4e7D5B3B658ec4580d3Bc30f5e50454F169',
     quoterContractAddress: '0x86Fc6ab84CFc6a506d51FC722D3aDe959599A98A',
-    redPacketContractAddress: '0x5e0ae89cCcCbFc8199a8147200eBcB97A5e8cC2d',
-    paymasterContractAddress: '0xC8Eb1749e5da9bc6db43d488E1a3a0Bd74138A6C',
+    redPacketContractAddress: '0x2f7821161C6c11a473A6DC03896ea6BB5ac5Cb2F',
+    paymasterContractAddress: '0x0a7f97fbF3cf238aAD21119CE70aB157CE11ce01',
     tokens: [
+      {
+        label: 'ETH',
+        value: DistributionTokenValue.ETH,
+      },
       {
         label: 'DTN',
         value: DistributionTokenValue.DTN,
       },
     ],
   },
-  dev: {
+  prod: {
     chainId: 810180,
     networkName: 'zkLink Nova',
     rpcUrl: 'https://rpc.zklink.io',
