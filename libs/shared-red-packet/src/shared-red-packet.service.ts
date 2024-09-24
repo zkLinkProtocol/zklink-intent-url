@@ -20,6 +20,7 @@ import { RegistryPlug } from '@action/registry';
 import {
   Action as ActionDto,
   BasicAdditionalParams,
+  GenerateFormParams,
   GenerateTransactionParams,
   TransactionInfo,
 } from 'src/common/dto';
@@ -83,6 +84,17 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
 
   public async getMetadata() {
     return genMetadata(this.config);
+  }
+
+  public async validateFormData(formData: GenerateFormParams<FieldTypes>) {
+    const { amountOfRedEnvelopes } = formData;
+    if (
+      Number(amountOfRedEnvelopes) < 200 ||
+      Number(amountOfRedEnvelopes) > 10000
+    ) {
+      return 'Number of Red Packets be between 200 and 10000';
+    }
+    return '';
   }
 
   private async genCreateSignature(params: CreateRedPacketParams) {
@@ -223,11 +235,6 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
       totalDistributionAmountBn,
     );
 
-    const allowance = await tokenContract.allowance(
-      additionalData.account,
-      this.config.redPacketContractAddress,
-    );
-
     const signature = await this.genCreateSignature({
       creator: account as Address,
       token: distributionToken as Address,
@@ -255,6 +262,11 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
       );
 
     const transactions = [];
+
+    const allowance = await tokenContract.allowance(
+      additionalData.account,
+      this.config.redPacketContractAddress,
+    );
     if (totalDistributionAmountBn > allowance) {
       transactions.push({
         chainId: this.config.chainId,

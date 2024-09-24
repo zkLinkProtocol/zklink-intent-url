@@ -48,6 +48,7 @@ import { JwtAuthGuard } from '../auth/jwtAuth.guard';
 interface TransactionBody {
   account: string;
   chainId: string;
+  inviter?: string;
   params: { [key: string]: string };
 }
 
@@ -450,12 +451,13 @@ export class ActionUrlController extends BaseController {
     @Body()
     body: TransactionBody,
   ): Promise<ResponseDto<TransactionInfo[]>> {
-    const { params, account, chainId } = body;
+    const { params, account, inviter, chainId } = body;
     const data = {
       additionalData: {
         code,
         account: account,
         chainId: parseInt(chainId),
+        inviter,
       },
       formData: params,
     };
