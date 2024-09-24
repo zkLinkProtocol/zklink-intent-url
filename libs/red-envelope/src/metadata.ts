@@ -27,8 +27,6 @@ export const genMetadata = (
         label: 'Distribution Method',
         desc: 'Choose Mode to distribute Red Envelopes',
         type: 'searchSelect',
-        regex: '^[a-zA-Z0-9]+$',
-        regexDesc: 'String',
         options: [
           {
             label: 'Equal Amount Per Address',
@@ -53,8 +51,6 @@ export const genMetadata = (
         label: 'Token to Distribute',
         desc: 'Choose a token to distribute',
         type: 'searchSelect',
-        regex: '^0x[a-fA-F0-9]{40}$',
-        regexDesc: 'Address',
         options: configValue.tokens,
       },
       {
@@ -63,15 +59,13 @@ export const genMetadata = (
         desc: 'Total number of Red Packets',
         type: 'input',
         regex: '^[1-9]\\d*$',
-        regexDesc: 'Int',
+        regexDesc: 'It should be a positive integer.',
       },
       {
         name: 'gasToken',
         label: 'Who should pay for the claiming gas fee',
         desc: 'Gas can be deducted from distributed amount, allowing recipient to grab red envelope with 0 gas',
         type: 'searchSelect',
-        regex: '^[a-zA-Z0-9]+$',
-        regexDesc: 'String',
         options: [
           {
             label: 'Recipient',

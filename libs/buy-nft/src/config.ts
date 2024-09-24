@@ -27,8 +27,6 @@ export const metadata: ActionMetadata<FieldTypes> = {
         label: 'NFT Query Method',
         desc: 'Specify how to find the NFT',
         type: 'searchSelect',
-        regex: '^[a-zA-Z]+$',
-        regexDesc: 'NFT Query Method',
         options: [
           {
             label: 'Magic Eden Collection URL',
