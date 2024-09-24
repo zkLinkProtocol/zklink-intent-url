@@ -62,7 +62,7 @@ export const genMetadata = (
         desc: 'Total number of Red Packets',
         type: 'input',
         regex: '^[1-9]\\d*$',
-        regexDesc: 'Int',
+        regexDesc: 'It must be between 200 and 10000',
       },
       {
         name: 'gasToken',
@@ -70,7 +70,7 @@ export const genMetadata = (
         desc: 'Gas Token',
         type: 'searchSelect',
         regex: '^[a-zA-Z0-9]+$',
-        regexDesc: 'String',
+        regexDesc: 'It should be string',
         options: [
           {
             label: 'Recipient',
