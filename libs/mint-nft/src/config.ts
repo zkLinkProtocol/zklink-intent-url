@@ -29,7 +29,7 @@ export const metadata: ActionMetadata<FieldTypes> = {
         desc: 'Enter the NFT contract address',
         type: 'input',
         regex: '^0x[a-fA-F0-9]{40}$',
-        regexDesc: 'Address',
+        regexDesc: 'Invalid Address',
       },
       {
         name: 'entrypoint',
