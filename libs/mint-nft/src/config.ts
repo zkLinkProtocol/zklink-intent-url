@@ -42,7 +42,8 @@ export const metadata: ActionMetadata<FieldTypes> = {
       },
       {
         name: 'recipient',
-        label: 'Recipient',
+        label:
+          "Recipient Address (leave it to none if the NFT contract don't need it, leave it to sender for transaction sender)",
         desc: "NFT recipient address, leave it to none if the NFT contract don't need it, leave it to sender for transaction sender",
         type: 'input',
         regex: '^(0x[a-fA-F0-9]{40})|(none)|(sender)$',
@@ -51,16 +52,18 @@ export const metadata: ActionMetadata<FieldTypes> = {
       },
       {
         name: 'quantity',
-        label: 'Quantity',
+        label:
+          "Quantity (leave it to 0 if the NFT contract don't support batch mint)",
         desc: "Quantity of NFTs to mint, leave it to 0 if the NFT contract don't support batch mint",
         type: 'input',
         regex: '^\\d+$',
         regexDesc: 'Quantity',
-        defaultValue: '1',
+        defaultValue: '0',
       },
       {
         name: 'ext',
-        label: 'Extension Data',
+        label:
+          "Extension Data, (leave it to none if the NFT contract don't need it)",
         desc: "Extension metadata of the NFT, leave it to none if the NFT contract don't need it",
         type: 'input',
         regex: '^.*$',
@@ -69,7 +72,7 @@ export const metadata: ActionMetadata<FieldTypes> = {
       },
       {
         name: 'value',
-        label: 'Amount',
+        label: 'Transaction Value (leave it to 0 for free mint NFT)',
         desc: 'The NFT mint fee, leave it to 0 for free mint NFT',
         type: 'input',
         regex: '^\\d+\\.?\\d*$|^\\d*\\.\\d+$',
