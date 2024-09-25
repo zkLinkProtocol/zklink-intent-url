@@ -203,7 +203,6 @@ export class TgbotService implements OnModuleInit {
 ✅️ *Verified zkLink official team*
 `;
     const parse_mode: ParseMode = 'MarkdownV2';
-    const postHref = `${userMiniApp}?startapp=${news.code}&`;
 
     const inlineKeyboard = [];
     const newsType = settings.newsType ?? '';
@@ -233,7 +232,7 @@ export class TgbotService implements OnModuleInit {
     }
     inlineKeyboard.push(typeActions);
     const actions = this.blinkService.magicLinkToBlinkActions(
-      postHref,
+      '',
       news.settings,
     );
     let lineButtons = [];
@@ -241,7 +240,7 @@ export class TgbotService implements OnModuleInit {
       const action = actions[i];
       lineButtons.push({
         text: action.label,
-        url: action.href,
+        url: `${userMiniApp}${action.href}&startapp=${news.code}__________${action.index}`,
       });
       if ((i + 1) % 3 === 0) {
         inlineKeyboard.push(lineButtons);
@@ -268,6 +267,34 @@ export class TgbotService implements OnModuleInit {
       this.logger.log('sendNews success', JSON.stringify(res));
     } catch (error) {
       this.logger.error(`sendNews error`, error.stack);
+    }
+  }
+
+  async sendMemeRedPacketMsg(inviteLink: string, tgUserId: string) {
+    let caption = `
+    ✅Your Meme Red Packet Already claimed.  Check your fortune!
+    🧧 Share2Earn: Receive a 20% reward based on the value claimed by your invitees.
+    Your Invite Link: \`${inviteLink}\`
+    `;
+    const parse_mode: ParseMode = 'MarkdownV2';
+    const shareUrl = `https://t.me/share?url=${inviteLink}&text=Claim your Meme Red Packet`;
+    const inlineKeyboard = [];
+    inlineKeyboard.push([
+      {
+        text: 'Invite',
+        url: shareUrl,
+      },
+    ]);
+    const reply_markup = {
+      inline_keyboard: inlineKeyboard,
+    };
+    try {
+      const options = { reply_markup, parse_mode };
+      caption = this.formatMarkdownV2(caption);
+      const res = await this.bot.sendMessage(tgUserId, caption, options);
+      this.logger.log('sendMemeRedPacketMsg success', JSON.stringify(res));
+    } catch (error) {
+      this.logger.error(`sendMemeRedPacketMsg error`, error.stack);
     }
   }
 
@@ -338,6 +365,7 @@ export class TgbotService implements OnModuleInit {
       .replaceAll('.', '\\.')
       .replaceAll('-', '\\-')
       .replaceAll('?', '\\?')
+      .replaceAll('!', '\\!')
       .replaceAll('=', '\\=');
   }
 }

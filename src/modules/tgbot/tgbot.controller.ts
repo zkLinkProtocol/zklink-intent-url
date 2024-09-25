@@ -82,4 +82,18 @@ export class TgbotController extends BaseController {
       return false;
     }
   }
+
+  @Get('testSendMemeRedPacketMsg')
+  async testSendMemeRedPacketMsg(
+    @Query('inviteLink') inviteLink: string,
+    @Query('tgUserId') tgUserId: string,
+  ) {
+    try {
+      this.tgbotService.sendMemeRedPacketMsg(inviteLink, tgUserId);
+      return true;
+    } catch (error) {
+      this.logger.error(error);
+      return false;
+    }
+  }
 }

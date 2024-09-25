@@ -25,13 +25,14 @@ export class BlinkService {
     const intentList = setting.intentList;
     let actions = [];
     if (intentList && intentList.length > 0) {
-      actions = intentList.map((item: any) => {
+      actions = intentList.map((item: any, index: number) => {
         let res: any = {};
         if (item.type == 'Button') {
           if (undefined != item.value) {
             params.set(item.field, item.value);
           }
           res = {
+            index,
             href: '',
             label: item.title,
           };
@@ -40,6 +41,7 @@ export class BlinkService {
           const component = components.get(item.field);
           if (component) {
             res = {
+              index,
               href: '',
               label: item.title,
               parameters: [
