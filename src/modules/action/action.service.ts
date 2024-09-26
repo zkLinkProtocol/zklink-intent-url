@@ -10,10 +10,11 @@ import {
 import { ConfigService } from '@nestjs/config';
 import _ from 'lodash';
 
-import { Action, ActionId } from 'src/common/dto';
+import { Action } from 'src/common/dto';
 import { ConfigType } from 'src/config';
 import { BusinessException } from 'src/exception/business.exception';
 import { ActionRepository } from 'src/repositories/action.repository';
+import { ActionId } from 'src/types';
 
 import { ActionResponseDto } from './dto/actions.dto';
 import { RegistryAction } from './model';
