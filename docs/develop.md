@@ -614,23 +614,28 @@ If you want to conveniently use local actions, create magic links, and initiate 
 </div>
 
 2. Ensure that the .env file is configured correctly so that the program can run properly, with a focus on the database configuration and run `npm run migration:run`
-  ```
-  DATABASE_HOST=
-  DATABASE_USER=
-  DATABASE_PASSWORD=
-  DATABASE_NAME=
-  ```
-  run command
-  ```
-  npm run migration:run
-  npm run start:debug
-  ```
+
+    ```
+    DATABASE_HOST=
+    DATABASE_USER=
+    DATABASE_PASSWORD=
+    DATABASE_NAME=
+    ```
+    run command
+    ```
+    npm run migration:run
+    npm run start:debug
+    ```
 3. Set breakpoints in the code area.
 <div align="center">
   <img src="./img/debug-breakpoint.png" width="300">
 </div>
 
 4. Access the magic link [dev dashboard](https://zklink.io/dashboard/) page using a browser, open the browser console, and type in the console `localStorage.setItem('baseUrl', 'http://localhost:4101/api')`. After refreshing the browser, all service requests will be directed to http://localhost:4101/api. Note that `4101` should match the `PORT` in your local .env file.
+
+    Next, log back into the dashboard using MetaMask or Passkey, create a magic link, and initiate a transaction using the magic link. All this data will be stored in your local database.
+
+    Be sure to check the requests in the browser's network tab to see if they are reaching the local port service; if not, set the `localStorage`.
 
 ## Tips and Tricks
 
