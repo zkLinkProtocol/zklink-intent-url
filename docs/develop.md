@@ -73,6 +73,11 @@ Create a .env file from .env.example and make sure all necessary environment var
 cp .env.example .env
 ```
 
+Create all db tables
+```shell
+npm run migration:run 
+```
+
 Start the local service.
 
 ```shell
@@ -597,6 +602,36 @@ After implementing your action, you need to submit a PR to the repository. We wi
 
 The [buy-me-a-coffee](../libs/buy-me-a-coffee/) and [`novaswap`](../libs/novaswap/) Actions are good examples for you to learn how to implement an action.
 
+## How to debug your action
+All of the metadata configurations and function implementations mentioned above are designed to build the frontend UI and on-chain transactions.
+
+If you want to conveniently use local actions, create magic links, and initiate transactions through the magic links during the action development process, you can follow these steps.
+
+1. Use the VSCode debug terminal
+
+<div align="center">
+  <img src="./img/debug-terminal.png" width="300">
+</div>
+
+2. Ensure that the .env file is configured correctly so that the program can run properly, with a focus on the database configuration and run `npm run migration:run`
+  ```
+  DATABASE_HOST=
+  DATABASE_USER=
+  DATABASE_PASSWORD=
+  DATABASE_NAME=
+  ```
+  run command
+  ```
+  npm run migration:run
+  npm run start:debug
+  ```
+3. Set breakpoints in the code area.
+<div align="center">
+  <img src="./img/debug-breakpoint.png" width="300">
+</div>
+
+4. Access the magic link [dev dashboard](https://zklink.io/dashboard/) page using a browser, open the browser console, and enter localStorage.setItem('baseUrl', 'http://localhost:4101/api'). After refreshing the browser, all service requests will be directed to http://localhost:4101/api. Note that `4101` should match the `PORT` in your local .env file.
+
 ## Tips and Tricks
 
 ### Keep it Simple
@@ -615,26 +650,6 @@ You are permitted to reference external API services with caution. During the co
 
 Security is our top priority. Minimizing dependencies and external services enhances the robustness of our service. This will be a key criterion in our evaluation of your Action implementation.
 
-### Verify your Action with Swagger
-
-After completing an Action, you should test it to ensure it works properly. Our code acts as SWAGGER, allowing you to test whether your Action functions correctly within our API on this page. The process is as follows:
-
-Before running the project, you need to run PostgreSQL locally. You also need to configure environment variables in the .env file, which you can get from the .env.example template. You should replace the variables with your own (especially for the PostgreSQL configuration).
-
-Start the project using the following command:
-
-```shell
-npm run migration:run  # create the database tables if you haven't done it before
-npm run start  # start the project
-```
-
-At this point, you can access SWAGGER through `localhost:4101`. You should ensure the proper functioning of three APIs:
-
-- `/api/actions`: This should include the description of your Action.
-- `/api/actions/{id}`: Upon entering the corresponding ID, it should return the description of your Action.
-- `/api/actions/{id}/transaction`: Upon entering the corresponding ID and the required parameters of the Action, it should generate the desired transaction.
-
-When you encounter issues, you can observe the logs in the command line console to pinpoint the problem. This is the most intuitive troubleshooting method.
 
 ## FAQs
 
@@ -715,11 +730,11 @@ Test Thoroughly: Ensure all changes are thoroughly tested, including unit, integ
 
 
 
-### 2. What if my action requires external data?
+### 3. What if my action requires external data?
 
 Minimize reliance on external APIs. If necessary, use them cautiously and ensure they do not impact business operations.
 
-### 3. What is the submission and review process for new actions?
+### 4. What is the submission and review process for new actions?
 
 1. Submit a PR: Follow the repository's guidelines for submitting a pull request.
 2. Code Review: Your code will be reviewed for quality, security, and compliance with standards.
