@@ -103,7 +103,7 @@ export class BuyNftService extends ActionDto<FieldTypes> {
   }
 
   public async reloadAdvancedInfo(
-    data: BasicAdditionalParams,
+    _: BasicAdditionalParams,
   ): Promise<{ title: string; content: string }> {
     return {
       title: 'NFT Info',

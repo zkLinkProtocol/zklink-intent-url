@@ -26,6 +26,7 @@ import { ActionTransactionParams, TransactionInfo } from 'src/common/dto';
 import { PagingOptionsDto } from 'src/common/pagingOptionsDto.param';
 import { PagingMetaDto, ResponseDto } from 'src/common/response.dto';
 import { BusinessException } from 'src/exception/business.exception';
+import { ErrorMessage, SuccessMessage } from 'src/types';
 
 import {
   ActionUrlAddRequestDto,
@@ -317,12 +318,7 @@ export class ActionUrlController extends BaseController {
     @Param('code') code: string,
     @Body()
     body: TransactionBody,
-  ): Promise<
-    ResponseDto<{
-      enable: boolean;
-      reason?: string;
-    }>
-  > {
+  ): Promise<ResponseDto<ErrorMessage>> {
     const intention = await this.actionUrlService.findOneByCode(code);
 
     const actionStore = await this.actionService.getActionVersionStore(
@@ -376,11 +372,7 @@ export class ActionUrlController extends BaseController {
     @Param('hash') hash: string,
     @Body()
     body: TransactionBody,
-  ): Promise<
-    ResponseDto<{
-      message: string;
-    }>
-  > {
+  ): Promise<ResponseDto<SuccessMessage>> {
     const txHash = hash;
     const intention = await this.actionUrlService.findOneByCode(code);
 

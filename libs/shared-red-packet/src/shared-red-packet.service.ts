@@ -30,7 +30,7 @@ import {
   IntentionRecordTxStatus,
 } from 'src/entities/intentionRecordTx.entity';
 import { IntentionRecordService } from 'src/modules/actionUrl/intentionRecord.service';
-import { Address } from 'src/types';
+import { Address, ErrorMessage } from 'src/types';
 
 import ERC20ABI from './abis/ERC20.json';
 import MemeRedPacketABI from './abis/MemeRedPacket.json';
@@ -92,7 +92,7 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
       Number(amountOfRedEnvelopes) < 200 ||
       Number(amountOfRedEnvelopes) > 10000
     ) {
-      return 'Number of Red Packets be between 200 and 10000';
+      return 'Number of Red Packets should be between 200 and 10000';
     }
     return '';
   }
@@ -302,16 +302,16 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
       account,
     );
     if (hasClaimed) {
-      return { enable: false, reason: 'User has already received' };
+      return 'User has already received';
     } else {
-      return { enable: true };
+      return '';
     }
   }
 
   async reportTransaction(
     data: GenerateTransactionParams<FieldTypes>,
     txHash: string,
-  ): Promise<{ message: string }> {
+  ): Promise<ErrorMessage> {
     const { formData } = data;
     const { distributionToken } = formData;
     const iface = new Interface(MemeRedPacketABI);
@@ -331,9 +331,7 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
       const { amount } = event?.args ?? { amount: 0n };
       const decimals = await this.getDecimals(distributionToken);
       const claimedAmount = formatUnits(amount.toString(), decimals);
-      return {
-        message: `You have received ${claimedAmount} in red packet amount!`,
-      };
+      return `You have received ${claimedAmount} in red packet amount!`;
     } catch (error) {
       throw new Error(`Failed to fetch transaction receipt: ${error.message}`);
     }

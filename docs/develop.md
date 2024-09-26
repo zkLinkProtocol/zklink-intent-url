@@ -51,9 +51,11 @@ In this case, we will describe all the features and functionalities you might ne
 
 ### 0. Prepare
 
-We use _npm_ as package manager. We develop using _TypeScript_ and have chosen _NestJS_, a Node.js framework, as the foundational framework for our entire system. You will need a basic understanding of TypeScript and a general knowledge of NestJS's dependency injection and IoC (Inversion of Control).
+We use _npm_ as package manager, _postgres_ database. We develop using _TypeScript_ and have chosen _NestJS_, a Node.js framework, as the foundational framework for our entire system. You will need a basic understanding of TypeScript and a general knowledge of NestJS's dependency injection and IoC (Inversion of Control).
 
-To get started, clone the repository:
+To get started, ensure that Node and Postgres are installed locally. clone the repository:
+
+
 
 ```shell
 git clone git@github.com:zkLinkProtocol/zklink-intent-url.git
@@ -176,8 +178,6 @@ async getMetadata() {
           label: 'Token',
           desc: 'The token you want to cost',
           type: 'searchSelect',
-          regex: '^[a-zA-Z0-9]+$',
-          regexDesc: 'Token Symbol',
           options: [
             {
               label: 'ETH',
@@ -259,7 +259,7 @@ async getMetadata() {
           desc: 'The address that is sponsored',
           type: 'input',
           regex: '^0x[a-fA-F0-9]{40}$',
-          regexDesc: 'Address',
+          regexDesc: 'Invalid address',
         },
       ],
       preset: [
@@ -328,14 +328,14 @@ I will provide further explanations for some fields that need clarification.
   </div>
 
 - preset: 
-This field presets the default trigger for the Magic Link. 'field' refers to the name of a specific 'name', 'value' is the value of 'name', 'title' is used for display, and 'type' can be set to either 'Button' or 'Input'.
+This field presets the default trigger for the Magic Link. `field` refers to the name of a specific `name`, `value` is the value of `name`, `title` is used for display, and `type` can be set to either 'Button' or 'Input'.
 
   <div align="center">
     <img src="./img/preset.png" width="500">
   </div>
 
 #### 2.2 generateTransaction
-Another function signature that must be implemented is `generateTransaction`, whose return signature is [`TransactionInfo[]`](../src/common/dto/transaction.dto.ts#57). When a user clicks the **0.001ETH** button on the Magic Link page, the `TransactionInfo` will be sequentially constructed into on-chain transactions and sent to the network.
+Another function that must be implemented is `generateTransaction`, whose return data type is [`TransactionInfo[]`](../src/common/dto/transaction.dto.ts#57). When a user clicks the **0.001ETH** button on the Magic Link page, the `TransactionInfo[]` will be sequentially constructed into on-chain transactions and sent to the network.
 
 Next, we will implement a straightforward generateTransaction method
 
@@ -353,7 +353,7 @@ async generateTransaction(
   return [tx];
 }
 ```
-As you can see, the simplest version of `TransactionInfo` only needs to define four fields related to the transaction. There are also three unused fields here, which are useful in certain scenarios and require further introduction to you.
+As you can see, the simplest version of `TransactionInfo` only needs to define 4 fields related to the transaction. There are also 3 unused fields here, which are useful in certain scenarios and require further introduction to you.
 
 - _shouldPublishToChain_: In most cases where a user needs to send an on-chain transaction, this field needs to be set to true.
 - _customData_: If you are familiar with [paymaster](https://docs.zksync.io/build/start-coding/zksync-101/paymaster), then you will be quite accustomed to this. [Learn how to send a transaction through a paymaster](https://docs.zksync.io/build/start-coding/quick-start/paymasters-introduction#how-to-send-a-transaction-through-a-paymaster) 
@@ -382,9 +382,9 @@ After the above steps, you have created a simple action. The final, we need to r
 
 We provide the `RegistryPlug` decorator, which requires two input parameters: args[0] is the action ID, and args[1] is the version number.
 
-The **action ID** should follow the snake case naming convention and match the name used in the command `npx nest g library my-action`, which is the name of your Action folder. This ensures that it is unique and does not conflict with other actions. This ID will be used as a runtime index throughout the system, guiding the runtime code to load and execute the Action. **Keep the naming consistent and do not allow further modifications.**
+The **action ID** should follow the snake-case naming convention and match the name used in the command `npx nest g library my-action`, which is the name of your Action folder. This ensures that it is unique and does not conflict with other actions. This ID will be used as a runtime index throughout the system, guiding the runtime code to load and execute the Action. **Keep the naming consistent and do not allow further modifications.**
 
-The **version** represents the version of your action, and the version number should start from `v1`. Each time you upgrade the action, increment the version by 1. For example, the initial submission of the action should be version `v1`. If you upgrade the action multiple times in the future, the version number should be updated to **v2**, **v3**, **v4**, and so on. For upgrading an action, please refer to the [Action Upgrade](#1-how-do-i-update-or-upgrade-an-action) section.
+The **version** represents the version of your action, and the version number should start from `v1`. Each time you upgrade the action, increment the version by 1. For example, the initial submission of the action should be version `v1`. If you upgrade the action multiple times in the future, the version number should be updated to **v2**, **v3**, **v4**, and so on. For upgrading an action, please refer to the [Action Upgrade](#2-how-do-i-update-or-upgrade-an-action) section.
 
 ```typescript
 // my-action.module.ts
@@ -408,7 +408,7 @@ class MyActionService extends ActionDto<FormName> {
 ```
 In the `libs` folder, we have defined the `RegistryPlug` decorator. Additionally, we have defined the `Registry Module`. This module acts as a registry for all the actions developed by developers. It uses NestJS's IoC to inject all the actions into our application, making them effective.
 
-The application will scan all action classes decorated with **RegistryPlug** in the **registry module**. It will register the action IDs into the application and use the highest version number for each ID as the currently available action for the intent creator. Meanwhile, for *already* created magic links, they will continue to use their originally corresponding version number.
+The application will scan all action classes decorated with **RegistryPlug** in the **registry module**. It will register the action IDs into the application and use the highest version number for each ID as the currently available action for the **intent creator**. Meanwhile, for *already* created magic links, they will continue to use their originally corresponding version number.
 
 ```typescript
 @Module({
@@ -432,10 +432,14 @@ Our framework will register your Action implementation into the routing system. 
   // amountIn and recipient are parameters input by the intents component
   // pseudocode below: 
   async validateFormData(formData: GenerateFormParams<FormData>): Promise<ErrorMessage> {
-    const { amountIn, recipient } = formData
-    if(Number(amountIn) > 20 && restrictList.includes(recipient)) {
-      return 'Restrict-listed address cannot receive donations greater than 20'
+    const { amountOfRedEnvelopes } = formData
+   if (
+      Number(amountOfRedEnvelopes) < 200 ||
+      Number(amountOfRedEnvelopes) > 10000
+    ) {
+      return 'Number of Red Packets should be between 200 and 10000';
     }
+    return ''; // no error message
   }
   ```
   <div align="center">
@@ -444,9 +448,9 @@ Our framework will register your Action implementation into the routing system. 
   
 - The `reloadAdvancedInfo` optional function processes real-time contract information that should be displayed to users through the magicLink. 
 
-  For example, for a red packet contract, it might show something like _"There are 20 red packets in total, and 3 red packets have been claimed."_  Developers can use this method to return a title and an HTML string based on the contract's stored information, making it easier for users to refresh and view the information. 
+  For example, for a red packet contract, it might show something like _"There are 20 red packets in total, and 3 red packets have been claimed."_  Developers can use this method to return a title and a HTML string based on the contract's view function, making it easier for users to refresh and view the information. 
 
-  After the developer defines the title and rich text content, the display in the magicLink will be similar to the part highlighted in red in the image
+  After the developer defines the title and html content, the display in the magicLink will be similar to the part highlighted in red in the image
   
    ```ts
   // You can obtain status information from the contract or through other APIs and return the results
@@ -464,7 +468,7 @@ Our framework will register your Action implementation into the routing system. 
     <img src="./img/real-time-example.png" width="300">
   </div>
 
-- **MagicLink binds to on-chain transactions**. After creating the magicLink, it may not become active immediately and you need to initiate one or more transactions to the smart contract before you can create an active magicLink. For example, with a red packet contract, you need to deposit a red packet asset into the contract before the magicLink can become active. This way, users can claim the red envelope created through your Magic Link.
+- **MagicLink binds to on-chain transactions**. After creating the magicLink, it may not become active immediately and you need to initiate one or more transactions on-chain before you can create an active magicLink. For example, with a red packet contract, you need to deposit a red packet asset into the contract before the Magic Link can become active. This way, users can claim the red envelope created through your Magic Link.
 
   The `onMagicLinkCreated` provides this capability. It returns `TransactionInfo[]`. Its signature is the same as `generateTransaction`, but it is an on-chain transaction executed immediately after the Magic Link is created.
 
@@ -472,7 +476,7 @@ Our framework will register your Action implementation into the routing system. 
     <img src="./img/on-magic-link-created.png" width="300">
   </div>
 
-  In the image above, we can see that after creating an inactive Magic Link, the transaction returned by `onMagicLinkCreated` is constructed and sent as an on-chain transaction.
+  In the image above, we can see that after creating a Magic Link, the transaction returned by `onMagicLinkCreated` is constructed and sent as an on-chain transaction.
 
 ### 4. Switch `env`
 We offer two environment variables, `dev` and `prod`, that allow you to configure contract addresses or settings for both environments. The env variable for the **dev** branch is set to `dev`, while the env variable for the **main** branch is set to `prod`. In the **dev** branch, you can test with the test-network's magicLink, and once the code is merged into the main branch, it will read the mainnet network's contract configurations.
