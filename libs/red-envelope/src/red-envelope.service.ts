@@ -30,7 +30,7 @@ import {
   IntentionRecordTxStatus,
 } from 'src/entities/intentionRecordTx.entity';
 import { IntentionRecordService } from 'src/modules/actionUrl/intentionRecord.service';
-import { Address } from 'src/types';
+import { Address, ErrorMessage } from 'src/types';
 import { utils } from 'zksync-ethers';
 
 import ERC20ABI from './abis/ERC20.json';
@@ -367,9 +367,9 @@ export class RedEnvelopeService extends ActionDto<FieldTypes> {
     const packetId = this.getPacketIDByCode(code);
     const hasClaimed = await this.envelopContract.isClaimed(packetId, account);
     if (hasClaimed) {
-      return { enable: false, reason: 'User has already received' };
+      return 'User has already received';
     } else {
-      return { enable: true };
+      return '';
     }
   }
 
@@ -385,7 +385,7 @@ export class RedEnvelopeService extends ActionDto<FieldTypes> {
   async reportTransaction(
     data: GenerateTransactionParams<FieldTypes>,
     txHash: string,
-  ): Promise<{ message: string }> {
+  ): Promise<ErrorMessage> {
     const { formData } = data;
     const { distributionToken } = formData;
     const iface = new Interface(RedPacketABI);
@@ -406,9 +406,7 @@ export class RedEnvelopeService extends ActionDto<FieldTypes> {
       const decimals = await this.getDecimals(distributionToken);
       const symbol = this.getTokenNameByAddress(distributionToken);
       const claimedAmount = formatUnits(amount.toString(), decimals);
-      return {
-        message: `You have received ${claimedAmount} ${symbol} in red packet amount!`,
-      };
+      return `You have received ${claimedAmount} ${symbol} in red packet amount!`;
     } catch (error) {
       throw new Error(`Failed to fetch transaction receipt: ${error.message}`);
     }
