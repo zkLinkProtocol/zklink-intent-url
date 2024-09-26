@@ -90,6 +90,12 @@
       "@action/mint-nft/*": [
         "libs/mint-nft/src/*"
       ],
+      "@action/mint-nova-nft": [
+        "libs/mint-nova-nft/src"
+      ],
+      "@action/mint-nova-nft/*": [
+        "libs/mint-nova-nft/src/*"
+      ],
       "@core/data": [
         "libs/data/src"
       ],

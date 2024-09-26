@@ -1,6 +1,6 @@
 import { RegistryPlug } from '@action/registry';
 import { Injectable } from '@nestjs/common';
-import { Contract, Interface, JsonRpcProvider } from 'ethers';
+import { Contract, Interface, JsonRpcProvider, ethers } from 'ethers';
 import {
   Action as ActionDto,
   GenerateTransactionParams,
@@ -63,7 +63,7 @@ export class MintNftService extends ActionDto<FieldTypes> {
     const tx: TransactionInfo = {
       chainId: chainId,
       to: mintTx.to,
-      value: formData.value,
+      value: ethers.parseEther(formData.value).toString(),
       data: mintTx.data,
       shouldPublishToChain: true,
     };
