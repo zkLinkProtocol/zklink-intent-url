@@ -630,7 +630,7 @@ If you want to conveniently use local actions, create magic links, and initiate 
   <img src="./img/debug-breakpoint.png" width="300">
 </div>
 
-4. Access the magic link [dev dashboard](https://zklink.io/dashboard/) page using a browser, open the browser console, and enter localStorage.setItem('baseUrl', 'http://localhost:4101/api'). After refreshing the browser, all service requests will be directed to http://localhost:4101/api. Note that `4101` should match the `PORT` in your local .env file.
+4. Access the magic link [dev dashboard](https://zklink.io/dashboard/) page using a browser, open the browser console, and type in the console `localStorage.setItem('baseUrl', 'http://localhost:4101/api')`. After refreshing the browser, all service requests will be directed to http://localhost:4101/api. Note that `4101` should match the `PORT` in your local .env file.
 
 ## Tips and Tricks
 
