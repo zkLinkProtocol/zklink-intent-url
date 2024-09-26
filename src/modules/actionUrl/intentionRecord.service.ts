@@ -24,7 +24,7 @@ export class IntentionRecordService {
   logger: Logger;
   constructor(
     private readonly intentionRepository: IntentionRepository,
-    private readonly intentionRecordRepository: IntentionRecordRepository,
+    public readonly intentionRecordRepository: IntentionRecordRepository,
     private readonly intentionRecordTxRepository: IntentionRecordTxRepository,
     private readonly intentionService: ActionUrlService,
   ) {
@@ -74,16 +74,11 @@ export class IntentionRecordService {
     };
   }
 
-  async findListByCode(intentionCode: string, address: string) {
-    const { data, total } =
-      await this.intentionRecordRepository.getIntentionRecordListWithTxsByCodeAndPublickey(
-        intentionCode,
-        address,
-      );
-    return {
-      data,
-      totalItems: total,
-    };
+  async findListByCode(intentionCode: string, address: string | undefined) {
+    return await this.intentionRecordRepository.getIntentionRecordWithTxsByCode(
+      intentionCode,
+      address,
+    );
   }
 
   async add(

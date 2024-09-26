@@ -471,21 +471,28 @@ export class RedEnvelopeService extends ActionDto<FieldTypes> {
       throw new Error('missing code');
     }
 
-    const result = await this.intentionRecordService.findListByCode(code, '');
+    const result = await this.intentionRecordService.findListByCode(
+      code,
+      undefined,
+    );
     const transferInfos: TransactionResult[] = [];
+    if (!result) {
+      return {
+        title: 'Recipients',
+        content: await this.generateHTML(transferInfos),
+      };
+    }
 
-    for (const item of result.data) {
-      const intentionRecordTxs: IntentionRecordTx[] = item.intentionRecordTxs;
-      for (const recordTx of intentionRecordTxs) {
-        if (recordTx.status !== IntentionRecordTxStatus.SUCCESS) {
-          continue;
-        }
-        const transferInfo: TransactionResult = await this.parseTransaction(
-          recordTx.txHash,
-          recordTx.chainId,
-        );
-        transferInfos.push(transferInfo);
+    const intentionRecordTxs: IntentionRecordTx[] = result.intentionRecordTxs;
+    for (const recordTx of intentionRecordTxs) {
+      if (recordTx.status !== IntentionRecordTxStatus.SUCCESS) {
+        continue;
       }
+      const transferInfo: TransactionResult = await this.parseTransaction(
+        recordTx.txHash,
+        recordTx.chainId,
+      );
+      transferInfos.push(transferInfo);
     }
 
     const hash = keccak256(toUtf8Bytes(code));
