@@ -3,8 +3,6 @@ import { ErrorMessage, SuccessMessage } from 'src/types';
 import { ActionMetadata } from './action-metadata.dto';
 import { TransactionInfo } from './transaction.dto';
 
-export type ActionId = string;
-
 export type BasicAdditionalParams = {
   code?: string;
   account?: string;
@@ -54,6 +52,36 @@ export abstract class Action<
   ): Promise<TransactionInfo[]>;
 
   /**
+   * During the creation process of the magic link,
+   * this allows you to run your custom validation logic,
+   * providing complex validation for the parameters used to create the magic link,
+   * rather than just simple regular expressions.
+   */
+  async validateFormData(_: GenerateFormParams<T>): Promise<ErrorMessage> {
+    return '';
+  }
+
+  /**
+   * After creating the magic link, it may also be necessary to initiate an on-chain transaction.
+   * For example, if I have a red envelope contract, each magic link should be created by the creator and deposit a sum of money into it,
+   * allowing users to claim the red envelope associated with the magic link.
+   */
+  async onMagicLinkCreated?(
+    data: GenerateTransactionParams<T>,
+  ): Promise<TransactionInfo[]>;
+
+  /**
+   * We can render some custom HTML in the magic link to provide intuitive on-chain data
+   * or centralized service data.
+   * Users can manually refresh this data, and this method is designed for that purpose.
+   *
+   */
+  async reloadAdvancedInfo?(data: BasicAdditionalParams): Promise<{
+    title: string;
+    content: string;
+  }>;
+
+  /**
    * Before sending the transaction with the magic link,
    * this function can be used to define some pre-checks
    * to determine whether the user can still trigger the transaction with the magic link.
@@ -81,34 +109,4 @@ export abstract class Action<
   ): Promise<SuccessMessage> {
     return '';
   }
-
-  /**
-   * During the creation process of the magic link,
-   * this allows you to run your custom validation logic,
-   * providing complex validation for the parameters used to create the magic link,
-   * rather than just simple regular expressions.
-   */
-  async validateFormData(_: GenerateFormParams<T>): Promise<ErrorMessage> {
-    return '';
-  }
-
-  /**
-   * We can render some custom HTML in the magic link to provide intuitive on-chain data
-   * or centralized service data.
-   * Users can manually refresh this data, and this method is designed for that purpose.
-   *
-   */
-  async reloadAdvancedInfo?(data: BasicAdditionalParams): Promise<{
-    title: string;
-    content: string;
-  }>;
-
-  /**
-   * After creating the magic link, it may also be necessary to initiate an on-chain transaction.
-   * For example, if I have a red envelope contract, each magic link should be created by the creator and deposit a sum of money into it,
-   * allowing users to claim the red envelope associated with the magic link.
-   */
-  async onMagicLinkCreated?(
-    data: GenerateTransactionParams<T>,
-  ): Promise<TransactionInfo[]>;
 }

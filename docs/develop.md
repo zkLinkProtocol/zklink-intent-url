@@ -67,7 +67,7 @@ Then install the dependencies:
 npm install
 ```
 
-Create a .env file from .env.example and make sure all necessary environment variables are correctly assigned.
+Create a .env file from .env.example and make sure all necessary environment variables are correctly assigned. (DATABASE_*  WITNESS_PRIVATE_KEY)
 
 ```shell
 cp .env.example .env
@@ -337,17 +337,37 @@ This field presets the default trigger for the Magic Link. `field` refers to the
 #### 2.2 generateTransaction
 Another function that must be implemented is `generateTransaction`, whose return data type is [`TransactionInfo[]`](../src/common/dto/transaction.dto.ts#57). When a user clicks the **0.001ETH** button on the Magic Link page, the `TransactionInfo[]` will be sequentially constructed into on-chain transactions and sent to the network.
 
+It is necessary to delve into the parameters of GenerateTransactionParams here
+```ts
+export type GenerateTransactionParams<
+  T extends Record<string, any> = Record<string, any>,
+> = {
+  additionalData: AdditionalParams;
+  formData: GenerateFormParams<T>;
+};
+
+type AdditionalParams = {
+  chainId: string; // Network chain ID
+  code?: string; // magic link code, a unique 8-character random string
+  account?: string; // the user address that initiates the transaction.
+  inviter?: string;
+};
+```
+  - code: You can leverage the code with the contract or your external service for deep binding, where each magic link has a unique and unrepeatable code.
+  - inviter: The inviter is a field used to handle invitation-related information. When users share the magic link, they include their address as the inviter. If your action has a sharing commission feature, you can incorporate the inviter into your contract to implement the logic.
+  - formData: It is the component you define in the component, and it is the raw form data used to construct the transaction.
 Next, we will implement a straightforward generateTransaction method
 
 ```ts
 async generateTransaction(
-    params: ActionTransactionParams,
+    data: GenerateTransactionParams,
 ): Promise<TransactionInfo[]> {
   // Build and return your transaction
+   const { formData } = data;
   const tx = {
     chainId: 810180,
-    to: params.recipient,
-    value: params.value,
+    to: formData.recipient,
+    value: formData.value,
     data: '0x',
   }
   return [tx];
@@ -360,7 +380,7 @@ As you can see, the simplest version of `TransactionInfo` only needs to define 4
 - _requiredTokenAmount_: Magic Link has the capability to allow developers to implement **Nova cross-chain** functionality with simple configurations. For example, the aforementioned transaction occurs on the Arbitrum chain, but if you want to allow users to attempt a cross-chain transfer of a corresponding amount of tokens from the Nova network when they do not have enough tokens on Arbitrum, you only need to configure this parameter, and it will try to execute the corresponding cross-chain request.
   ```ts
   async generateTransaction(
-      params: ActionTransactionParams,
+      params: GenerateTransactionParams,
   ): Promise<TransactionInfo[]> {
     // Build and return your transaction
     const tx = {
@@ -477,6 +497,62 @@ Our framework will register your Action implementation into the routing system. 
   </div>
 
   In the image above, we can see that after creating a Magic Link, the transaction returned by `onMagicLinkCreated` is constructed and sent as an on-chain transaction.
+
+- `preCheckTransaction`, the magic link is not always available to users. Imagine a scenario where you expect users to participate in a vote only once through the magic link. Therefore, when loading the magic link, you need to query the on-chain information to check if the user has already voted. If they have voted, this function should return a message to inform the user of the reason they cannot vote again.
+  ```ts
+  // pseudocode
+
+   public async preCheckTransaction(
+    data: GenerateTransactionParams<FieldTypes>,
+  ) {
+    const { additionalData } = data;
+    const { code, account } = additionalData;
+    if (!code) {
+      throw new Error('missing code');
+    }
+    const hasVoted = this.contract.queryVotedStatus(code, account);
+    if (hasVoted) {
+      return 'You has already voted';
+    } else {
+      return '';
+    }
+  }
+
+  ```
+- `reportTransaction` is similar to preCheckTransaction above, this function also returns a message to politely inform the user of the result of their transaction after it has completed.
+  ```ts
+
+  async reportTransaction(
+    data: GenerateTransactionParams<FieldTypes>,
+    txHash: string,
+  ): Promise<ErrorMessage> {
+      const { formData } = data;
+      const { distributionToken } = formData;
+      const iface = new Interface(RedPacketABI);
+      const eventTopic = ethers.id('RedPacketClaimed(uint256,address,uint256)');
+      try {
+        const receipt = await this.provider.getTransactionReceipt(txHash);
+        if (!receipt) {
+          throw new Error('wrong transaction hash');
+        }
+        const log = receipt.logs.find((log) => {
+          return log.topics[0] === eventTopic;
+        });
+        if (!log) {
+          throw new Error('parse log error');
+        }
+        const event = iface.parseLog(log);
+        const { amount } = event?.args ?? { amount: 0n };
+        const decimals = await this.getDecimals(distributionToken);
+        const symbol = this.getTokenNameByAddress(distributionToken);
+        const claimedAmount = formatUnits(amount.toString(), decimals);
+        return `You have received ${claimedAmount} ${symbol} in red packet amount!`;
+      } catch (error) {
+        throw new Error(`Failed to fetch transaction receipt: ${error.message}`);
+      }
+    }
+  ```
+  The above reportTransaction function politely informs the user of the successful outcome after they have successfully claimed the red envelope through the magic link
 
 ### 4. Switch `env`
 We offer two environment variables, `dev` and `prod`, that allow you to configure contract addresses or settings for both environments. The env variable for the **dev** branch is set to `dev`, while the env variable for the **main** branch is set to `prod`. In the **dev** branch, you can test with the test-network's magicLink, and once the code is merged into the main branch, it will read the mainnet network's contract configurations.
