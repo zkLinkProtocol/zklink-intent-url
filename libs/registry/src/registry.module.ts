@@ -7,6 +7,7 @@ import { MintNftModule } from '@action/mint-nft';
 import { MintNovaNftModule } from '@action/mint-nova-nft';
 import { NewsModule } from '@action/news';
 import { NovaswapModule } from '@action/novaswap';
+import { PreSaleModule } from '@action/pre-sale';
 import { PumpFunModule } from '@action/pump-fun';
 import { RedEnvelopeModule } from '@action/red-envelope';
 import { SharedRedPacketModule } from '@action/shared-red-packet';
@@ -27,6 +28,7 @@ import { RegistryService } from './registry.service';
     MintNftModule,
     MintNovaNftModule,
     SharedRedPacketModule,
+    PreSaleModule,
   ],
   providers: [RegistryService],
   exports: [RegistryService],
