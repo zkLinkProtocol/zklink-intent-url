@@ -74,13 +74,6 @@ export class IntentionRecordService {
     };
   }
 
-  async findListByCode(intentionCode: string, address: string | undefined) {
-    return await this.intentionRecordRepository.getIntentionRecordWithTxsByCode(
-      intentionCode,
-      address,
-    );
-  }
-
   async add(
     code: string,
     params: IntentionRecordAddRequestDto,

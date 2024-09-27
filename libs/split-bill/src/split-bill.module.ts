@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
-import { ActionUrlModule } from 'src/modules/actionUrl/actionUrl.module';
 
 import { SplitBillService } from './split-bill.service';
+import { DataModule } from '../../data/src/data.module';
 
 @Module({
-  imports: [ActionUrlModule],
+  imports: [DataModule],
   providers: [SplitBillService],
-  exports: [SplitBillService, ActionUrlModule],
+  exports: [SplitBillService, DataModule],
 })
 export class SplitBillModule {}

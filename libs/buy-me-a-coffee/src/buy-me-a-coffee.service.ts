@@ -21,7 +21,6 @@ import {
   IntentionRecordTx,
   IntentionRecordTxStatus,
 } from 'src/entities/intentionRecordTx.entity';
-import { IntentionRecordService } from 'src/modules/actionUrl/intentionRecord.service';
 
 import ERC20ABI from './abis/ERC20.json';
 import {
@@ -31,11 +30,12 @@ import {
   providerConfig,
 } from './config';
 import { FieldTypes } from './types';
+import { DataService } from '../../data/src/data.service';
 
 @RegistryPlug('buy-me-a-coffee', 'v1')
 @Injectable()
 export class BuyMeACoffeeService extends ActionDto<FieldTypes> {
-  constructor(private readonly intentionRecordService: IntentionRecordService) {
+  constructor(private readonly dataServise: DataService) {
     super();
   }
 
@@ -85,10 +85,7 @@ export class BuyMeACoffeeService extends ActionDto<FieldTypes> {
     if (!code) {
       throw new Error('missing code in buy me a coffee');
     }
-    const result = await this.intentionRecordService.findListByCode(
-      code,
-      undefined,
-    );
+    const result = await this.dataServise.findListByCode(code);
     const transferInfos: TransactionResult[] = [];
     if (!result) {
       return {
