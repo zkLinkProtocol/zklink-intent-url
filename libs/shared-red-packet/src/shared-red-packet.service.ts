@@ -382,6 +382,13 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
       throw new Error('missing code');
     }
 
+    const hash = keccak256(toUtf8Bytes(code));
+    const packetId = getBigInt(hash);
+    const [, unClaimedCount] =
+      await this.redPacketContract.getRedPacketBalance(packetId);
+    const [_, , , totalCount] =
+      await this.redPacketContract.getRedPacketInfo(packetId);
+
     const result = await this.intentionRecordService.findListByCode(
       code,
       undefined,
@@ -390,7 +397,9 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
     if (!result) {
       return {
         title: 'Recipients',
-        content: await this.generateHTML(transferInfos),
+        content:
+          `${totalCount - unClaimedCount}/${totalCount} red packet(s) opened` +
+          (await this.generateHTML(transferInfos)),
       };
     }
 
@@ -406,12 +415,6 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
       transferInfos.push(transferInfo);
     }
 
-    const hash = keccak256(toUtf8Bytes(code));
-    const packetId = getBigInt(hash);
-    const [, unClaimedCount] =
-      await this.redPacketContract.getRedPacketBalance(packetId);
-    const [_, , , totalCount] =
-      await this.redPacketContract.getRedPacketInfo(packetId);
     return {
       title: 'Recipients',
       content:
