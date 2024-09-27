@@ -36,7 +36,7 @@ export class MintNovaNftService extends ActionDto<FieldTypes> {
       throw new Error('missing code');
     }
 
-    const result = await this.dataService.findListByCode(code, '');
+    const result = await this.dataService.findListByCode(code);
     if (!result) {
       return [];
     }
