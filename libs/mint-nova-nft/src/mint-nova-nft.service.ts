@@ -36,15 +36,14 @@ export class MintNovaNftService extends ActionDto<FieldTypes> {
       throw new Error('missing code');
     }
 
-    const result = await this.dataService.findListByCode(code);
-    if (!result) {
-      return [];
-    }
     let tokenId = Number(formData.tokenId);
-    const intentionRecordTxs: IntentionRecordTx[] = result.intentionRecordTxs;
-    for (const recordTx of intentionRecordTxs) {
-      if (recordTx.status == IntentionRecordTxStatus.SUCCESS) {
-        tokenId++;
+    const result = await this.dataService.findListByCode(code);
+    if (result) {
+      const intentionRecordTxs: IntentionRecordTx[] = result.intentionRecordTxs;
+      for (const recordTx of intentionRecordTxs) {
+        if (recordTx.status === IntentionRecordTxStatus.SUCCESS) {
+          tokenId++;
+        }
       }
     }
 
