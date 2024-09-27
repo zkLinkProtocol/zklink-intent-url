@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common';
 
-import { IntentionRepository } from 'src/repositories';
-import { IntentionRecordRepository } from 'src/repositories/intentionRecord.repository';
+import {
+  IntentionRecordRepository,
+  IntentionRepository,
+} from 'src/repositories';
 
 @Injectable()
 export class DataService {
