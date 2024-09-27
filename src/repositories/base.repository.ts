@@ -124,6 +124,14 @@ export abstract class BaseRepository<T extends ObjectLiteral> {
     });
   }
 
+  public async update(
+    record: QueryDeepPartialEntity<T>,
+    where: FindOptionsWhere<T>,
+  ): Promise<void> {
+    const transactionManager = this.unitOfWork.getTransactionManager();
+    await transactionManager.update<T>(this.entityTarget, where, record);
+  }
+
   public async delete(where: FindOptionsWhere<T>): Promise<void> {
     const transactionManager = this.unitOfWork.getTransactionManager();
     await transactionManager.delete<T>(this.entityTarget, where);

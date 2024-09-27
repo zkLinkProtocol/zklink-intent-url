@@ -1,48 +1,43 @@
 import { ActionMetadata } from 'src/common/dto';
 
-import { FormName } from './types';
+import { FieldTypes } from './types';
 
-export const metadata: ActionMetadata<FormName> = {
+export const metadata: ActionMetadata<FieldTypes> = {
   title: 'Buy me a coffee ☕',
   description:
-    'This action allows you to create a Magic Link to receive donations',
+    '<div>This action allows you to create a Magic Link to receive donations</div>',
   networks: [
     {
       name: 'Arbitrum',
       chainId: '42161',
-      contractAddress: '0x',
     },
     {
       name: 'zkLink Nova',
       chainId: '810180',
-      contractAddress: '0x',
     },
     {
       name: 'zkLink Nova sepolia',
       chainId: '810181',
-      contractAddress: '0x',
     },
     {
       name: 'zkLink dev',
       chainId: '270',
-      contractAddress: '0x',
     },
   ],
-  dApp: { name: 'Buy me a coffee' },
   author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
   magicLinkMetadata: {
+    title: 'Buy me a coffee ☕',
     description:
       'Magic Link Enthusiast | Donate with your love for zkLink magic',
   },
   intent: {
+    binding: 'value',
     components: [
       {
         name: 'token',
         label: 'Token',
         desc: 'The token you want to cost',
         type: 'searchSelect',
-        regex: '^[a-zA-Z0-9]+$',
-        regexDesc: 'Token Symbol',
         options: [
           {
             label: 'ETH',
@@ -124,7 +119,7 @@ export const metadata: ActionMetadata<FormName> = {
         desc: 'The address that is sponsored',
         type: 'input',
         regex: '^0x[a-fA-F0-9]{40}$',
-        regexDesc: 'Address',
+        regexDesc: 'Invalid Address',
       },
     ],
     preset: [

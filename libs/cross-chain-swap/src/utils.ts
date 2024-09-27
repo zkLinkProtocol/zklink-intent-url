@@ -1,7 +1,7 @@
 import { ethers } from 'ethers';
+import { getQuote } from 'src/common/okxAPI';
 
 import { GAS_COEFFICIENT } from './config';
-import { getQuote } from './okxAPI';
 
 export async function getUserERC20Balance(
   userAddress: string,

@@ -1,46 +1,41 @@
 import { ActionMetadata } from 'src/common/dto';
 
-import { FormName } from './types';
+import { FieldTypes } from './types';
 
-export const metadata: ActionMetadata<FormName> = {
+export const metadata: ActionMetadata<FieldTypes> = {
   title: 'Split Bill 💰',
-  description: 'This action is made for friends to split the bill',
+  description: '<div>This action is made for friends to split the bill</div>',
   networks: [
     {
       name: 'Arbitrum',
       chainId: '42161',
-      contractAddress: '0x',
     },
     {
       name: 'zkLink Nova',
       chainId: '810180',
-      contractAddress: '0x',
     },
     {
       name: 'zkLink Nova sepolia',
       chainId: '810181',
-      contractAddress: '0x',
     },
     {
       name: 'zkLink dev',
       chainId: '270',
-      contractAddress: '0x',
     },
   ],
-  dApp: { name: 'Split bill' },
   author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
   magicLinkMetadata: {
+    title: 'Split Bill 💰',
     description: 'Each friend will pay you the same amount',
   },
   intent: {
+    binding: 'value',
     components: [
       {
         name: 'token',
         label: 'Token',
         desc: 'The token you want to cost',
         type: 'searchSelect',
-        regex: '^[a-zA-Z0-9]+$',
-        regexDesc: 'Token Symbol',
         options: [
           {
             label: 'ETH',
@@ -116,7 +111,6 @@ export const metadata: ActionMetadata<FormName> = {
         regex: '^\\d+\\.?\\d*$|^\\d*\\.\\d+$',
         defaultValue: '10',
         regexDesc: 'Must be a number',
-        bind: true,
       },
       {
         name: 'recipient',
@@ -124,7 +118,7 @@ export const metadata: ActionMetadata<FormName> = {
         desc: "Please enter the recipient's address.",
         type: 'input',
         regex: '^0x[a-fA-F0-9]{40}$',
-        regexDesc: 'Address',
+        regexDesc: 'Invalid Address',
       },
     ],
   },

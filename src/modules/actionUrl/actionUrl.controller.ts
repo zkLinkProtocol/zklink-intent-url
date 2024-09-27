@@ -13,6 +13,7 @@ import {
 import {
   ApiBody,
   ApiParam,
+  ApiQuery,
   ApiResponse,
   ApiTags,
   getSchemaPath,
@@ -25,6 +26,7 @@ import { ActionTransactionParams, TransactionInfo } from 'src/common/dto';
 import { PagingOptionsDto } from 'src/common/pagingOptionsDto.param';
 import { PagingMetaDto, ResponseDto } from 'src/common/response.dto';
 import { BusinessException } from 'src/exception/business.exception';
+import { ErrorMessage, SuccessMessage } from 'src/types';
 
 import {
   ActionUrlAddRequestDto,
@@ -47,6 +49,7 @@ import { JwtAuthGuard } from '../auth/jwtAuth.guard';
 interface TransactionBody {
   account: string;
   chainId: string;
+  inviter?: string;
   params: { [key: string]: string };
 }
 
@@ -74,6 +77,7 @@ export class ActionUrlController extends BaseController {
     const response = {
       code: result.code,
       actionAuthor: result.action.author,
+      actionId: result.action.id,
       title: result.title,
       description: result.description,
       metadata: result.metadata,
@@ -94,7 +98,7 @@ export class ActionUrlController extends BaseController {
   async getIntentPostTxs(
     @Param('code') code: string,
     @Body()
-    request: { sender: string; params: ActionTransactionParams<string> },
+    request: { sender: string; params: ActionTransactionParams },
   ): Promise<ResponseDto<TransactionInfo[]>> {
     const { sender, params } = request;
     const intention = await this.actionUrlService.findOneByCode(code);
@@ -255,11 +259,145 @@ export class ActionUrlController extends BaseController {
     return this.success(result);
   }
 
-  @Post(':code/transaction')
+  @Post(':code/validate-transaction')
   @CommonApiOperation('Generate transaction by action Id.')
   @ApiParam({
     name: 'id',
-    example: 'novaswap',
+    example: '9sf92k3i',
+  })
+  @ApiBody({
+    description: 'parameters to generate transaction',
+    schema: {
+      type: 'object',
+      additionalProperties: {
+        type: 'any',
+      },
+    },
+    examples: {
+      a: {
+        summary: 'NovaSwap',
+        description: 'Generate tranasction for NovaSwap',
+        value: {
+          tokenInAddress: '0x6e42d10eB474a17b14f3cfeAC2590bfa604313C7',
+          tokenOutAddress: '0x461fE851Cd66e82A274570ED5767c873bE9Ae1ff',
+          amountIn: '1',
+          recipient: '0xE592427A0AEce92De3Edee1F18E0157C05861564',
+          deadlineDurationInSec: '3600',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Return generated transaction',
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ResponseDto) },
+        {
+          properties: {
+            data: {
+              type: 'object',
+              properties: {
+                enable: {
+                  type: 'boolean',
+                  description: 'Indicates if the transaction can proceed',
+                },
+                reason: {
+                  type: 'string',
+                  description: 'Reason if transaction cannot proceed',
+                  nullable: true,
+                },
+              },
+            },
+          },
+        },
+      ],
+    },
+  })
+  async preCheckTransaction(
+    @Param('code') code: string,
+    @Body()
+    body: TransactionBody,
+  ): Promise<ResponseDto<ErrorMessage>> {
+    const intention = await this.actionUrlService.findOneByCode(code);
+
+    const actionStore = await this.actionService.getActionVersionStore(
+      intention.actionId,
+      intention.actionVersion,
+    );
+    const { params, account, chainId } = body;
+    const data = {
+      additionalData: {
+        code,
+        account: account,
+        chainId: parseInt(chainId),
+      },
+      formData: params,
+    };
+    const response = await actionStore.preCheckTransaction(data);
+    return this.success(response);
+  }
+
+  @Post(':code/:hash/reporter')
+  @CommonApiOperation('Generate transaction by action Id.')
+  @ApiResponse({
+    status: 200,
+    description: 'Return generated transaction',
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ResponseDto) },
+        {
+          properties: {
+            data: {
+              type: 'object',
+              properties: {
+                enable: {
+                  type: 'boolean',
+                  description: 'Indicates if the transaction can proceed',
+                },
+                reason: {
+                  type: 'string',
+                  description: 'Reason if transaction cannot proceed',
+                  nullable: true,
+                },
+              },
+            },
+          },
+        },
+      ],
+    },
+  })
+  async reportTransaction(
+    @Param('code') code: string,
+    @Param('hash') hash: string,
+    @Body()
+    body: TransactionBody,
+  ): Promise<ResponseDto<SuccessMessage>> {
+    const txHash = hash;
+    const intention = await this.actionUrlService.findOneByCode(code);
+
+    const actionStore = await this.actionService.getActionVersionStore(
+      intention.actionId,
+      intention.actionVersion,
+    );
+    const { params, account, chainId } = body;
+    const data = {
+      additionalData: {
+        code,
+        account: account,
+        chainId: parseInt(chainId),
+      },
+      formData: params,
+    };
+    const response = await actionStore.reportTransaction(data, txHash);
+    return this.success(response);
+  }
+
+  @Post(':code/transaction')
+  @CommonApiOperation('Generate transaction by action Id.')
+  @ApiParam({
+    name: 'code',
+    example: '9sf92k3i',
   })
   @ApiBody({
     description: 'parameters to generate transaction',
@@ -305,12 +443,13 @@ export class ActionUrlController extends BaseController {
     @Body()
     body: TransactionBody,
   ): Promise<ResponseDto<TransactionInfo[]>> {
-    const { params, account, chainId } = body;
+    const { params, account, inviter, chainId } = body;
     const data = {
       additionalData: {
         code,
         account: account,
         chainId: parseInt(chainId),
+        inviter,
       },
       formData: params,
     };
@@ -330,17 +469,21 @@ export class ActionUrlController extends BaseController {
   }
 
   // get intention record list with txs
-  @Get(':code/intention-record')
+  @Get(':address/intention-record')
   @CommonApiOperation('Get intention record list with txs.')
+  @ApiQuery({
+    name: 'status',
+    example: 'pending|success|faild or empty',
+  })
   async getIntentionRecordList(
-    @Param('code') code: string,
-    @Query('address') address: string,
+    @Param('address') address: string,
     @Query() pagingOptions: PagingOptionsDto,
+    @Query('status') status?: string,
   ): Promise<ResponseDto<IntentionRecordListItemResponseDto[]>> {
     const { page = 1, limit = 20 } = pagingOptions;
-    const result = await this.intentionRecordService.findListByCodeAndPublickey(
-      code,
+    const result = await this.intentionRecordService.findListAndPublickey(
       address,
+      status,
       page,
       limit,
     );

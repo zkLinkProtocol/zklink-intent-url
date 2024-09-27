@@ -10,10 +10,11 @@ import {
 import { ConfigService } from '@nestjs/config';
 import _ from 'lodash';
 
-import { Action, ActionId } from 'src/common/dto';
+import { Action } from 'src/common/dto';
 import { ConfigType } from 'src/config';
 import { BusinessException } from 'src/exception/business.exception';
 import { ActionRepository } from 'src/repositories/action.repository';
+import { ActionId } from 'src/types';
 
 import { ActionResponseDto } from './dto/actions.dto';
 import { RegistryAction } from './model';
@@ -36,7 +37,9 @@ export class ActionService implements OnApplicationBootstrap {
   onApplicationBootstrap() {
     this.uniqueActionPlugs = _.chain(this.allActionPlugs)
       .groupBy('id')
-      .map((actions) => _.maxBy(actions, 'version'))
+      .map((actions) =>
+        _.maxBy(actions, (action) => parseInt(action.version.substring(1), 10)),
+      )
       .compact()
       .value();
 
@@ -45,7 +48,7 @@ export class ActionService implements OnApplicationBootstrap {
   }
 
   private async initializeActionsMetadata(actionPlugs: Array<RegistryAction>) {
-    for (const { id, service } of actionPlugs) {
+    for (const [index, { id, service }] of actionPlugs.entries()) {
       const metadata = await service.getMetadata();
 
       if (!metadata.logo) {
@@ -67,7 +70,7 @@ export class ActionService implements OnApplicationBootstrap {
         });
         metadata.magicLinkMetadata = metadata.magicLinkMetadata ?? {};
         metadata.magicLinkMetadata.gallery = galleryWithExt
-          ? `${this.awsConfig.s3Url}/${this.awsConfig.keyPrefix}/logos/${galleryWithExt}`
+          ? `${this.awsConfig.s3Url}/${this.awsConfig.keyPrefix}/galleries/${galleryWithExt}`
           : '';
       }
 
@@ -77,7 +80,6 @@ export class ActionService implements OnApplicationBootstrap {
         description,
         networks,
         intent,
-        dApp,
         author,
         magicLinkMetadata,
       } = metadata;
@@ -89,9 +91,9 @@ export class ActionService implements OnApplicationBootstrap {
         networks,
         description,
         author,
-        dApp,
         intent,
         magicLinkMetadata,
+        sortOrder: index,
       });
       await this.actionRepository.initAction(newAction);
     }
@@ -104,17 +106,21 @@ export class ActionService implements OnApplicationBootstrap {
     if (!actionMetadata) {
       throw new BusinessException(`ActionId ${id} not found`);
     }
-    const actionStore = await this.getActionStore(id);
+    const actionStore = this.getActionStore(id);
     const hasPostTxs = !!actionStore.onMagicLinkCreated;
     return { ...actionMetadata, hasPostTxs };
   }
 
   async getAllActionMetadata(): Promise<ActionResponseDto[]> {
-    const allActionMetadataRaw = await this.actionRepository.find({});
+    const allActionMetadataRaw = await this.actionRepository.find({
+      order: {
+        sortOrder: 'asc',
+      },
+    });
     const allActionMetadata = allActionMetadataRaw.map(
       async (actionMetadata) => {
         const { id } = actionMetadata;
-        const actionStore = await this.getActionStore(id);
+        const actionStore = this.getActionStore(id);
         const hasPostTxs = !!actionStore.onMagicLinkCreated;
         return { ...actionMetadata, hasPostTxs };
       },

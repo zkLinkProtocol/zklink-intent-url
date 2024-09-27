@@ -63,6 +63,69 @@
       "compilerOptions": {
         "tsConfigPath": "libs/registry/tsconfig.lib.json"
       }
+    },
+    "pump-fun": {
+      "type": "library",
+      "root": "libs/pump-fun",
+      "entryFile": "index",
+      "sourceRoot": "libs/pump-fun/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/pump-fun/tsconfig.lib.json"
+      }
+    },
+    "news": {
+      "type": "library",
+      "root": "libs/news",
+      "entryFile": "index",
+      "sourceRoot": "libs/news/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/news/tsconfig.lib.json"
+      }
+    },
+    "buy-nft": {
+      "type": "library",
+      "root": "libs/buy-nft",
+      "entryFile": "index",
+      "sourceRoot": "libs/buy-nft/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/buy-nft/tsconfig.lib.json"
+      }
+    },
+    "mint-nft": {
+      "type": "library",
+      "root": "libs/mint-nft",
+      "entryFile": "index",
+      "sourceRoot": "libs/mint-nft/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/mint-nft/tsconfig.lib.json"
+      }
+    },
+    "mint-nova-nft": {
+      "type": "library",
+      "root": "libs/mint-nova-nft",
+      "entryFile": "index",
+      "sourceRoot": "libs/mint-nova-nft/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/mint-nova-nft/tsconfig.lib.json"
+      }
+    },
+    "data": {
+      "type": "library",
+      "root": "libs/data",
+      "entryFile": "index",
+      "sourceRoot": "libs/data/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/data/tsconfig.lib.json"
+      }
+    },
+    "shared-red-packet": {
+      "type": "library",
+      "root": "libs/shared-red-packet",
+      "entryFile": "index",
+      "sourceRoot": "libs/shared-red-packet/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/shared-red-packet/tsconfig.lib.json"
+      }
     }
   }
 }

@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { nanoid } from 'nanoid';
+import { ClsModule } from 'nestjs-cls';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -17,11 +19,20 @@ import { ActionUrlModule } from './modules/actionUrl/actionUrl.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { FilesModule } from './modules/files/files.module';
 import { HubModule } from './modules/hub/hub.module';
+import { TgbotModule } from './modules/tgbot/tgbot.module';
 import { typeOrmModuleOptions } from './typeorm.config';
 import { UnitOfWorkModule } from './unitOfWork';
 
 @Module({
   imports: [
+    ClsModule.forRoot({
+      global: true,
+      interceptor: {
+        mount: true,
+        generateId: true,
+        idGenerator: () => nanoid(),
+      },
+    }),
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
@@ -45,14 +56,15 @@ import { UnitOfWorkModule } from './unitOfWork';
       IntentionRecord,
       IntentionRecordTx,
     ]),
+    ActionModule.forRoot(),
     MetricsModule,
     UnitOfWorkModule,
     AuthModule,
     ActionUrlModule,
-    ActionModule,
     FilesModule,
     HubModule,
     ActionsJsonModule,
+    TgbotModule,
   ],
 
   controllers: [AppController],

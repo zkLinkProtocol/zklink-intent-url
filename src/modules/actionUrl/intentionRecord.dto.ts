@@ -19,6 +19,13 @@ export class IntentionRecordTxRequestDto {
   txHash: string;
 
   @ApiProperty({
+    name: 'opUserHash',
+    description: 'bundle hash by response of solver.',
+    example: '0x123456',
+  })
+  opUserHash?: string;
+
+  @ApiProperty({
     name: 'chainId',
     description: 'ChainId of intention record.',
     example: '1',
@@ -47,25 +54,6 @@ export class IntentionRecordAddRequestDto {
   })
   @IsString()
   address: string;
-
-  @ApiProperty({
-    name: 'opUserHash',
-    description: 'bundle hash by response of solver.',
-    example: '0x123456',
-  })
-  @IsString()
-  @IsNotEmpty()
-  opUserHash: string;
-
-  @ApiProperty({
-    name: 'opUserChainId',
-    description: 'ChainId of target chain.',
-    example: '1',
-    required: true,
-  })
-  @IsString()
-  @IsNotEmpty()
-  opUserChainId: number;
 
   @ApiProperty({
     name: 'txs',

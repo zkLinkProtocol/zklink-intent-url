@@ -1,29 +1,34 @@
 import { Module } from '@nestjs/common';
 
-import { BuyMeACoffeeService } from '@action/buy-me-a-coffee';
-import { CrossChainSwapService } from '@action/cross-chain-swap';
-import { NovaswapService } from '@action/novaswap';
-import { RedEnvelopeService } from '@action/red-envelope';
-import { SplitBillService } from 'libs/split-bill/src';
+import { BuyMeACoffeeModule } from '@action/buy-me-a-coffee';
+import { BuyNftModule } from '@action/buy-nft';
+import { CrossChainSwapModule } from '@action/cross-chain-swap';
+import { MintNftModule } from '@action/mint-nft';
+import { MintNovaNftModule } from '@action/mint-nova-nft';
+import { NewsModule } from '@action/news';
+import { NovaswapModule } from '@action/novaswap';
+import { PumpFunModule } from '@action/pump-fun';
+import { RedEnvelopeModule } from '@action/red-envelope';
+import { SharedRedPacketModule } from '@action/shared-red-packet';
+import { SplitBillModule } from '@action/slipt-bill';
 
 import { RegistryService } from './registry.service';
 
 @Module({
-  providers: [
-    RegistryService,
-    CrossChainSwapService,
-    BuyMeACoffeeService,
-    NovaswapService,
-    RedEnvelopeService,
-    SplitBillService,
+  imports: [
+    RedEnvelopeModule,
+    SplitBillModule,
+    BuyMeACoffeeModule,
+    CrossChainSwapModule,
+    NovaswapModule,
+    PumpFunModule,
+    NewsModule,
+    BuyNftModule,
+    MintNftModule,
+    MintNovaNftModule,
+    SharedRedPacketModule,
   ],
-  exports: [
-    RegistryService,
-    CrossChainSwapService,
-    BuyMeACoffeeService,
-    NovaswapService,
-    RedEnvelopeService,
-    SplitBillService,
-  ],
+  providers: [RegistryService],
+  exports: [RegistryService],
 })
 export class RegistryModule {}

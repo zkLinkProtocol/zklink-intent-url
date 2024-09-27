@@ -3,7 +3,7 @@ import { IsBoolean } from 'class-validator';
 
 import { ActionMetadata } from 'src/common/dto';
 
-export class ActionResponseDto extends ActionMetadata<string> {
+export class ActionResponseDto extends ActionMetadata {
   @ApiProperty({
     type: String,
     description: 'action id',

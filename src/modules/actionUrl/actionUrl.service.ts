@@ -4,8 +4,7 @@ import { nanoid } from 'nanoid';
 import { GenerateTransactionParams, TransactionInfo } from 'src/common/dto';
 import { BusinessException } from 'src/exception/business.exception';
 import { ActionService } from 'src/modules/action/action.service';
-import { ActionRepository } from 'src/repositories';
-import { IntentionRepository } from 'src/repositories/intention.repository';
+import { ActionRepository, IntentionRepository } from 'src/repositories';
 import { UnitOfWork } from 'src/unitOfWork';
 
 import { ActionUrlAddRequestDto } from './actionUrl.dto';
@@ -23,10 +22,7 @@ export class ActionUrlService {
   }
 
   async findOneByCode(code: string) {
-    const intention = await this.intentionRepository.findOne({
-      where: [{ code }],
-      relations: ['creator', 'action'],
-    });
+    const intention = await this.intentionRepository.queryIntentionByCode(code);
     if (!intention) throw new BusinessException(`intention ${code} not found`);
     return intention;
   }
@@ -47,15 +43,27 @@ export class ActionUrlService {
         'createdAt',
         'updatedAt',
       ],
+      relations: ['action'],
       take: limit,
       skip: offset,
       order: { createdAt: 'DESC' },
     });
 
+    const filteredActionUrls = actionUrls.map((item) => ({
+      ...item,
+      action: item.action
+        ? {
+            title: item.action.title,
+            logo: item.action.logo,
+            networks: item.action.networks.length,
+          }
+        : null,
+    }));
+
     const totalPages = Math.ceil(total / limit);
 
     return {
-      data: actionUrls,
+      data: filteredActionUrls,
       currentPage: page,
       totalPages,
       totalItems: total,
@@ -77,25 +85,27 @@ export class ActionUrlService {
       creatorId,
       code,
     });
-    try {
-      this.unitOfWork.useTransaction(async () => {
-        const actionInfo = await this.actionRepository.findOneBy({
-          id: params.actionId,
-        });
-        if (!actionInfo) {
-          throw new BusinessException(`No action ${params.actionId} found`);
-        }
-        actionInfo.intentionCount += 1;
+    return new Promise((resolve) => {
+      try {
+        this.unitOfWork.useTransaction(async () => {
+          const actionInfo = await this.actionRepository.findOneBy({
+            id: params.actionId,
+          });
+          if (!actionInfo) {
+            throw new BusinessException(`No action ${params.actionId} found`);
+          }
+          actionInfo.intentionCount += 1;
 
-        await this.intentionRepository.add(intentionRecord);
-        await this.actionRepository.upsert(actionInfo, true, ['id']);
-        this.logger.log(`a new intention is added ${code}`);
-      });
-    } catch (error) {
-      this.logger.error(error);
-      throw new BusinessException('Failed to add actionUrl');
-    }
-    return code;
+          await this.intentionRepository.add(intentionRecord);
+          await this.actionRepository.upsert(actionInfo, true, ['id']);
+          this.logger.log(`a new intention is added ${code}`);
+          resolve(code);
+        });
+      } catch (error) {
+        this.logger.error(error);
+        throw new BusinessException('Failed to add actionUrl');
+      }
+    });
   }
 
   async updateByCode(code: string, params: any, creatorId: bigint) {
@@ -157,7 +167,7 @@ export class ActionUrlService {
   }
 
   async generateTransaction(
-    data: GenerateTransactionParams<string>,
+    data: GenerateTransactionParams,
   ): Promise<TransactionInfo[]> {
     const actionUrl = await this.findOneByCode(data.additionalData.code!);
     const { actionId, actionVersion } = actionUrl;

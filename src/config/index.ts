@@ -17,6 +17,7 @@ const configFactory = async () => {
     witnessPrivateKey: process.env.WITNESS_PRIVATE_KEY || '',
     turnkeyApi: process.env.TURNKEY_API || '',
     rpc: {
+      810181: process.env.Nova_Sepolia_RPC_URL || '',
       810180: process.env.Nova_RPC_URL || '',
       1: process.env.Ethereum_RPC_URL || '',
       324: process.env.Zksync_RPC_URL || '',
@@ -27,6 +28,15 @@ const configFactory = async () => {
       5000: process.env.Mantle_RPC_URL || '',
       169: process.env.Manta_RPC_URL || '',
       534352: process.env.Scroll_RPC_URL || '',
+    },
+    tgbot: {
+      tgbot: process.env.TGBOT || '',
+      webHookUrl: process.env.TGBOT_WEBHOOK_URL || '',
+      pollApi: process.env.TGBOT_POLL_API || '',
+      token: process.env.TGBOT_TOKEN,
+      miniApp: process.env.TGBOT_MINI_APP || '',
+      newsChannelId: process.env.NEWS_CHANNEL_ID || '',
+      userMiniApp: process.env.TGBOT_USER_MINI_APP || '',
     },
   };
 };

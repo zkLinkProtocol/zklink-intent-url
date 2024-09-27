@@ -1,1 +1,5 @@
-export type FormName = 'amountToBuy' | 'tokenIn' | 'tokenOutAddress';
+export type FieldTypes = {
+  amountToBuy: string;
+  tokenFrom: string;
+  tokenTo: string;
+};

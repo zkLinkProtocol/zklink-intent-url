@@ -1,30 +1,32 @@
 import { ActionMetadata } from 'src/common/dto';
 
 import { Value } from './config';
-import { DistributionModeValue, FormName, GasTokenValue } from './type';
+import { DistributionModeValue, FieldTypes, GasTokenValue } from './type';
 
-export const genMetadata = (configValue: Value): ActionMetadata<FormName> => ({
-  title: 'RedEnvelope',
-  description: 'Send red Envelope',
+export const genMetadata = (
+  configValue: Value,
+): ActionMetadata<FieldTypes> => ({
+  title: 'Red Packet 🧧',
+  description: '<div>This action is designed to distribute token rewards</div>',
   networks: [
     {
-      name: 'zkLink Nova',
+      name: configValue.networkName,
       chainId: configValue.chainId.toString(),
-      contractAddress: '',
     },
   ],
-  dApp: { name: 'RedEnvelope' },
   author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
-  magicLinkMetadata: {},
+  magicLinkMetadata: {
+    title: 'Red Packet 🧧',
+    description: 'Best wishes!',
+  },
   intent: {
+    binding: true,
     components: [
       {
         name: 'distributionMode',
-        label: 'Distribution Mode',
+        label: 'Distribution Method',
         desc: 'Choose Mode to distribute Red Envelopes',
         type: 'searchSelect',
-        regex: '^[a-zA-Z0-9]+$',
-        regexDesc: 'String',
         options: [
           {
             label: 'Equal Amount Per Address',
@@ -38,43 +40,39 @@ export const genMetadata = (configValue: Value): ActionMetadata<FormName> => ({
       },
       {
         name: 'totalDistributionAmount',
-        label: 'Total Distribution Amount',
-        desc: 'Total amount you want to distribute',
+        label: 'Total Token Amount',
+        desc: 'The total amount of tokens to be distributed',
         type: 'input',
-        regex: '^[1-9]\\d*$',
+        regex: '^\\d+\\.?\\d*$|^\\d*\\.\\d+$',
         regexDesc: 'Int',
       },
       {
         name: 'distributionToken',
-        label: 'Distribution Token',
+        label: 'Token to Distribute',
         desc: 'Choose a token to distribute',
-        type: 'searchSelectErc20',
-        regex: '^0x[a-fA-F0-9]{40}$',
-        regexDesc: 'Address',
+        type: 'searchSelect',
         options: configValue.tokens,
       },
       {
         name: 'amountOfRedEnvelopes',
-        label: 'Amount Of Red Envelopes',
-        desc: 'How many Red Envelopes want to distribute',
+        label: 'Number of Red Packets',
+        desc: 'Total number of Red Packets',
         type: 'input',
         regex: '^[1-9]\\d*$',
-        regexDesc: 'Int',
+        regexDesc: 'It should be a positive integer.',
       },
       {
         name: 'gasToken',
-        label: 'Gas Token',
+        label: 'Who should pay for the claiming gas fee',
         desc: 'Gas can be deducted from distributed amount, allowing recipient to grab red envelope with 0 gas',
         type: 'searchSelect',
-        regex: '^[a-zA-Z0-9]+$',
-        regexDesc: 'String',
         options: [
           {
-            label: 'ETH(Pay By Recipient)',
+            label: 'Recipient',
             value: GasTokenValue.Eth,
           },
           {
-            label: 'Distributed Token(No Gas)',
+            label: 'Red Packet Creator (Requires additional tokens)',
             value: GasTokenValue.DistributedToken,
           },
         ],

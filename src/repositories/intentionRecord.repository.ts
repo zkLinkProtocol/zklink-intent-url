@@ -1,11 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { Brackets } from 'typeorm';
+import { Brackets, In } from 'typeorm';
 
 import {
   IntentionRecord,
   IntentionRecordStatus,
 } from 'src/entities/intentionRecord.entity';
-import { IntentionRecordTx } from 'src/entities/intentionRecordTx.entity';
+import {
+  IntentionRecordTx,
+  IntentionRecordTxStatus,
+} from 'src/entities/intentionRecordTx.entity';
 
 import { BaseRepository } from './base.repository';
 import { UnitOfWork } from '../unitOfWork';
@@ -23,13 +26,6 @@ export class IntentionRecordRepository extends BaseRepository<IntentionRecord> {
   ) {
     const transactionManager = this.unitOfWork.getTransactionManager();
     await transactionManager.transaction(async (manager) => {
-      const exists = await manager.findOneBy(IntentionRecord, {
-        opUserHash: intentionRecord.opUserHash,
-        opUserChainId: intentionRecord.opUserChainId,
-      });
-      if (exists) {
-        return;
-      }
       const savedIntentionRecord = await manager.save(
         IntentionRecord,
         intentionRecord,
@@ -79,10 +75,29 @@ export class IntentionRecordRepository extends BaseRepository<IntentionRecord> {
     });
   }
 
+  public async getIntentionRecordWithTxsByCode(
+    code: string,
+    address: string | undefined,
+  ): Promise<IntentionRecord | null> {
+    return await this.findOne({
+      select: [
+        'id',
+        'intentionCode',
+        'status',
+        'address',
+        'createdAt',
+        'intention',
+      ],
+      where: { intentionCode: code, address: address },
+      order: { createdAt: 'DESC' },
+      relations: ['intentionRecordTxs'],
+    });
+  }
+
   // get paging intention record list with txs by intention code and address
   public async getPagingIntentionRecordListWithTxsByCodeAndPublickey(
-    intentionCode: string,
     address: string,
+    status: string | undefined,
     page: number = 1,
     limit: number = 10,
   ) {
@@ -96,9 +111,7 @@ export class IntentionRecordRepository extends BaseRepository<IntentionRecord> {
         'intentionrecord.createdAt as createdAt',
       ])
       .addSelect("intentionrecord.intention->>'title'", 'title')
-      .where('intentionrecord.intentionCode = :intentionCode', {
-        intentionCode,
-      })
+      .addSelect("intentionrecord.intention->>'metadata'", 'metadata')
       .andWhere(
         new Brackets((qb) => {
           qb.where('intentionrecord.address = :address', {
@@ -109,6 +122,11 @@ export class IntentionRecordRepository extends BaseRepository<IntentionRecord> {
       .orderBy('intentionrecord.createdAt', 'DESC')
       .skip((page - 1) * limit)
       .take(limit);
+    if (status) {
+      queryBuilder.andWhere('intentionrecord.status = :status', {
+        status,
+      });
+    }
 
     const data = await queryBuilder.getRawMany();
     const total = await queryBuilder.getCount();
@@ -116,35 +134,18 @@ export class IntentionRecordRepository extends BaseRepository<IntentionRecord> {
     return { data, total };
   }
 
-  public async getIntentionRecordListWithTxsByCodeAndPublickey(
-    intentionCode: string,
-    address: string,
-  ) {
-    const addressHash = address ? Buffer.from(address.substring(2), 'hex') : '';
-    const queryBuilder = this.unitOfWork
+  async getIntentionRecordListTxStatus(
+    status: IntentionRecordTxStatus,
+  ): Promise<IntentionRecord[]> {
+    const manager = this.unitOfWork.getTransactionManager();
+    return await manager.query(
+      `select a.id from "intention_record" as a left join "intention_record_tx" as b on a."id" = b."intentionRecordId" where b.status='${status}'`,
+    );
+  }
+
+  async updateStatusByIds(ids: bigint[], status: IntentionRecordStatus) {
+    await this.unitOfWork
       .getTransactionManager()
-      .createQueryBuilder(IntentionRecord, 'intentionrecord')
-      .select([
-        'intentionrecord.id as id',
-        'intentionrecord.status as status',
-        'intentionrecord.createdAt as createdAt',
-      ])
-      .addSelect("intentionrecord.intention->>'title'", 'title')
-      .where('intentionrecord.intentionCode = :intentionCode', {
-        intentionCode,
-      });
-
-    if (address) {
-      queryBuilder.andWhere('intentionrecord.address = :address', {
-        address: addressHash,
-      });
-    }
-
-    queryBuilder.orderBy('intentionrecord.createdAt', 'DESC');
-
-    const data = await queryBuilder.getRawMany();
-    const total = await queryBuilder.getCount();
-
-    return { data, total };
+      .update(IntentionRecord, { id: In(ids) }, { status });
   }
 }

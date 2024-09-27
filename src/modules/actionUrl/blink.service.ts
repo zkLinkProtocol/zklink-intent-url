@@ -12,9 +12,7 @@ export class BlinkService {
     this.logger = new Logger(BlinkService.name);
   }
 
-  async getMetadataActions(code: string, setting: any) {
-    const postHref = `/api/action-url/${code}/build-transactions`;
-
+  magicLinkToBlinkActions(postHref: string, setting: any) {
     const componentsArr = setting.intentInfo.components;
     const components = new Map();
     const params = new Map();
@@ -27,13 +25,14 @@ export class BlinkService {
     const intentList = setting.intentList;
     let actions = [];
     if (intentList && intentList.length > 0) {
-      actions = intentList.map((item: any) => {
+      actions = intentList.map((item: any, index: number) => {
         let res: any = {};
         if (item.type == 'Button') {
           if (undefined != item.value) {
             params.set(item.field, item.value);
           }
           res = {
+            index,
             href: '',
             label: item.title,
           };
@@ -42,6 +41,7 @@ export class BlinkService {
           const component = components.get(item.field);
           if (component) {
             res = {
+              index,
               href: '',
               label: item.title,
               parameters: [
@@ -60,11 +60,19 @@ export class BlinkService {
         params.forEach((value, key) => {
           paramsStr += `${key}=${value}&`;
         });
-        res.href = `${postHref}?${paramsStr.substring(0, paramsStr.length - 1)}`;
+        res.href =
+          postHref.indexOf('?') != -1
+            ? `${postHref}${paramsStr.substring(0, paramsStr.length - 1)}`
+            : `${postHref}?${paramsStr.substring(0, paramsStr.length - 1)}`;
         return res;
       });
     }
     return actions;
+  }
+
+  async getMetadataActions(code: string, setting: any) {
+    const postHref = `/api/action-url/${code}/build-transactions`;
+    return this.magicLinkToBlinkActions(postHref, setting);
   }
 
   async buildTransactions(
@@ -73,7 +81,7 @@ export class BlinkService {
     account: string,
     params: any,
   ): Promise<string> {
-    const data: GenerateTransactionParams<string> = {
+    const data: GenerateTransactionParams = {
       additionalData: {
         chainId,
         code,

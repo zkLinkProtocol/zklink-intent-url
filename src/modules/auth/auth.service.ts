@@ -5,7 +5,7 @@ import { TSignedRequest } from '@turnkey/sdk-server';
 import { verifyMessage } from 'ethers';
 
 import { ConfigType } from 'src/config';
-import { CreatorStatus } from 'src/entities/creator.entity';
+import { Creator, CreatorStatus } from 'src/entities/creator.entity';
 import { BusinessException } from 'src/exception/business.exception';
 import { CreatorRepository } from 'src/repositories/creator.repository';
 
@@ -64,7 +64,13 @@ export class AuthService {
     // return this.contractService.checkTurnkeyBind(result.address);
   }
 
-  async loginByAddress(address: string, message: string, signature: string) {
+  async loginByAddress(
+    address: string,
+    message: string,
+    signature: string,
+    tgUserId: string,
+    tgUserName: string,
+  ) {
     const validateStatus = await this.validatePrivatekey(
       address,
       message,
@@ -74,7 +80,7 @@ export class AuthService {
       throw new BusinessException('Invalid signature');
     }
 
-    await this.updateCreator(address);
+    await this.updateCreator(address, tgUserId, tgUserName);
 
     return this.signJwtToken(address);
   }
@@ -91,18 +97,38 @@ export class AuthService {
     };
   }
 
-  public async updateCreator(address: string) {
-    try {
-      await this.creatorRepository.upsert(
-        {
-          address,
-          status: CreatorStatus.ACTIVE,
-        },
-        true,
-        ['address'],
-      );
-    } catch (error) {
-      throw new Error(`update creator ${address} failed`);
+  public async updateCreator(
+    address: string,
+    tgUserId?: string,
+    tgUserName?: string,
+  ) {
+    const creator = await this.creatorRepository.findByAddress(address);
+    if (!creator) {
+      const creator =
+        tgUserId != ''
+          ? ({
+              address: address,
+              status: CreatorStatus.ACTIVE,
+              tgUserId: tgUserId,
+              tgUserName: tgUserName,
+            } as Creator)
+          : ({
+              address: address,
+              status: CreatorStatus.ACTIVE,
+            } as Creator);
+      try {
+        await this.creatorRepository.add(creator);
+      } catch (err) {
+        throw new BusinessException(`create creator ${address} failed`);
+      }
+    } else {
+      if (tgUserName && tgUserId) {
+        if ('' == creator.tgUserId || null == creator.tgUserId) {
+          creator.tgUserId = tgUserId ?? '';
+        }
+        creator.tgUserName = tgUserName ?? '';
+        await this.creatorRepository.update(creator, { id: creator.id });
+      }
     }
   }
 
