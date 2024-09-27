@@ -100,6 +100,15 @@
         "tsConfigPath": "libs/mint-nft/tsconfig.lib.json"
       }
     },
+    "mint-nova-nft": {
+      "type": "library",
+      "root": "libs/mint-nova-nft",
+      "entryFile": "index",
+      "sourceRoot": "libs/mint-nova-nft/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/mint-nova-nft/tsconfig.lib.json"
+      }
+    },
     "data": {
       "type": "library",
       "root": "libs/data",

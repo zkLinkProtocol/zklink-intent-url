@@ -4,6 +4,7 @@ import { BuyMeACoffeeModule } from '@action/buy-me-a-coffee';
 import { BuyNftModule } from '@action/buy-nft';
 import { CrossChainSwapModule } from '@action/cross-chain-swap';
 import { MintNftModule } from '@action/mint-nft';
+import { MintNovaNftModule } from '@action/mint-nova-nft';
 import { NewsModule } from '@action/news';
 import { NovaswapModule } from '@action/novaswap';
 import { PumpFunModule } from '@action/pump-fun';
@@ -24,6 +25,7 @@ import { RegistryService } from './registry.service';
     NewsModule,
     BuyNftModule,
     MintNftModule,
+    MintNovaNftModule,
     SharedRedPacketModule,
   ],
   providers: [RegistryService],
