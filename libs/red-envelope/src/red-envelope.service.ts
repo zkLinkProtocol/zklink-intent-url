@@ -1,4 +1,5 @@
 import { RegistryPlug } from '@action/registry';
+import { getERC20SymbolAndDecimals } from '@core/utils';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import BigNumber from 'bignumber.js';
@@ -463,6 +464,26 @@ export class RedEnvelopeService extends ActionDto<FieldTypes> {
     ];
   }
 
+  private async getTxRecords(code: string) {
+    const result = await this.dataService.findListByCode(code);
+    if (!result) {
+      return [];
+    }
+    const transferInfos: TransactionResult[] = [];
+    const intentionRecordTxs: IntentionRecordTx[] = result.intentionRecordTxs;
+    for (const recordTx of intentionRecordTxs) {
+      if (recordTx.status !== IntentionRecordTxStatus.SUCCESS) {
+        continue;
+      }
+      const transferInfo: TransactionResult = await this.parseTransaction(
+        recordTx.txHash,
+        recordTx.chainId,
+      );
+      transferInfos.push(transferInfo);
+    }
+    return transferInfos;
+  }
+
   public async reloadAdvancedInfo(
     data: BasicAdditionalParams,
   ): Promise<{ title: string; content: string }> {
@@ -477,33 +498,12 @@ export class RedEnvelopeService extends ActionDto<FieldTypes> {
     const [_, , , totalCount] =
       await this.envelopContract.getRedPacketInfo(packetId);
 
-    const result = await this.dataService.findListByCode(code);
-    const transferInfos: TransactionResult[] = [];
-    if (!result) {
-      return {
-        title: 'Recipients',
-        content:
-          `${totalCount - unClaimedCount}/${totalCount} red packet(s) opened` +
-          (await this.generateHTML(transferInfos)),
-      };
-    }
-
-    const intentionRecordTxs: IntentionRecordTx[] = result.intentionRecordTxs;
-    for (const recordTx of intentionRecordTxs) {
-      if (recordTx.status !== IntentionRecordTxStatus.SUCCESS) {
-        continue;
-      }
-      const transferInfo: TransactionResult = await this.parseTransaction(
-        recordTx.txHash,
-        recordTx.chainId,
-      );
-      transferInfos.push(transferInfo);
-    }
+    const getTxRecords = await this.getTxRecords(code);
     return {
       title: 'Recipients',
       content:
         `${totalCount - unClaimedCount}/${totalCount} red packet(s) opened` +
-        (await this.generateHTML(transferInfos)),
+        (await this.generateHTML(getTxRecords)),
     };
   }
 
@@ -575,8 +575,88 @@ export class RedEnvelopeService extends ActionDto<FieldTypes> {
         const browserUrl = browserConfig[tx.chainId];
         const tokenName = option?.label;
         const prefixedTxhash = `${browserUrl}${tx.txhash}`;
-        return `<p>${tx.toAddress}   ${tx.value} ${tokenName}   ${prefixedTxhash}</p>`;
+        return `
+          <br/>
+          <br/>
+          <div>
+            <div>To: ${tx.toAddress} </div>
+            <div>Amount: ${tx.value} ${tokenName}</div>
+            <div>Transaction Hash: <a href=${prefixedTxhash}>${prefixedTxhash}</a><div>
+          </div>
+        `;
       })
       .join('');
+  }
+
+  public async generateManagementInfo(code: string) {
+    const packetId = this.getPacketIDByCode(code);
+    const magicLinkInfo = await this.dataService.getMagicLinkInfoByCode(code);
+
+    if (!magicLinkInfo) {
+      throw new Error(`magic link ${code} not found`);
+    }
+    const distributionToken = magicLinkInfo.components.find(
+      (i) => i.name === 'distributionToken',
+    );
+
+    if (!distributionToken) {
+      throw new Error(`magic link ${code} distributionToken not found`);
+    }
+
+    let symbol = 'ETH';
+    let decimals = 18;
+
+    if (distributionToken.value !== ethers.ZeroAddress) {
+      const tokenData = await getERC20SymbolAndDecimals(
+        this.provider,
+        distributionToken.value,
+      );
+      symbol = tokenData.symbol;
+      decimals = tokenData.decimals;
+    }
+
+    const withdrawRedPacketData =
+      await this.envelopContract.withdrawPacketBalance.populateTransaction(
+        packetId,
+      );
+
+    const [, , , totalCount, tokenAmount] =
+      await this.envelopContract.getRedPacketInfo(packetId);
+
+    const [, unClaimedCount, unClaimedTokenAmount] =
+      await this.envelopContract.getRedPacketBalance(packetId);
+
+    const records = await this.getTxRecords(code);
+    return {
+      form: [
+        {
+          label: 'Number of Red Packets ',
+          value: `${unClaimedCount}/${totalCount}`,
+        },
+        {
+          label: 'Number of Tokens',
+          value: `${formatUnits(unClaimedTokenAmount, decimals)}/${formatUnits(tokenAmount, decimals)} ${symbol}`,
+        },
+        {
+          label: 'Winner List',
+          value: records.map((i) => ({ address: i.toAddress, value: i.value })),
+        },
+      ],
+      triggers: [
+        {
+          text: 'Claim your token',
+          transactions: [
+            {
+              chainId: Number(magicLinkInfo.network.chainId),
+              to: this.config.redPacketContractAddress,
+              value: '0',
+              data: withdrawRedPacketData.data,
+              customData: null,
+              shouldPublishToChain: true,
+            },
+          ],
+        },
+      ],
+    };
   }
 }

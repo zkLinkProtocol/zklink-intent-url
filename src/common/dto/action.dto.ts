@@ -109,4 +109,22 @@ export abstract class Action<
   ): Promise<SuccessMessage> {
     return '';
   }
+
+  /**
+   * After creating the magic link, we want to provide the creator with a place to display
+   * on-chain information and perform on-chain transactions. This function provides that capability.
+   * You may want the creator to read some on-chain information to understand the usage of
+   * the magic links they created or to initiate a transaction that changes the status of the created magic link
+   * @param {string} code refer to magic link code
+   */
+  async generateManagementInfo?(code: string): Promise<{
+    form: Array<{
+      label: string;
+      value: string | Array<Record<string, string>>;
+    }>;
+    triggers: Array<{
+      text: string;
+      transactions: TransactionInfo[];
+    }>;
+  }>;
 }

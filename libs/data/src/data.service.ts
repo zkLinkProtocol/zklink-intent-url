@@ -16,6 +16,11 @@ export class DataService {
     return intention?.creator;
   }
 
+  public async getMagicLinkInfoByCode(code: string) {
+    const intention = await this.intentionRepository.queryIntentionByCode(code);
+    return intention?.settings.intentInfo;
+  }
+
   async findListByCode(intentionCode: string, address?: string) {
     return await this.intentionRecordRepository.getIntentionRecordWithTxsByCode(
       intentionCode,
