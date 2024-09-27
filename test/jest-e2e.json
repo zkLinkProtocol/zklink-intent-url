@@ -32,6 +32,8 @@
     "@core/data/(.*)": "<rootDir>/../libs/data/src/$1",
     "@core/data": "<rootDir>/../libs/data/src",
     "@action/shared-red-packet/(.*)": "<rootDir>/../libs/shared-red-packet/src/$1",
-    "@action/shared-red-packet": "<rootDir>/../libs/shared-red-packet/src"
+    "@action/shared-red-packet": "<rootDir>/../libs/shared-red-packet/src",
+    "@action/pre-sale/(.*)": "<rootDir>/../libs/pre-sale/src/$1",
+    "@action/pre-sale": "<rootDir>/../libs/pre-sale/src"
   }
 }

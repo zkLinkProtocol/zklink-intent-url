@@ -126,6 +126,15 @@
       "compilerOptions": {
         "tsConfigPath": "libs/shared-red-packet/tsconfig.lib.json"
       }
+    },
+    "pre-sale": {
+      "type": "library",
+      "root": "libs/pre-sale",
+      "entryFile": "index",
+      "sourceRoot": "libs/pre-sale/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/pre-sale/tsconfig.lib.json"
+      }
     }
   }
 }
