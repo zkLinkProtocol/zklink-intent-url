@@ -1,7 +1,7 @@
+import { DataModule } from '@core/data';
 import { Module } from '@nestjs/common';
 
 import { RedEnvelopeService } from './red-envelope.service';
-import { DataModule } from '../../data/src/data.module';
 
 @Module({
   imports: [DataModule],

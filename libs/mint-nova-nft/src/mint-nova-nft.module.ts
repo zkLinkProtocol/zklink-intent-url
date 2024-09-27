@@ -1,7 +1,7 @@
+import { DataModule } from '@core/data';
 import { Module } from '@nestjs/common';
 
 import { MintNovaNftService } from './mint-nova-nft.service';
-import { DataModule } from '../../data/src/data.module';
 
 @Module({
   imports: [DataModule],

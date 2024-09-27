@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common';
 
+import { DataModule } from '@core/data';
+
 import { SharedRedPacketService } from './shared-red-packet.service';
-import { DataModule } from '../../data/src/data.module';
 
 @Module({
   imports: [DataModule],
