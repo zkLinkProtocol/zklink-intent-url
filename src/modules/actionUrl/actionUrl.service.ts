@@ -23,7 +23,7 @@ export class ActionUrlService {
 
   async findOneByCode(code: string) {
     const intention = await this.intentionRepository.queryIntentionByCode(code);
-    if (!intention) throw new BusinessException(`intention ${code} not found`);
+    if (!intention) throw new BusinessException(`magic link ${code} not found`);
     return intention;
   }
 
@@ -178,6 +178,24 @@ export class ActionUrlService {
 
     try {
       return actionStore.generateTransaction(data);
+    } catch (error) {
+      this.logger.error(error);
+      throw new BusinessException('Failed to generate transaction');
+    }
+  }
+
+  async generateManagementInfo(code: string) {
+    const actionUrl = await this.findOneByCode(code);
+    const { actionId, actionVersion } = actionUrl;
+    const actionStore = this.actionService.getActionVersionStore(
+      actionId,
+      actionVersion,
+    );
+
+    try {
+      return actionStore.generateManagementInfo
+        ? actionStore.generateManagementInfo(code)
+        : null;
     } catch (error) {
       this.logger.error(error);
       throw new BusinessException('Failed to generate transaction');

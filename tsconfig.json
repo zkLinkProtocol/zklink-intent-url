@@ -107,6 +107,12 @@
       ],
       "@action/shared-red-packet/*": [
         "libs/shared-red-packet/src/*"
+      ],
+      "@action/pre-sale": [
+        "libs/pre-sale/src"
+      ],
+      "@action/pre-sale/*": [
+        "libs/pre-sale/src/*"
       ]
     }
   }

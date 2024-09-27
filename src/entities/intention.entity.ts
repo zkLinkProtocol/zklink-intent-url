@@ -7,6 +7,8 @@ import {
   PrimaryColumn,
 } from 'typeorm';
 
+import { NetworkDto } from 'src/common/dto';
+
 import { Action } from './action.entity';
 import { BaseEntity } from './base.entity';
 import { Creator } from './creator.entity';
@@ -44,7 +46,16 @@ export class Intention extends BaseEntity {
   public metadata: string;
 
   @Column({ type: 'jsonb' })
-  public settings: object;
+  public settings: {
+    newsType: string;
+    intentInfo: {
+      network: NetworkDto;
+      components: Array<{
+        name: string;
+        value: any;
+      }>;
+    };
+  };
 
   @Column({ type: 'boolean', default: true })
   public active: boolean;

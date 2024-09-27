@@ -26,6 +26,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "typeorm": "typeorm-ts-node-commonjs",
     "migration:generate": "npm run typeorm migration:generate ./src/migrations/$npm_config_name -- -d ./src/typeorm.config.ts",
+    "migration:create": "npm run typeorm migration:create ./src/migrations/$npm_config_name",
     "migration:run": "npm run typeorm migration:run -- -d ./src/typeorm.config.ts",
     "migration:revert": "npm run typeorm migration:revert -- -d ./src/typeorm.config.ts"
   },
@@ -136,7 +137,8 @@
       "^@action/mint-nft(|/.*)$": "<rootDir>/libs/mint-nft/src/$1",
       "^@action/mint-nova-nft(|/.*)$": "<rootDir>/libs/mint-nova-nft/src/$1",
       "^@core/data(|/.*)$": "<rootDir>/libs/data/src/$1",
-      "^@action/shared-red-packet(|/.*)$": "<rootDir>/libs/shared-red-packet/src/$1"
+      "^@action/shared-red-packet(|/.*)$": "<rootDir>/libs/shared-red-packet/src/$1",
+      "^@action/pre-sale(|/.*)$": "<rootDir>/libs/pre-sale/src/$1"
     }
   }
 }

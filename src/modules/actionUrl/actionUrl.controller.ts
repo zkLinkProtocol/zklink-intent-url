@@ -457,6 +457,14 @@ export class ActionUrlController extends BaseController {
     return this.success(response);
   }
 
+  // generateManagementInfo
+  @Get(':code/management')
+  @CommonApiOperation('intention management info.')
+  async generateManagementInfo(@Param('code') code: string) {
+    const result = await this.actionUrlService.generateManagementInfo(code);
+    return this.success(result);
+  }
+
   // post intention record and txs
   @Post(':code/intention-record')
   @CommonApiOperation('Post intention record and txs.')
