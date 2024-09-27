@@ -29,7 +29,6 @@ import {
   IntentionRecordTx,
   IntentionRecordTxStatus,
 } from 'src/entities/intentionRecordTx.entity';
-import { IntentionRecordService } from 'src/modules/actionUrl/intentionRecord.service';
 import { Address, ErrorMessage } from 'src/types';
 import { utils } from 'zksync-ethers';
 
@@ -53,6 +52,7 @@ import {
   FieldTypes,
   GasTokenValue,
 } from './type';
+import { DataService } from '../../data/src/data.service';
 
 const PACKET_HASH = ethers.keccak256(ethers.toUtf8Bytes('REDPACKET'));
 
@@ -69,7 +69,7 @@ export class RedEnvelopeService extends ActionDto<FieldTypes> {
 
   constructor(
     readonly configService: ConfigService,
-    private readonly intentionRecordService: IntentionRecordService,
+    private readonly dataService: DataService,
   ) {
     super();
     this.env = configService.get('env', { infer: true })!;
@@ -477,10 +477,7 @@ export class RedEnvelopeService extends ActionDto<FieldTypes> {
     const [_, , , totalCount] =
       await this.envelopContract.getRedPacketInfo(packetId);
 
-    const result = await this.intentionRecordService.findListByCode(
-      code,
-      undefined,
-    );
+    const result = await this.dataService.findListByCode(code);
     const transferInfos: TransactionResult[] = [];
     if (!result) {
       return {

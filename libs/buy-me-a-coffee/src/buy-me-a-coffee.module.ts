@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
-import { ActionUrlModule } from 'src/modules/actionUrl/actionUrl.module';
 
 import { BuyMeACoffeeService } from './buy-me-a-coffee.service';
+import { DataModule } from '../../data/src/data.module';
 
 @Module({
-  imports: [ActionUrlModule],
+  imports: [DataModule],
   providers: [BuyMeACoffeeService],
-  exports: [BuyMeACoffeeService, ActionUrlModule],
+  exports: [BuyMeACoffeeService, DataModule],
 })
 export class BuyMeACoffeeModule {}

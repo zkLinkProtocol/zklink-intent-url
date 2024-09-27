@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
-import { ActionUrlModule } from 'src/modules/actionUrl/actionUrl.module';
 
 import { RedEnvelopeService } from './red-envelope.service';
+import { DataModule } from '../../data/src/data.module';
 
 @Module({
-  imports: [ActionUrlModule],
+  imports: [DataModule],
   providers: [RedEnvelopeService],
   exports: [RedEnvelopeService],
 })
