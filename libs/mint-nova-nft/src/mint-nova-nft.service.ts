@@ -10,16 +10,16 @@ import {
   IntentionRecordTx,
   IntentionRecordTxStatus,
 } from 'src/entities/intentionRecordTx.entity';
-import { IntentionRecordService } from 'src/modules/actionUrl/intentionRecord.service';
 
 import ERC721ABI from './abis/ERC721.json';
 import { contractConfig, metadata, providerConfig } from './config';
 import { FieldTypes } from './types';
+import { DataService } from '../../data/src/data.service';
 
 @RegistryPlug('mint-nova-nft', 'v1')
 @Injectable()
 export class MintNovaNftService extends ActionDto<FieldTypes> {
-  constructor(private readonly intentionRecordService: IntentionRecordService) {
+  constructor(private readonly dataService: DataService) {
     super();
   }
 
@@ -36,14 +36,15 @@ export class MintNovaNftService extends ActionDto<FieldTypes> {
       throw new Error('missing code');
     }
 
-    const result = await this.intentionRecordService.findListByCode(code, '');
+    const result = await this.dataService.findListByCode(code, '');
+    if (!result) {
+      return [];
+    }
     let tokenId = Number(formData.tokenId);
-    for (const item of result.data) {
-      const intentionRecordTxs: IntentionRecordTx[] = item.intentionRecordTxs;
-      for (const recordTx of intentionRecordTxs) {
-        if (recordTx.status == IntentionRecordTxStatus.SUCCESS) {
-          tokenId++;
-        }
+    const intentionRecordTxs: IntentionRecordTx[] = result.intentionRecordTxs;
+    for (const recordTx of intentionRecordTxs) {
+      if (recordTx.status == IntentionRecordTxStatus.SUCCESS) {
+        tokenId++;
       }
     }
 

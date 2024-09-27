@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
-import { ActionUrlModule } from 'src/modules/actionUrl/actionUrl.module';
 
 import { MintNovaNftService } from './mint-nova-nft.service';
+import { DataModule } from '../../data/src/data.module';
 
 @Module({
-  imports: [ActionUrlModule],
+  imports: [DataModule],
   providers: [MintNovaNftService],
   exports: [MintNovaNftService],
 })
