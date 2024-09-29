@@ -150,7 +150,7 @@ export async function getSupportedChain() {
     }[];
     msg: string;
   } = await resp.json();
-  return chains;
+  return chains.data;
 }
 
 export async function getAllTokens(chainId: number) {

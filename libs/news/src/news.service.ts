@@ -7,7 +7,11 @@ import {
   GenerateTransactionParams,
   TransactionInfo,
 } from 'src/common/dto';
-import { getApproveData, getSwapData } from 'src/common/okxAPI';
+import {
+  getApproveData,
+  getSupportedChain,
+  getSwapData,
+} from 'src/common/okxAPI';
 import { TgbotService } from 'src/modules/tgbot/tgbot.service';
 
 import { FieldTypes, METADATA, TOKEN_CONFIG } from './config';
@@ -20,6 +24,11 @@ export class NewsService extends ActionDto<FieldTypes> {
     super();
   }
   async getMetadata() {
+    const chains = await getSupportedChain();
+    METADATA.networks = chains.map((chain) => ({
+      name: chain.chainName,
+      chainId: chain.chainId,
+    }));
     return METADATA;
   }
 

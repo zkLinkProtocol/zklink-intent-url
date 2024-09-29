@@ -30,16 +30,8 @@ export const TOKEN_CONFIG: {
 export const METADATA: ActionMetadata<FieldTypes> = {
   title: 'Magic News',
   description: '<div>Perform news seamlessly across multiple networks</div>',
-  networks: [
-    {
-      name: 'Arbitrum',
-      chainId: '42161',
-    },
-    {
-      name: 'Ethereum',
-      chainId: '1',
-    },
-  ],
+  // networks is loaded from okx when application starts
+  networks: [],
   author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
   magicLinkMetadata: {},
   intent: {
