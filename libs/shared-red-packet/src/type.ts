@@ -27,6 +27,7 @@ export interface CreateRedPacketParams {
 export interface ClaimRedPacketParams {
   id: bigint;
   recipient: string;
+  inviter: string;
   expiry: number;
 }
 
