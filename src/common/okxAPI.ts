@@ -1,5 +1,6 @@
 import CryptoJS from 'crypto-js';
 import { ethers } from 'ethers';
+import { LRUCache } from 'lru-cache';
 import fetch from 'node-fetch';
 
 import { TransactionInfo } from 'src/common/dto/transaction.dto';
@@ -17,6 +18,22 @@ const apiBaseUrl = 'https://www.okx.com/api/v5/dex/aggregator/';
 const SECREAT_KEY = '91DC4BA6E6FF03F2BDAFBD1A18BF8C14';
 const ACCESS_KEY = '90fae07d-3fe3-4b23-bc27-afc59285b4aa';
 const PASSPHRASE = '8686Qwe!';
+
+type TokenType = {
+  decimals: string;
+  tokenContractAddress: string;
+  tokenLogoUrl: string;
+  tokenName: string;
+  tokenSymbol: string;
+};
+
+const options = {
+  max: 10000,
+  ttl: 60 * 1000,
+  allowStale: false,
+  ttlAutopurge: true,
+};
+const cacheToken = new LRUCache<number, TokenType[]>(options);
 
 export async function getApproveData(
   chainId: number,
@@ -154,6 +171,11 @@ export async function getSupportedChain() {
 }
 
 export async function getAllTokens(chainId: number) {
+  const supportTokens = cacheToken.get(chainId);
+  if (supportTokens) {
+    return supportTokens;
+  }
+
   const timestamp = new Date().toISOString();
   const allTokenUrl = `${apiBaseUrl}all-tokens?chainId=${chainId}`;
   const toSignUrl = allTokenUrl.replace('https://www.okx.com', '');
@@ -165,16 +187,18 @@ export async function getAllTokens(chainId: number) {
   });
   const tokens: {
     code: string;
-    data: {
-      decimals: string;
-      tokenContractAddress: string;
-      tokenLogoUrl: string;
-      tokenName: string;
-      tokenSymbol: string;
-    }[];
+    data: TokenType[];
     msg: string;
   } = await resp.json();
-  return tokens;
+
+  if (tokens.code != '0') {
+    logger.error(
+      `okx get supportToken failed,chainId:${chainId},msg:${tokens.msg}`,
+    );
+    throw new BusinessException('okx get supportToken failed');
+  }
+  cacheToken.set(chainId, tokens.data);
+  return tokens.data;
 }
 
 function getAccessSign(

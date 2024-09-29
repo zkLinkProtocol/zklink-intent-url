@@ -1,20 +1,21 @@
 import { RegistryPlug } from '@action/registry';
 import { Injectable } from '@nestjs/common';
 import { ethers } from 'ethers';
-import { RPC_URL } from 'src/common/chain/config';
 import {
   Action as ActionDto,
   GenerateTransactionParams,
   TransactionInfo,
 } from 'src/common/dto';
 import {
+  getAllTokens,
   getApproveData,
   getSupportedChain,
   getSwapData,
 } from 'src/common/okxAPI';
 import { TgbotService } from 'src/modules/tgbot/tgbot.service';
+import { Address } from 'src/types';
 
-import { FieldTypes, METADATA, TOKEN_CONFIG } from './config';
+import { FieldTypes, METADATA } from './config';
 
 //magic news
 @RegistryPlug('news', 'v1')
@@ -41,7 +42,17 @@ export class NewsService extends ActionDto<FieldTypes> {
       throw new Error('Missing account!');
     }
     const { amountToBuy, ...restParams } = formData;
-    const tokenFrom = TOKEN_CONFIG[additionalData.chainId][formData.tokenFrom];
+    const supportTokens = await getAllTokens(chainId);
+    const tokenFrom = supportTokens
+      .filter(
+        (token) =>
+          token.tokenContractAddress.toLowerCase() ===
+          formData.tokenFrom.toLowerCase(),
+      )
+      .map((token) => ({
+        address: token.tokenContractAddress.toLowerCase() as Address,
+        decimal: Number(token.decimals),
+      }))[0];
 
     const params = {
       ...restParams,
@@ -59,13 +70,11 @@ export class NewsService extends ActionDto<FieldTypes> {
       },
     ];
 
-    if (params.tokenFrom === 'weth') {
-      console.log(params);
-      console.log(account);
+    if (tokenInAddress === '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee') {
       swapTx = await getSwapData(
         account,
         chainId,
-        '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+        tokenInAddress,
         params.tokenTo,
         params.amountToBuy,
       );
