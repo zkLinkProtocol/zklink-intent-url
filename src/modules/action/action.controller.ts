@@ -66,7 +66,7 @@ export class ActionController extends BaseController {
         addressList.length > 0 &&
         !addressList.includes(creator.address))
     ) {
-      actions = actions.filter((action) => action.id === 'news');
+      actions = actions.filter((action) => action.id !== 'news');
     }
 
     return this.success(actions);
