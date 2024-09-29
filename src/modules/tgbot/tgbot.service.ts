@@ -269,10 +269,9 @@ export class TgbotService implements OnModuleInit {
     const reply_markup = {
       inline_keyboard: inlineKeyboard,
     };
+    caption = this.formatMarkdownV2(caption);
     try {
       let res = null;
-      caption = this.formatMarkdownV2(caption);
-      console.log('caption', caption);
       if (photo === '') {
         const options = { reply_markup, parse_mode };
         res = await this.bot.sendMessage(newsChannelId, caption, options);
@@ -283,6 +282,7 @@ export class TgbotService implements OnModuleInit {
       this.logger.log('sendNews success', JSON.stringify(res));
     } catch (error) {
       this.logger.error(`sendNews error`, error.stack);
+      this.logger.log(`caption:${caption}, newsChannelId:${newsChannelId}`);
     }
   }
 
@@ -304,13 +304,14 @@ export class TgbotService implements OnModuleInit {
     const reply_markup = {
       inline_keyboard: inlineKeyboard,
     };
+    caption = this.formatMarkdownV2(caption);
     try {
       const options = { reply_markup, parse_mode };
-      caption = this.formatMarkdownV2(caption);
       const res = await this.bot.sendMessage(tgUserId, caption, options);
       this.logger.log('sendMemeRedPacketMsg success', JSON.stringify(res));
     } catch (error) {
       this.logger.error(`sendMemeRedPacketMsg error`, error.stack);
+      this.logger.log(`tgUserId:${tgUserId}, caption:${caption}`);
     }
   }
 
