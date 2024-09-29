@@ -183,9 +183,21 @@ export class TgbotService implements OnModuleInit {
 
   async sendNews(code: string) {
     const config = await configFactory();
-    const newsChannelId = config.tgbot.newsChannelId;
+    const newsChannelIdCn = config.tgbot.newsChannelIdCn;
+    const newsChannelIdEn = config.tgbot.newsChannelIdEn;
+    let newsChannelId = '';
     const userMiniApp = config.tgbot.userMiniApp;
-    const news = await this.actionUrlService.findOneByCode(code);
+    let news = null;
+    try {
+      news = await this.actionUrlService.findOneByCode(code);
+    } catch (error) {
+      this.logger.error('sendNews error', error.stack);
+      return false;
+    }
+    if (!news) {
+      this.logger.error('sendNews error : news is undefined');
+      return false;
+    }
     const settings = news.settings as {
       newsType: string;
     };
@@ -201,6 +213,11 @@ export class TgbotService implements OnModuleInit {
 [Go to mini app](${userMiniApp}?startapp=${news.code}) 
 ✅️ *Verified zkLink official team*
 `;
+    if (this.containsChineseCharacters(caption)) {
+      newsChannelId = newsChannelIdCn;
+    } else {
+      newsChannelId = newsChannelIdEn;
+    }
     const parse_mode: ParseMode = 'MarkdownV2';
 
     const inlineKeyboard = [];
@@ -366,5 +383,10 @@ export class TgbotService implements OnModuleInit {
       .replaceAll('?', '\\?')
       .replaceAll('!', '\\!')
       .replaceAll('=', '\\=');
+  }
+
+  containsChineseCharacters(str: string) {
+    const regex = /[\u4e00-\u9fa5]/;
+    return regex.test(str);
   }
 }
