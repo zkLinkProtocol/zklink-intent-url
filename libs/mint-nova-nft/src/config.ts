@@ -44,6 +44,15 @@ export const metadata: ActionMetadata<FieldTypes> = {
         regexDesc: 'Key',
         defaultValue: '10',
       },
+      {
+        name: 'fee',
+        label: 'Transaction Value',
+        desc: 'The NFT mint fee',
+        type: 'input',
+        regex: '^\\d+\\.?\\d*$|^\\d*\\.\\d+$',
+        regexDesc: 'Must be a number',
+        defaultValue: '0.002',
+      },
     ],
   },
 };
