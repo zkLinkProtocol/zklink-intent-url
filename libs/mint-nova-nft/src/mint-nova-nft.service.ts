@@ -87,7 +87,7 @@ export class MintNovaNftService extends ActionDto<FieldTypes> {
     const tx: TransactionInfo = {
       chainId,
       to: mintTx.to,
-      value: ethers.parseEther('0.0001').toString(),
+      value: ethers.parseEther(formData.fee).toString(),
       data: mintTx.data,
       shouldPublishToChain: true,
     };
