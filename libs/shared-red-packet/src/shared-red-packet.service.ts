@@ -357,12 +357,12 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
     const signature = await this.genClaimSignature({
       id: packetId,
       expiry,
-      inviter: inviter ?? account,
+      inviter: inviter ?? ethers.ZeroAddress,
       recipient: account,
     });
     const tx = await this.redPacketContract.claimRedPacket.populateTransaction(
       packetId,
-      inviter ?? account,
+      inviter ?? ethers.ZeroAddress,
       expiry,
       signature,
     );
