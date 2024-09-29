@@ -35,7 +35,8 @@ const configFactory = async () => {
       pollApi: process.env.TGBOT_POLL_API || '',
       token: process.env.TGBOT_TOKEN,
       miniApp: process.env.TGBOT_MINI_APP || '',
-      newsChannelId: process.env.NEWS_CHANNEL_ID || '',
+      newsChannelIdCn: process.env.NEWS_CHANNEL_ID_CN || '',
+      newsChannelIdEn: process.env.NEWS_CHANNEL_ID_EN || '',
       userMiniApp: process.env.TGBOT_USER_MINI_APP || '',
     },
   };

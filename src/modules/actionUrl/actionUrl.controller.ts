@@ -23,6 +23,7 @@ import { Response } from 'express';
 import { BaseController } from 'src/common/base.controller';
 import { CommonApiOperation } from 'src/common/base.decorators';
 import { ActionTransactionParams, TransactionInfo } from 'src/common/dto';
+import { getAllTokens } from 'src/common/okxAPI';
 import { PagingOptionsDto } from 'src/common/pagingOptionsDto.param';
 import { PagingMetaDto, ResponseDto } from 'src/common/response.dto';
 import { BusinessException } from 'src/exception/business.exception';
@@ -601,5 +602,14 @@ export class ActionUrlController extends BaseController {
       response.message = error.message;
     }
     return response;
+  }
+
+  @Get('/magicnews/support/tokens')
+  public async getTokens(@Query('chainId') chainId: number) {
+    const supportTokens = await getAllTokens(Number(chainId));
+    return supportTokens.map((token) => ({
+      lable: token.tokenSymbol,
+      address: token.tokenContractAddress,
+    }));
   }
 }

@@ -192,6 +192,46 @@ export class OptionComponentDto<
   options: OptionDto[];
 }
 
+export class InputOptionComponentDto<
+  R extends Record<string, any>,
+> extends BaseComponentDto<R> {
+  @ApiProperty({
+    type: String,
+    enum: ['inputSelect'],
+    description: 'This component is a dropdown menu and support input.',
+  })
+  @IsEnum(['inputSelect'])
+  type: 'inputSelect';
+
+  @ApiProperty({
+    type: 'array',
+    items: { $ref: getSchemaPath(OptionDto) },
+    description: 'Dropdown menu option configuration.',
+  })
+  @IsArray()
+  @Type(() => OptionDto)
+  @ValidateNested({ each: true })
+  @ValidateIf((o) => ['inputSelect'].includes(o.type))
+  @ValidateOptions({ message: 'Invalid options based on type value' })
+  options: OptionDto[];
+
+  @ApiProperty({
+    type: String,
+    description:
+      'Simple regex validation, informing the frontend of the form field rules, which the frontend will use for validation.',
+  })
+  @IsString()
+  regex?: string;
+
+  @ApiProperty({
+    type: String,
+    description:
+      'Error message for regex validation; if the regex validation fails, this configuration will serve as a prompt to tell the creator the rules for filling in this field.',
+  })
+  @IsString()
+  regexDesc?: string;
+}
+
 export class ConditionalComponentDto<
   R extends Record<string, any>,
 > extends BaseComponentDto<R> {
@@ -249,6 +289,7 @@ export class IntentDto<R extends Record<string, any> = Record<string, any>> {
       AgnosticComponentDto,
       InputComponentDto,
       OptionComponentDto,
+      InputOptionComponentDto,
       ConditionalComponentDto,
     ],
     description: 'Form configuration items for constructing a transaction.',
@@ -259,6 +300,7 @@ export class IntentDto<R extends Record<string, any> = Record<string, any>> {
     | AgnosticComponentDto<R>
     | InputComponentDto<R>
     | OptionComponentDto<R>
+    | InputOptionComponentDto<R>
     | ConditionalComponentDto<R>
   >;
 
@@ -380,6 +422,7 @@ export class ActionMetadata<
 export function isOptionComponentDto<R extends Record<string, any>>(
   component:
     | OptionComponentDto<R>
+    | InputOptionComponentDto<R>
     | InputComponentDto<R>
     | ConditionalComponentDto<R>
     | AgnosticComponentDto<R>,

@@ -28,6 +28,7 @@ export interface ClaimRedPacketParams {
   id: bigint;
   recipient: string;
   expiry: number;
+  inviter?: string;
 }
 
 export type FieldTypes = {

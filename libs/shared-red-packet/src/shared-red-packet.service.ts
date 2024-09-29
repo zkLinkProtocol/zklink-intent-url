@@ -152,7 +152,7 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
       MemeRedPacketClaim: [
         { name: 'id', type: 'uint256' },
         { name: 'recipient', type: 'address' },
-        { name: ' inviter', type: 'address' },
+        { name: 'inviter', type: 'address' },
         { name: 'expiry', type: 'uint256' },
       ],
     };
@@ -160,6 +160,7 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
     const signMessage = {
       id: params.id,
       recipient: params.recipient,
+      inviter: params.inviter,
       expiry: params.expiry,
     };
 
@@ -356,11 +357,12 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
     const signature = await this.genClaimSignature({
       id: packetId,
       expiry,
+      inviter: inviter ?? ethers.ZeroAddress,
       recipient: account,
     });
     const tx = await this.redPacketContract.claimRedPacket.populateTransaction(
       packetId,
-      inviter,
+      inviter ?? ethers.ZeroAddress,
       expiry,
       signature,
     );
