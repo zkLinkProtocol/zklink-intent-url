@@ -422,6 +422,7 @@ export class ActionMetadata<
 export function isOptionComponentDto<R extends Record<string, any>>(
   component:
     | OptionComponentDto<R>
+    | InputOptionComponentDto<R>
     | InputComponentDto<R>
     | ConditionalComponentDto<R>
     | AgnosticComponentDto<R>,
