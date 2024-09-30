@@ -1,3 +1,4 @@
+# Developer Guide
 ## Update Contract Address and RPC Provider
 https://github.com/zkLinkProtocol/zklink-intent-url/blob/dev/libs/mint-nova-nft/src/config.ts
 ```typescript
@@ -77,3 +78,7 @@ function setMintPrice(uint256 _mintPrice) external onlyOwner {
 }
 ```
 Call `setMintPrice` to modify the mint fee
+
+## Contract Changelog
+1. Update preset `mintPrice`
+2. add `setMintPrice` method to update `mintPrice`
