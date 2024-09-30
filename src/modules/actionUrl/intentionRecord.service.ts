@@ -1,8 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { ethers } from 'ethers';
 import { IsNull, Not } from 'typeorm';
 
-import configFactory from 'src/config';
+import { ConfigType } from 'src/config';
 import {
   IntentionRecord,
   IntentionRecordStatus,
@@ -22,26 +23,31 @@ import { IntentionRecordAddRequestDto } from './intentionRecord.dto';
 @Injectable()
 export class IntentionRecordService {
   logger: Logger;
+  private readonly rpcs: ConfigType['rpc'];
   constructor(
+    readonly configService: ConfigService,
     private readonly intentionRepository: IntentionRepository,
     public readonly intentionRecordRepository: IntentionRecordRepository,
     private readonly intentionRecordTxRepository: IntentionRecordTxRepository,
     private readonly intentionService: ActionUrlService,
   ) {
     this.logger = new Logger(IntentionRecordService.name);
+    this.rpcs = configService.get('rpc', { infer: true })!;
   }
 
   async findOneById(id: bigint): Promise<IntentionRecord> {
     const intentionRecord =
       await this.intentionRecordRepository.getIntentionRecordWithTxsById(id);
     if (!intentionRecord) {
-      throw new BusinessException('Intention record not found');
+      throw new BusinessException(`Intention record ${id} not found`);
     }
     const intentionTmp = await this.intentionService.findOneByCode(
       intentionRecord.intentionCode,
     );
     if (!intentionTmp) {
-      throw new BusinessException('Intention not found');
+      throw new BusinessException(
+        `Intention ${intentionRecord.intentionCode} not found`,
+      );
     }
     intentionRecord.intention = {
       ...intentionRecord.intention,
@@ -122,14 +128,14 @@ export class IntentionRecordService {
     while (loop) {
       this.logger.log(`start handle tx status`);
       try {
-        this.handleOpUserTxStatus();
-        this.handleTxStatus();
-        this.handleRecordStatus();
+        await this.handleOpUserTxStatus();
+        await this.handleTxStatus();
+        await this.handleRecordStatus();
       } catch (error) {
         this.logger.error(error);
       }
       this.logger.log(`end handle tx status`);
-      await this.delay(2000);
+      await this.delay(10000);
     }
   }
 
@@ -151,15 +157,15 @@ export class IntentionRecordService {
       return;
     }
     for (const tx of txs) {
-      const txHashs = await this.fetchTxReceipt(tx.chainId, tx.opUserHash);
-      if (txHashs.length === 0) {
+      const txHashes = await this.fetchTxReceipt(tx.chainId, tx.opUserHash);
+      if (txHashes.length === 0) {
         continue;
       }
-      const txHash = txHashs[0] ?? '';
+      const txHash = txHashes[0] ?? '';
       if (!txHash) {
         continue;
       }
-      await this.intentionRecordTxRepository.updateTxhasById(tx.id, txHash);
+      await this.intentionRecordTxRepository.updateTxhashById(tx.id, txHash);
     }
   }
 
@@ -198,7 +204,10 @@ export class IntentionRecordService {
       order: { id: 'ASC' },
     });
     for (const tx of txs) {
-      const status = await this.checkTxStatus(tx.txHash, tx.chainId);
+      const status = await this.checkTxStatus(
+        tx.txHash,
+        tx.chainId as keyof ConfigType['rpc'],
+      );
       if (status === IntentionRecordTxStatus.PENDING) {
         continue;
       }
@@ -207,9 +216,11 @@ export class IntentionRecordService {
   }
 
   // use ethers.js to check tx status
-  private async checkTxStatus(txHash: string, chainId: number) {
-    const rpcs: { [key: number]: string } = (await configFactory())?.rpc ?? {};
-    const rpc = rpcs[chainId];
+  private async checkTxStatus(
+    txHash: string,
+    chainId: keyof ConfigType['rpc'],
+  ) {
+    const rpc = this.rpcs[chainId];
     if (!rpc) {
       this.logger.log(`Had no supported the chinId: ${chainId}`);
       return IntentionRecordTxStatus.FAILD;
@@ -229,7 +240,8 @@ export class IntentionRecordService {
     networkId: number,
     userOphash: string,
   ): Promise<string[]> {
-    const url = `https://dev-proxy-bundler.sepolia.zklink.io/deposit/findBundlerTxReceipt`;
+    const turnkeyApi = this.configService.get('turnkeyApi', { infer: true })!;
+    const url = `${turnkeyApi}/deposit/findBundlerTxReceipt`;
     const response = await fetch(url, {
       method: 'post',
       headers: { 'Content-Type': 'application/json' },

@@ -60,8 +60,7 @@ export class AuthService {
     }
     const { result } = await response.json();
 
-    return result; // TODO
-    // return this.contractService.checkTurnkeyBind(result.address);
+    return result;
   }
 
   async loginByAddress(

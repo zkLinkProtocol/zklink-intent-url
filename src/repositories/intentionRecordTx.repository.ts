@@ -22,7 +22,7 @@ export class IntentionRecordTxRepository extends BaseRepository<IntentionRecordT
       .update(IntentionRecordTx, { id }, { status });
   }
 
-  public async updateTxhasById(id: bigint, txHash: string): Promise<void> {
+  public async updateTxhashById(id: bigint, txHash: string): Promise<void> {
     await this.unitOfWork
       .getTransactionManager()
       .update(IntentionRecordTx, { id }, { txHash });
