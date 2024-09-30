@@ -25,11 +25,6 @@ export class NewsService extends ActionDto<FieldTypes> {
     super();
   }
   async getMetadata() {
-    const chains = await getSupportedChain();
-    METADATA.networks = chains.map((chain) => ({
-      name: chain.chainName,
-      chainId: chain.chainId,
-    }));
     return METADATA;
   }
 

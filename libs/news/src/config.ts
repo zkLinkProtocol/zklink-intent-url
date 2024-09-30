@@ -9,8 +9,44 @@ export type FieldTypes = {
 export const METADATA: ActionMetadata<FieldTypes> = {
   title: 'Magic News',
   description: '<div>Perform news seamlessly across multiple networks</div>',
-  // networks is loaded from okx when application starts
-  networks: [],
+  networks: [
+    {
+      name: 'Ethereum',
+      chainId: '1',
+    },
+    {
+      name: 'Arbitrum',
+      chainId: '42161',
+    },
+    {
+      name: 'Optimism',
+      chainId: '10',
+    },
+    {
+      name: 'zkSync Era',
+      chainId: '324',
+    },
+    {
+      name: 'Linea',
+      chainId: '59144',
+    },
+    {
+      name: 'Mantle',
+      chainId: '5000',
+    },
+    {
+      name: 'Base',
+      chainId: '8453',
+    },
+    {
+      name: 'Scroll',
+      chainId: '534352',
+    },
+    {
+      name: 'Manta Pacific',
+      chainId: '169',
+    },
+  ],
   author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
   magicLinkMetadata: {},
   intent: {

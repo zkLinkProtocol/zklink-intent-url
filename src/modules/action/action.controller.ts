@@ -1,4 +1,5 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import {
   ApiBody,
   ApiExtraModels,
@@ -15,12 +16,17 @@ import { ResponseDto } from 'src/common/response.dto';
 
 import { ActionService } from './action.service';
 import { ActionResponseDto } from './dto/actions.dto';
+import { GetCreator, OptionLogin } from '../auth/creator.decorators';
+import { JwtAuthGuard } from '../auth/jwtAuth.guard';
 
 @ApiTags('actions')
 @ApiExtraModels(ActionMetadata)
 @Controller('actions')
 export class ActionController extends BaseController {
-  constructor(private readonly actionStoreService: ActionService) {
+  constructor(
+    private readonly actionStoreService: ActionService,
+    private readonly configService: ConfigService,
+  ) {
     super();
   }
 
@@ -43,8 +49,26 @@ export class ActionController extends BaseController {
       ],
     },
   })
-  async findAll(): Promise<ResponseDto<ActionResponseDto[]>> {
-    const actions = await this.actionStoreService.getAllActionMetadata();
+  @OptionLogin()
+  @UseGuards(JwtAuthGuard)
+  async findAll(
+    @GetCreator() creator: { address: string },
+  ): Promise<ResponseDto<ActionResponseDto[]>> {
+    let actions = await this.actionStoreService.getAllActionMetadata();
+
+    const addressList = this.configService
+      .get<string>('NEWS_WHITE_ADDRESS')
+      ?.split(',')
+      .map((address) => address.toLowerCase());
+    if (
+      !creator ||
+      (addressList &&
+        addressList.length > 0 &&
+        !addressList.includes(creator.address))
+    ) {
+      actions = actions.filter((action) => action.id !== 'news');
+    }
+
     return this.success(actions);
   }
 
