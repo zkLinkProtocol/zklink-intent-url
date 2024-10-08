@@ -1,33 +1,33 @@
 
-# zkLink Nova Actions & MagicLink SDK
+# zkLink Nova Actions & magicLink SDK
 
 > [!NOTE]  
-> Actions & MagicLink is in beta and undergoing audit. Please [Contact Us](https://t.me/laniakeiaa) if you plan on going live with it.
+> Actions & magicLink is in beta and undergoing audit. Please [Contact Us](https://t.me/laniakeiaa) if you plan on going live with it.
 
 Comprehensive Guide for Creating, Registering, and Utilizing Actions with MagicLinks in the zkLink Nova Network
 
 ## Overview
 
-MagicLink is a tool provided by zkLink that simplifies blockchain transactions into a shareable short link. With MagicLink, users don’t need to understand complex blockchain operations. They can click the link, set a few simple parameters, and generate, preview, and sign the transaction, which can then be sent to various networks. This short link can easily be shared on social media or websites, making the user experience straightforward and smooth.
+magicLink is a tool provided by zkLink that simplifies blockchain transactions into a shareable short link. With magicLink, users don’t need to understand complex blockchain operations. They can click the link, set a few simple parameters, and generate, preview, and sign the transaction, which can then be sent to various networks. This short link can easily be shared on social media or websites, making the user experience straightforward and smooth.
 
-Key uses of MagicLink:
+Key uses of magicLink:
 
 - Simplified Transactions: Wrap complex on-chain operations into a simple link. Users click the link, enter parameters, confirm, and initiate a transaction.
-- Cross-chain Support: MagicLink handles transactions across multiple EVM-compatible networks. Users don’t need to worry about lacking tokens on a specific chain—this is managed in the background.
+- Cross-chain Support: magicLink handles transactions across multiple EVM-compatible networks. Users don’t need to worry about lacking tokens on a specific chain—this is managed in the background.
 - Low Barrier of Entry: Users don’t need to understand the details of transactions; just simple inputs and clicks are enough to complete the process.
 - Multiple Use Cases: Supports on-chain activities like token swaps, voting, and sponsorships.
 
-Imagine you're building an on-chain voting dApp or a red packet dApp. Traditionally, beyond deploying smart contracts, you would need to develop and host front-end and back-end services, register domain names, and integrate with Twitter/Telegram for promotion. With MagicLink, the development process is greatly simplified. You only need to focus on developing the Action. Once everything is ready, your dApp is essentially complete. Isn't that cool?
+Imagine you're building an on-chain voting dApp or a red packet dApp. Traditionally, beyond deploying smart contracts, you would need to develop and host front-end and back-end services, register domain names, and integrate with Twitter/Telegram for promotion. With magicLink, the development process is greatly simplified. You only need to focus on developing the Action. Once everything is ready, your dApp is essentially complete. Isn't that cool?
 
-For developers, MagicLink is created through the Action API, where you can define the business logic and customize the behavior based on the use case. MagicLink provides a simple, efficient way to interact with the blockchain while giving users a seamless experience.
+For developers, magicLink is created through the Action API, where you can define the business logic and customize the behavior based on the use case. magicLink provides a simple, efficient way to interact with the blockchain while giving users a seamless experience.
 
 **Key Concepts**
 
-- **Action**: An Action is a target implementation for developers and serves as the core functionality behind different MagicLinks. Simply put, it’s an abstract class that developers need to implement, which defines a standard interface for Action implementations. Through an Action, developers are required to set some necessary metadata, such as the `id`, `version`, `title`, `logo`, and `description`. Additionally, they need to guide how the MagicLink constructs transactions. Actions also allow for defining data validation, displaying information to MagicLink users, and more. We will go into further details in the following sections 
-- **MagicLink**: It is a shareable short link that serves as the entry point for executing an action. On the page of this short link, users can set a few parameters using selection boxes or input fields. After clicking confirm, they can generate and preview the transaction. If everything is correct, the user can sign and send it to the different networks. While on a website, a magicLink might immediately initiate a transaction preview in a wallet without redirecting users to a dApp. In Telegram, a bot can be used to expand a magicLink into an interactive set of buttons. In the future iteration, this function will be expanded to Discord. 
+- **action**: An action is a target implementation for developers and serves as the core functionality behind different MagicLinks. Simply put, it’s an abstract class that developers need to implement, which defines a standard interface for Action implementations. Through an Action, developers are required to set some necessary metadata, such as the `id`, `version`, `title`, `logo`, and `description`. Additionally, they need to guide how the magicLink constructs transactions. Actions also allow for defining data validation, displaying information to magicLink users, and more. We will go into further details in the following sections 
+- **magicLink**: It is a shareable short link that serves as the entry point for executing an action. On the page of this short link, users can set a few parameters using selection boxes or input fields. After clicking confirm, they can generate and preview the transaction. If everything is correct, the user can sign and send it to the different networks. While on a website, a magicLink might immediately initiate a transaction preview in a wallet without redirecting users to a dApp. In Telegram, a bot can be used to expand a magicLink into an interactive set of buttons. In the future iteration, this function will be expanded to Discord. 
 
 ## Role
-MagicLink involves three key roles from development to sharing and usage:
+magicLink involves three key roles from development to sharing and usage:
 
 - Developer: The role responsible for developing Actions. Developers need to implement the Action specifications and submit the code to the repository. We (zkLink) will register the reviewed Actions.
 - Intent Creator: The role responsible for creating magicLinks. They select a registered Action, configure it, and generate a shareable short link.
@@ -39,7 +39,7 @@ MagicLink involves three key roles from development to sharing and usage:
 
 ## How It Works
 
-The image below illustrates the flow from the user's transaction initiation to the core logic call of the **Action** created by the developer. The user initiates a request from the MagicLink frontend. Since each MagicLink is unique, when the backend service receives the request, it finds the corresponding **Action ID** from our **Action Registry** and retrieves the Action instance. At this point, the core functionality within the Action converts the parameters carried by the MagicLink into a constructed transaction, which is then returned to the frontend. The frontend constructs the correct transaction and guides the user to send the transaction.
+The image below illustrates the flow from the user's transaction initiation to the core logic call of the **Action** created by the developer. The user initiates a request from the magicLink frontend. Since each magicLink is unique, when the backend service receives the request, it finds the corresponding **Action ID** from our **Action Registry** and retrieves the Action instance. At this point, the core functionality within the Action converts the parameters carried by the magicLink into a constructed transaction, which is then returned to the frontend. The frontend constructs the correct transaction and guides the user to send the transaction.
 ![](./img/backend-action-flow.png)
 
 ## Create an Action
@@ -493,7 +493,7 @@ Our framework will register your Action implementation into the routing system. 
     <img src="./img/real-time-example.png" width="300">
   </div>
 
-- **MagicLink binds to on-chain transactions**. After creating the magicLink, it may not become active immediately and you need to initiate one or more transactions on-chain before you can create an active magicLink. For example, with a red packet contract, you need to deposit a red packet asset into the contract before the Magic Link can become active. This way, users can claim the red envelope created through your Magic Link.
+- **magicLink binds to on-chain transactions**. After creating the magicLink, it may not become active immediately and you need to initiate one or more transactions on-chain before you can create an active magicLink. For example, with a red packet contract, you need to deposit a red packet asset into the contract before the Magic Link can become active. This way, users can claim the red envelope created through your Magic Link.
 
   The `onMagicLinkCreated` provides this capability. It returns `TransactionInfo[]`. Its signature is the same as `generateTransaction`, but it is an on-chain transaction executed immediately after the Magic Link is created.
 
