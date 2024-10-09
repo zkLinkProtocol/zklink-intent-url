@@ -65,7 +65,7 @@ export async function getApproveData(
     to: tokenInAddress,
     value: '0',
     data: resData.data,
-
+    dexContractAddress: resData.dexContractAddress,
     shouldPublishToChain: true,
   };
 }
