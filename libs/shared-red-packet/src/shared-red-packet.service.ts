@@ -30,6 +30,7 @@ import {
   IntentionRecordTx,
   IntentionRecordTxStatus,
 } from 'src/entities/intentionRecordTx.entity';
+import { TgbotService } from 'src/modules/tgbot/tgbot.service';
 import { Address, ErrorMessage } from 'src/types';
 
 import ERC20ABI from './abis/ERC20.json';
@@ -65,6 +66,7 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
   constructor(
     readonly configService: ConfigService,
     private readonly dataService: DataService,
+    private readonly tgbotService: TgbotService,
   ) {
     super();
     this.env = configService.get('env', { infer: true })!;
@@ -314,7 +316,7 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
     data: GenerateTransactionParams<FieldTypes>,
     txHash: string,
   ): Promise<ErrorMessage> {
-    const { formData } = data;
+    const { formData, additionalData } = data;
     const { distributionToken } = formData;
     const iface = new Interface(MemeRedPacketABI);
     const eventTopic = ethers.id('RedPacketClaimed(uint256,address,uint256)');
@@ -333,6 +335,18 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
       const { amount } = event?.args ?? { amount: 0n };
       const decimals = await this.getDecimals(distributionToken);
       const claimedAmount = formatUnits(amount.toString(), decimals);
+      const { account, code } = additionalData;
+      if (!account) {
+        throw new Error('missing account in reportTransaction params');
+      }
+      const userInfo = await this.dataService.getUserInfo(account);
+      if (userInfo?.tgUserId) {
+        const sharedLink = `${this.config.magicLinkUrl}/${code}?referrer=${account}`;
+        await this.tgbotService.sendMemeRedPacketMsg(
+          sharedLink,
+          userInfo?.tgUserId,
+        );
+      }
       return `You have received ${claimedAmount} in red packet amount!`;
     } catch (error) {
       throw new Error(`Failed to fetch transaction receipt: ${error.message}`);
