@@ -35,6 +35,116 @@ const options = {
 };
 const cacheToken = new LRUCache<number, TokenType[]>(options);
 
+const ERC20_TRANSFER_ABI = [
+  {
+    constant: false,
+    inputs: [
+      { name: '_to', type: 'address' },
+      { name: '_value', type: 'uint256' },
+    ],
+    name: 'transfer',
+    outputs: [{ name: '', type: 'bool' }],
+    type: 'function',
+  },
+];
+
+//
+/**
+ * Generates a compound transaction that includes commission, approval (if needed), and swap.
+ * This function combines multiple transaction types into a single array for efficient execution.
+ *
+ * @param chainId - The ID of the blockchain network
+ * @param tokenInAddress - The address of the input token
+ * @param tokenOutAddress - The address of the output token
+ * @param amount - The amount of tokens to be swapped
+ * @param account - The account address performing the transaction
+ * @param creator - The address of the creator receiving the commission
+ * @param commissionRate - The commission rate (percentage)
+ * @returns A Promise resolving to an array of TransactionInfo objects
+ */
+export async function generateCompoundTransaction(
+  chainId: number,
+  tokenInAddress: string,
+  tokenOutAddress: string,
+  amount: bigint,
+  account: string,
+  creator: string,
+  commissionRate: number,
+): Promise<TransactionInfo[]> {
+  const transactions: TransactionInfo[] = [];
+  const commissionAmount = BigInt(
+    Math.floor((Number(amount) * commissionRate) / 100),
+  );
+  // 1. Commission transaction
+  const commissionTx = await getCommissionTransaction(
+    chainId,
+    tokenInAddress,
+    creator,
+    commissionAmount,
+  );
+  transactions.push(commissionTx);
+  const swapAmount = amount - commissionAmount;
+  // 2. Approve transaction (if not native token)
+  if (tokenInAddress !== '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee') {
+    const approveTx = await getApproveData(chainId, tokenInAddress, swapAmount);
+    transactions.push(approveTx);
+  }
+
+  // 3. Swap transaction
+  const swapTx = await getSwapData(
+    account,
+    chainId,
+    tokenInAddress,
+    tokenOutAddress,
+    swapAmount,
+  );
+  transactions.push(swapTx);
+
+  return transactions;
+}
+
+/**
+ * Creates a transaction for commission payment.
+ *
+ * @param chainId - The ID of the blockchain network.
+ * @param tokenInAddress - The address of the token being used for payment.
+ * @param creator - The address of the creator receiving the commission.
+ * @param commissionAmount - The amount of the commission.
+ * @returns A Promise resolving to TransactionInfo for the commission payment.
+ */
+export async function getCommissionTransaction(
+  chainId: number,
+  tokenInAddress: string,
+  creator: string,
+  commissionAmount: bigint,
+): Promise<TransactionInfo> {
+  if (tokenInAddress == '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee') {
+    return {
+      chainId,
+      to: creator,
+      value: commissionAmount.toString(),
+      data: '0x',
+      shouldPublishToChain: true,
+    };
+  } else {
+    const tokenContract = new ethers.Contract(
+      tokenInAddress,
+      ERC20_TRANSFER_ABI,
+    );
+    const transferData = await tokenContract.transfer.populateTransaction(
+      creator,
+      commissionAmount,
+    );
+    return {
+      chainId,
+      to: tokenInAddress,
+      value: '0',
+      data: transferData.data,
+      shouldPublishToChain: true,
+    };
+  }
+}
+
 export async function getApproveData(
   chainId: number,
   tokenInAddress: string,
@@ -69,7 +179,6 @@ export async function getApproveData(
     shouldPublishToChain: true,
   };
 }
-
 export async function getQuote(
   chainId: number,
   tokenInAddress: string,
