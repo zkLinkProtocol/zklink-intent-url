@@ -86,7 +86,7 @@ export class SplitBillService extends ActionDto<FieldTypes> {
     if (!code) {
       throw new Error('missing code');
     }
-    const result = await this.dataService.findListByCode(code);
+    const result = await this.dataService.findRecordByCode(code);
     const transferInfos: TransactionResult[] = [];
     if (!result) {
       return {
@@ -95,7 +95,9 @@ export class SplitBillService extends ActionDto<FieldTypes> {
       };
     }
 
-    const intentionRecordTxs: IntentionRecordTx[] = result.intentionRecordTxs;
+    const intentionRecordTxs: IntentionRecordTx[] = result
+      .map((r) => r.intentionRecordTxs)
+      .flat();
     for (const recordTx of intentionRecordTxs) {
       if (recordTx.status !== IntentionRecordTxStatus.SUCCESS) {
         continue;
