@@ -1,5 +1,5 @@
 import { RegistryPlug } from '@action/registry';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import {
   Contract,
   JsonRpcProvider,
@@ -35,6 +35,7 @@ import { DataService } from '../../data/src/data.service';
 @RegistryPlug('buy-me-a-coffee', 'v1')
 @Injectable()
 export class BuyMeACoffeeService extends ActionDto<FieldTypes> {
+  private readonly logger = new Logger(BuyMeACoffeeService.name);
   constructor(private readonly dataServise: DataService) {
     super();
   }
@@ -127,7 +128,6 @@ export class BuyMeACoffeeService extends ActionDto<FieldTypes> {
     let value: bigint;
 
     for (const log of receipt.logs) {
-      console.log(log);
       if (log.topics[0] === transferEventHash) {
         if (log.address === '0x000000000000000000000000000000000000800A') {
           continue;
@@ -137,7 +137,7 @@ export class BuyMeACoffeeService extends ActionDto<FieldTypes> {
         value = toBigInt(log.data);
         tokenAddress = log.address;
         toAddress = to;
-        console.log(
+        this.logger.log(
           `ERC-20 Transfer: from ${from} to ${to}, amount ${formatEther(value.toString())} tokens at ${tokenAddress}`,
         );
         return {
@@ -154,7 +154,7 @@ export class BuyMeACoffeeService extends ActionDto<FieldTypes> {
     if (tx) {
       toAddress = tx.to || '';
       const ethValue = tx.value.toString();
-      console.log(
+      this.logger.log(
         `ETH Transfer: from ${tx.from} to ${tx.to}, amount ${formatEther(ethValue)} ETH`,
       );
       return {

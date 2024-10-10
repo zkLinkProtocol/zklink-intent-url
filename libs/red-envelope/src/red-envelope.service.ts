@@ -1,6 +1,6 @@
 import { RegistryPlug } from '@action/registry';
 import { getERC20SymbolAndDecimals } from '@core/utils';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import BigNumber from 'bignumber.js';
 import {
@@ -60,6 +60,7 @@ const PACKET_HASH = ethers.keccak256(ethers.toUtf8Bytes('REDPACKET'));
 @RegistryPlug('red-envelope', 'v1')
 @Injectable()
 export class RedEnvelopeService extends ActionDto<FieldTypes> {
+  private readonly logger = new Logger(RedEnvelopeService.name);
   public envelopContract: ethers.Contract;
   private quoter: ethers.Contract;
   private wallet: ethers.Wallet;
@@ -522,7 +523,6 @@ export class RedEnvelopeService extends ActionDto<FieldTypes> {
     let value: bigint;
 
     for (const log of receipt.logs) {
-      console.log(log);
       if (log.topics[0] === transferEventHash) {
         if (log.address === '0x000000000000000000000000000000000000800A') {
           continue;
@@ -532,7 +532,7 @@ export class RedEnvelopeService extends ActionDto<FieldTypes> {
         value = toBigInt(log.data);
         tokenAddress = log.address;
         toAddress = to;
-        console.log(
+        this.logger.log(
           `ERC-20 Transfer: from ${from} to ${to}, amount ${formatEther(value.toString())} tokens at ${tokenAddress}`,
         );
         return {
@@ -549,7 +549,7 @@ export class RedEnvelopeService extends ActionDto<FieldTypes> {
     if (tx) {
       toAddress = tx.to || '';
       const ethValue = tx.value.toString();
-      console.log(
+      this.logger.log(
         `ETH Transfer: from ${tx.from} to ${tx.to}, amount ${formatEther(ethValue)} ETH`,
       );
       return {

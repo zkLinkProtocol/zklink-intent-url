@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   Interface,
@@ -56,6 +56,7 @@ const PACKET_HASH = ethers.keccak256(ethers.toUtf8Bytes('REDPACKET'));
 @RegistryPlug('shared-red-packet', 'v1')
 @Injectable()
 export class SharedRedPacketService extends ActionDto<FieldTypes> {
+  private readonly logger = new Logger(SharedRedPacketService.name);
   public redPacketContract: ethers.Contract;
   private wallet: ethers.Wallet;
   private provider: ethers.Provider;
@@ -451,7 +452,6 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
     let value: bigint;
 
     for (const log of receipt.logs) {
-      console.log(log);
       if (log.topics[0] === transferEventHash) {
         if (log.address === '0x000000000000000000000000000000000000800A') {
           continue;
@@ -461,7 +461,7 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
         value = toBigInt(log.data);
         tokenAddress = log.address;
         toAddress = to;
-        console.log(
+        this.logger.log(
           `ERC-20 Transfer: from ${from} to ${to}, amount ${formatEther(value.toString())} tokens at ${tokenAddress}`,
         );
         return {
@@ -478,7 +478,7 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
     if (tx) {
       toAddress = tx.to || '';
       const ethValue = tx.value.toString();
-      console.log(
+      this.logger.log(
         `ETH Transfer: from ${tx.from} to ${tx.to}, amount ${formatEther(ethValue)} ETH`,
       );
       return {
