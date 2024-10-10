@@ -4,10 +4,8 @@ import { Injectable } from '@nestjs/common';
 import { ethers } from 'ethers';
 import {
   Action as ActionDto,
-  BasicAdditionalParams,
   GenerateTransactionParams,
   TransactionInfo,
-  isOptionComponentDto,
 } from 'src/common/dto';
 
 import PumpFunABI from './abis/PumpFun.json';

@@ -181,7 +181,7 @@ export class RedEnvelopeService extends ActionDto<FieldTypes> {
   private async claimRedEnvelopeMinGas(
     formData: GenerateFormParams<FieldTypes>,
   ) {
-    const { gasToken, distributionToken, amountOfRedEnvelopes } = formData;
+    const { gasToken, amountOfRedEnvelopes } = formData;
     const isGasfree = gasToken === GasTokenValue.DistributedToken;
     const id = 0n;
     const expiry = Math.floor(Date.now() / 1000) + 60 * 60;
@@ -197,7 +197,7 @@ export class RedEnvelopeService extends ActionDto<FieldTypes> {
       signature,
     );
     const { maxFeePerGas } = await this.provider.getFeeData();
-    const txCost = BigNumber((gasEstimate * (maxFeePerGas ?? 0n)).toString())
+    const _txCost = BigNumber((gasEstimate * (maxFeePerGas ?? 0n)).toString())
       .multipliedBy(1.5)
       .multipliedBy(amountOfRedEnvelopes);
 
