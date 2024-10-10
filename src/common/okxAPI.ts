@@ -75,14 +75,17 @@ export async function generateCompoundTransaction(
   const commissionAmount = BigInt(
     Math.floor((Number(amount) * commissionRate) / 100),
   );
-  // 1. Commission transaction
-  const commissionTx = await getCommissionTransaction(
-    chainId,
-    tokenInAddress,
-    creator,
-    commissionAmount,
-  );
-  transactions.push(commissionTx);
+  if (commissionAmount > 0) {
+    // 1. Commission transaction
+    const commissionTx = await getCommissionTransaction(
+      chainId,
+      tokenInAddress,
+      creator,
+      commissionAmount,
+    );
+    transactions.push(commissionTx);
+  }
+
   const swapAmount = amount - commissionAmount;
   // 2. Approve transaction (if not native token)
   if (tokenInAddress !== '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee') {
