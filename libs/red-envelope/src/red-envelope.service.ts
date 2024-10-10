@@ -631,11 +631,11 @@ export class RedEnvelopeService extends ActionDto<FieldTypes> {
       form: [
         {
           label: 'Number of Red Packets ',
-          value: `${unClaimedCount}/${totalCount}`,
+          value: `${totalCount - unClaimedCount}/${totalCount}`,
         },
         {
           label: 'Number of Tokens',
-          value: `${formatUnits(unClaimedTokenAmount, decimals)}/${formatUnits(tokenAmount, decimals)} ${symbol}`,
+          value: `${formatUnits(tokenAmount - unClaimedTokenAmount, decimals)}/${formatUnits(tokenAmount, decimals)} ${symbol}`,
         },
         {
           label: 'Winner List',
