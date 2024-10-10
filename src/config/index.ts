@@ -39,6 +39,11 @@ const configFactory = async () => {
       newsChannelIdEn: process.env.NEWS_CHANNEL_ID_EN || '',
       userMiniApp: process.env.TGBOT_USER_MINI_APP || '',
     },
+    okx: {
+      secretKey: process.env.OKX_SECRET_KEY || '',
+      accessKey: process.env.OKX_ACCESS_KEY || '',
+      passphrase: process.env.OKX_PASSPHRASE || '',
+    },
   };
 };
 
