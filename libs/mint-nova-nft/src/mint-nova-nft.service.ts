@@ -37,9 +37,11 @@ export class MintNovaNftService extends ActionDto<FieldTypes> {
     }
 
     let tokenId = Number(formData.tokenId);
-    const result = await this.dataService.findListByCode(code);
+    const result = await this.dataService.findRecordByCode(code);
     if (result) {
-      const intentionRecordTxs: IntentionRecordTx[] = result.intentionRecordTxs;
+      const intentionRecordTxs: IntentionRecordTx[] = result
+        .map((r) => r.intentionRecordTxs)
+        .flat();
       for (const recordTx of intentionRecordTxs) {
         if (recordTx.status === IntentionRecordTxStatus.SUCCESS) {
           tokenId++;

@@ -3,16 +3,11 @@ import { ConfigService } from '@nestjs/config';
 import {
   Interface,
   JsonRpcProvider,
-  dataSlice,
   ethers,
-  formatEther,
   formatUnits,
-  getAddress,
   getBigInt,
-  id,
   keccak256,
   parseUnits,
-  toBigInt,
   toUtf8Bytes,
 } from 'ethers';
 
@@ -35,13 +30,7 @@ import { Address, ErrorMessage } from 'src/types';
 
 import ERC20ABI from './abis/ERC20.json';
 import MemeRedPacketABI from './abis/MemeRedPacket.json';
-import {
-  TransactionResult,
-  Value,
-  browserConfig,
-  configuration,
-  providerConfig,
-} from './config';
+import { TransactionResult, Value, configuration } from './config';
 import { genMetadata } from './metadata';
 import {
   ClaimRedPacketParams,
@@ -308,8 +297,42 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
     );
     if (hasClaimed) {
       return 'User has already received';
-    } else {
-      return '';
+    }
+    const hasUnclaimedPacket =
+      await this.redPacketContract.getRedPacketBalance(packetId);
+    if (hasUnclaimedPacket.unClaimedCount === 0n) {
+      return 'The red packet has been fully claimed';
+    }
+    return '';
+  }
+
+  async parseClaimEventLog(txHash: string) {
+    const iface = new ethers.Interface(MemeRedPacketABI);
+    const eventTopic = ethers.id('RedPacketClaimed(uint256,address,uint256)');
+    try {
+      const receipt = await this.provider.getTransactionReceipt(txHash);
+      if (!receipt) {
+        throw new Error('wrong transaction hash');
+      }
+      const log = receipt.logs.find((log) => {
+        return log.topics[0] === eventTopic;
+      });
+      if (!log) {
+        throw new Error('parse log error');
+      }
+      const parsedLog = iface.parseLog(log);
+      if (!parsedLog?.args) {
+        throw new Error('parse log args error');
+      }
+      const { id, recipient, amount } = parsedLog.args;
+
+      return {
+        id: id.toString(),
+        recipient: recipient,
+        amount: amount.toString(),
+      };
+    } catch (error) {
+      throw new Error(`Failed to fetch transaction receipt: ${error.message}`);
     }
   }
 
@@ -345,7 +368,7 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
         const sharedLink = `${this.config.magicLinkUrl}/${code}?referrer=${account}`;
         await this.tgbotService.sendMemeRedPacketMsg(
           sharedLink,
-          userInfo?.tgUserId,
+          userInfo.tgUserId,
         );
       }
       return `You have received ${claimedAmount} in red packet amount!`;
@@ -392,22 +415,37 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
     ];
   }
 
-  private async getTxRecords(code: string) {
-    const result = await this.dataService.findListByCode(code);
+  private async getClaimedRecords(code: string, account?: string) {
+    const result = await this.dataService.findRecordByCode(code, account);
     if (!result) {
       return [];
     }
+    const packetId = this.getPacketIDByCode(code);
+    const [, , token] = await this.redPacketContract.getRedPacketInfo(packetId);
     const transferInfos: TransactionResult[] = [];
-    const intentionRecordTxs: IntentionRecordTx[] = result.intentionRecordTxs;
+    const intentionRecordTxs: IntentionRecordTx[] = result
+      .map((r) => r.intentionRecordTxs)
+      .flat();
     for (const recordTx of intentionRecordTxs) {
       if (recordTx.status !== IntentionRecordTxStatus.SUCCESS) {
         continue;
       }
-      const transferInfo: TransactionResult = await this.parseTransaction(
-        recordTx.txHash,
-        recordTx.chainId,
-      );
-      transferInfos.push(transferInfo);
+      const transferInfo = await this.parseClaimEventLog(recordTx.txHash);
+
+      const tokenData =
+        token === ethers.ZeroAddress
+          ? {
+              symbol: 'ETH',
+              decimals: 18,
+            }
+          : await getERC20SymbolAndDecimals(this.provider, token);
+      transferInfos.push({
+        recipient: transferInfo.recipient,
+        symbol: tokenData.symbol,
+        amount: formatUnits(transferInfo.amount, tokenData.decimals),
+        txhash: recordTx.txHash,
+        chainId: recordTx.chainId,
+      });
     }
     return transferInfos;
   }
@@ -415,9 +453,12 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
   public async reloadAdvancedInfo(
     data: BasicAdditionalParams,
   ): Promise<{ title: string; content: string }> {
-    const { code } = data;
+    const { code, account } = data;
     if (!code) {
       throw new Error('missing code');
+    }
+    if (!account) {
+      throw new Error('missing account');
     }
 
     const hash = keccak256(toUtf8Bytes(code));
@@ -427,85 +468,27 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
     const [_, , , totalCount] =
       await this.redPacketContract.getRedPacketInfo(packetId);
 
-    const transferInfos = await this.getTxRecords(code);
-
+    const claimRecords = await this.getClaimedRecords(code, account);
+    const claimRecordsHtml = await this.generateHTML(claimRecords);
     return {
       title: 'Recipients',
-      content:
-        `${totalCount - unClaimedCount}/${totalCount} red packet(s) opened` +
-        (await this.generateHTML(transferInfos)),
+      content: `${totalCount - unClaimedCount}/${totalCount} red packet(s) opened ${claimRecordsHtml}`,
     };
   }
 
-  public async parseTransaction(txhash: string, chainId: number) {
-    const transferEventHash = id('Transfer(address,address,uint256)');
-    const providerUrl = providerConfig[chainId];
-    const provider = new JsonRpcProvider(providerUrl);
-
-    const receipt = await provider.getTransactionReceipt(txhash);
-    if (!receipt) {
-      throw new Error('Transaction receipt not found');
-    }
-
-    let toAddress: string;
-    let tokenAddress: string;
-    let value: bigint;
-
-    for (const log of receipt.logs) {
-      if (log.topics[0] === transferEventHash) {
-        if (log.address === '0x000000000000000000000000000000000000800A') {
-          continue;
-        }
-        const from = getAddress(dataSlice(log.topics[1], 12));
-        const to = getAddress(dataSlice(log.topics[2], 12));
-        value = toBigInt(log.data);
-        tokenAddress = log.address;
-        toAddress = to;
-        this.logger.log(
-          `ERC-20 Transfer: from ${from} to ${to}, amount ${formatEther(value.toString())} tokens at ${tokenAddress}`,
-        );
-        return {
-          toAddress,
-          tokenAddress,
-          value: formatEther(value.toString()),
-          txhash,
-          chainId,
-        } as TransactionResult;
-      }
-    }
-    // If no ERC-20 transfer event was found, check if it's an ETH transfer
-    const tx = await provider.getTransaction(txhash);
-    if (tx) {
-      toAddress = tx.to || '';
-      const ethValue = tx.value.toString();
-      this.logger.log(
-        `ETH Transfer: from ${tx.from} to ${tx.to}, amount ${formatEther(ethValue)} ETH`,
-      );
-      return {
-        toAddress,
-        tokenAddress: '',
-        value: formatEther(ethValue),
-        txhash,
-        chainId,
-      } as TransactionResult;
-    }
-
-    throw new Error('Transaction parsing failed');
-  }
-
-  public async generateHTML(
+  private async generateHTML(
     transactions: TransactionResult[],
   ): Promise<string> {
     return transactions
       .map((tx) => {
-        const browserUrl = browserConfig[tx.chainId];
+        const browserUrl = this.config.browserUrl;
         const prefixedTxhash = `${browserUrl}${tx.txhash}`;
         return `
           <br/>
           <br/>
           <div>
-            <div>To: ${tx.toAddress} </div>
-            <div>Amount: ${tx.value} </div>
+            <div>To: ${tx.recipient} </div>
+            <div>Amount: ${tx.amount} ${tx.symbol} </div>
             <div>Transaction Hash: <a href=${prefixedTxhash}>${prefixedTxhash}</a><div>
           </div>
         `;
@@ -551,7 +534,7 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
     const [, unClaimedCount, unClaimedTokenAmount] =
       await this.redPacketContract.getRedPacketBalance(packetId);
 
-    const records = await this.getTxRecords(code);
+    const records = await this.getClaimedRecords(code);
 
     return {
       form: [
@@ -565,7 +548,10 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
         },
         {
           label: 'Winner List',
-          value: records.map((i) => ({ address: i.toAddress, value: i.value })),
+          value: records.map((i) => ({
+            address: i.recipient,
+            amount: `${i.amount} ${i.symbol}`,
+          })),
         },
       ],
       triggers: [

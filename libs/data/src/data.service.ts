@@ -23,8 +23,8 @@ export class DataService {
     return intention?.settings.intentInfo;
   }
 
-  public async findListByCode(intentionCode: string, address?: string) {
-    return await this.intentionRecordRepository.getIntentionRecordWithTxsByCode(
+  public async findRecordByCode(intentionCode: string, address?: string) {
+    return await this.intentionRecordRepository.getIntentionRecordsByCode(
       intentionCode,
       address,
     );
