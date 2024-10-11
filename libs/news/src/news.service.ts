@@ -1,4 +1,5 @@
 import { RegistryPlug } from '@action/registry';
+import { OKXService } from '@core/shared';
 import { Injectable } from '@nestjs/common';
 import { ethers } from 'ethers';
 import {
@@ -6,7 +7,6 @@ import {
   GenerateTransactionParams,
   TransactionInfo,
 } from 'src/common/dto';
-import { getAllTokens, getApproveData, getSwapData } from 'src/common/okxAPI';
 import { TgbotService } from 'src/modules/tgbot/tgbot.service';
 import { Address } from 'src/types';
 
@@ -16,7 +16,10 @@ import { FieldTypes, METADATA } from './config';
 @RegistryPlug('news', 'v1')
 @Injectable()
 export class NewsService extends ActionDto<FieldTypes> {
-  constructor(private readonly tgbotService: TgbotService) {
+  constructor(
+    private readonly tgbotService: TgbotService,
+    private readonly okxService: OKXService,
+  ) {
     super();
   }
   async getMetadata() {
@@ -32,7 +35,7 @@ export class NewsService extends ActionDto<FieldTypes> {
       throw new Error('Missing account!');
     }
     const { amountToBuy, ...restParams } = formData;
-    const supportTokens = await getAllTokens(chainId);
+    const supportTokens = await this.okxService.getAllTokens(chainId);
     const tokenFrom = supportTokens
       .filter(
         (token) =>
@@ -61,7 +64,7 @@ export class NewsService extends ActionDto<FieldTypes> {
     ];
 
     if (tokenInAddress === '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee') {
-      swapTx = await getSwapData(
+      swapTx = await this.okxService.getSwapData(
         account,
         chainId,
         tokenInAddress,
@@ -73,13 +76,13 @@ export class NewsService extends ActionDto<FieldTypes> {
       return [swapTx];
     } else {
       //buy
-      approveTx = await getApproveData(
+      approveTx = await this.okxService.getApproveData(
         chainId,
         tokenInAddress,
         ethers.MaxUint256,
       );
 
-      swapTx = await getSwapData(
+      swapTx = await this.okxService.getSwapData(
         account,
         chainId,
         tokenInAddress,

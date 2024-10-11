@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
 
-import { DataModule } from '@core/data';
+import { SharedModule } from '@core/shared';
 import { TgbotModule } from 'src/modules/tgbot/tgbot.module';
 
 import { SharedRedPacketService } from './shared-red-packet.service';
 
 @Module({
-  imports: [DataModule, TgbotModule],
+  imports: [SharedModule, TgbotModule],
   providers: [SharedRedPacketService],
   exports: [SharedRedPacketService],
 })

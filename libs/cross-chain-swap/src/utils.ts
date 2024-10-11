@@ -1,5 +1,4 @@
 import { ethers } from 'ethers';
-import { getQuote } from 'src/common/okxAPI';
 
 import { GAS_COEFFICIENT } from './config';
 
@@ -54,17 +53,4 @@ export async function getGasCost(
 
 export async function getSolverFee(_amount: bigint): Promise<bigint> {
   return BigInt(0);
-}
-export async function getERC20GasCost(
-  chainId: number,
-  gasCost: bigint,
-  erc20Address: string,
-) {
-  const quote = await getQuote(
-    chainId,
-    '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
-    erc20Address,
-    gasCost,
-  );
-  return quote;
 }

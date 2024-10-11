@@ -1,4 +1,5 @@
 import { RegistryPlug } from '@action/registry';
+import { OKXService } from '@core/shared';
 import { Injectable } from '@nestjs/common';
 import { ethers } from 'ethers';
 import { RPC_URL } from 'src/common/chain/config';
@@ -7,20 +8,18 @@ import {
   GenerateTransactionParams,
   TransactionInfo,
 } from 'src/common/dto';
-import { getApproveData, getSwapData } from 'src/common/okxAPI';
 
 import { ESTIMATED_GAS_WALLET, METADATA, TOKEN_CONFIG } from './config';
 import { FieldTypes } from './types';
-import {
-  getERC20GasCost,
-  getEstimatedGasCost,
-  getGasCost,
-  getSolverFee,
-} from './utils';
+import { getEstimatedGasCost, getGasCost, getSolverFee } from './utils';
 
 @RegistryPlug('cross-chain-swap', 'v1')
 @Injectable()
 export class CrossChainSwapService extends ActionDto<FieldTypes> {
+  constructor(private readonly okxService: OKXService) {
+    super();
+  }
+
   async getMetadata() {
     return METADATA;
   }
@@ -54,7 +53,7 @@ export class CrossChainSwapService extends ActionDto<FieldTypes> {
     ];
 
     if (params.tokenFrom === 'weth') {
-      swapTx = await getSwapData(
+      swapTx = await this.okxService.getSwapData(
         account,
         chainId,
         '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
@@ -73,7 +72,7 @@ export class CrossChainSwapService extends ActionDto<FieldTypes> {
 
       const totalFee = gasCost + solverFee;
       // Update the swap transaction with the new amount
-      swapTx = await getSwapData(
+      swapTx = await this.okxService.getSwapData(
         account,
         chainId,
         '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
@@ -84,7 +83,7 @@ export class CrossChainSwapService extends ActionDto<FieldTypes> {
       return [swapTx];
     } else {
       //buy
-      approveTx = await getApproveData(
+      approveTx = await this.okxService.getApproveData(
         chainId,
         tokenInAddress,
         ethers.MaxUint256,
@@ -96,7 +95,7 @@ export class CrossChainSwapService extends ActionDto<FieldTypes> {
         approveTx.value,
         provider,
       );
-      swapTx = await getSwapData(
+      swapTx = await this.okxService.getSwapData(
         account,
         chainId,
         tokenInAddress,
@@ -113,16 +112,17 @@ export class CrossChainSwapService extends ActionDto<FieldTypes> {
       const totalGasCost = swapGasCost + approveGasCost;
 
       // Estimate gas cost in ERC20 tokens for the swap transaction
-      const erc20GasCost = await getERC20GasCost(
+      const erc20GasCost = await this.okxService.getQuote(
         chainId,
-        totalGasCost,
+        '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
         tokenInAddress,
+        totalGasCost,
       );
 
       const solverFee = await getSolverFee(params.amountToBuy);
       const totalFee = erc20GasCost + solverFee;
 
-      swapTx = await getSwapData(
+      swapTx = await this.okxService.getSwapData(
         account,
         chainId,
         tokenInAddress,

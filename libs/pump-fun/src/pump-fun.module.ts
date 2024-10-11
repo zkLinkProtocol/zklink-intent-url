@@ -1,10 +1,10 @@
-import { DataModule } from '@core/data';
+import { SharedModule } from '@core/shared';
 import { Module } from '@nestjs/common';
 
 import { PumpFunService } from './pump-fun.service';
 
 @Module({
-  imports: [DataModule],
+  imports: [SharedModule],
   providers: [PumpFunService],
   exports: [PumpFunService],
 })
