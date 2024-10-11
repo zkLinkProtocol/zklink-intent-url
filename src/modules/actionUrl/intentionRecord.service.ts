@@ -126,7 +126,6 @@ export class IntentionRecordService {
   async handleRecordTxsStatus() {
     const loop = true;
     while (loop) {
-      this.logger.log(`start handle tx status`);
       try {
         await this.handleOpUserTxStatus();
         await this.handleTxStatus();
@@ -134,7 +133,6 @@ export class IntentionRecordService {
       } catch (error) {
         this.logger.error(error);
       }
-      this.logger.log(`end handle tx status`);
       await this.delay(10000);
     }
   }
