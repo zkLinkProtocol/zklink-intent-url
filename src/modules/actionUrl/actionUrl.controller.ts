@@ -20,10 +20,10 @@ import {
 } from '@nestjs/swagger';
 import { Response } from 'express';
 
+import { OKXService } from '@core/shared';
 import { BaseController } from 'src/common/base.controller';
 import { CommonApiOperation } from 'src/common/base.decorators';
 import { ActionTransactionParams, TransactionInfo } from 'src/common/dto';
-import { getAllTokens } from 'src/common/okxAPI';
 import { PagingOptionsDto } from 'src/common/pagingOptionsDto.param';
 import { PagingMetaDto, ResponseDto } from 'src/common/response.dto';
 import { BusinessException } from 'src/exception/business.exception';
@@ -62,6 +62,7 @@ export class ActionUrlController extends BaseController {
     private readonly actionService: ActionService,
     private readonly intentionRecordService: IntentionRecordService,
     private readonly blinkService: BlinkService,
+    private readonly okxService: OKXService,
   ) {
     super();
   }
@@ -606,7 +607,7 @@ export class ActionUrlController extends BaseController {
 
   @Get('/magicnews/support/tokens')
   public async getTokens(@Query('chainId') chainId: number) {
-    const supportTokens = await getAllTokens(Number(chainId));
+    const supportTokens = await this.okxService.getAllTokens(Number(chainId));
     return supportTokens.map((token) => ({
       lable: token.tokenSymbol,
       address: token.tokenContractAddress,
