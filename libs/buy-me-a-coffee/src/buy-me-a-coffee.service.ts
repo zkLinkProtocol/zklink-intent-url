@@ -1,4 +1,5 @@
 import { RegistryPlug } from '@action/registry';
+import { DataService } from '@core/shared';
 import { Injectable, Logger } from '@nestjs/common';
 import {
   Contract,
@@ -30,7 +31,6 @@ import {
   providerConfig,
 } from './config';
 import { FieldTypes } from './types';
-import { DataService } from '../../data/src/data.service';
 
 @RegistryPlug('buy-me-a-coffee', 'v1')
 @Injectable()

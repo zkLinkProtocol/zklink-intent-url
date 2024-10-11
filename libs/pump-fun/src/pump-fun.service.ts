@@ -1,5 +1,5 @@
 import { RegistryPlug } from '@action/registry';
-import { DataService } from '@core/data';
+import { DataService } from '@core/shared';
 import { Injectable } from '@nestjs/common';
 import { ethers } from 'ethers';
 import {

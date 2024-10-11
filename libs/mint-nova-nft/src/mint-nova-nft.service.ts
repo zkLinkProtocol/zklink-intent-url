@@ -1,4 +1,5 @@
 import { RegistryPlug } from '@action/registry';
+import { DataService } from '@core/shared';
 import { Injectable } from '@nestjs/common';
 import { Contract, JsonRpcProvider, ethers } from 'ethers';
 import {
@@ -14,7 +15,6 @@ import {
 import ERC721ABI from './abis/ERC721.json';
 import { contractConfig, metadata, providerConfig } from './config';
 import { FieldTypes } from './types';
-import { DataService } from '../../data/src/data.service';
 
 @RegistryPlug('mint-nova-nft', 'v1')
 @Injectable()

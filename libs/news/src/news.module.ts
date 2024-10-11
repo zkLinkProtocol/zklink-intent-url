@@ -1,13 +1,13 @@
 import { NovaswapModule } from '@action/novaswap';
+import { SharedModule } from '@core/shared';
 import { Module } from '@nestjs/common';
-import { ActionUrlModule } from 'src/modules/actionUrl/actionUrl.module';
 import { TgbotModule } from 'src/modules/tgbot/tgbot.module';
 
 import { NewsService } from './news.service';
 
 @Module({
-  imports: [ActionUrlModule, NovaswapModule, TgbotModule],
+  imports: [NovaswapModule, TgbotModule, SharedModule],
   providers: [NewsService],
-  exports: [NewsService, ActionUrlModule],
+  exports: [NewsService],
 })
 export class NewsModule {}
