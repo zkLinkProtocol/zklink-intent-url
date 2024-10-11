@@ -1,14 +1,9 @@
 import { Contract, Provider, ethers } from 'ethers';
-import e from 'express';
-import { GenerateTransactionParams, TokenAmount } from 'src/common/dto';
-import { Address } from 'src/types';
 
 import ERC20_ABI from './abis/erc20.json';
 import FACTORY_ABI from './abis/factory.json';
 import POOL_ABI from './abis/pool.json';
-import QUOTER_ABI from './abis/quoter.json';
 import SWAP_ROUTER_ABI from './abis/swaprouter.json';
-import { FieldTypes } from './types';
 
 export class NovaSwap {
   private chainId: number;
@@ -89,7 +84,7 @@ export class NovaSwap {
     if (tokenOut == ethers.ZeroAddress) {
       tokenOut = await this.swapRouterContract.WETH9();
     }
-    const { poolContract, fee } = await this.getPoolInfo(
+    const { poolContract } = await this.getPoolInfo(
       this.factoryContract,
       tokenIn,
       tokenOut,

@@ -52,7 +52,7 @@ export async function getGasCost(
     : BigInt(0);
 }
 
-export async function getSolverFee(amount: bigint): Promise<bigint> {
+export async function getSolverFee(_amount: bigint): Promise<bigint> {
   return BigInt(0);
 }
 export async function getERC20GasCost(

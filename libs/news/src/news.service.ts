@@ -6,12 +6,7 @@ import {
   GenerateTransactionParams,
   TransactionInfo,
 } from 'src/common/dto';
-import {
-  getAllTokens,
-  getApproveData,
-  getSupportedChain,
-  getSwapData,
-} from 'src/common/okxAPI';
+import { getAllTokens, getApproveData, getSwapData } from 'src/common/okxAPI';
 import { TgbotService } from 'src/modules/tgbot/tgbot.service';
 import { Address } from 'src/types';
 

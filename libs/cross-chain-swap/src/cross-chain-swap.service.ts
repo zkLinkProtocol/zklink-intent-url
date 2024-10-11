@@ -54,8 +54,6 @@ export class CrossChainSwapService extends ActionDto<FieldTypes> {
     ];
 
     if (params.tokenFrom === 'weth') {
-      console.log(params);
-      console.log(account);
       swapTx = await getSwapData(
         account,
         chainId,

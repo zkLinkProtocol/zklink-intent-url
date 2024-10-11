@@ -75,11 +75,11 @@ export class IntentionRecordRepository extends BaseRepository<IntentionRecord> {
     });
   }
 
-  public async getIntentionRecordWithTxsByCode(
+  public async getIntentionRecordsByCode(
     code: string,
     address: string | undefined,
-  ): Promise<IntentionRecord | null> {
-    return await this.findOne({
+  ): Promise<IntentionRecord[] | null> {
+    return await this.find({
       select: [
         'id',
         'intentionCode',

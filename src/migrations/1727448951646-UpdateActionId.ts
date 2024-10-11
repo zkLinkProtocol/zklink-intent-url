@@ -5,5 +5,5 @@ export class UpdateActionId1727448951646 implements MigrationInterface {
     await queryRunner.query(`DELETE FROM action WHERE id = 'split-order'`);
   }
 
-  public async down(queryRunner: QueryRunner): Promise<void> {}
+  public async down(): Promise<void> {}
 }

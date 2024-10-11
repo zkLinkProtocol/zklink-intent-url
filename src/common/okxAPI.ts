@@ -4,6 +4,7 @@ import { LRUCache } from 'lru-cache';
 import fetch from 'node-fetch';
 
 import { TransactionInfo } from 'src/common/dto/transaction.dto';
+import configFactory from 'src/config';
 import { BusinessException } from 'src/exception/business.exception';
 import logger from 'src/logger';
 type HeadersParams = {
@@ -13,11 +14,21 @@ type HeadersParams = {
   'OK-ACCESS-TIMESTAMP': string;
   'OK-ACCESS-PASSPHRASE': string;
 };
-
 const apiBaseUrl = 'https://www.okx.com/api/v5/dex/aggregator/';
-const SECREAT_KEY = '91DC4BA6E6FF03F2BDAFBD1A18BF8C14';
-const ACCESS_KEY = '90fae07d-3fe3-4b23-bc27-afc59285b4aa';
-const PASSPHRASE = '8686Qwe!';
+let SECREAT_KEY: string;
+let ACCESS_KEY: string;
+let PASSPHRASE: string;
+
+async function initializeConfig() {
+  const config = await configFactory();
+  SECREAT_KEY = config.okx.secretKey;
+  ACCESS_KEY = config.okx.accessKey;
+  PASSPHRASE = config.okx.passphrase;
+}
+
+initializeConfig().catch((error) => {
+  console.error('Failed to initialize config:', error);
+});
 
 type TokenType = {
   decimals: string;
@@ -34,6 +45,119 @@ const options = {
   ttlAutopurge: true,
 };
 const cacheToken = new LRUCache<number, TokenType[]>(options);
+
+const ERC20_TRANSFER_ABI = [
+  {
+    constant: false,
+    inputs: [
+      { name: '_to', type: 'address' },
+      { name: '_value', type: 'uint256' },
+    ],
+    name: 'transfer',
+    outputs: [{ name: '', type: 'bool' }],
+    type: 'function',
+  },
+];
+
+//
+/**
+ * Generates a compound transaction that includes commission, approval (if needed), and swap.
+ * This function combines multiple transaction types into a single array for efficient execution.
+ *
+ * @param chainId - The ID of the blockchain network
+ * @param tokenInAddress - The address of the input token
+ * @param tokenOutAddress - The address of the output token
+ * @param amount - The amount of tokens to be swapped
+ * @param account - The account address performing the transaction
+ * @param creator - The address of the creator receiving the commission
+ * @param commissionRate - The commission rate (percentage)
+ * @returns A Promise resolving to an array of TransactionInfo objects
+ */
+export async function generateCompoundTransaction(
+  chainId: number,
+  tokenInAddress: string,
+  tokenOutAddress: string,
+  amount: bigint,
+  account: string,
+  creator: string,
+  commissionRate: number,
+): Promise<TransactionInfo[]> {
+  const transactions: TransactionInfo[] = [];
+  const commissionAmount = BigInt(
+    Math.floor((Number(amount) * commissionRate) / 100),
+  );
+  if (commissionAmount > 0) {
+    // 1. Commission transaction
+    const commissionTx = await getCommissionTransaction(
+      chainId,
+      tokenInAddress,
+      creator,
+      commissionAmount,
+    );
+    transactions.push(commissionTx);
+  }
+
+  const swapAmount = amount - commissionAmount;
+  // 2. Approve transaction (if not native token)
+  if (tokenInAddress !== '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee') {
+    const approveTx = await getApproveData(chainId, tokenInAddress, swapAmount);
+    transactions.push(approveTx);
+  }
+
+  // 3. Swap transaction
+  const swapTx = await getSwapData(
+    account,
+    chainId,
+    tokenInAddress,
+    tokenOutAddress,
+    swapAmount,
+  );
+  transactions.push(swapTx);
+
+  return transactions;
+}
+
+/**
+ * Creates a transaction for commission payment.
+ *
+ * @param chainId - The ID of the blockchain network.
+ * @param tokenInAddress - The address of the token being used for payment.
+ * @param creator - The address of the creator receiving the commission.
+ * @param commissionAmount - The amount of the commission.
+ * @returns A Promise resolving to TransactionInfo for the commission payment.
+ */
+export async function getCommissionTransaction(
+  chainId: number,
+  tokenInAddress: string,
+  creator: string,
+  commissionAmount: bigint,
+): Promise<TransactionInfo> {
+  if (tokenInAddress == '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee') {
+    return {
+      chainId,
+      to: creator,
+      value: commissionAmount.toString(),
+      data: '0x',
+      shouldPublishToChain: true,
+    };
+  } else {
+    const tokenContract = new ethers.Contract(
+      tokenInAddress,
+      ERC20_TRANSFER_ABI,
+    );
+    const transferData = await tokenContract.transfer.populateTransaction(
+      creator,
+      commissionAmount,
+    );
+    return {
+      chainId,
+      to: tokenInAddress,
+      value: '0',
+      data: transferData.data,
+      shouldPublishToChain: true,
+    };
+  }
+}
 
 export async function getApproveData(
   chainId: number,
@@ -65,11 +189,10 @@ export async function getApproveData(
     to: tokenInAddress,
     value: '0',
     data: resData.data,
-
+    dexContractAddress: resData.dexContractAddress,
     shouldPublishToChain: true,
   };
 }
-
 export async function getQuote(
   chainId: number,
   tokenInAddress: string,

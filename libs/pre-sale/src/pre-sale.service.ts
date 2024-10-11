@@ -1,15 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { ethers } from 'ethers';
 
-import { TOKEN_CONFIG } from '@action/cross-chain-swap/config';
 import { RegistryPlug } from '@action/registry';
 import { DataService } from '@core/data';
 import {
   Action as ActionDto,
-  BasicAdditionalParams,
   GenerateTransactionParams,
   TransactionInfo,
-  isOptionComponentDto,
 } from 'src/common/dto';
 
 import PreSaleABI from './abis/PreSale.json';

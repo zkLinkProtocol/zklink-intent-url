@@ -21,6 +21,11 @@ export class TransactionInfo {
   data: string;
 
   @ApiProperty({
+    description: 'dex router address',
+  })
+  dexContractAddress?: string;
+
+  @ApiProperty({
     description:
       'Flag indicating whether the transaction should be sent on-chain',
   })

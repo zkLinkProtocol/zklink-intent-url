@@ -1,5 +1,5 @@
 import { RegistryPlug } from '@action/registry';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import {
   Contract,
   JsonRpcProvider,
@@ -35,6 +35,7 @@ import { DataService } from '../../data/src/data.service';
 @RegistryPlug('split-bill', 'v1')
 @Injectable()
 export class SplitBillService extends ActionDto<FieldTypes> {
+  private readonly logger = new Logger(SplitBillService.name);
   constructor(private readonly dataService: DataService) {
     super();
   }
@@ -85,7 +86,7 @@ export class SplitBillService extends ActionDto<FieldTypes> {
     if (!code) {
       throw new Error('missing code');
     }
-    const result = await this.dataService.findListByCode(code);
+    const result = await this.dataService.findRecordByCode(code);
     const transferInfos: TransactionResult[] = [];
     if (!result) {
       return {
@@ -94,7 +95,9 @@ export class SplitBillService extends ActionDto<FieldTypes> {
       };
     }
 
-    const intentionRecordTxs: IntentionRecordTx[] = result.intentionRecordTxs;
+    const intentionRecordTxs: IntentionRecordTx[] = result
+      .map((r) => r.intentionRecordTxs)
+      .flat();
     for (const recordTx of intentionRecordTxs) {
       if (recordTx.status !== IntentionRecordTxStatus.SUCCESS) {
         continue;
@@ -127,7 +130,6 @@ export class SplitBillService extends ActionDto<FieldTypes> {
     let value: bigint;
 
     for (const log of receipt.logs) {
-      console.log(log);
       if (log.topics[0] === transferEventHash) {
         if (log.address === '0x000000000000000000000000000000000000800A') {
           continue;
@@ -137,7 +139,7 @@ export class SplitBillService extends ActionDto<FieldTypes> {
         value = toBigInt(log.data);
         tokenAddress = log.address;
         toAddress = to;
-        console.log(
+        this.logger.log(
           `ERC-20 Transfer: from ${from} to ${to}, amount ${formatEther(value.toString())} tokens at ${tokenAddress}`,
         );
         return {
@@ -154,7 +156,7 @@ export class SplitBillService extends ActionDto<FieldTypes> {
     if (tx) {
       toAddress = tx.to || '';
       const ethValue = tx.value.toString();
-      console.log(
+      this.logger.log(
         `ETH Transfer: from ${tx.from} to ${tx.to}, amount ${formatEther(ethValue)} ETH`,
       );
       return {
