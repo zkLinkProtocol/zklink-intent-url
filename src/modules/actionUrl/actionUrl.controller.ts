@@ -130,7 +130,7 @@ export class ActionUrlController extends BaseController {
   )
   async getRefreshContent(
     @Param('code') code: string,
-    @Query('sender') sender: string,
+    @Query('account') account: string,
   ): Promise<
     ResponseDto<{
       title: string;
@@ -147,7 +147,7 @@ export class ActionUrlController extends BaseController {
     }
     const data = await actionStore.reloadAdvancedInfo({
       code,
-      account: sender,
+      account: account,
     });
     return this.success(data);
   }
