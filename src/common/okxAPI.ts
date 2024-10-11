@@ -26,9 +26,16 @@ async function initializeConfig() {
   PASSPHRASE = config.okx.passphrase;
 }
 
-initializeConfig().catch((error) => {
-  console.error('Failed to initialize config:', error);
-});
+initializeConfig()
+  .then(() => {
+    logger.log('Successfully initialized okx config');
+    logger.log('SECREAT_KEY:', SECREAT_KEY);
+    logger.log('ACCESS_KEY:', ACCESS_KEY);
+    logger.log('PASSPHRASE:', PASSPHRASE);
+  })
+  .catch((error) => {
+    logger.error('Failed to initialize config:', error);
+  });
 
 type TokenType = {
   decimals: string;
