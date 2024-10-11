@@ -4,6 +4,7 @@ import { LRUCache } from 'lru-cache';
 import fetch from 'node-fetch';
 
 import { TransactionInfo } from 'src/common/dto/transaction.dto';
+import configFactory from 'src/config';
 import { BusinessException } from 'src/exception/business.exception';
 import logger from 'src/logger';
 type HeadersParams = {
@@ -13,11 +14,21 @@ type HeadersParams = {
   'OK-ACCESS-TIMESTAMP': string;
   'OK-ACCESS-PASSPHRASE': string;
 };
-
 const apiBaseUrl = 'https://www.okx.com/api/v5/dex/aggregator/';
-const SECREAT_KEY = '91DC4BA6E6FF03F2BDAFBD1A18BF8C14';
-const ACCESS_KEY = '90fae07d-3fe3-4b23-bc27-afc59285b4aa';
-const PASSPHRASE = '8686Qwe!';
+let SECREAT_KEY: string;
+let ACCESS_KEY: string;
+let PASSPHRASE: string;
+
+async function initializeConfig() {
+  const config = await configFactory();
+  SECREAT_KEY = config.okx.secretKey;
+  ACCESS_KEY = config.okx.accessKey;
+  PASSPHRASE = config.okx.passphrase;
+}
+
+initializeConfig().catch((error) => {
+  console.error('Failed to initialize config:', error);
+});
 
 type TokenType = {
   decimals: string;
