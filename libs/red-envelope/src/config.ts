@@ -27,8 +27,8 @@ export const configuration = {
     rpcUrl: 'https://rpc.zklink.io',
     wethAddress: '0x8280a4e7D5B3B658ec4580d3Bc30f5e50454F169',
     quoterContractAddress: '0x86Fc6ab84CFc6a506d51FC722D3aDe959599A98A',
-    redPacketContractAddress: '0x583ba818E70418c99829F21Dce4A0A188bbc871F',
-    paymasterContractAddress: '0x036CD64D20018148Df37C6ffDb971273EAC2E127',
+    redPacketContractAddress: '0x6cd5E9a05dD9ef0c4C9F533eb9Df6044ecAf2297',
+    paymasterContractAddress: '0x30A37F965cE59c28698292268fC2e7Df450cAca4',
     browserUrl: 'https://explorer.zklink.io/tx/',
     tokens: [
       {
