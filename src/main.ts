@@ -43,7 +43,8 @@ async function bootstrap() {
   });
 
   const port = configService.get('port');
+  const env = configService.get('env');
   await app.listen(port);
-  logger.log(`App was listened port : ${port}`);
+  logger.log(`App was listened port : ${port}, env: ${env}`);
 }
 bootstrap();
