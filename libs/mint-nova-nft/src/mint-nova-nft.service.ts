@@ -1,6 +1,6 @@
 import { RegistryPlug } from '@action/registry';
 import { DataService } from '@core/shared';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Contract, JsonRpcProvider, ethers } from 'ethers';
 import {
   Action as ActionDto,
@@ -19,6 +19,7 @@ import { FieldTypes } from './types';
 @RegistryPlug('mint-nova-nft', 'v1')
 @Injectable()
 export class MintNovaNftService extends ActionDto<FieldTypes> {
+  private logger: Logger = new Logger(MintNovaNftService.name);
   constructor(private readonly dataService: DataService) {
     super();
   }
@@ -90,6 +91,12 @@ export class MintNovaNftService extends ActionDto<FieldTypes> {
       expiry,
     };
     const signer = new ethers.Wallet(formData.key);
+
+    this.logger.log(
+      JSON.stringify(domain),
+      JSON.stringify(types),
+      JSON.stringify(message),
+    );
     const signature = signer.signTypedData(domain, types, message);
 
     const mintTx = await contract.publicMint.populateTransaction(
