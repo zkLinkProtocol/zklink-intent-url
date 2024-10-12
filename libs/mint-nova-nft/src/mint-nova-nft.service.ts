@@ -45,15 +45,9 @@ export class MintNovaNftService extends ActionDto<FieldTypes> {
     const provider = new JsonRpcProvider(providerConfig[chainId]);
     const nftContractAddress = contractConfig[chainId];
 
-    const nftContract = new ethers.Contract(
-      nftContractAddress,
-      [
-        'function getUserMintedCount(address) public view returns (uint256 memory)',
-      ],
-      provider,
-    );
+    const contract = new Contract(nftContractAddress, ERC721ABI, provider);
     const mintedCount = Number(
-      await nftContract.getUserMintedCount(formData.recipient),
+      await contract.getUserMintedCount(formData.recipient),
     );
     if (mintedCount >= 2) {
       throw new Error('The maximum number of mint has been reached');
@@ -98,7 +92,6 @@ export class MintNovaNftService extends ActionDto<FieldTypes> {
     const signer = new ethers.Wallet(formData.key);
     const signature = signer.signTypedData(domain, types, message);
 
-    const contract = new Contract(nftContractAddress, ERC721ABI, provider);
     const mintTx = await contract.publicMint.populateTransaction(
       formData.recipient,
       tokenId,
