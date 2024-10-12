@@ -32,14 +32,14 @@ export class MintNovaNftService extends ActionDto<FieldTypes> {
     data: GenerateTransactionParams<FieldTypes>,
   ): Promise<TransactionInfo[]> {
     const { additionalData, formData } = data;
-    const { code, chainId } = additionalData;
+    const { code, chainId, account } = additionalData;
     if (!code) {
       throw new Error('missing code');
     }
 
     //mock gets the list of addresses from the whitelisted address service
     const whiteAddressList = ['0xF0DB7cE565Cd7419eC2e6548603845a648f6594F'];
-    if (!whiteAddressList.includes(formData.recipient)) {
+    if (!whiteAddressList.includes(account!)) {
       throw new Error('You are not entitled to mint');
     }
 
