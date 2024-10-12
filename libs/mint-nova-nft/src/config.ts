@@ -62,5 +62,5 @@ export const providerConfig: { [key in number]: string } = {
 };
 
 export const contractConfig: { [key in number]: string } = {
-  810181: '0x14BD2594aBbFEd161b365bD7855620d847D5D5c8',
+  810181: '0xC3c85AdB7d72685011De4961593d9B0E5f81252E',
 };

@@ -36,6 +36,29 @@ export class MintNovaNftService extends ActionDto<FieldTypes> {
       throw new Error('missing code');
     }
 
+    //mock gets the list of addresses from the whitelisted address service
+    const whiteAddressList = ['0xF0DB7cE565Cd7419eC2e6548603845a648f6594F'];
+    if (!whiteAddressList.includes(formData.recipient)) {
+      throw new Error('You are not entitled to mint');
+    }
+
+    const provider = new JsonRpcProvider(providerConfig[chainId]);
+    const nftContractAddress = contractConfig[chainId];
+
+    const nftContract = new ethers.Contract(
+      nftContractAddress,
+      [
+        'function getUserMintedCount(address) public view returns (uint256 memory)',
+      ],
+      provider,
+    );
+    const mintedCount = Number(
+      await nftContract.getUserMintedCount(formData.recipient),
+    );
+    if (mintedCount >= 2) {
+      throw new Error('The maximum number of mint has been reached');
+    }
+
     let tokenId = Number(formData.tokenId);
     const result = await this.dataService.findRecordByCode(code);
     if (result) {
@@ -54,7 +77,7 @@ export class MintNovaNftService extends ActionDto<FieldTypes> {
       name: 'OKXMint',
       version: '1.0',
       chainId,
-      verifyingContract: contractConfig[chainId],
+      verifyingContract: nftContractAddress,
     };
     const types = {
       MintAuth: [
@@ -75,9 +98,7 @@ export class MintNovaNftService extends ActionDto<FieldTypes> {
     const signer = new ethers.Wallet(formData.key);
     const signature = signer.signTypedData(domain, types, message);
 
-    const providerUrl = providerConfig[chainId];
-    const provider = new JsonRpcProvider(providerUrl);
-    const contract = new Contract(contractConfig[chainId], ERC721ABI, provider);
+    const contract = new Contract(nftContractAddress, ERC721ABI, provider);
     const mintTx = await contract.publicMint.populateTransaction(
       formData.recipient,
       tokenId,
