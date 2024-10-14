@@ -50,7 +50,7 @@ export class PreSaleService extends ActionDto<FieldTypes> {
       ethers.parseEther(formData.tokenMaxSupply),
       creator,
       ethers.parseEther(formData.creatorAmount),
-      Number(formData.price),
+      ethers.parseEther(formData.price),
       additionalData.code,
     );
 
@@ -81,7 +81,7 @@ export class PreSaleService extends ActionDto<FieldTypes> {
       formData.tokenSymbol,
       ethers.parseEther(formData.tokenMaxSupply),
       ethers.parseEther(formData.creatorAmount),
-      Number(formData.price),
+      ethers.parseEther(formData.price),
       additionalData.code,
     );
 
