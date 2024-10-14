@@ -181,15 +181,15 @@ export class IntentionRecordService {
       );
     }
 
-    //set faild
-    const faildRecords =
+    //set failed
+    const failedRecords =
       await this.intentionRecordRepository.getIntentionRecordListTxStatus(
         IntentionRecordTxStatus.FAILED,
       );
-    if (faildRecords.length > 0) {
-      const faildRecordIds = faildRecords.map((item) => item.id);
+    if (failedRecords.length > 0) {
+      const failedRecordIds = failedRecords.map((item) => item.id);
       await this.intentionRecordRepository.updateStatusByIds(
-        faildRecordIds,
+        failedRecordIds,
         IntentionRecordStatus.FAILED,
       );
     }
@@ -249,7 +249,7 @@ export class IntentionRecordService {
       }),
     });
     const responseJson = await response.json();
-    // if faild
+    // if failed
     if (responseJson.status !== 1) {
       return [];
     }
@@ -257,9 +257,9 @@ export class IntentionRecordService {
     if (logs.length === 0) {
       return [];
     }
-    const txHashs = logs.map((item: any) => {
+    const txHashes = logs.map((item: any) => {
       return item.transactionHash;
     });
-    return txHashs;
+    return txHashes;
   }
 }

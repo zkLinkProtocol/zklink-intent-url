@@ -483,7 +483,7 @@ export class ActionUrlController extends BaseController {
   @CommonApiOperation('Get intention record list with txs.')
   @ApiQuery({
     name: 'status',
-    example: 'pending|success|faild or empty',
+    example: 'pending|success|failed or empty',
   })
   async getIntentionRecordList(
     @Param('address') address: string,
