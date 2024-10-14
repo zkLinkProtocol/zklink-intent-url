@@ -383,6 +383,9 @@ export class TgbotService implements OnModuleInit {
       .replaceAll('-', '\\-')
       .replaceAll('?', '\\?')
       .replaceAll('!', '\\!')
+      .replaceAll('(', '\\(')
+      .replaceAll(')', '\\)')
+      .replaceAll('#', '\\#')
       .replaceAll('=', '\\=');
   }
 
