@@ -25,6 +25,7 @@ const configFactory = async () => {
       42161: process.env.Arbitrum_RPC_URL || '',
       10: process.env.Optimism_RPC_URL || '',
       8453: process.env.Base_RPC_URL || '',
+      84532: process.env.Base_Sepolia_RPC_URL || '',
       5000: process.env.Mantle_RPC_URL || '',
       169: process.env.Manta_RPC_URL || '',
       534352: process.env.Scroll_RPC_URL || '',
