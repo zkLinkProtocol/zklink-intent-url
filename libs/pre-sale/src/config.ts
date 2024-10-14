@@ -2,7 +2,7 @@ import { ActionMetadata } from 'src/common/dto';
 
 import { FieldTypes } from './types';
 
-export const PRE_SALE_ADDRESS = '0x2c290FCe8fDf5Fe843598aeD0f886dAF411817c2';
+export const PRE_SALE_ADDRESS = '0x751DdB176ff6dcedBE954452966772e96342D80B';
 export const CHAIN_ID = 810181;
 export const metadata: ActionMetadata<FieldTypes> = {
   title: 'PreSale',
@@ -53,9 +53,9 @@ export const metadata: ActionMetadata<FieldTypes> = {
       {
         name: 'price',
         label: 'Price',
-        desc: 'The price of the token',
+        desc: 'The amount of ETH required to purchase one token',
         type: 'input',
-        regex: '^[a-zA-Z0-9]+$',
+        regex: '^[0-9]+(\\.[0-9]+)?$',
         regexDesc: 'Price',
       },
       {
