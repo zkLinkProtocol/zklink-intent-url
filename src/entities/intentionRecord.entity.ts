@@ -2,11 +2,15 @@ import {
   Column,
   Entity,
   Index,
+  JoinColumn,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
+import { Action } from './action.entity';
 import { BaseEntity } from './base.entity';
+import { Intention } from './intention.entity';
 import { IntentionRecordTx } from './intentionRecordTx.entity';
 import { hexTransformer } from '../transformers/hex.transformer';
 
@@ -33,8 +37,16 @@ export class IntentionRecord extends BaseEntity {
   @Column({ type: 'enum', enum: IntentionRecordStatus })
   public status: IntentionRecordStatus;
 
-  @Column({ type: 'jsonb' })
-  public intention: object;
+  @ManyToOne(() => Intention, (intention) => intention.intentionRecords)
+  @JoinColumn({ name: 'intentionCode' })
+  public intention: Intention;
+
+  @Column({ type: 'varchar' })
+  public actionId: string;
+
+  @ManyToOne(() => Action, (action) => action.intentions)
+  @JoinColumn({ name: 'actionId' })
+  public action: Action;
 
   // join intention record txs
   @OneToMany(

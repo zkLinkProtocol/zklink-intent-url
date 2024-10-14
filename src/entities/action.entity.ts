@@ -4,7 +4,6 @@ import { BaseEntity } from './base.entity';
 import { Intention } from './intention.entity';
 import {
   AuthorDto,
-  // DAppDto,
   IntentDto,
   MagicLinkMetadataDto,
   NetworkDto,
