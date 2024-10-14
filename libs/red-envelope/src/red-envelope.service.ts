@@ -1,4 +1,5 @@
 import { RegistryPlug } from '@action/registry';
+import { DataService } from '@core/shared';
 import { getERC20SymbolAndDecimals } from '@core/utils';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -41,7 +42,6 @@ import {
   FieldTypes,
   GasTokenValue,
 } from './type';
-import { DataService } from '../../data/src/data.service';
 
 const PACKET_HASH = ethers.keccak256(ethers.toUtf8Bytes('REDPACKET'));
 

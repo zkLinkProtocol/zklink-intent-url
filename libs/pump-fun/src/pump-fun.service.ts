@@ -1,5 +1,5 @@
 import { RegistryPlug } from '@action/registry';
-import { DataService } from '@core/data';
+import { DataService } from '@core/shared';
 import { Injectable } from '@nestjs/common';
 import { ethers } from 'ethers';
 import {
@@ -113,12 +113,17 @@ export class PumpFunService extends ActionDto<FieldTypes> {
       }
     } else {
       if (formData.orderType === 'buy') {
+        const maxToBuy = await tokenContract.getMaxEthToBuy();
+        const buyAmount =
+          maxToBuy > ethers.parseEther(formData.buyAmount)
+            ? ethers.parseEther(formData.buyAmount)
+            : maxToBuy;
         const buyData = await tokenContract.buy.populateTransaction();
         return [
           {
             chainId: additionalData.chainId,
             to: tokenAddress,
-            value: ethers.parseEther(formData.buyAmount).toString(),
+            value: buyAmount.toString(),
             data: buyData.data,
             shouldPublishToChain: true,
           },

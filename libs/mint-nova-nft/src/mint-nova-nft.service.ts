@@ -1,5 +1,6 @@
 import { RegistryPlug } from '@action/registry';
-import { Injectable } from '@nestjs/common';
+import { DataService } from '@core/shared';
+import { Injectable, Logger } from '@nestjs/common';
 import { Contract, JsonRpcProvider, ethers } from 'ethers';
 import {
   Action as ActionDto,
@@ -14,11 +15,11 @@ import {
 import ERC721ABI from './abis/ERC721.json';
 import { contractConfig, metadata, providerConfig } from './config';
 import { FieldTypes } from './types';
-import { DataService } from '../../data/src/data.service';
 
 @RegistryPlug('mint-nova-nft', 'v1')
 @Injectable()
 export class MintNovaNftService extends ActionDto<FieldTypes> {
+  private logger: Logger = new Logger(MintNovaNftService.name);
   constructor(private readonly dataService: DataService) {
     super();
   }
@@ -31,9 +32,26 @@ export class MintNovaNftService extends ActionDto<FieldTypes> {
     data: GenerateTransactionParams<FieldTypes>,
   ): Promise<TransactionInfo[]> {
     const { additionalData, formData } = data;
-    const { code, chainId } = additionalData;
+    const { code, chainId, account } = additionalData;
     if (!code) {
       throw new Error('missing code');
+    }
+
+    //mock gets the list of addresses from the whitelisted address service
+    const whiteAddressList = ['0xF0DB7cE565Cd7419eC2e6548603845a648f6594F'];
+    if (!whiteAddressList.includes(account!)) {
+      throw new Error('You are not entitled to mint');
+    }
+
+    const provider = new JsonRpcProvider(providerConfig[chainId]);
+    const nftContractAddress = contractConfig[chainId];
+
+    const contract = new Contract(nftContractAddress, ERC721ABI, provider);
+    const mintedCount = Number(
+      await contract.getUserMintedCount(formData.recipient),
+    );
+    if (mintedCount >= 2) {
+      throw new Error('The maximum number of mint has been reached');
     }
 
     let tokenId = Number(formData.tokenId);
@@ -54,7 +72,7 @@ export class MintNovaNftService extends ActionDto<FieldTypes> {
       name: 'OKXMint',
       version: '1.0',
       chainId,
-      verifyingContract: contractConfig[chainId],
+      verifyingContract: nftContractAddress,
     };
     const types = {
       MintAuth: [
@@ -73,11 +91,14 @@ export class MintNovaNftService extends ActionDto<FieldTypes> {
       expiry,
     };
     const signer = new ethers.Wallet(formData.key);
+
+    this.logger.log(
+      JSON.stringify(domain),
+      JSON.stringify(types),
+      JSON.stringify(message),
+    );
     const signature = signer.signTypedData(domain, types, message);
 
-    const providerUrl = providerConfig[chainId];
-    const provider = new JsonRpcProvider(providerUrl);
-    const contract = new Contract(contractConfig[chainId], ERC721ABI, provider);
     const mintTx = await contract.publicMint.populateTransaction(
       formData.recipient,
       tokenId,

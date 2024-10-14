@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 
-import { DataModule } from '@core/data';
+import { SharedModule } from '@core/shared';
 
 import { PreSaleService } from './pre-sale.service';
 @Module({
-  imports: [DataModule],
+  imports: [SharedModule],
   providers: [PreSaleService],
   exports: [PreSaleService],
 })

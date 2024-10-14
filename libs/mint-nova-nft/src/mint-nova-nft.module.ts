@@ -1,10 +1,10 @@
-import { DataModule } from '@core/data';
+import { SharedModule } from '@core/shared';
 import { Module } from '@nestjs/common';
 
 import { MintNovaNftService } from './mint-nova-nft.service';
 
 @Module({
-  imports: [DataModule],
+  imports: [SharedModule],
   providers: [MintNovaNftService],
   exports: [MintNovaNftService],
 })

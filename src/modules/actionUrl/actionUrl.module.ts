@@ -1,5 +1,6 @@
 import { Logger, Module, OnModuleInit } from '@nestjs/common';
 
+import { SharedModule } from '@core/shared';
 import {
   ActionRepository,
   IntentionRecordRepository,
@@ -14,7 +15,7 @@ import { BlinkService } from './blink.service';
 import { IntentionRecordService } from './intentionRecord.service';
 
 @Module({
-  imports: [UnitOfWorkModule],
+  imports: [UnitOfWorkModule, SharedModule],
   controllers: [ActionUrlController],
   providers: [
     ActionRepository,

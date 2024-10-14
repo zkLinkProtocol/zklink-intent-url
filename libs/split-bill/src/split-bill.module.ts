@@ -1,10 +1,10 @@
-import { DataModule } from '@core/data';
+import { SharedModule } from '@core/shared';
 import { Module } from '@nestjs/common';
 
 import { SplitBillService } from './split-bill.service';
 
 @Module({
-  imports: [DataModule],
+  imports: [SharedModule],
   providers: [SplitBillService],
   exports: [SplitBillService],
 })
