@@ -23,6 +23,10 @@ export const metadata: ActionMetadata<FieldTypes> = {
       name: 'zkLink dev',
       chainId: '270',
     },
+    {
+      name: 'Base Sepolia',
+      chainId: '84532',
+    },
   ],
   author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
   magicLinkMetadata: {
@@ -103,6 +107,11 @@ export const metadata: ActionMetadata<FieldTypes> = {
             value: '0x09B141F8a41BA6d2A0Ec1d55d67De3C8f3846921',
             chainId: '270',
           },
+          {
+            label: 'ETH',
+            value: '',
+            chainId: '84532',
+          },
         ],
       },
       {
@@ -150,6 +159,7 @@ export const providerConfig: { [key in number]: string } = {
   810180: 'https://rpc.zklink.io',
   810181: 'https://sepolia.rpc.zklink.io',
   270: 'http://3.112.15.165:3050',
+  84532: 'https://sepolia.base.org',
 };
 
 export const browserConfig: { [key in number]: string } = {
@@ -157,6 +167,7 @@ export const browserConfig: { [key in number]: string } = {
   810180: 'https://explorer.zklink.io/tx/',
   810181: 'https://sepolia.explorer.zklink.io/tx/',
   270: 'http://3.112.15.165:3050',
+  84532: 'https://sepolia-explorer.base.org',
 };
 
 export type TransactionResult = {
