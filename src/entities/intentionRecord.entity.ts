@@ -18,7 +18,7 @@ export enum IntentionRecordStatus {
   WAITING = 'waiting',
   PENDING = 'pending',
   SUCCESS = 'success',
-  FAILD = 'faild',
+  FAILED = 'failed',
 }
 
 @Entity()

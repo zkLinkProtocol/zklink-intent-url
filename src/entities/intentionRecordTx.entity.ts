@@ -14,7 +14,7 @@ import { hexTransformer } from '../transformers/hex.transformer';
 export enum IntentionRecordTxStatus {
   PENDING = 'pending',
   SUCCESS = 'success',
-  FAILD = 'faild',
+  FAILED = 'failed',
 }
 
 @Entity()

@@ -184,13 +184,13 @@ export class IntentionRecordService {
     //set faild
     const faildRecords =
       await this.intentionRecordRepository.getIntentionRecordListTxStatus(
-        IntentionRecordTxStatus.FAILD,
+        IntentionRecordTxStatus.FAILED,
       );
     if (faildRecords.length > 0) {
       const faildRecordIds = faildRecords.map((item) => item.id);
       await this.intentionRecordRepository.updateStatusByIds(
         faildRecordIds,
-        IntentionRecordStatus.FAILD,
+        IntentionRecordStatus.FAILED,
       );
     }
   }
@@ -221,7 +221,7 @@ export class IntentionRecordService {
     const rpc = this.rpcs[chainId];
     if (!rpc) {
       this.logger.log(`Had no supported the chinId: ${chainId}`);
-      return IntentionRecordTxStatus.FAILD;
+      return IntentionRecordTxStatus.FAILED;
     }
     const provider = new ethers.JsonRpcProvider(rpc);
     const tx = await provider.getTransaction(txHash);
@@ -231,7 +231,7 @@ export class IntentionRecordService {
     if (tx.blockNumber) {
       return IntentionRecordTxStatus.SUCCESS;
     }
-    return IntentionRecordTxStatus.FAILD;
+    return IntentionRecordTxStatus.FAILED;
   }
 
   private async fetchTxReceipt(
