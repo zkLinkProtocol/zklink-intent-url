@@ -61,7 +61,7 @@ export const metadata: ActionMetadata<FieldTypes> = {
       {
         name: 'offerAmount',
         label: 'Offer Amount',
-        desc: 'The amount of tokens the creator will receive',
+        desc: 'The amount of ETH the user wants to use to purchase tokens',
         type: 'input',
         regex: '^[0-9]+(\\.[0-9]+)?$',
         regexDesc: 'Offer Amount',
