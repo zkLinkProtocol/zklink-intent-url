@@ -207,9 +207,8 @@ export class TgbotService implements OnModuleInit {
       news.createdAt?.toISOString().split('T')[0] +
       ` ${news.createdAt?.toISOString().split('T')[1].split('.')[0]}`;
     let caption = `
-*Title* : ${news.title.replaceAll('(', '\\(').replaceAll(')', '\\)')}
-*Description* : ${content.replaceAll('(', '\\(').replaceAll(')', '\\)')}
-*Create Time* : ${date}
+*${news.title.replaceAll('(', '\\(').replaceAll(')', '\\)')}*
+${content.replaceAll('(', '\\(').replaceAll(')', '\\)')}
 [Go to mini app](${userMiniApp}?startapp=${news.code}) 
 ✅️ *Verified zkLink official team*
 `;
