@@ -14,6 +14,10 @@ export const metadata: ActionMetadata<FieldTypes> = {
       name: 'zkLink Nova sepolia',
       chainId: '810181',
     },
+    {
+      name: 'Base Sepolia',
+      chainId: '84532',
+    },
   ],
   author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
   magicLinkMetadata: {
@@ -86,4 +90,5 @@ export const metadata: ActionMetadata<FieldTypes> = {
 export const providerConfig: { [key in number]: string } = {
   810180: 'https://rpc.zklink.io',
   810181: 'https://sepolia.rpc.zklink.io',
+  84532: 'https://sepolia.base.org',
 };
