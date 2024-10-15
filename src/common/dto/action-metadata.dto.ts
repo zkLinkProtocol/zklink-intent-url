@@ -306,7 +306,11 @@ export class IntentDto<R extends Record<string, any> = Record<string, any>> {
 
   @ApiPropertyOptional({
     type: String,
-    description: 'should bind value with submit button',
+    description: `
+      should bind value with submit button.
+      if it is true, then customization of a specific field is not possible, and all fields will be bound to the submit button.
+      if it is 'R', it indicates that the creator can customize the value of that field, setting it to the submit button.
+    `,
   })
   @IsOptional()
   binding?: keyof R | true;
