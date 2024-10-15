@@ -24,7 +24,7 @@ import { JwtAuthGuard } from '../auth/jwtAuth.guard';
 @Controller('actions')
 export class ActionController extends BaseController {
   constructor(
-    private readonly actionStoreService: ActionService,
+    private readonly actionService: ActionService,
     private readonly configService: ConfigService,
   ) {
     super();
@@ -54,7 +54,7 @@ export class ActionController extends BaseController {
   async findAll(
     @GetCreator() creator: { address: string },
   ): Promise<ResponseDto<ActionResponseDto[]>> {
-    let actions = await this.actionStoreService.getAllActionMetadata();
+    let actions = await this.actionService.getAllActionMetadata();
 
     const addressList = this.configService
       .get<string>('NEWS_WHITE_ADDRESS')
@@ -89,7 +89,7 @@ export class ActionController extends BaseController {
     },
   })
   async find(@Param('id') id: string): Promise<ResponseDto<ActionResponseDto>> {
-    const action = await this.actionStoreService.getActionMetadata(id);
+    const action = await this.actionService.getActionMetadata(id);
     return this.success(action);
   }
 
@@ -134,7 +134,7 @@ export class ActionController extends BaseController {
     @Body()
     body: GenerateFormParams,
   ): Promise<ResponseDto<string>> {
-    const actionStore = await this.actionStoreService.getActionStore(id);
+    const actionStore = await this.actionService.getActionStore(id);
     const response = await actionStore.validateFormData(body);
     return this.success(response);
   }

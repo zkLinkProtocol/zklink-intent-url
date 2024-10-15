@@ -36,7 +36,7 @@ import { FieldTypes } from './types';
 @Injectable()
 export class BuyMeACoffeeService extends ActionDto<FieldTypes> {
   private readonly logger = new Logger(BuyMeACoffeeService.name);
-  constructor(private readonly dataServise: DataService) {
+  constructor(private readonly dataService: DataService) {
     super();
   }
 
@@ -86,7 +86,7 @@ export class BuyMeACoffeeService extends ActionDto<FieldTypes> {
     if (!code) {
       throw new Error('missing code in buy me a coffee');
     }
-    const result = await this.dataServise.findRecordByCode(code);
+    const result = await this.dataService.findRecordByCode(code);
     const transferInfos: TransactionResult[] = [];
     if (!result) {
       return {
