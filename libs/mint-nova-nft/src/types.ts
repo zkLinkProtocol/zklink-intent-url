@@ -1,6 +1,6 @@
 export type FieldTypes = {
   key: string;
-  recipient: string;
+  stage: string;
   tokenId: string;
   fee: string;
 };
