@@ -94,7 +94,6 @@ export class IntentionRecordService {
     intentionRecord.intentionCode = code;
     intentionRecord.address = params.address;
     intentionRecord.status = IntentionRecordStatus.PENDING;
-    intentionRecord.intention = intention;
 
     const txs = params.txs.map((tx) => {
       const intentionRecordTx = new IntentionRecordTx();

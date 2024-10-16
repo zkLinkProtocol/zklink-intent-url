@@ -85,11 +85,12 @@ export class ActionUrlController extends BaseController {
       metadata: result.metadata,
       settings: result.settings,
       logo: result.action.logo,
+      interactionssss: 1,
       creator: {
         address: result.creator.address,
       },
     };
-    return this.success(response);
+    return this.success<ActionUrlResponseDto>(response);
   }
 
   @Post(':code/post-transactions')

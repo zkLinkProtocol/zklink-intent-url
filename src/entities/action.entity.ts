@@ -1,6 +1,7 @@
 import { Column, Entity, Index, OneToMany, PrimaryColumn } from 'typeorm';
 
 import { BaseEntity } from './base.entity';
+import { Commission } from './commission.entity';
 import { Intention } from './intention.entity';
 import {
   AuthorDto,
@@ -38,6 +39,9 @@ export abstract class Action extends BaseEntity {
 
   @OneToMany(() => Intention, (intention) => intention.actionId)
   public intentions: Intention[];
+
+  @OneToMany(() => Commission, (commission) => commission.actionId)
+  public commissions: Commission[];
 
   @Index()
   @Column({ type: 'int', default: 0 })

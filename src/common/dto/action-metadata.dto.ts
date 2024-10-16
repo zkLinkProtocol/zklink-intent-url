@@ -421,6 +421,19 @@ export class ActionMetadata<
   })
   @ValidateNested()
   magicLinkMetadata?: MagicLinkMetadataDto;
+
+  @ApiProperty({
+    type: Number,
+    description: `
+      Set the maximum value for the commission, which is
+      a percentage representing the share of the commission that the
+      creator of the magic link will receive. Once this value is set,
+      as an action developer, you need to create a transfer transaction
+      in the generateTransaction method to reimburse the creator based
+      on the commission value.`,
+  })
+  @IsOptional()
+  maxCommission?: number;
 }
 
 export function isOptionComponentDto<R extends Record<string, any>>(

@@ -42,7 +42,7 @@ export class AddRelationOnIntentionRecordTable1728926127070
       `ALTER TABLE "intention_record" DROP COLUMN "actionId"`,
     );
     await queryRunner.query(
-      `ALTER TABLE "intention_record" ADD "actionId" character varying NOT NULL`,
+      `ALTER TABLE "intention_record" ADD "actionId" character varying(20) NOT NULL`,
     );
     await queryRunner.query(
       `ALTER TABLE "intention_record" ADD CONSTRAINT "FK_409e50e5e6cfc088829c4f3f8c6" FOREIGN KEY ("intentionCode") REFERENCES "intention"("code") ON DELETE NO ACTION ON UPDATE NO ACTION`,

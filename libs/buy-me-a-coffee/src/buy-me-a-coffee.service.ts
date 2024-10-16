@@ -1,5 +1,5 @@
 import { RegistryPlug } from '@action/registry';
-import { DataService } from '@core/shared';
+import { DataService, HelperService } from '@core/shared';
 import { Injectable, Logger } from '@nestjs/common';
 import {
   Contract,
@@ -36,7 +36,10 @@ import { FieldTypes } from './types';
 @Injectable()
 export class BuyMeACoffeeService extends ActionDto<FieldTypes> {
   private readonly logger = new Logger(BuyMeACoffeeService.name);
-  constructor(private readonly dataService: DataService) {
+  constructor(
+    private readonly dataService: DataService,
+    private readonly helperService: HelperService,
+  ) {
     super();
   }
 
@@ -48,20 +51,34 @@ export class BuyMeACoffeeService extends ActionDto<FieldTypes> {
     data: GenerateTransactionParams<FieldTypes>,
   ): Promise<TransactionInfo[]> {
     const { additionalData, formData } = data;
-    const { chainId } = additionalData;
+    const { code, chainId, commission } = additionalData;
+    const { token, value, recipient } = formData;
+
     const providerUrl = providerConfig[chainId];
     const provider = new JsonRpcProvider(providerUrl);
-    let transferTx = { to: formData.recipient, data: '0x' };
-    if (formData.token !== '') {
-      const contract = new Contract(
-        formData.token.toString(),
-        ERC20ABI,
-        provider,
-      );
+    let transferTx = { to: recipient, data: '0x' };
+    if (!code) {
+      throw Error('Missing code');
+    }
+
+    if (!commission) {
+      throw Error('Missing commission');
+    }
+
+    const commissionTx = await this.helperService.parseCommissionTx({
+      code,
+      chainId,
+      amount: Number(value),
+      token,
+      commission,
+    });
+
+    if (token !== '') {
+      const contract = new Contract(token.toString(), ERC20ABI, provider);
       const decimals = await contract.decimals();
-      const amountToSend = parseUnits(formData.value.toString(), decimals);
+      const amountToSend = parseUnits(value.toString(), decimals);
       transferTx = await contract.transfer.populateTransaction(
-        formData.recipient,
+        recipient,
         amountToSend,
       );
     }
@@ -69,14 +86,11 @@ export class BuyMeACoffeeService extends ActionDto<FieldTypes> {
     const tx: TransactionInfo = {
       chainId: chainId,
       to: transferTx.to,
-      value:
-        formData.token === ''
-          ? parseUnits(formData.value.toString(), 18).toString()
-          : '0',
+      value: token === '' ? parseUnits(value.toString(), 18).toString() : '0',
       data: transferTx.data,
       shouldPublishToChain: true,
     };
-    return [tx];
+    return [commissionTx, tx];
   }
 
   public async reloadAdvancedInfo(

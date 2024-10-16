@@ -7,6 +7,7 @@ export type BasicAdditionalParams = {
   code?: string;
   account?: string;
   inviter?: string;
+  commission?: number;
 };
 
 type NetworkAdditionalParams = {

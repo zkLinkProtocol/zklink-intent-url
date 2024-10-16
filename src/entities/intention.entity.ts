@@ -12,6 +12,7 @@ import { NetworkDto } from 'src/common/dto';
 
 import { Action } from './action.entity';
 import { BaseEntity } from './base.entity';
+import { Commission } from './commission.entity';
 import { Creator } from './creator.entity';
 import { IntentionRecord } from './intentionRecord.entity';
 
@@ -62,6 +63,9 @@ export class Intention extends BaseEntity {
   @Column({ type: 'boolean', default: true })
   public active: boolean;
 
-  @OneToMany(() => IntentionRecord, (record) => record.intention)
+  @OneToMany(() => IntentionRecord, (record) => record.intentionCode)
   public intentionRecords: IntentionRecord[];
+
+  @OneToMany(() => Commission, (record) => record.intentionCode)
+  public commissions: Commission[];
 }

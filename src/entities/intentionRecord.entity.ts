@@ -41,7 +41,7 @@ export class IntentionRecord extends BaseEntity {
   @JoinColumn({ name: 'intentionCode' })
   public intention: Intention;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', length: 20 })
   public actionId: string;
 
   @ManyToOne(() => Action, (action) => action.intentions)

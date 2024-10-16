@@ -8,6 +8,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import configFactory from './config';
 import { Action } from './entities/action.entity';
+import { Commission } from './entities/commission.entity';
 import { Creator } from './entities/creator.entity';
 import { Intention } from './entities/intention.entity';
 import { IntentionRecord } from './entities/intentionRecord.entity';
@@ -52,6 +53,7 @@ import { UnitOfWorkModule } from './unitOfWork';
     TypeOrmModule.forFeature([
       Action,
       Creator,
+      Commission,
       Intention,
       IntentionRecord,
       IntentionRecordTx,
