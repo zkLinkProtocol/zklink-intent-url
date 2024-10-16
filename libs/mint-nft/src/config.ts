@@ -75,7 +75,7 @@ export const metadata: ActionMetadata<FieldTypes> = {
         desc: "Extension metadata of the NFT, leave it to none if the NFT contract don't need it",
         type: 'input',
         regex: '^.*$',
-        regexDesc: 'Quantity',
+        regexDesc: 'metadata',
         defaultValue: 'none',
       },
       {
