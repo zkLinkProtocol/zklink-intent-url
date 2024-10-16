@@ -116,6 +116,11 @@ export const metadata: ActionMetadata<FieldTypes> = {
             value: '',
             chainId: '84532',
           },
+          {
+            label: 'ETH',
+            value: '',
+            chainId: '421614',
+          },
         ],
       },
       {
