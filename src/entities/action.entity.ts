@@ -3,6 +3,7 @@ import { Column, Entity, Index, OneToMany, PrimaryColumn } from 'typeorm';
 import { BaseEntity } from './base.entity';
 import { Commission } from './commission.entity';
 import { Intention } from './intention.entity';
+import { IntentionRecord } from './intentionRecord.entity';
 import {
   AuthorDto,
   IntentDto,
@@ -37,11 +38,14 @@ export abstract class Action extends BaseEntity {
   @Index('idx_dapp_name_gin', { synchronize: false })
   public readonly intent: IntentDto;
 
-  @OneToMany(() => Intention, (intention) => intention.actionId)
+  @OneToMany(() => Intention, (intention) => intention.action)
   public intentions: Intention[];
 
-  @OneToMany(() => Commission, (commission) => commission.actionId)
+  @OneToMany(() => Commission, (commission) => commission.action)
   public commissions: Commission[];
+
+  @OneToMany(() => IntentionRecord, (intentionRecord) => intentionRecord.action)
+  public intentionRecords: IntentionRecord[];
 
   @Index()
   @Column({ type: 'int', default: 0 })

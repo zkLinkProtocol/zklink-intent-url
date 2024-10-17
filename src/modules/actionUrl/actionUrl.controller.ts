@@ -26,6 +26,7 @@ import { CommonApiOperation } from 'src/common/base.decorators';
 import { ActionTransactionParams, TransactionInfo } from 'src/common/dto';
 import { PagingOptionsDto } from 'src/common/pagingOptionsDto.param';
 import { PagingMetaDto, ResponseDto } from 'src/common/response.dto';
+import { IntentionRecord } from 'src/entities/intentionRecord.entity';
 import { BusinessException } from 'src/exception/business.exception';
 import { ErrorMessage, SuccessMessage } from 'src/types';
 
@@ -37,9 +38,9 @@ import {
 } from './actionUrl.dto';
 import { ActionUrlService } from './actionUrl.service';
 import { BlinkService } from './blink.service';
+import { CommissionService } from './commission.service';
 import {
   IntentionRecordAddRequestDto,
-  IntentionRecordFindOneResponseDto,
   IntentionRecordListItemResponseDto,
 } from './intentionRecord.dto';
 import { IntentionRecordService } from './intentionRecord.service';
@@ -51,6 +52,7 @@ interface TransactionBody {
   account: string;
   chainId: string;
   inviter?: string;
+  commissionRate?: number;
   params: { [key: string]: string };
 }
 
@@ -59,6 +61,7 @@ interface TransactionBody {
 export class ActionUrlController extends BaseController {
   constructor(
     private readonly actionUrlService: ActionUrlService,
+    private readonly commissionService: CommissionService,
     private readonly actionService: ActionService,
     private readonly intentionRecordService: IntentionRecordService,
     private readonly blinkService: BlinkService,
@@ -85,12 +88,12 @@ export class ActionUrlController extends BaseController {
       metadata: result.metadata,
       settings: result.settings,
       logo: result.action.logo,
-      interactionssss: 1,
+      interaction: result.intentionRecords.length,
       creator: {
         address: result.creator.address,
       },
     };
-    return this.success<ActionUrlResponseDto>(response);
+    return this.success(response);
   }
 
   @Post(':code/post-transactions')
@@ -107,7 +110,7 @@ export class ActionUrlController extends BaseController {
     const intention = await this.actionUrlService.findOneByCode(code);
 
     const actionStore = await this.actionService.getActionVersionStore(
-      intention.actionId,
+      intention.action.id,
       intention.actionVersion,
     );
     if (!actionStore.onMagicLinkCreated) {
@@ -141,7 +144,7 @@ export class ActionUrlController extends BaseController {
   > {
     const result = await this.actionUrlService.findOneByCode(code);
     const actionStore = await this.actionService.getActionVersionStore(
-      result.actionId,
+      result.action.id,
       result.actionVersion,
     );
     if (!actionStore.reloadAdvancedInfo) {
@@ -184,12 +187,12 @@ export class ActionUrlController extends BaseController {
     @GetCreator() creator: { id: bigint },
   ): Promise<ResponseDto<ActionUrlFindOneResponseDto>> {
     const result = await this.actionUrlService.findOneByCode(code);
-    if ((result?.creatorId ?? '') !== creator.id) {
+    if ((result?.creator.id ?? '') !== creator.id) {
       throw new BusinessException('ActionUrl not found');
     }
     const response = {
       code: result.code,
-      actionId: result.actionId,
+      actionId: result.action.id,
       title: result.title,
       description: result.description,
       metadata: result.metadata,
@@ -325,7 +328,7 @@ export class ActionUrlController extends BaseController {
     const intention = await this.actionUrlService.findOneByCode(code);
 
     const actionStore = await this.actionService.getActionVersionStore(
-      intention.actionId,
+      intention.action.id,
       intention.actionVersion,
     );
     const { params, account, chainId } = body;
@@ -341,6 +344,13 @@ export class ActionUrlController extends BaseController {
     return this.success(response);
   }
 
+  /**
+   * @deprecated using reportTransactions instead
+   * @param code
+   * @param hash
+   * @param body
+   * @returns
+   */
   @Post(':code/:hash/reporter')
   @CommonApiOperation('Generate transaction by action Id.')
   @ApiResponse({
@@ -380,7 +390,7 @@ export class ActionUrlController extends BaseController {
     const intention = await this.actionUrlService.findOneByCode(code);
 
     const actionStore = await this.actionService.getActionVersionStore(
-      intention.actionId,
+      intention.action.id,
       intention.actionVersion,
     );
     const { params, account, chainId } = body;
@@ -392,7 +402,81 @@ export class ActionUrlController extends BaseController {
       },
       formData: params,
     };
-    const response = await actionStore.reportTransaction(data, txHash);
+    await this.commissionService.handleCommissionTransaction(
+      intention.action,
+      intention,
+      810181,
+      txHash,
+    );
+    const response = await actionStore.reportTransaction(data, [
+      { hash: txHash, chainId: 1 }, // deprecated
+    ]);
+    return this.success(response);
+  }
+
+  @Post(':code/reporter')
+  @CommonApiOperation('Generate transaction by action Id.')
+  @ApiResponse({
+    status: 200,
+    description: 'Return generated transaction',
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ResponseDto) },
+        {
+          properties: {
+            data: {
+              type: 'object',
+              properties: {
+                enable: {
+                  type: 'boolean',
+                  description: 'Indicates if the transaction can proceed',
+                },
+                reason: {
+                  type: 'string',
+                  description: 'Reason if transaction cannot proceed',
+                  nullable: true,
+                },
+              },
+            },
+          },
+        },
+      ],
+    },
+  })
+  async reportTransactions(
+    @Param('code') code: string,
+    @Body()
+    body: TransactionBody & {
+      txHashes: Array<{ hash: string; chainId: number }>;
+    },
+  ): Promise<ResponseDto<SuccessMessage>> {
+    const { params, account, chainId, txHashes } = body;
+
+    const intention = await this.actionUrlService.findOneByCode(code);
+
+    const actionStore = await this.actionService.getActionVersionStore(
+      intention.action.id,
+      intention.actionVersion,
+    );
+
+    const metadata = await actionStore.getMetadata();
+    if (metadata.maxCommission) {
+      await this.commissionService.handleCommissionTransaction(
+        intention.action,
+        intention,
+        txHashes[0].chainId,
+        txHashes[0].hash,
+      );
+    }
+    const data = {
+      additionalData: {
+        code,
+        account: account,
+        chainId: parseInt(chainId),
+      },
+      formData: params,
+    };
+    const response = await actionStore.reportTransaction(data, txHashes);
     return this.success(response);
   }
 
@@ -446,13 +530,14 @@ export class ActionUrlController extends BaseController {
     @Body()
     body: TransactionBody,
   ): Promise<ResponseDto<TransactionInfo[]>> {
-    const { params, account, inviter, chainId } = body;
+    const { params, account, inviter, chainId, commissionRate } = body;
     const data = {
       additionalData: {
         code,
         account: account,
         chainId: parseInt(chainId),
         inviter,
+        commissionRate,
       },
       formData: params,
     };
@@ -514,7 +599,7 @@ export class ActionUrlController extends BaseController {
   async getIntentionRecord(
     @Param('id') id: bigint,
     @Query('address') address: string,
-  ): Promise<ResponseDto<IntentionRecordFindOneResponseDto>> {
+  ): Promise<ResponseDto<IntentionRecord>> {
     const result = await this.intentionRecordService.findOneById(id);
     if (!result) {
       return this.error('Intention record not found');
@@ -523,7 +608,7 @@ export class ActionUrlController extends BaseController {
     if (address && result.address !== address) {
       return this.error('Intention record not found under the address');
     }
-    return this.success(result as IntentionRecordFindOneResponseDto);
+    return this.success(result);
   }
 
   // https://xxx.com/aciont-url/:code/metadata

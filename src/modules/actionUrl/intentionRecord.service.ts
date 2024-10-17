@@ -42,11 +42,11 @@ export class IntentionRecordService {
       throw new BusinessException(`Intention record ${id} not found`);
     }
     const intentionTmp = await this.intentionService.findOneByCode(
-      intentionRecord.intentionCode,
+      intentionRecord.intention.code,
     );
     if (!intentionTmp) {
       throw new BusinessException(
-        `Intention ${intentionRecord.intentionCode} not found`,
+        `Intention ${intentionRecord.intention.code} not found`,
       );
     }
     intentionRecord.intention = {
@@ -85,13 +85,17 @@ export class IntentionRecordService {
     params: IntentionRecordAddRequestDto,
   ): Promise<boolean> {
     // code is intention code
-    const intention = await this.intentionRepository.findOneBy({ code });
+    const intention = await this.intentionRepository.findOne({
+      where: { code },
+      relations: { action: true },
+    });
     if (!intention) {
       throw new BusinessException('Intention not found');
     }
 
     const intentionRecord = new IntentionRecord();
-    intentionRecord.intentionCode = code;
+    intentionRecord.action = intention.action;
+    intentionRecord.intention = intention;
     intentionRecord.address = params.address;
     intentionRecord.status = IntentionRecordStatus.PENDING;
 
@@ -103,7 +107,7 @@ export class IntentionRecordService {
       if (tx.opUserHash) {
         intentionRecordTx.opUserHash = tx.opUserHash;
       }
-      intentionRecordTx.intentionRecordId = BigInt(0);
+      intentionRecordTx.intentionRecord = intentionRecord;
       intentionRecordTx.chainId = tx.chainId;
       intentionRecordTx.createdAt = new Date(tx.createdAt);
       intentionRecordTx.status = IntentionRecordTxStatus.PENDING;

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import ethers from 'ethers';
+import { ethers } from 'ethers';
 
 import { TransactionInfo } from 'src/common/dto';
 import { ConfigType } from 'src/config';
@@ -23,14 +23,13 @@ export class HelperService {
     chainId: number;
     amount: number;
     token: string;
-    commission: number;
+    commissionRate: number;
   }): Promise<TransactionInfo> {
-    const { code, chainId, amount, token, commission } = params;
+    const { code, chainId, amount, token, commissionRate } = params;
     const account = await this.dataService.getMagicLinkCreatorInfoByCode(code);
     if (!account) {
       throw new Error(`account not found on magic link ${code}`);
     }
-
     const providerUrl = this.rpcs[chainId as keyof ConfigType['rpc']];
     const provider = new ethers.JsonRpcProvider(providerUrl);
     let transferTx = { to: account.address, data: '0x' };
@@ -43,7 +42,7 @@ export class HelperService {
       );
       const decimals = await contract.decimals();
       const amountToSend = ethers.parseUnits(
-        (amount * commission).toString(),
+        (amount * commissionRate).toString(),
         decimals,
       );
       transferTx = await contract.transfer.populateTransaction(
@@ -51,13 +50,18 @@ export class HelperService {
         amountToSend,
       );
     }
+    console.log(
+      ethers.parseUnits((amount * commissionRate).toString(), 18).toString(),
+    );
 
     return {
       chainId: chainId,
       to: transferTx.to,
       value:
         token === ''
-          ? ethers.parseUnits(amount.toString(), 18).toString()
+          ? ethers
+              .parseUnits((amount * commissionRate).toString(), 18)
+              .toString()
           : '0',
       data: transferTx.data,
       shouldPublishToChain: true,

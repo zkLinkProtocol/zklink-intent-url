@@ -22,14 +22,10 @@ export enum IntentionRecordStatus {
 }
 
 @Entity()
-@Index(['intentionCode'])
 @Index(['address'])
 export class IntentionRecord extends BaseEntity {
   @PrimaryGeneratedColumn()
   public readonly id: bigint;
-
-  @Column({ type: 'varchar' })
-  public intentionCode: string;
 
   @Column({ type: 'bytea', transformer: hexTransformer })
   public address: string;
@@ -41,10 +37,7 @@ export class IntentionRecord extends BaseEntity {
   @JoinColumn({ name: 'intentionCode' })
   public intention: Intention;
 
-  @Column({ type: 'varchar', length: 20 })
-  public actionId: string;
-
-  @ManyToOne(() => Action, (action) => action.intentions)
+  @ManyToOne(() => Action, (action) => action.intentionRecords)
   @JoinColumn({ name: 'actionId' })
   public action: Action;
 

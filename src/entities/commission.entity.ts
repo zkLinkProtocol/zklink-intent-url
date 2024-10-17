@@ -1,7 +1,6 @@
 import {
   Column,
   Entity,
-  Index,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
@@ -25,16 +24,11 @@ export class Commission {
   @Column({ type: 'bytea', transformer: hexTransformer })
   public tokenAddress: string;
 
+  @Column({ type: 'bytea', transformer: hexTransformer })
+  public txHash: string;
+
   @Column({ type: 'bigint' })
   public tokenAmount: bigint;
-
-  @Index()
-  @Column({ type: 'varchar' })
-  public intentionCode: string;
-
-  @Index()
-  @Column({ type: 'varchar', length: 20 })
-  public actionId: string;
 
   @ManyToOne(() => Intention, (intention) => intention.commissions)
   @JoinColumn({ name: 'intentionCode' })

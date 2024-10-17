@@ -408,14 +408,16 @@ export class RedEnvelopeService extends ActionDto<FieldTypes> {
 
   async reportTransaction(
     data: GenerateTransactionParams<FieldTypes>,
-    txHash: string,
+    txHashes: Array<{ hash: string; chainId: number }>,
   ): Promise<ErrorMessage> {
     const { formData } = data;
     const { distributionToken } = formData;
     const iface = new Interface(RedPacketABI);
     const eventTopic = ethers.id('RedPacketClaimed(uint256,address,uint256)');
     try {
-      const receipt = await this.provider.getTransactionReceipt(txHash);
+      const receipt = await this.provider.getTransactionReceipt(
+        txHashes[0].hash,
+      );
       if (!receipt) {
         throw new Error('wrong transaction hash');
       }
