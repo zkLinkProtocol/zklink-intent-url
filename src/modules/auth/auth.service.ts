@@ -156,6 +156,9 @@ export class AuthService {
     this.logger.log(`validatePrivatekey: ${address} ${message} ${signature}`);
     try {
       const recoveredAddress = verifyMessage(message, signature);
+      this.logger.log(
+        `address: ${address}, recoveredAddress: ${recoveredAddress}`,
+      );
       return recoveredAddress.toLowerCase() === address.toLowerCase();
     } catch (error) {
       return false;
