@@ -1,6 +1,7 @@
 import { RegistryPlug } from '@action/registry';
 import { DataService } from '@core/shared';
 import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Contract, JsonRpcProvider, ethers, keccak256 } from 'ethers';
 import { MerkleTree } from 'merkletreejs';
 import {
@@ -8,6 +9,7 @@ import {
   GenerateTransactionParams,
   TransactionInfo,
 } from 'src/common/dto';
+import { ConfigType } from 'src/config';
 import {
   IntentionRecordTx,
   IntentionRecordTxStatus,
@@ -21,8 +23,13 @@ import { FieldTypes } from './types';
 @Injectable()
 export class MintNovaNftService extends ActionDto<FieldTypes> {
   private logger: Logger = new Logger(MintNovaNftService.name);
-  constructor(private readonly dataService: DataService) {
+  readonly okxConfig: ConfigType['okx'];
+  constructor(
+    readonly configService: ConfigService,
+    private readonly dataService: DataService,
+  ) {
     super();
+    this.okxConfig = configService.get('okx', { infer: true })!;
   }
 
   async getMetadata() {
@@ -112,6 +119,9 @@ export class MintNovaNftService extends ActionDto<FieldTypes> {
     if (!account) {
       throw new Error('missing account');
     }
+    if (!this.okxConfig.nftSignerPrivateKey) {
+      throw new Error('missing NFT signer private key');
+    }
 
     const provider = new JsonRpcProvider(providerConfig[chainId]);
     const nftContractAddress = contractConfig[chainId];
@@ -151,7 +161,7 @@ export class MintNovaNftService extends ActionDto<FieldTypes> {
       tokenId,
       expiry,
       formData.stage,
-      formData.key,
+      this.okxConfig.nftSignerPrivateKey,
     );
 
     const mintTx = await contract.mint.populateTransaction(

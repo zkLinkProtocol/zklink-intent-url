@@ -44,6 +44,7 @@ const configFactory = async () => {
       secretKey: process.env.OKX_SECRET_KEY || '',
       accessKey: process.env.OKX_ACCESS_KEY || '',
       passphrase: process.env.OKX_PASSPHRASE || '',
+      nftSignerPrivateKey: process.env.OKX_SIGNER_PRIVATE_KEY || '',
     },
   };
 };
