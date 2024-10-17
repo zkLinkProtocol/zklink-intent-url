@@ -80,6 +80,14 @@ export class IntentionRecordService {
     };
   }
 
+  async countByCode(code: string): Promise<number> {
+    const res = await this.intentionRecordRepository.getIntentionRecordsByCode(
+      code,
+      undefined,
+    );
+    return res ? res.length : 0;
+  }
+
   async add(
     code: string,
     params: IntentionRecordAddRequestDto,

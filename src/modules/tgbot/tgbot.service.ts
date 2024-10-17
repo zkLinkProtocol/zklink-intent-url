@@ -9,6 +9,7 @@ import { CreatorRepository, IntentionRepository } from 'src/repositories';
 
 import { ActionUrlService } from '../actionUrl/actionUrl.service';
 import { BlinkService } from '../actionUrl/blink.service';
+import { IntentionRecordService } from '../actionUrl/intentionRecord.service';
 
 const options = {
   max: 240 * 7 * 10000,
@@ -26,6 +27,7 @@ export class TgbotService implements OnModuleInit {
     private readonly creatorRepository: CreatorRepository,
     private readonly actionUrlService: ActionUrlService,
     private readonly blinkService: BlinkService,
+    private readonly intentionRecordService: IntentionRecordService,
   ) {}
 
   async update(body: any) {
@@ -187,6 +189,7 @@ export class TgbotService implements OnModuleInit {
     const newsChannelIdEn = config.tgbot.newsChannelIdEn;
     let newsChannelId = '';
     const userMiniApp = config.tgbot.userMiniApp;
+    const tgbot = config.tgbot.tgbot;
     let news = null;
     try {
       news = await this.actionUrlService.findOneByCode(code);
@@ -200,18 +203,57 @@ export class TgbotService implements OnModuleInit {
     }
     const settings = news.settings as {
       newsType: string;
+      intentInfo: {
+        network: {
+          name: string;
+        };
+        components: {
+          value: string;
+          options?: {
+            label: string;
+            value: string;
+            default: boolean;
+          }[];
+        }[];
+      };
     };
     const photo = news.metadata;
     const content = html2md(news.description.replaceAll(/<img[^>]*>/g, ''));
     const date =
       news.createdAt?.toISOString().split('T')[0] +
       ` ${news.createdAt?.toISOString().split('T')[1].split('.')[0]}`;
-    let caption = `
-*${news.title.replaceAll('(', '\\(').replaceAll(')', '\\)')}*
+    const network = settings.intentInfo.network.name;
+    const components = settings.intentInfo.components;
+    const to = this.getOptionsLabelFromValue(
+      components[0].value,
+      components[0].options ?? [],
+    );
+    const from = this.getOptionsLabelFromValue(
+      components[1].value,
+      components[1].options ?? [],
+    );
+    const participants = await this.intentionRecordService.countByCode(code);
+    const captionTemplate = `
+🟢*${news.title.replaceAll('(', '\\(').replaceAll(')', '\\)')}*🟢
 ${content.replaceAll('(', '\\(').replaceAll(')', '\\)')}
-[Go to mini app](${userMiniApp}?startapp=${news.code}) 
+
+👨‍🍳Trading Strategy: 
+
+📍 ${network}
+➡️ Token From: ${from}
+⬅️ Token To: ${to}
+👥 Participants: $participants
+
+🔥More details Click here to 👉MagicLink TG \\([Go to mini app](${userMiniApp}?startapp=${news.code})\\)
+
+🌈Push Magic News Alerts in group? Invite [@BOT](${tgbot}?startgroup=join&admin=edit_messages) in your group
+
 ✅️ *Verified zkLink official team*
 `;
+    let caption = captionTemplate.replaceAll(
+      '$participants',
+      participants.toString(),
+    );
     if (this.containsChineseCharacters(caption)) {
       newsChannelId = newsChannelIdCn;
     } else {
@@ -376,6 +418,18 @@ ${content.replaceAll('(', '\\(').replaceAll(')', '\\)')}
     }
   }
 
+  async updateMagicNews(code: string) {
+    this.bot.editMessageCaption(caption, {
+      inline_message_id: inlinkMessageId,
+    });
+  }
+
+  async insertMagicNews(
+    code: string,
+    inlinkMessageId: string,
+    caption: string,
+  ) {}
+
   formatMarkdownV2(text: string) {
     return text
       .replaceAll('.', '\\.')
@@ -389,5 +443,19 @@ ${content.replaceAll('(', '\\(').replaceAll(')', '\\)')}
   containsChineseCharacters(str: string) {
     const regex = /[\u4e00-\u9fa5]/;
     return regex.test(str);
+  }
+
+  private getOptionsLabelFromValue(
+    value: string,
+    options: { label: string; value: string; default: boolean }[],
+  ) {
+    if (options.length > 0) {
+      for (const option of options) {
+        if (option.value == value) {
+          return option.label;
+        }
+      }
+    }
+    return value;
   }
 }
