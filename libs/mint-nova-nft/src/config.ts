@@ -3,7 +3,7 @@ import { ActionMetadata } from 'src/common/dto';
 import { FieldTypes } from './types';
 
 export const metadata: ActionMetadata<FieldTypes> = {
-  title: 'Mint Nova Genesis NFT',
+  title: 'Mint Nova Cubo NFT',
   description: '<div>This action allows you to mint Nova Cubo NFT</div>',
   networks: [
     {
@@ -19,14 +19,6 @@ export const metadata: ActionMetadata<FieldTypes> = {
   },
   intent: {
     components: [
-      {
-        name: 'key',
-        label: 'Private Key',
-        desc: 'Private Key',
-        type: 'input',
-        regex: '^[a-f0-9]{64}$',
-        regexDesc: 'Key',
-      },
       {
         name: 'stage',
         label: 'Mint Stage',
