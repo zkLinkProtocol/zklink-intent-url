@@ -11,8 +11,16 @@ export const metadata: ActionMetadata<FieldTypes> = {
       chainId: '810180',
     },
     {
-      name: 'zkLink Nova sepolia',
+      name: 'zkLink Nova Sepolia',
       chainId: '810181',
+    },
+    {
+      name: 'Base Sepolia',
+      chainId: '84532',
+    },
+    {
+      name: 'Arbitrum Sepolia',
+      chainId: '421614',
     },
   ],
   author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
@@ -67,7 +75,7 @@ export const metadata: ActionMetadata<FieldTypes> = {
         desc: "Extension metadata of the NFT, leave it to none if the NFT contract don't need it",
         type: 'input',
         regex: '^.*$',
-        regexDesc: 'Quantity',
+        regexDesc: 'metadata',
         defaultValue: 'none',
       },
       {
@@ -86,4 +94,6 @@ export const metadata: ActionMetadata<FieldTypes> = {
 export const providerConfig: { [key in number]: string } = {
   810180: 'https://rpc.zklink.io',
   810181: 'https://sepolia.rpc.zklink.io',
+  84532: 'https://sepolia.base.org',
+  421614: 'https://arbitrum-sepolia.gateway.tenderly.co',
 };

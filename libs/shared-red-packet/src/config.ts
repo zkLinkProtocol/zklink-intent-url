@@ -11,7 +11,7 @@ export const configuration = {
     chainId: 810180,
     networkName: 'zkLink Nova',
     rpcUrl: 'https://rpc.zklink.io',
-    redPacketContractAddress: '0x583ba818E70418c99829F21Dce4A0A188bbc871F',
+    redPacketContractAddress: '0xcD894D074d2fB4B4F031AE06db2850B0903a39E1',
     magicLinkUrl: 'https://magic.zklink.io/intent',
     browserUrl: 'https://explorer.zklink.io/tx/',
   },

@@ -3,8 +3,8 @@ import { ActionMetadata } from 'src/common/dto';
 import { FieldTypes } from './types';
 
 export const metadata: ActionMetadata<FieldTypes> = {
-  title: 'Mint Nova Genesis NFT',
-  description: '<div>This action allows you to mint Nova Genesis NFT</div>',
+  title: 'Mint Nova Cubo NFT',
+  description: '<div>This action allows you to mint Nova Cubo NFT</div>',
   networks: [
     {
       name: 'zkLink Nova sepolia',
@@ -20,20 +20,20 @@ export const metadata: ActionMetadata<FieldTypes> = {
   intent: {
     components: [
       {
-        name: 'key',
-        label: 'Private Key',
-        desc: 'Private Key',
-        type: 'input',
-        regex: '^[a-f0-9]{64}$',
-        regexDesc: 'Key',
-      },
-      {
-        name: 'recipient',
-        label: 'Recipient Address',
-        desc: 'NFT recipient address',
-        type: 'input',
-        regex: '^0x[a-fA-F0-9]{40}$',
-        regexDesc: 'Address',
+        name: 'stage',
+        label: 'Mint Stage',
+        desc: 'NFT Mint Stage',
+        type: 'searchSelect',
+        options: [
+          {
+            label: 'Whitelist Only',
+            value: 'Allowlist',
+          },
+          {
+            label: 'Public Mint',
+            value: 'Public',
+          },
+        ],
       },
       {
         name: 'tokenId',
@@ -62,5 +62,5 @@ export const providerConfig: { [key in number]: string } = {
 };
 
 export const contractConfig: { [key in number]: string } = {
-  810181: '0xC3c85AdB7d72685011De4961593d9B0E5f81252E',
+  810181: '0xECf78E16EF9e9c9d745fD52F87cddD5E0e8637DB',
 };

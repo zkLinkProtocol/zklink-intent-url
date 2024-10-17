@@ -27,6 +27,10 @@ export const metadata: ActionMetadata<FieldTypes> = {
       name: 'Base Sepolia',
       chainId: '84532',
     },
+    {
+      name: 'Arbitrum Sepolia',
+      chainId: '421614',
+    },
   ],
   author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
   magicLinkMetadata: {
@@ -112,6 +116,11 @@ export const metadata: ActionMetadata<FieldTypes> = {
             value: '',
             chainId: '84532',
           },
+          {
+            label: 'ETH',
+            value: '',
+            chainId: '421614',
+          },
         ],
       },
       {
@@ -161,6 +170,7 @@ export const providerConfig: { [key in number]: string } = {
   810181: 'https://sepolia.rpc.zklink.io',
   270: 'http://3.112.15.165:3050',
   84532: 'https://sepolia.base.org',
+  421614: 'https://arbitrum-sepolia.gateway.tenderly.co',
 };
 
 export const browserConfig: { [key in number]: string } = {
@@ -168,7 +178,8 @@ export const browserConfig: { [key in number]: string } = {
   810180: 'https://explorer.zklink.io/tx/',
   810181: 'https://sepolia.explorer.zklink.io/tx/',
   270: 'http://3.112.15.165:3050',
-  84532: 'https://sepolia-explorer.base.org',
+  84532: 'https://base-sepolia.blockscout.com/tx',
+  421614: 'https://sepolia.arbiscan.io/tx',
 };
 
 export type TransactionResult = {
