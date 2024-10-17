@@ -7,7 +7,6 @@ import { nanoid } from 'nanoid';
 import { BaseController } from 'src/common/base.controller';
 import { CommonApiOperation } from 'src/common/base.decorators';
 import { ResponseDto } from 'src/common/response.dto';
-import { sign_message } from 'src/constants';
 import { BusinessException } from 'src/exception/business.exception';
 
 import {
@@ -82,7 +81,9 @@ export class AuthController extends BaseController {
   @CommonApiOperation('Returns the sign message .')
   async getSignMessage(): Promise<ResponseDto<string>> {
     const nid = nanoid();
-    const message = `${sign_message} sign this message to login: ${nid}`;
+    const message = `Welcome to magicPortal!
+URL: https://magic.zklink.io
+Nonce: ${nid}`;
     const key = Buffer.from(message).toString('base64');
     cache.set(key, true);
     return this.success(message);
