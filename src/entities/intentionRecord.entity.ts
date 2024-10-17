@@ -2,11 +2,15 @@ import {
   Column,
   Entity,
   Index,
+  JoinColumn,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
+import { Action } from './action.entity';
 import { BaseEntity } from './base.entity';
+import { Intention } from './intention.entity';
 import { IntentionRecordTx } from './intentionRecordTx.entity';
 import { hexTransformer } from '../transformers/hex.transformer';
 
@@ -14,18 +18,14 @@ export enum IntentionRecordStatus {
   WAITING = 'waiting',
   PENDING = 'pending',
   SUCCESS = 'success',
-  FAILD = 'faild',
+  FAILED = 'failed',
 }
 
 @Entity()
-@Index(['intentionCode'])
 @Index(['address'])
 export class IntentionRecord extends BaseEntity {
   @PrimaryGeneratedColumn()
   public readonly id: bigint;
-
-  @Column({ type: 'varchar' })
-  public intentionCode: string;
 
   @Column({ type: 'bytea', transformer: hexTransformer })
   public address: string;
@@ -33,8 +33,13 @@ export class IntentionRecord extends BaseEntity {
   @Column({ type: 'enum', enum: IntentionRecordStatus })
   public status: IntentionRecordStatus;
 
-  @Column({ type: 'jsonb' })
-  public intention: object;
+  @ManyToOne(() => Intention, (intention) => intention.intentionRecords)
+  @JoinColumn({ name: 'intentionCode' })
+  public intention: Intention;
+
+  @ManyToOne(() => Action, (action) => action.intentionRecords)
+  @JoinColumn({ name: 'actionId' })
+  public action: Action;
 
   // join intention record txs
   @OneToMany(

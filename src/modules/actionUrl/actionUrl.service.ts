@@ -4,7 +4,11 @@ import { nanoid } from 'nanoid';
 import { GenerateTransactionParams, TransactionInfo } from 'src/common/dto';
 import { BusinessException } from 'src/exception/business.exception';
 import { ActionService } from 'src/modules/action/action.service';
-import { ActionRepository, IntentionRepository } from 'src/repositories';
+import {
+  ActionRepository,
+  CreatorRepository,
+  IntentionRepository,
+} from 'src/repositories';
 import { UnitOfWork } from 'src/unitOfWork';
 
 import { ActionUrlAddRequestDto } from './actionUrl.dto';
@@ -15,6 +19,7 @@ export class ActionUrlService {
   constructor(
     private readonly unitOfWork: UnitOfWork,
     private readonly intentionRepository: IntentionRepository,
+    private readonly creatorRepository: CreatorRepository,
     private readonly actionRepository: ActionRepository,
     private readonly actionService: ActionService,
   ) {
@@ -33,8 +38,8 @@ export class ActionUrlService {
     limit: number = 20,
   ) {
     const offset = Math.max((page - 1) * limit, 0);
-    const [actionUrls, total] = await this.intentionRepository.findAndCount({
-      where: { creatorId },
+    const [intentions, total] = await this.intentionRepository.findAndCount({
+      where: { creator: { id: creatorId } },
       select: [
         'code',
         'title',
@@ -49,7 +54,7 @@ export class ActionUrlService {
       order: { createdAt: 'DESC' },
     });
 
-    const filteredActionUrls = actionUrls.map((item) => ({
+    const filteredActionUrls = intentions.map((item) => ({
       ...item,
       action: item.action
         ? {
@@ -76,28 +81,26 @@ export class ActionUrlService {
     creatorId: bigint,
   ): Promise<string> {
     const action = await this.actionService.getActionMetadata(params.actionId);
+    const creator = await this.creatorRepository.findById(creatorId);
     if (!action) {
       throw new BusinessException('Action not found');
     }
+
+    if (!creator) {
+      throw new BusinessException('Creator not found');
+    }
+
     const code = nanoid(8);
     const intentionRecord = this.intentionRepository.create({
       ...params,
-      creatorId,
+      creator: creator,
+      action: action,
       code,
     });
     return new Promise((resolve) => {
       try {
         this.unitOfWork.useTransaction(async () => {
-          const actionInfo = await this.actionRepository.findOneBy({
-            id: params.actionId,
-          });
-          if (!actionInfo) {
-            throw new BusinessException(`No action ${params.actionId} found`);
-          }
-          actionInfo.intentionCount += 1;
-
           await this.intentionRepository.add(intentionRecord);
-          await this.actionRepository.upsert(actionInfo, true, ['id']);
           this.logger.log(`a new intention is added ${code}`);
           resolve(code);
         });
@@ -113,7 +116,7 @@ export class ActionUrlService {
     if (!actionUrl) {
       throw new BusinessException('ActionUrl not found');
     }
-    if (actionUrl.creatorId !== creatorId) {
+    if (actionUrl.creator.id !== creatorId) {
       throw new BusinessException('ActionUrl not found');
     }
     actionUrl.title = params.title;
@@ -135,7 +138,7 @@ export class ActionUrlService {
     if (!actionUrl) {
       throw new BusinessException('ActionUrl not found');
     }
-    if (actionUrl.creatorId !== creatorId) {
+    if (actionUrl.creator.id !== creatorId) {
       throw new UnauthorizedException('Not your own intent');
     }
     actionUrl.active = true;
@@ -154,7 +157,7 @@ export class ActionUrlService {
     if (!actionUrl) {
       throw new BusinessException('ActionUrl not found');
     }
-    if (actionUrl.creatorId !== creatorId) {
+    if (actionUrl.creator.id !== creatorId) {
       throw new BusinessException('ActionUrl not found');
     }
     try {
@@ -170,9 +173,9 @@ export class ActionUrlService {
     data: GenerateTransactionParams,
   ): Promise<TransactionInfo[]> {
     const actionUrl = await this.findOneByCode(data.additionalData.code!);
-    const { actionId, actionVersion } = actionUrl;
+    const { action, actionVersion } = actionUrl;
     const actionStore = this.actionService.getActionVersionStore(
-      actionId,
+      action.id,
       actionVersion,
     );
 
@@ -186,9 +189,9 @@ export class ActionUrlService {
 
   async generateManagementInfo(code: string) {
     const actionUrl = await this.findOneByCode(code);
-    const { actionId, actionVersion } = actionUrl;
+    const { action, actionVersion } = actionUrl;
     const actionStore = this.actionService.getActionVersionStore(
-      actionId,
+      action.id,
       actionVersion,
     );
 

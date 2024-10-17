@@ -14,23 +14,19 @@ import { hexTransformer } from '../transformers/hex.transformer';
 export enum IntentionRecordTxStatus {
   PENDING = 'pending',
   SUCCESS = 'success',
-  FAILD = 'faild',
+  FAILED = 'failed',
 }
 
 @Entity()
-@Index(['intentionRecordId'])
 @Index(['txHash', 'chainId'], { unique: true })
 @Index(['opUserHash', 'chainId'], { unique: true })
 export class IntentionRecordTx extends BaseEntity {
   @PrimaryGeneratedColumn()
   public readonly id: bigint;
 
-  @Column({ type: 'int' })
-  public intentionRecordId: bigint;
-
   @ManyToOne(() => IntentionRecord, (intentionRecord) => intentionRecord.id)
   @JoinColumn({ name: 'intentionRecordId' })
-  public readonly intentionRecord: IntentionRecord;
+  public intentionRecord: IntentionRecord;
 
   @Column({ type: 'bytea', transformer: hexTransformer, nullable: true })
   public opUserHash: string;

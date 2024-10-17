@@ -144,7 +144,7 @@ export class TgbotService implements OnModuleInit {
       return;
     }
     const intentions = await this.intentionRepository.find({
-      where: { creatorId: creator.id },
+      where: { creator: { id: creator.id } },
       order: { createdAt: 'DESC' },
     });
     if (!intentions || intentions.length === 0) {

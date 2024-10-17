@@ -25,7 +25,7 @@ export class TransactionInfo {
   })
   dexContractAddress?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description:
       'Flag indicating whether the transaction should be sent on-chain',
   })
@@ -41,6 +41,11 @@ export class TransactionInfo {
     description: 'Token information required by the target chain',
   })
   requiredTokenAmount?: TokenAmount[];
+
+  @ApiPropertyOptional({
+    description: '',
+  })
+  isCommission?: boolean = false;
 }
 
 export class TokenAmount {

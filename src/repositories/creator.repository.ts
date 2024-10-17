@@ -13,4 +13,8 @@ export class CreatorRepository extends BaseRepository<Creator> {
   async findByAddress(address: string): Promise<Creator | null> {
     return this.findOneBy([{ address }]);
   }
+
+  async findById(id: bigint): Promise<Creator | null> {
+    return this.findOneBy([{ id: id }]);
+  }
 }

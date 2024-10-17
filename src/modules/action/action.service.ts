@@ -16,7 +16,6 @@ import { BusinessException } from 'src/exception/business.exception';
 import { ActionRepository } from 'src/repositories/action.repository';
 import { ActionId } from 'src/types';
 
-import { ActionResponseDto } from './dto/actions.dto';
 import { RegistryAction } from './model';
 
 @Injectable()
@@ -111,18 +110,33 @@ export class ActionService implements OnApplicationBootstrap {
     return { ...actionMetadata, hasPostTxs };
   }
 
-  async getAllActionMetadata(): Promise<ActionResponseDto[]> {
-    const allActionMetadataRaw = await this.actionRepository.find({
-      order: {
-        sortOrder: 'asc',
-      },
-    });
+  async getAllActionMetadata() {
+    const allActionMetadataRaw = await this.actionRepository.getAllActions();
     const allActionMetadata = allActionMetadataRaw.map(
       async (actionMetadata) => {
-        const { id } = actionMetadata;
+        const {
+          id,
+          logo,
+          title,
+          networks,
+          description,
+          author,
+          intentionRecords,
+          intentions,
+        } = actionMetadata;
         const actionStore = this.getActionStore(id);
         const hasPostTxs = !!actionStore.onMagicLinkCreated;
-        return { ...actionMetadata, hasPostTxs };
+        return {
+          id,
+          logo,
+          title,
+          networks,
+          description,
+          author,
+          intentionCount: intentions.length,
+          interaction: intentionRecords.length,
+          hasPostTxs,
+        };
       },
     );
     return Promise.all(allActionMetadata);

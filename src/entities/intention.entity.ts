@@ -1,9 +1,9 @@
 import {
   Column,
   Entity,
-  Index,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryColumn,
 } from 'typeorm';
 
@@ -11,16 +11,14 @@ import { NetworkDto } from 'src/common/dto';
 
 import { Action } from './action.entity';
 import { BaseEntity } from './base.entity';
+import { Commission } from './commission.entity';
 import { Creator } from './creator.entity';
+import { IntentionRecord } from './intentionRecord.entity';
 
 @Entity()
-@Index(['creatorId'])
 export class Intention extends BaseEntity {
   @PrimaryColumn({ type: 'varchar' })
   public code: string;
-
-  @Column({ type: 'int' })
-  public creatorId: bigint;
 
   @ManyToOne(() => Creator, (creator) => creator.id)
   @JoinColumn({ name: 'creatorId' })
@@ -29,9 +27,6 @@ export class Intention extends BaseEntity {
   @ManyToOne(() => Action, (action) => action.intentions)
   @JoinColumn({ name: 'actionId' })
   public action: Action;
-
-  @Column({ type: 'varchar' })
-  public actionId: string;
 
   @Column({ type: 'varchar', default: 'v1' })
   public actionVersion: string;
@@ -59,4 +54,13 @@ export class Intention extends BaseEntity {
 
   @Column({ type: 'boolean', default: true })
   public active: boolean;
+
+  @OneToMany(
+    () => IntentionRecord,
+    (intentionRecord) => intentionRecord.intention,
+  )
+  public intentionRecords: IntentionRecord[];
+
+  @OneToMany(() => Commission, (commission) => commission.intention)
+  public commissions: Commission[];
 }

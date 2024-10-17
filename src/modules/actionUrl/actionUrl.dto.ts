@@ -1,5 +1,5 @@
 import { ApiProperty, OmitType } from '@nestjs/swagger';
-import { IsNotEmpty, IsObject, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsObject, IsString } from 'class-validator';
 
 import { AuthorDto } from 'src/common/dto';
 
@@ -68,7 +68,10 @@ export class ActionUrlAddRequestDto {
 export class ActionUrlUpdateRequestDto extends ActionUrlAddRequestDto {}
 
 // response dto
-export class ActionUrlFindOneResponseDto extends ActionUrlAddRequestDto {
+export class ActionUrlFindOneResponseDto extends OmitType(
+  ActionUrlAddRequestDto,
+  ['actionId'],
+) {
   @ApiProperty({
     name: 'creator',
     description: 'Creator info.',
@@ -128,4 +131,13 @@ export class ActionUrlResponseDto extends OmitType(ActionUrlAddRequestDto, [
   })
   @IsObject()
   creator: CreatorDto;
+
+  @ApiProperty({
+    name: 'interaction',
+    description: 'Intention interaction count',
+    example: 20,
+    required: true,
+  })
+  @IsNumber()
+  interaction: number;
 }

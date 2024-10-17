@@ -14,8 +14,8 @@ export class IntentionRepository extends BaseRepository<Intention> {
     try {
       const transactionManager = this.unitOfWork.getTransactionManager();
       const intention = await transactionManager.findOne(Intention, {
-        where: [{ code }],
-        relations: ['creator', 'action'],
+        where: { code },
+        relations: { creator: true, action: true, intentionRecords: true },
       });
       return intention;
     } catch (error) {

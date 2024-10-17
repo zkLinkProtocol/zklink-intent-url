@@ -14,4 +14,19 @@ export class ActionRepository extends BaseRepository<Action> {
   async initAction(updateData: Partial<Action>): Promise<void> {
     return this.upsert(updateData, true, ['id']);
   }
+
+  async getAllActions() {
+    try {
+      const allActionMetadataRaw = await this.find({
+        select: ['id', 'logo', 'title', 'networks', 'description', 'author'],
+        order: {
+          sortOrder: 'asc',
+        },
+        relations: ['intentions', 'commissions', 'intentionRecords'],
+      });
+      return allActionMetadataRaw;
+    } catch (error) {
+      throw new Error(`getAllActions failed: ${error.message}`);
+    }
+  }
 }

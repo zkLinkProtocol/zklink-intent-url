@@ -42,11 +42,11 @@ export class IntentionRecordService {
       throw new BusinessException(`Intention record ${id} not found`);
     }
     const intentionTmp = await this.intentionService.findOneByCode(
-      intentionRecord.intentionCode,
+      intentionRecord.intention.code,
     );
     if (!intentionTmp) {
       throw new BusinessException(
-        `Intention ${intentionRecord.intentionCode} not found`,
+        `Intention ${intentionRecord.intention.code} not found`,
       );
     }
     intentionRecord.intention = {
@@ -85,16 +85,19 @@ export class IntentionRecordService {
     params: IntentionRecordAddRequestDto,
   ): Promise<boolean> {
     // code is intention code
-    const intention = await this.intentionRepository.findOneBy({ code });
+    const intention = await this.intentionRepository.findOne({
+      where: { code },
+      relations: { action: true },
+    });
     if (!intention) {
       throw new BusinessException('Intention not found');
     }
 
     const intentionRecord = new IntentionRecord();
-    intentionRecord.intentionCode = code;
+    intentionRecord.action = intention.action;
+    intentionRecord.intention = intention;
     intentionRecord.address = params.address;
     intentionRecord.status = IntentionRecordStatus.PENDING;
-    intentionRecord.intention = intention;
 
     const txs = params.txs.map((tx) => {
       const intentionRecordTx = new IntentionRecordTx();
@@ -104,7 +107,7 @@ export class IntentionRecordService {
       if (tx.opUserHash) {
         intentionRecordTx.opUserHash = tx.opUserHash;
       }
-      intentionRecordTx.intentionRecordId = BigInt(0);
+      intentionRecordTx.intentionRecord = intentionRecord;
       intentionRecordTx.chainId = tx.chainId;
       intentionRecordTx.createdAt = new Date(tx.createdAt);
       intentionRecordTx.status = IntentionRecordTxStatus.PENDING;
@@ -181,16 +184,16 @@ export class IntentionRecordService {
       );
     }
 
-    //set faild
-    const faildRecords =
+    //set failed
+    const failedRecords =
       await this.intentionRecordRepository.getIntentionRecordListTxStatus(
-        IntentionRecordTxStatus.FAILD,
+        IntentionRecordTxStatus.FAILED,
       );
-    if (faildRecords.length > 0) {
-      const faildRecordIds = faildRecords.map((item) => item.id);
+    if (failedRecords.length > 0) {
+      const failedRecordIds = failedRecords.map((item) => item.id);
       await this.intentionRecordRepository.updateStatusByIds(
-        faildRecordIds,
-        IntentionRecordStatus.FAILD,
+        failedRecordIds,
+        IntentionRecordStatus.FAILED,
       );
     }
   }
@@ -221,7 +224,7 @@ export class IntentionRecordService {
     const rpc = this.rpcs[chainId];
     if (!rpc) {
       this.logger.log(`Had no supported the chinId: ${chainId}`);
-      return IntentionRecordTxStatus.FAILD;
+      return IntentionRecordTxStatus.FAILED;
     }
     const provider = new ethers.JsonRpcProvider(rpc);
     const tx = await provider.getTransaction(txHash);
@@ -231,7 +234,7 @@ export class IntentionRecordService {
     if (tx.blockNumber) {
       return IntentionRecordTxStatus.SUCCESS;
     }
-    return IntentionRecordTxStatus.FAILD;
+    return IntentionRecordTxStatus.FAILED;
   }
 
   private async fetchTxReceipt(
@@ -249,7 +252,7 @@ export class IntentionRecordService {
       }),
     });
     const responseJson = await response.json();
-    // if faild
+    // if failed
     if (responseJson.status !== 1) {
       return [];
     }
@@ -257,9 +260,9 @@ export class IntentionRecordService {
     if (logs.length === 0) {
       return [];
     }
-    const txHashs = logs.map((item: any) => {
+    const txHashes = logs.map((item: any) => {
       return item.transactionHash;
     });
-    return txHashs;
+    return txHashes;
   }
 }

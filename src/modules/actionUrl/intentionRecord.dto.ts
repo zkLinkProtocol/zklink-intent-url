@@ -1,10 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsArray, IsNotEmpty, IsString } from 'class-validator';
 
+import { Intention } from 'src/entities/intention.entity';
 import { IntentionRecordStatus } from 'src/entities/intentionRecord.entity';
 import { IntentionRecordTxStatus } from 'src/entities/intentionRecordTx.entity';
-
-import { ActionUrlFindOneResponseDto } from './actionUrl.dto';
 
 // request dto
 export class IntentionRecordTxRequestDto {
@@ -155,17 +154,15 @@ export class IntentionRecordFindOneResponseDto {
   @ApiProperty({
     name: 'intention',
     description: 'Intention info.',
-    example: ActionUrlFindOneResponseDto,
     required: true,
   })
   @IsString()
   @IsNotEmpty()
-  intention: ActionUrlFindOneResponseDto;
+  intention: Intention;
 
   @ApiProperty({
     name: 'txs',
     description: 'Txs of the intention record.',
-    example: ActionUrlFindOneResponseDto,
     required: true,
   })
   @IsString()
