@@ -32,7 +32,7 @@ export class IntentionRecordRepository extends BaseRepository<IntentionRecord> {
       );
 
       intentionRecordTxs.forEach((tx) => {
-        tx.intentionRecordId = savedIntentionRecord.id;
+        tx.intentionRecord = savedIntentionRecord;
       });
 
       await manager.save(IntentionRecordTx, intentionRecordTxs);
@@ -62,16 +62,9 @@ export class IntentionRecordRepository extends BaseRepository<IntentionRecord> {
     intentionRecordId: bigint,
   ): Promise<IntentionRecord | null> {
     return await this.findOne({
-      select: [
-        'id',
-        'intentionCode',
-        'status',
-        'address',
-        'createdAt',
-        'intention',
-      ],
+      select: ['id', 'status', 'address', 'createdAt', 'intention'],
       where: { id: intentionRecordId },
-      relations: ['intentionRecordTxs'],
+      relations: ['intentionRecordTxs', 'intention'],
     });
   }
 
@@ -80,15 +73,8 @@ export class IntentionRecordRepository extends BaseRepository<IntentionRecord> {
     address: string | undefined,
   ): Promise<IntentionRecord[] | null> {
     return await this.find({
-      select: [
-        'id',
-        'intentionCode',
-        'status',
-        'address',
-        'createdAt',
-        'intention',
-      ],
-      where: { intentionCode: code, address: address },
+      select: ['id', 'status', 'address', 'createdAt', 'intention'],
+      where: { intention: { code }, address: address },
       order: { createdAt: 'DESC' },
       relations: ['intentionRecordTxs'],
     });
