@@ -26,7 +26,6 @@ import { CommonApiOperation } from 'src/common/base.decorators';
 import { ActionTransactionParams, TransactionInfo } from 'src/common/dto';
 import { PagingOptionsDto } from 'src/common/pagingOptionsDto.param';
 import { PagingMetaDto, ResponseDto } from 'src/common/response.dto';
-import { IntentionRecord } from 'src/entities/intentionRecord.entity';
 import { BusinessException } from 'src/exception/business.exception';
 import { ErrorMessage, SuccessMessage } from 'src/types';
 
@@ -41,6 +40,7 @@ import { BlinkService } from './blink.service';
 import { CommissionService } from './commission.service';
 import {
   IntentionRecordAddRequestDto,
+  IntentionRecordFindOneResponseDto,
   IntentionRecordListItemResponseDto,
 } from './intentionRecord.dto';
 import { IntentionRecordService } from './intentionRecord.service';
@@ -598,17 +598,13 @@ export class ActionUrlController extends BaseController {
   @CommonApiOperation('Get intention record with txs by id.')
   async getIntentionRecord(
     @Param('id') id: bigint,
-    @Query('address') address: string,
-  ): Promise<ResponseDto<IntentionRecord>> {
+  ): Promise<ResponseDto<IntentionRecordFindOneResponseDto>> {
     const result = await this.intentionRecordService.findOneById(id);
     if (!result) {
       return this.error('Intention record not found');
     }
 
-    if (address && result.address !== address) {
-      return this.error('Intention record not found under the address');
-    }
-    return this.success(result);
+    return this.success(result as IntentionRecordFindOneResponseDto);
   }
 
   // https://xxx.com/aciont-url/:code/metadata
