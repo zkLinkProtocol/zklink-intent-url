@@ -91,13 +91,14 @@ export class IntentionRecordRepository extends BaseRepository<IntentionRecord> {
     const queryBuilder = this.unitOfWork
       .getTransactionManager()
       .createQueryBuilder(IntentionRecord, 'intentionrecord')
+      .leftJoinAndSelect('intentionrecord.intention', 'intention')
       .select([
         'intentionrecord.id as id',
         'intentionrecord.status as status',
         'intentionrecord.createdAt as createdAt',
+        'intention.title as title',
+        'intention.metadata as metadata',
       ])
-      .addSelect("intentionrecord.intention->>'title'", 'title')
-      .addSelect("intentionrecord.intention->>'metadata'", 'metadata')
       .andWhere(
         new Brackets((qb) => {
           qb.where('intentionrecord.address = :address', {
