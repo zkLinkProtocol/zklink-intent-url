@@ -512,16 +512,12 @@ export class ActionUrlController extends BaseController {
   @CommonApiOperation('Get intention record with txs by id.')
   async getIntentionRecord(
     @Param('id') id: bigint,
-    @Query('address') address: string,
   ): Promise<ResponseDto<IntentionRecordFindOneResponseDto>> {
     const result = await this.intentionRecordService.findOneById(id);
     if (!result) {
       return this.error('Intention record not found');
     }
 
-    if (address && result.address !== address) {
-      return this.error('Intention record not found under the address');
-    }
     return this.success(result as IntentionRecordFindOneResponseDto);
   }
 

@@ -168,7 +168,7 @@ export class TgbotService implements OnModuleInit {
 *Title* : ${intent.title}
 *Description* : ${intent.description}
 *Create Time* : ${date}
-[Go to tg mini app](${userMiniApp}?startapp=${intent.code})              [Share to others](https://t.me/share?url=${shareUrl}&text=${intent.title})
+[Go to tg mini app](${userMiniApp}?startapp=${intent.code})              [Share to others](tg://msg_url?url=${shareUrl}&text=${intent.title})
 ✅️ *Verified zkLink official team*
 \\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\n
         `;
@@ -334,7 +334,7 @@ ${content.replaceAll('(', '\\(').replaceAll(')', '\\)')}
     Your Invite Link: \`${inviteLink}\`
     `;
     const parse_mode: ParseMode = 'MarkdownV2';
-    const shareUrl = `https://t.me/share?url=${inviteLink}&text=Claim your Meme Red Packet`;
+    const shareUrl = `tg://msg_url?url=${inviteLink}&text=Claim your Meme Red Packet`;
     const inlineKeyboard = [];
     inlineKeyboard.push([
       {
@@ -419,9 +419,9 @@ ${content.replaceAll('(', '\\(').replaceAll(')', '\\)')}
   }
 
   async updateMagicNews(code: string) {
-    this.bot.editMessageCaption(caption, {
-      inline_message_id: inlinkMessageId,
-    });
+    // this.bot.editMessageCaption(caption, {
+    //   inline_message_id: inlinkMessageId,
+    // });
   }
 
   async insertMagicNews(
