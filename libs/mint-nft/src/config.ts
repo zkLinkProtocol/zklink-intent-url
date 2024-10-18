@@ -15,12 +15,40 @@ export const metadata: ActionMetadata<FieldTypes> = {
       chainId: '810181',
     },
     {
+      name: 'Arbitrum Sepolia',
+      chainId: '421614',
+    },
+    {
+      name: 'Arbitrum One',
+      chainId: '42161',
+    },
+    {
+      name: 'Ethereum Mainnet',
+      chainId: '1',
+    },
+    {
+      name: 'Base',
+      chainId: '8453',
+    },
+    {
       name: 'Base Sepolia',
       chainId: '84532',
     },
     {
-      name: 'Arbitrum Sepolia',
-      chainId: '421614',
+      name: 'Linea',
+      chainId: '59144',
+    },
+    {
+      name: 'Manta Pacific Mainnet',
+      chainId: '169',
+    },
+    {
+      name: 'OP Mainnet',
+      chainId: '10',
+    },
+    {
+      name: 'Scroll Mainnet',
+      chainId: '534352',
     },
   ],
   author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
@@ -92,8 +120,15 @@ export const metadata: ActionMetadata<FieldTypes> = {
 };
 
 export const providerConfig: { [key in number]: string } = {
+  42161: 'https://arbitrum.llamarpc.com',
   810180: 'https://rpc.zklink.io',
   810181: 'https://sepolia.rpc.zklink.io',
   84532: 'https://sepolia.base.org',
   421614: 'https://arbitrum-sepolia.gateway.tenderly.co',
+  1: 'https://eth.llamarpc.com',
+  8453: 'https://base.llamarpc.com',
+  59144: 'https://rpc.linea.build',
+  169: 'https://pacific-rpc.manta.network/http',
+  10: 'https://optimism.llamarpc.com',
+  534352: 'https://rpc.scroll.io',
 };
