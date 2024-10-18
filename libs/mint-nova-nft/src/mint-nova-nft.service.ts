@@ -16,7 +16,7 @@ import {
 } from 'src/entities/intentionRecordTx.entity';
 
 import ERC721ABI from './abis/ERC721.json';
-import { contractConfig, metadata, providerConfig } from './config';
+import { metadata, providerConfig } from './config';
 import { FieldTypes } from './types';
 
 @RegistryPlug('mint-nova-nft', 'v1')
@@ -124,7 +124,7 @@ export class MintNovaNftService extends ActionDto<FieldTypes> {
     }
 
     const provider = new JsonRpcProvider(providerConfig[chainId]);
-    const nftContractAddress = contractConfig[chainId];
+    const nftContractAddress = formData.contract;
 
     const contract = new Contract(nftContractAddress, ERC721ABI, provider);
     const mintedCount = Number(await contract.mintRecordAllStage(account));

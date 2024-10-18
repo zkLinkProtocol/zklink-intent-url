@@ -20,6 +20,14 @@ export const metadata: ActionMetadata<FieldTypes> = {
   intent: {
     components: [
       {
+        name: 'contract',
+        label: 'NFT Contract Address',
+        desc: 'Enter the NFT contract address',
+        type: 'input',
+        regex: '^0x[a-fA-F0-9]{40}$',
+        regexDesc: 'Invalid Address',
+      },
+      {
         name: 'stage',
         label: 'Mint Stage',
         desc: 'NFT Mint Stage',
@@ -51,7 +59,7 @@ export const metadata: ActionMetadata<FieldTypes> = {
         type: 'input',
         regex: '^\\d+\\.?\\d*$|^\\d*\\.\\d+$',
         regexDesc: 'Must be a number',
-        defaultValue: '0.002',
+        defaultValue: '0.00001',
       },
     ],
   },
@@ -59,8 +67,4 @@ export const metadata: ActionMetadata<FieldTypes> = {
 
 export const providerConfig: { [key in number]: string } = {
   810181: 'https://sepolia.rpc.zklink.io',
-};
-
-export const contractConfig: { [key in number]: string } = {
-  810181: '0xECf78E16EF9e9c9d745fD52F87cddD5E0e8637DB',
 };
