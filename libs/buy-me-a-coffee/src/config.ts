@@ -8,7 +8,7 @@ export const metadata: ActionMetadata<FieldTypes> = {
     '<div>This action allows you to create a Magic Link to receive donations</div>',
   networks: [
     {
-      name: 'Arbitrum',
+      name: 'Arbitrum One',
       chainId: '42161',
     },
     {
@@ -30,6 +30,30 @@ export const metadata: ActionMetadata<FieldTypes> = {
     {
       name: 'Arbitrum Sepolia',
       chainId: '421614',
+    },
+    {
+      name: 'Ethereum Mainnet',
+      chainId: '1',
+    },
+    {
+      name: 'Base',
+      chainId: '8453',
+    },
+    {
+      name: 'Linea',
+      chainId: '59144',
+    },
+    {
+      name: 'Manta Pacific Mainnet',
+      chainId: '169',
+    },
+    {
+      name: 'OP Mainnet',
+      chainId: '10',
+    },
+    {
+      name: 'Scroll Mainnet',
+      chainId: '534352',
     },
   ],
   author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
@@ -121,6 +145,36 @@ export const metadata: ActionMetadata<FieldTypes> = {
             value: '',
             chainId: '421614',
           },
+          {
+            label: 'ETH',
+            value: '',
+            chainId: '1',
+          },
+          {
+            label: 'ETH',
+            value: '',
+            chainId: '8453',
+          },
+          {
+            label: 'ETH',
+            value: '',
+            chainId: '59144',
+          },
+          {
+            label: 'ETH',
+            value: '',
+            chainId: '169',
+          },
+          {
+            label: 'ETH',
+            value: '',
+            chainId: '10',
+          },
+          {
+            label: 'ETH',
+            value: '',
+            chainId: '534352',
+          },
         ],
       },
       {
@@ -164,12 +218,18 @@ export const metadata: ActionMetadata<FieldTypes> = {
 };
 
 export const providerConfig: { [key in number]: string } = {
-  42161: 'https://arbitrum.llamarpc.com	',
+  42161: 'https://arbitrum.llamarpc.com',
   810180: 'https://rpc.zklink.io',
   810181: 'https://sepolia.rpc.zklink.io',
   270: 'http://3.112.15.165:3050',
   84532: 'https://sepolia.base.org',
   421614: 'https://arbitrum-sepolia.gateway.tenderly.co',
+  1: 'https://eth.llamarpc.com',
+  8453: 'https://base.llamarpc.com',
+  59144: 'https://rpc.linea.build',
+  169: 'https://pacific-rpc.manta.network/http',
+  10: 'https://optimism.llamarpc.com',
+  534352: 'https://rpc.scroll.io',
 };
 
 export const browserConfig: { [key in number]: string } = {
@@ -177,8 +237,14 @@ export const browserConfig: { [key in number]: string } = {
   810180: 'https://explorer.zklink.io/tx/',
   810181: 'https://sepolia.explorer.zklink.io/tx/',
   270: 'http://3.112.15.165:3050',
-  84532: 'https://base-sepolia.blockscout.com/tx',
-  421614: 'https://sepolia.arbiscan.io/tx',
+  84532: 'https://base-sepolia.blockscout.com/tx/',
+  421614: 'https://sepolia.arbiscan.io/tx/',
+  1: 'https://etherscan.io/tx/',
+  8453: 'https://basescan.org/tx/',
+  59144: 'https://lineascan.build/tx/',
+  169: 'https://pacific-explorer.manta.network/tx/',
+  10: 'https://optimistic.etherscan.io/tx/',
+  534352: 'https://scrollscan.com/tx/',
 };
 
 export type TransactionResult = {
