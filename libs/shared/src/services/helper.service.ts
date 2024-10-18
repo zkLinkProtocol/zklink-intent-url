@@ -42,7 +42,7 @@ export class HelperService {
       );
       const decimals = await contract.decimals();
       const amountToSend = ethers.parseUnits(
-        (amount * commissionRate).toString(),
+        (amount * commissionRate).toFixed(18),
         decimals,
       );
       transferTx = await contract.transfer.populateTransaction(
@@ -50,9 +50,6 @@ export class HelperService {
         amountToSend,
       );
     }
-    console.log(
-      ethers.parseUnits((amount * commissionRate).toString(), 18).toString(),
-    );
 
     return {
       chainId: chainId,
@@ -60,7 +57,7 @@ export class HelperService {
       value:
         token === ''
           ? ethers
-              .parseUnits((amount * commissionRate).toString(), 18)
+              .parseUnits((amount * commissionRate).toFixed(18), 18)
               .toString()
           : '0',
       data: transferTx.data,

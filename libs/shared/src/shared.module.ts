@@ -21,6 +21,6 @@ import { OKXService } from './services/okx.service';
     IntentionRepository,
     IntentionRecordRepository,
   ],
-  exports: [DataService, OKXService],
+  exports: [DataService, OKXService, HelperService],
 })
 export class SharedModule {}
