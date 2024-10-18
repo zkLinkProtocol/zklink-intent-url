@@ -47,12 +47,12 @@ export class TgbotService implements OnModuleInit {
   private async eventInit() {
     this.bot.onText(/\/start/, (msg: any) => this.onStart(msg.from.id));
     this.bot.onText(/\/my/, (msg: any) => this.onMyMagicLink(msg.from.id));
-    this.bot.onText(/Create/, (msg: any) => this.onMyMagicLink(msg.from.id));
-    this.bot.onText(/Portfolio/, (msg: any) => this.onMyMagicLink(msg.from.id));
-    this.bot.onText(/Deposit/, (msg: any) => this.onMyMagicLink(msg.from.id));
-    this.bot.onText(/News/, (msg: any) => this.onMyMagicLink(msg.from.id));
-    this.bot.onText(/Invite/, (msg: any) => this.onMyMagicLink(msg.from.id));
-    this.bot.onText(/Earn/, (msg: any) => this.onMyMagicLink(msg.from.id));
+    this.bot.onText(/Create/, (msg: any) => this.onCreate(msg.from.id));
+    this.bot.onText(/Portfolio/, (msg: any) => this.onPortfolio(msg.from.id));
+    this.bot.onText(/Support/, (msg: any) => this.onSupport(msg.from.id));
+    this.bot.onText(/News/, (msg: any) => this.onNews(msg.from.id));
+    this.bot.onText(/Invite/, (msg: any) => this.onInvite(msg.from.id));
+    this.bot.onText(/Earn/, (msg: any) => this.onEarn(msg.from.id));
     this.bot.on('callback_query', (callbackQuery: any) => {
       this.logger.log(`callback_query:`, JSON.stringify(callbackQuery));
       const chatId = callbackQuery.message.chat.id;
