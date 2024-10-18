@@ -50,10 +50,33 @@ export class TgbotController extends BaseController {
     }
   }
 
-  @Post('testStart')
-  async testStart() {
+  @Post('testAction')
+  async testStart(@Query('action') action: string) {
+    const tgUserId = '1352553794';
     try {
-      this.tgbotService.onStart('1352553794');
+      switch (action) {
+        case 'start':
+          this.tgbotService.onStart(tgUserId);
+          break;
+        case 'create':
+          this.tgbotService.onCreate(tgUserId);
+          break;
+        case 'portfolio':
+          this.tgbotService.onPortfolio(tgUserId);
+          break;
+        case 'support':
+          this.tgbotService.onSupport(tgUserId);
+          break;
+        case 'news':
+          this.tgbotService.onNews(tgUserId);
+          break;
+        case 'invite':
+          this.tgbotService.onInvite(tgUserId);
+          break;
+        case 'earn':
+          this.tgbotService.onEarn(tgUserId);
+          break;
+      }
       return true;
     } catch (error) {
       this.logger.error(error);
@@ -65,6 +88,17 @@ export class TgbotController extends BaseController {
   async testMyMagicLink() {
     try {
       this.tgbotService.onMyMagicLink('1352553794');
+      return true;
+    } catch (error) {
+      this.logger.error(error);
+      return false;
+    }
+  }
+
+  @Get('testMagicLink')
+  async testMagicLink(@Query('code') code: string) {
+    try {
+      this.tgbotService.sendMagicLink(code);
       return true;
     } catch (error) {
       this.logger.error(error);
