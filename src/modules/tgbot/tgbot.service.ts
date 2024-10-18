@@ -103,6 +103,7 @@ export class TgbotService implements OnModuleInit {
     const parse_mode: ParseMode = 'MarkdownV2';
     const reply_markup = {
       is_persistent: true,
+      resize_keyboard: true,
       keyboard: [
         [
           {
