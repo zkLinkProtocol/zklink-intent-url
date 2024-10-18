@@ -224,13 +224,13 @@ export class TgbotService implements OnModuleInit {
       ` ${news.createdAt?.toISOString().split('T')[1].split('.')[0]}`;
     const network = settings.intentInfo.network.name;
     const components = settings.intentInfo.components;
-    const to = this.getOptionsLabelFromValue(
-      components[0].value,
-      components[0].options ?? [],
-    );
     const from = this.getOptionsLabelFromValue(
       components[1].value,
       components[1].options ?? [],
+    );
+    const to = this.getOptionsLabelFromValue(
+      components[2].value,
+      components[2].options ?? [],
     );
     const participants = await this.intentionRecordService.countByCode(code);
     const captionTemplate = `
