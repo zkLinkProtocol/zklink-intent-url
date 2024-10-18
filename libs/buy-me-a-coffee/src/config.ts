@@ -215,7 +215,6 @@ export const metadata: ActionMetadata<FieldTypes> = {
       },
     ],
   },
-  maxCommission: 0.03,
 };
 
 export const providerConfig: { [key in number]: string } = {

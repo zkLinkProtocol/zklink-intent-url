@@ -51,7 +51,7 @@ export class BuyMeACoffeeService extends ActionDto<FieldTypes> {
     data: GenerateTransactionParams<FieldTypes>,
   ): Promise<TransactionInfo[]> {
     const { additionalData, formData } = data;
-    const { code, chainId, commissionRate = 0.001 } = additionalData;
+    const { code, chainId } = additionalData;
     const { token, value, recipient } = formData;
 
     const providerUrl = providerConfig[chainId];
@@ -60,18 +60,6 @@ export class BuyMeACoffeeService extends ActionDto<FieldTypes> {
     if (!code) {
       throw Error('Missing code');
     }
-
-    if (!commissionRate) {
-      throw Error('Missing commissionRate');
-    }
-
-    const commissionTx = await this.helperService.parseCommissionTx({
-      code,
-      chainId,
-      amount: Number(value),
-      token,
-      commissionRate,
-    });
 
     if (token !== '') {
       const contract = new Contract(token.toString(), ERC20ABI, provider);
@@ -90,7 +78,7 @@ export class BuyMeACoffeeService extends ActionDto<FieldTypes> {
       data: transferTx.data,
       shouldPublishToChain: true,
     };
-    return [commissionTx, tx];
+    return [tx];
   }
 
   public async reloadAdvancedInfo(
