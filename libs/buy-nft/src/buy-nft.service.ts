@@ -30,6 +30,8 @@ export class BuyNftService extends ActionDto<FieldTypes> {
         '<div>This action allows you to buy NFT from Magic Eden</div>',
       networks: this.chainService.buildSupportedNetworks([
         Chains.EthereumMainnet,
+        Chains.Base,
+        Chains.ArbitrumOne,
       ]),
       author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
       magicLinkMetadata: {
@@ -83,7 +85,7 @@ export class BuyNftService extends ActionDto<FieldTypes> {
     if (!additionalData.account) {
       throw new Error('Missing account!');
     }
-    const MAGIC_EDEN_API = apiConfig[additionalData.chainId];
+    const MAGIC_EDEN_API = (apiConfig as any)[additionalData.chainId];
     let collection = formData.queryValue;
     if (formData.queryType == 'link') {
       const queryParams = `slug=${encodeURIComponent(formData.queryValue.substring(formData.queryValue.lastIndexOf('/') + 1))}`;
