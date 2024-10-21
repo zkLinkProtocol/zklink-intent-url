@@ -1,24 +1,108 @@
 import { RegistryPlug } from '@action/registry';
+import { ChainService } from '@core/shared';
 import { Injectable } from '@nestjs/common';
-import { Contract, Interface, JsonRpcProvider, ethers } from 'ethers';
+import { Contract, Interface, ethers } from 'ethers';
 import {
   Action as ActionDto,
+  ActionMetadata,
   GenerateTransactionParams,
   TransactionInfo,
 } from 'src/common/dto';
+import { Chains } from 'src/constants';
 
-import { metadata, providerConfig } from './config';
 import { FieldTypes } from './types';
 
 @RegistryPlug('mint-nft', 'v1')
 @Injectable()
 export class MintNftService extends ActionDto<FieldTypes> {
-  constructor() {
+  constructor(private readonly chainService: ChainService) {
     super();
   }
 
-  async getMetadata() {
-    return metadata;
+  async getMetadata(): Promise<ActionMetadata<FieldTypes>> {
+    return {
+      title: 'Mint NFT',
+      description: '<div>This action allows you to mint NFT</div>',
+      networks: this.chainService.buildSupportedNetworks([
+        Chains.ZkLinkNova,
+        Chains.ZkLinkNovaSepolia,
+        Chains.ArbitrumSepolia,
+        Chains.ArbitrumOne,
+        Chains.EthereumMainnet,
+        Chains.Base,
+        Chains.BaseSepolia,
+        Chains.Linea,
+        Chains.MantaPacificMainnet,
+        Chains.OpMainnet,
+        Chains.ScrollMainnet,
+      ]),
+      author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
+      magicLinkMetadata: {
+        title: 'Mint NFT',
+        description:
+          'Magic Link Enthusiast | Donate with your love for zkLink magic',
+      },
+      intent: {
+        components: [
+          {
+            name: 'contract',
+            label: 'NFT Contract Address',
+            desc: 'Enter the NFT contract address',
+            type: 'input',
+            regex: '^0x[a-fA-F0-9]{40}$',
+            regexDesc: 'Invalid Address',
+          },
+          {
+            name: 'entrypoint',
+            label: 'Mint Func',
+            desc: 'Entry point of the mint function',
+            type: 'input',
+            regex: '^[a-zA-Z0-9$_]+$',
+            regexDesc: 'Func',
+            defaultValue: 'mint',
+          },
+          {
+            name: 'recipient',
+            label:
+              "Recipient Address (leave it to none if the NFT contract don't need it, leave it to sender for transaction sender)",
+            desc: "NFT recipient address, leave it to none if the NFT contract don't need it, leave it to sender for transaction sender",
+            type: 'input',
+            regex: '^(0x[a-fA-F0-9]{40})|(none)|(sender)$',
+            regexDesc: 'Address',
+            defaultValue: 'none',
+          },
+          {
+            name: 'quantity',
+            label:
+              "Quantity (leave it to 0 if the NFT contract don't support batch mint)",
+            desc: "Quantity of NFTs to mint, leave it to 0 if the NFT contract don't support batch mint",
+            type: 'input',
+            regex: '^\\d+$',
+            regexDesc: 'Quantity',
+            defaultValue: '0',
+          },
+          {
+            name: 'ext',
+            label:
+              "Extension Data, (leave it to none if the NFT contract don't need it)",
+            desc: "Extension metadata of the NFT, leave it to none if the NFT contract don't need it",
+            type: 'input',
+            regex: '^.*$',
+            regexDesc: 'metadata',
+            defaultValue: 'none',
+          },
+          {
+            name: 'value',
+            label: 'Transaction Value (leave it to 0 for free mint NFT)',
+            desc: 'The NFT mint fee, leave it to 0 for free mint NFT',
+            type: 'input',
+            regex: '^\\d+\\.?\\d*$|^\\d*\\.\\d+$',
+            regexDesc: 'Must be a number',
+            defaultValue: '0',
+          },
+        ],
+      },
+    };
   }
 
   async generateTransaction(
@@ -26,8 +110,7 @@ export class MintNftService extends ActionDto<FieldTypes> {
   ): Promise<TransactionInfo[]> {
     const { additionalData, formData } = data;
     const { chainId } = additionalData;
-    const providerUrl = providerConfig[chainId];
-    const provider = new JsonRpcProvider(providerUrl);
+    const provider = this.chainService.getProvider(chainId);
 
     const payable = Number(formData.value) > 0 ? ' payable' : '';
     const abiParams = [];

@@ -1,9 +1,8 @@
 import { RegistryPlug } from '@action/registry';
-import { DataService, HelperService } from '@core/shared';
+import { ChainService, DataService } from '@core/shared';
 import { Injectable, Logger } from '@nestjs/common';
 import {
   Contract,
-  JsonRpcProvider,
   dataSlice,
   formatEther,
   getAddress,
@@ -13,24 +12,20 @@ import {
 } from 'ethers';
 import {
   Action as ActionDto,
+  ActionMetadata,
   BasicAdditionalParams,
   GenerateTransactionParams,
   TransactionInfo,
   isOptionComponentDto,
 } from 'src/common/dto';
+import { Chains } from 'src/constants';
 import {
   IntentionRecordTx,
   IntentionRecordTxStatus,
 } from 'src/entities/intentionRecordTx.entity';
 
 import ERC20ABI from './abis/ERC20.json';
-import {
-  TransactionResult,
-  browserConfig,
-  metadata,
-  providerConfig,
-} from './config';
-import { FieldTypes } from './types';
+import { FieldTypes, TransactionResult } from './types';
 
 @RegistryPlug('buy-me-a-coffee', 'v1')
 @Injectable()
@@ -38,13 +33,190 @@ export class BuyMeACoffeeService extends ActionDto<FieldTypes> {
   private readonly logger = new Logger(BuyMeACoffeeService.name);
   constructor(
     private readonly dataService: DataService,
-    private readonly helperService: HelperService,
+    private readonly chainService: ChainService,
   ) {
     super();
   }
 
-  async getMetadata() {
-    return metadata;
+  async getMetadata(): Promise<ActionMetadata<FieldTypes>> {
+    return {
+      title: 'Buy me a coffee ☕',
+      description:
+        '<div>This action allows you to create a Magic Link to receive donations</div>',
+      networks: this.chainService.buildSupportedNetworks([
+        Chains.EthereumMainnet,
+        Chains.Linea,
+        Chains.Base,
+        Chains.MantaPacificMainnet,
+        Chains.OpMainnet,
+        Chains.ScrollMainnet,
+        Chains.ArbitrumOne,
+        Chains.ZkLinkNova,
+        Chains.ZkLinkNovaSepolia,
+        Chains.ZklinkDev,
+        Chains.BaseSepolia,
+        Chains.ArbitrumSepolia,
+      ]),
+      author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
+      magicLinkMetadata: {
+        title: 'Buy me a coffee ☕',
+        description:
+          'Magic Link Enthusiast | Donate with your love for zkLink magic',
+      },
+      intent: {
+        binding: 'value',
+        components: [
+          {
+            name: 'token',
+            label: 'Token',
+            desc: 'The token you want to cost',
+            type: 'searchSelect',
+            options: [
+              {
+                label: 'ETH',
+                value: '',
+                chainId: Chains.ArbitrumOne,
+                default: true,
+              },
+              {
+                label: 'USDT',
+                value: '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9',
+                chainId: Chains.ArbitrumOne,
+              },
+              {
+                label: 'USDC',
+                value: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831',
+                chainId: Chains.ArbitrumOne,
+              },
+              {
+                label: 'ETH',
+                value: '',
+                chainId: Chains.ZkLinkNova,
+                default: true,
+              },
+              {
+                label: 'USDT',
+                value: '0x2F8A25ac62179B31D62D7F80884AE57464699059',
+                chainId: Chains.ZkLinkNova,
+              },
+              {
+                label: 'USDC',
+                value: '0x1a1A3b2ff016332e866787B311fcB63928464509',
+                chainId: Chains.ZkLinkNova,
+              },
+              {
+                label: 'ETH',
+                value: '',
+                chainId: Chains.ZkLinkNovaSepolia,
+                default: true,
+              },
+              {
+                label: 'USDT',
+                value: '0x0efDC9f3948BE4509e8c57d49Df97660CF038F9a',
+                chainId: Chains.ZkLinkNovaSepolia,
+              },
+              {
+                label: 'USDC',
+                value: '0xAC4a95747cB3f291BC4a26630862FfA0A4b01B44',
+                chainId: Chains.ZkLinkNovaSepolia,
+              },
+              {
+                label: 'ETH',
+                value: '',
+                chainId: Chains.ZklinkDev,
+                default: true,
+              },
+              {
+                label: 'USDT',
+                value: '0xDBBD57f02DdbC9f1e2B80D8DAcfEC34BC8B287e3',
+                chainId: Chains.ZklinkDev,
+              },
+              {
+                label: 'USDC',
+                value: '0x09B141F8a41BA6d2A0Ec1d55d67De3C8f3846921',
+                chainId: Chains.ZklinkDev,
+              },
+              {
+                label: 'ETH',
+                value: '',
+                chainId: Chains.BaseSepolia,
+              },
+              {
+                label: 'ETH',
+                value: '',
+                chainId: Chains.ArbitrumSepolia,
+              },
+              {
+                label: 'ETH',
+                value: '',
+                chainId: Chains.EthereumMainnet,
+              },
+              {
+                label: 'ETH',
+                value: '',
+                chainId: Chains.Base,
+              },
+              {
+                label: 'ETH',
+                value: '',
+                chainId: Chains.Linea,
+              },
+              {
+                label: 'ETH',
+                value: '',
+                chainId: Chains.MantaPacificMainnet,
+              },
+              {
+                label: 'ETH',
+                value: '',
+                chainId: Chains.OpMainnet,
+              },
+              {
+                label: 'ETH',
+                value: '',
+                chainId: Chains.ScrollMainnet,
+              },
+            ],
+          },
+          {
+            name: 'value',
+            label: 'Amount',
+            desc: 'The amount to sponsor',
+            type: 'input',
+            regex: '^\\d+\\.?\\d*$|^\\d*\\.\\d+$',
+            regexDesc: 'Must be a number',
+          },
+          {
+            name: 'recipient',
+            label: 'Recipient',
+            desc: 'The address that is sponsored',
+            type: 'input',
+            regex: '^0x[a-fA-F0-9]{40}$',
+            regexDesc: 'Invalid Address',
+          },
+        ],
+        preset: [
+          {
+            field: 'value',
+            title: '0.001 ETH',
+            type: 'Button',
+            value: '0.001',
+          },
+          {
+            field: 'value',
+            title: '0.005 ETH',
+            type: 'Button',
+            value: '0.005',
+          },
+          {
+            field: 'value',
+            title: '0.01 ETH',
+            type: 'Button',
+            value: '0.01',
+          },
+        ],
+      },
+    };
   }
 
   async generateTransaction(
@@ -54,8 +226,7 @@ export class BuyMeACoffeeService extends ActionDto<FieldTypes> {
     const { code, chainId } = additionalData;
     const { token, value, recipient } = formData;
 
-    const providerUrl = providerConfig[chainId];
-    const provider = new JsonRpcProvider(providerUrl);
+    const provider = this.chainService.getProvider(chainId);
     let transferTx = { to: recipient, data: '0x' };
     if (!code) {
       throw Error('Missing code');
@@ -119,8 +290,7 @@ export class BuyMeACoffeeService extends ActionDto<FieldTypes> {
 
   public async parseTransaction(txhash: string, chainId: number) {
     const transferEventHash = id('Transfer(address,address,uint256)');
-    const providerUrl = providerConfig[chainId];
-    const provider = new JsonRpcProvider(providerUrl);
+    const provider = this.chainService.getProvider(chainId);
 
     const receipt = await provider.getTransactionReceipt(txhash);
     if (!receipt) {
@@ -176,6 +346,7 @@ export class BuyMeACoffeeService extends ActionDto<FieldTypes> {
   public async generateHTML(
     transactions: TransactionResult[],
   ): Promise<string> {
+    const metadata = await this.getMetadata();
     return transactions
       .map((tx) => {
         const tokenComponent = metadata.intent.components.find(
@@ -188,12 +359,13 @@ export class BuyMeACoffeeService extends ActionDto<FieldTypes> {
         if (isOptionComponentDto(tokenComponent)) {
           const option = tokenComponent.options.find(
             (option) =>
-              option.value === tx.tokenAddress &&
-              option.chainId === tx.chainId.toString(),
+              option.value === tx.tokenAddress && option.chainId === tx.chainId,
           );
-          const browserUrl = browserConfig[tx.chainId];
+          const prefixedTxhash = this.chainService.buildTransactionExplorerLink(
+            tx.txhash,
+            tx.chainId,
+          );
           const tokenName = option?.label;
-          const prefixedTxhash = `${browserUrl}${tx.txhash}`;
           return `<p>${tx.toAddress}   ${tx.value} ${tokenName}   ${prefixedTxhash}</p>`;
         }
       })

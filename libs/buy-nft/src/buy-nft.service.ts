@@ -1,14 +1,17 @@
 import { RegistryPlug } from '@action/registry';
+import { ChainService } from '@core/shared';
 import { Injectable } from '@nestjs/common';
 import fetch from 'node-fetch';
 import {
   Action as ActionDto,
+  ActionMetadata,
   BasicAdditionalParams,
   GenerateTransactionParams,
   TransactionInfo,
 } from 'src/common/dto';
+import { Chains } from 'src/constants';
 
-import { apiConfig, metadata } from './config';
+import { apiConfig } from './config';
 import { FieldTypes } from './types';
 
 @RegistryPlug('buy-nft', 'v1')
@@ -16,12 +19,61 @@ import { FieldTypes } from './types';
 export class BuyNftService extends ActionDto<FieldTypes> {
   nftHtmlInfo: string[] = [];
 
-  constructor() {
+  constructor(private readonly chainService: ChainService) {
     super();
   }
 
-  async getMetadata() {
-    return metadata;
+  async getMetadata(): Promise<ActionMetadata<FieldTypes>> {
+    return {
+      title: 'Buy NFT from Magic Eden',
+      description:
+        '<div>This action allows you to buy NFT from Magic Eden</div>',
+      networks: this.chainService.buildSupportedNetworks([
+        Chains.EthereumMainnet,
+      ]),
+      author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
+      magicLinkMetadata: {
+        description: '',
+      },
+      intent: {
+        components: [
+          {
+            name: 'queryType',
+            label: 'NFT Query Method',
+            desc: 'Specify how to find the NFT',
+            type: 'searchSelect',
+            options: [
+              {
+                label: 'Magic Eden Collection URL',
+                value: 'link',
+              },
+              {
+                label: 'Contract Address',
+                value: 'contract',
+              },
+            ],
+          },
+          {
+            name: 'queryValue',
+            label: 'NFT Query Value',
+            desc: 'Enter the contract address or URL (e.g., https://magiceden.io/collections/ethereum/cryptopunks)',
+            type: 'input',
+            regex:
+              '^(0x[a-fA-F0-9]{40}(:\\d+)?)|(https?://magiceden..+/collections/ethereum/.+)$',
+            regexDesc: 'NFT Query Value',
+          },
+          {
+            name: 'quantity',
+            label: 'Quantity',
+            desc: 'Quantity of NFTs to buy',
+            type: 'input',
+            regex: '^\\d+$',
+            regexDesc: 'Quantity',
+            defaultValue: '1',
+          },
+        ],
+      },
+    };
   }
 
   async generateTransaction(

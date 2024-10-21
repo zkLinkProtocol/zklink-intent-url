@@ -12,10 +12,11 @@ import {
 } from 'ethers';
 
 import { RegistryPlug } from '@action/registry';
-import { DataService } from '@core/shared';
+import { ChainService, DataService } from '@core/shared';
 import { getERC20SymbolAndDecimals } from '@core/utils';
 import {
   Action as ActionDto,
+  ActionMetadata,
   BasicAdditionalParams,
   GenerateFormParams,
   GenerateTransactionParams,
@@ -32,12 +33,12 @@ import { Address, ErrorMessage } from 'src/types';
 import ERC20ABI from './abis/ERC20.json';
 import MemeRedPacketABI from './abis/MemeRedPacket.json';
 import { TransactionResult, Value, configuration } from './config';
-import { genMetadata } from './metadata';
 import {
   ClaimRedPacketParams,
   CreateRedPacketParams,
   DistributionModeValue,
   FieldTypes,
+  GasTokenValue,
 } from './type';
 
 const PACKET_HASH = ethers.keccak256(ethers.toUtf8Bytes('REDPACKET'));
@@ -57,6 +58,7 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
     readonly configService: ConfigService,
     private readonly dataService: DataService,
     private readonly tgbotService: TgbotService,
+    private readonly chainService: ChainService,
   ) {
     super();
     this.env = configService.get('env', { infer: true })!;
@@ -75,8 +77,81 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
     );
   }
 
-  public async getMetadata() {
-    return genMetadata(this.config);
+  public async getMetadata(): Promise<ActionMetadata<FieldTypes>> {
+    return {
+      title: 'Shared Red Packet 🧧',
+      description:
+        '<div>This action is designed to distribute token rewards</div>',
+      networks: this.chainService.buildSupportedNetworks([this.config.chainId]),
+      author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
+      magicLinkMetadata: {
+        title: 'Shared Red Packet 🧧',
+        description: 'Best wishes!',
+      },
+      intent: {
+        binding: true,
+        components: [
+          {
+            name: 'distributionMode',
+            label: 'Distribution Method',
+            desc: 'Choose Mode to distribute Red Envelopes',
+            type: 'searchSelect',
+            options: [
+              {
+                label: 'Equal Amount Per Address',
+                value: DistributionModeValue.EqualAmountPerAddress,
+              },
+              {
+                label: 'Random Amount Per Address',
+                value: DistributionModeValue.RandomAmountPerAddress,
+              },
+            ],
+          },
+          {
+            name: 'totalDistributionAmount',
+            label: 'Total Token Amount',
+            desc: 'The total amount of tokens to be distributed',
+            type: 'input',
+            regex: '^\\d+\\.?\\d*$|^\\d*\\.\\d+$',
+            regexDesc: 'It should be a valid number',
+          },
+          {
+            name: 'distributionToken',
+            label: 'Token to Distribute',
+            desc: 'Choose a token to distribute',
+            type: 'input',
+            regex: '^0x[a-fA-F0-9]{40}$',
+            regexDesc: 'Invalid address',
+          },
+          {
+            name: 'amountOfRedEnvelopes',
+            label: 'Number of Red Packets',
+            desc: 'Total number of Red Packets',
+            type: 'input',
+            regex: '^[1-9]\\d*$',
+            regexDesc: 'It should be a positive integer.',
+          },
+          {
+            name: 'gasToken',
+            label: 'Who should pay for the claiming gas fee',
+            desc: 'Gas Token',
+            type: 'searchSelect',
+            options: [
+              {
+                label: 'Recipient',
+                value: GasTokenValue.Eth,
+              },
+            ],
+          },
+          {
+            name: 'isInvitable',
+            label: 'Whether to give a commission to the inviter',
+            desc: 'When this switch is turned on, users who share the Magic Link will receive a portion of the recipient’s red envelope reward.',
+            type: 'switch',
+          },
+        ],
+      },
+    };
   }
 
   public async validateFormData(formData: GenerateFormParams<FieldTypes>) {

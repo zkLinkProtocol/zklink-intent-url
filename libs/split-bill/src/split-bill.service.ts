@@ -1,9 +1,8 @@
 import { RegistryPlug } from '@action/registry';
-import { DataService } from '@core/shared';
+import { ChainService, DataService } from '@core/shared';
 import { Injectable, Logger } from '@nestjs/common';
 import {
   Contract,
-  JsonRpcProvider,
   dataSlice,
   formatEther,
   getAddress,
@@ -13,35 +12,143 @@ import {
 } from 'ethers';
 import {
   Action as ActionDto,
+  ActionMetadata,
   BasicAdditionalParams,
   GenerateTransactionParams,
   TransactionInfo,
   isOptionComponentDto,
 } from 'src/common/dto';
+import { Chains } from 'src/constants';
 import {
   IntentionRecordTx,
   IntentionRecordTxStatus,
 } from 'src/entities/intentionRecordTx.entity';
 
 import ERC20ABI from './abis/ERC20.json';
-import {
-  TransactionResult,
-  browserConfig,
-  metadata,
-  providerConfig,
-} from './config';
-import { FieldTypes } from './types';
+import { FieldTypes, TransactionResult } from './types';
 
 @RegistryPlug('split-bill', 'v1')
 @Injectable()
 export class SplitBillService extends ActionDto<FieldTypes> {
   private readonly logger = new Logger(SplitBillService.name);
-  constructor(private readonly dataService: DataService) {
+  constructor(
+    private readonly dataService: DataService,
+    private readonly chainService: ChainService,
+  ) {
     super();
   }
 
-  async getMetadata() {
-    return metadata;
+  async getMetadata(): Promise<ActionMetadata<FieldTypes>> {
+    return {
+      title: 'Split Bill 💰',
+      description:
+        '<div>This action is made for friends to split the bill</div>',
+      networks: this.chainService.buildSupportedNetworks([
+        Chains.ArbitrumOne,
+        Chains.ZkLinkNova,
+        Chains.ZkLinkNovaSepolia,
+        Chains.ZklinkDev,
+      ]),
+      author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
+      magicLinkMetadata: {
+        title: 'Split Bill 💰',
+        description: 'Each friend will pay you the same amount',
+      },
+      intent: {
+        binding: 'value',
+        components: [
+          {
+            name: 'token',
+            label: 'Token',
+            desc: 'The token you want to cost',
+            type: 'searchSelect',
+            options: [
+              {
+                label: 'ETH',
+                value: '',
+                chainId: Chains.ArbitrumOne,
+              },
+              {
+                label: 'USDT',
+                value: '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9',
+                chainId: Chains.ArbitrumOne,
+              },
+              {
+                label: 'USDC',
+                value: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831',
+                chainId: Chains.ArbitrumOne,
+                default: true,
+              },
+              {
+                label: 'ETH',
+                value: '',
+                chainId: Chains.ZkLinkNova,
+              },
+              {
+                label: 'USDT',
+                value: '0x2F8A25ac62179B31D62D7F80884AE57464699059',
+                chainId: Chains.ZkLinkNova,
+              },
+              {
+                label: 'USDC',
+                value: '0x1a1A3b2ff016332e866787B311fcB63928464509',
+                chainId: Chains.ZkLinkNova,
+                default: true,
+              },
+              {
+                label: 'ETH',
+                value: '',
+                chainId: Chains.ZkLinkNovaSepolia,
+              },
+              {
+                label: 'USDT',
+                value: '0x0efDC9f3948BE4509e8c57d49Df97660CF038F9a',
+                chainId: Chains.ZkLinkNovaSepolia,
+              },
+              {
+                label: 'USDC',
+                value: '0xAC4a95747cB3f291BC4a26630862FfA0A4b01B44',
+                chainId: Chains.ZkLinkNovaSepolia,
+                default: true,
+              },
+              {
+                label: 'ETH',
+                value: '',
+                chainId: Chains.ZklinkDev,
+              },
+              {
+                label: 'USDT',
+                value: '0xDBBD57f02DdbC9f1e2B80D8DAcfEC34BC8B287e3',
+                chainId: Chains.ZklinkDev,
+              },
+              {
+                label: 'USDC',
+                value: '0x09B141F8a41BA6d2A0Ec1d55d67De3C8f3846921',
+                chainId: Chains.ZklinkDev,
+                default: true,
+              },
+            ],
+          },
+          {
+            name: 'value',
+            label: 'Amount',
+            desc: 'The amount of tokens you receive from each friend.',
+            type: 'input',
+            regex: '^\\d+\\.?\\d*$|^\\d*\\.\\d+$',
+            defaultValue: '10',
+            regexDesc: 'Must be a number',
+          },
+          {
+            name: 'recipient',
+            label: 'Recipient',
+            desc: "Please enter the recipient's address.",
+            type: 'input',
+            regex: '^0x[a-fA-F0-9]{40}$',
+            regexDesc: 'Invalid Address',
+          },
+        ],
+      },
+    };
   }
 
   async generateTransaction(
@@ -49,8 +156,7 @@ export class SplitBillService extends ActionDto<FieldTypes> {
   ): Promise<TransactionInfo[]> {
     const { additionalData, formData } = data;
     const { chainId } = additionalData;
-    const providerUrl = providerConfig[chainId];
-    const provider = new JsonRpcProvider(providerUrl);
+    const provider = this.chainService.getProvider(chainId);
     let transferTx = { to: formData.recipient, data: '0x' };
     if (formData.token !== '') {
       const contract = new Contract(
@@ -117,8 +223,7 @@ export class SplitBillService extends ActionDto<FieldTypes> {
 
   public async parseTransaction(txhash: string, chainId: number) {
     const transferEventHash = id('Transfer(address,address,uint256)');
-    const providerUrl = providerConfig[chainId];
-    const provider = new JsonRpcProvider(providerUrl);
+    const provider = this.chainService.getProvider(chainId);
 
     const receipt = await provider.getTransactionReceipt(txhash);
     if (!receipt) {
@@ -174,6 +279,7 @@ export class SplitBillService extends ActionDto<FieldTypes> {
   public async generateHTML(
     transactions: TransactionResult[],
   ): Promise<string> {
+    const metadata = await this.getMetadata();
     return transactions
       .map((tx) => {
         const tokenComponent = metadata.intent.components.find(
@@ -185,12 +291,13 @@ export class SplitBillService extends ActionDto<FieldTypes> {
         if (isOptionComponentDto(tokenComponent)) {
           const option = tokenComponent?.options?.find(
             (option) =>
-              option.value === tx.tokenAddress &&
-              option.chainId === tx.chainId.toString(),
+              option.value === tx.tokenAddress && option.chainId === tx.chainId,
           );
-          const browserUrl = browserConfig[tx.chainId];
           const tokenName = option?.label;
-          const prefixedTxhash = `${browserUrl}${tx.txhash}`;
+          const prefixedTxhash = this.chainService.buildTransactionExplorerLink(
+            tx.txhash,
+            tx.chainId,
+          );
           return `<p>${tx.toAddress}   ${tx.value} ${tokenName}   ${prefixedTxhash}</p>`;
         }
       })

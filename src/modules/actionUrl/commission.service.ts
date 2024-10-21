@@ -1,21 +1,17 @@
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { ethers } from 'ethers';
 
-import { ConfigType } from 'src/config';
+import { ChainService } from '@core/shared';
 import { Action } from 'src/entities/action.entity';
 import { Intention } from 'src/entities/intention.entity';
 import { CommissionRepository } from 'src/repositories';
 
 @Injectable()
 export class CommissionService {
-  private rpc: ConfigType['rpc'];
   constructor(
-    readonly configService: ConfigService,
     private readonly commissionRepository: CommissionRepository,
-  ) {
-    this.rpc = configService.get('rpc', { infer: true })!;
-  }
+    private readonly chainService: ChainService,
+  ) {}
   async handleCommissionTransaction(
     action: Action,
     intention: Intention,
@@ -24,9 +20,7 @@ export class CommissionService {
   ) {
     try {
       // Get the transaction details
-      const provider = new ethers.JsonRpcProvider(
-        this.rpc[chainId as keyof ConfigType['rpc']],
-      );
+      const provider = this.chainService.getProvider(chainId);
       // Get the transaction details
       const tx = await provider.getTransaction(txHash);
       if (!tx) {

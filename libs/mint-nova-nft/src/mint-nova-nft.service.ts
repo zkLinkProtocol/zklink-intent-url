@@ -1,22 +1,23 @@
 import { RegistryPlug } from '@action/registry';
-import { DataService } from '@core/shared';
+import { ChainService, DataService } from '@core/shared';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Contract, JsonRpcProvider, ethers, keccak256 } from 'ethers';
+import { Contract, ethers, keccak256 } from 'ethers';
 import { MerkleTree } from 'merkletreejs';
 import {
   Action as ActionDto,
+  ActionMetadata,
   GenerateTransactionParams,
   TransactionInfo,
 } from 'src/common/dto';
 import { ConfigType } from 'src/config';
+import { Chains } from 'src/constants';
 import {
   IntentionRecordTx,
   IntentionRecordTxStatus,
 } from 'src/entities/intentionRecordTx.entity';
 
 import ERC721ABI from './abis/ERC721.json';
-import { metadata, providerConfig } from './config';
 import { FieldTypes } from './types';
 
 @RegistryPlug('mint-nova-nft', 'v1')
@@ -27,13 +28,73 @@ export class MintNovaNftService extends ActionDto<FieldTypes> {
   constructor(
     readonly configService: ConfigService,
     private readonly dataService: DataService,
+    private readonly chainService: ChainService,
   ) {
     super();
     this.okxConfig = configService.get('okx', { infer: true })!;
   }
 
-  async getMetadata() {
-    return metadata;
+  async getMetadata(): Promise<ActionMetadata<FieldTypes>> {
+    return {
+      title: 'Mint Nova Cubo NFT',
+      description: '<div>This action allows you to mint Nova Cubo NFT</div>',
+      networks: this.chainService.buildSupportedNetworks([
+        Chains.ZkLinkNova,
+        Chains.ZkLinkNovaSepolia,
+      ]),
+      author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
+      magicLinkMetadata: {
+        title: 'Mint NFT',
+        description:
+          'Magic Link Enthusiast | Donate with your love for zkLink magic',
+      },
+      intent: {
+        components: [
+          {
+            name: 'contract',
+            label: 'NFT Contract Address',
+            desc: 'Enter the NFT contract address',
+            type: 'input',
+            regex: '^0x[a-fA-F0-9]{40}$',
+            regexDesc: 'Invalid Address',
+          },
+          {
+            name: 'stage',
+            label: 'Mint Stage',
+            desc: 'NFT Mint Stage',
+            type: 'searchSelect',
+            options: [
+              {
+                label: 'Whitelist Only',
+                value: 'Allowlist',
+              },
+              {
+                label: 'Public Mint',
+                value: 'Public',
+              },
+            ],
+          },
+          {
+            name: 'tokenId',
+            label: 'Start Token ID',
+            desc: 'Start Token ID',
+            type: 'input',
+            regex: '^\\d+$',
+            regexDesc: 'Key',
+            defaultValue: '10',
+          },
+          {
+            name: 'fee',
+            label: 'Transaction Value',
+            desc: 'The NFT mint fee',
+            type: 'input',
+            regex: '^\\d+\\.?\\d*$|^\\d*\\.\\d+$',
+            regexDesc: 'Must be a number',
+            defaultValue: '0.00001',
+          },
+        ],
+      },
+    };
   }
 
   async calcSignature(
@@ -126,7 +187,7 @@ export class MintNovaNftService extends ActionDto<FieldTypes> {
       throw new Error('missing NFT signer private key');
     }
 
-    const provider = new JsonRpcProvider(providerConfig[chainId]);
+    const provider = this.chainService.getProvider(chainId);
     const nftContractAddress = formData.contract;
 
     const contract = new Contract(nftContractAddress, ERC721ABI, provider);

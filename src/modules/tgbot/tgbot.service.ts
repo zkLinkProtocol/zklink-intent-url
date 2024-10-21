@@ -4,7 +4,9 @@ import html2md from 'html-to-md';
 import { LRUCache } from 'lru-cache';
 import TelegramBot, { ParseMode } from 'node-telegram-bot-api';
 
+import { ChainService } from '@core/shared';
 import configFactory from 'src/config';
+import { Chains } from 'src/constants';
 import { CreatorRepository, IntentionRepository } from 'src/repositories';
 
 import { ActionUrlService } from '../actionUrl/actionUrl.service';
@@ -28,6 +30,7 @@ export class TgbotService implements OnModuleInit {
     private readonly actionUrlService: ActionUrlService,
     private readonly blinkService: BlinkService,
     private readonly intentionRecordService: IntentionRecordService,
+    private readonly chainService: ChainService,
   ) {}
 
   async update(body: any) {
@@ -174,8 +177,7 @@ export class TgbotService implements OnModuleInit {
     if (creator) {
       walletAddress = creator.address;
       try {
-        const novaRpc = config.rpc[810180];
-        const novaProvider = new ethers.JsonRpcProvider(novaRpc);
+        const novaProvider = this.chainService.getProvider(Chains.ZkLinkNova);
         ethBalance = await novaProvider.getBalance(walletAddress);
       } catch (error) {
         this.logger.error(`onStart error`, error.stack);
