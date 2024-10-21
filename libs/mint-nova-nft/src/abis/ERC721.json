@@ -996,6 +996,11 @@
         "type": "uint32"
       },
       {
+        "internalType": "uint256",
+        "name": "tokenIdCounter_",
+        "type": "uint256"
+      },
+      {
         "internalType": "string",
         "name": "name_",
         "type": "string"
@@ -1956,6 +1961,42 @@
     "name": "upgradeToAndCall",
     "outputs": [],
     "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "stage",
+        "type": "string"
+      }
+    ],
+    "name": "validateActive",
+    "outputs": [],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "to",
+        "type": "address"
+      },
+      {
+        "internalType": "string",
+        "name": "stage",
+        "type": "string"
+      }
+    ],
+    "name": "validateAmount",
+    "outputs": [],
+    "stateMutability": "view",
     "type": "function"
   },
   {
