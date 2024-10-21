@@ -2,8 +2,23 @@ import { ActionMetadata } from 'src/common/dto';
 
 import { FieldTypes } from './types';
 
-export const PRE_SALE_ADDRESS = '0x751DdB176ff6dcedBE954452966772e96342D80B';
-export const CHAIN_ID = 810181;
+export const PRE_SALE_ADDRESSES = {
+  810181: '0x751DdB176ff6dcedBE954452966772e96342D80B',
+  8453: '0xa0cc66e64dA2B6BD5056D8697D079ccba1013b73',
+  42161: '0x85BB43570655c8636Bdb9d6318b5440028656630',
+  10: '0x263Ce73d5243A5192dAbc34BB20fe33dcCEE1fb7',
+  5000: '0x263Ce73d5243A5192dAbc34BB20fe33dcCEE1fb7',
+};
+
+export const RPC_URLS = {
+  810181: 'https://rpc.zklink.io/nova-sepolia',
+  8453: 'https://base-mainnet.g.alchemy.com/v2/0cNsvrP9a82KWY24wOyUVpgKf8T7WJKQ',
+  42161:
+    'https://arb-mainnet.g.alchemy.com/v2/0cNsvrP9a82KWY24wOyUVpgKf8T7WJKQm',
+  10: 'https://opt-mainnet.g.alchemy.com/v2/0cNsvrP9a82KWY24wOyUVpgKf8T7WJKQ',
+  5000: 'https://mantle-mainnet.g.alchemy.com/v2/0cNsvrP9a82KWY24wOyUVpgKf8T7WJKQ',
+};
+
 export const metadata: ActionMetadata<FieldTypes> = {
   title: 'PreSale',
   description:
@@ -12,6 +27,23 @@ export const metadata: ActionMetadata<FieldTypes> = {
     {
       name: 'zkLink Nova sepolia',
       chainId: '810181',
+    },
+    {
+      name: 'Base',
+      chainId: '8453',
+    },
+
+    {
+      name: 'Arbitrum',
+      chainId: '42161',
+    },
+    {
+      name: 'Optimism',
+      chainId: '10',
+    },
+    {
+      name: 'Mantle',
+      chainId: '5000',
     },
   ],
   author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
