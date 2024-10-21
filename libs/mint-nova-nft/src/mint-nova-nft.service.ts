@@ -127,9 +127,13 @@ export class MintNovaNftService extends ActionDto<FieldTypes> {
     const nftContractAddress = formData.contract;
 
     const contract = new Contract(nftContractAddress, ERC721ABI, provider);
-    const mintedCount = Number(await contract.mintRecordAllStage(account));
-    if (mintedCount >= 2) {
-      throw new Error('The maximum number of mint has been reached');
+    try {
+      await contract.validateActive(formData.stage);
+      await contract.validateAmount(1, account, formData.stage);
+    } catch (error) {
+      throw new Error(
+        `Can't mint NFT in ${formData.stage} stage, Reason: ${error.revert.name}`,
+      );
     }
     let proof: string[] = [];
     if (formData.stage == 'Allowlist') {
