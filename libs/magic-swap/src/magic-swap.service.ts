@@ -40,6 +40,22 @@ export class MagicSwapService extends ActionDto<FieldTypes> {
       throw Error('Missing commissionRate');
     }
 
+    if (!account) {
+      throw new Error('Missing account!');
+    }
+
+    if (chainId === 51) {
+      return [
+        await this.okxService.getSwapData(
+          '93AikG5NnncNRMFzHRRUYtmxDpkStwvZSwnmRLgn4Tmt',
+          chainId,
+          formData.tokenFrom,
+          formData.tokenTo,
+          BigInt(formData.amountToBuy),
+        ),
+      ];
+    }
+
     const commissionTx = await this.helperService.parseCommissionTx({
       code,
       chainId,
@@ -53,9 +69,6 @@ export class MagicSwapService extends ActionDto<FieldTypes> {
       RPC_URL[chainId as unknown as keyof typeof RPC_URL],
     );
 
-    if (!account) {
-      throw new Error('Missing account!');
-    }
     const { amountToBuy, ...restParams } = formData;
     let tokenInAddress = formData.tokenFrom;
     let decimals;
