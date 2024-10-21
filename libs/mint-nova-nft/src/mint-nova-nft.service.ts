@@ -91,6 +91,9 @@ export class MintNovaNftService extends ActionDto<FieldTypes> {
       '0x57749C34068C8Ec12B2E9D103fE32A3d0C46f702',
       '0xeB1195962aeb7D300e5BF59A0E0B452bC229D0e5',
       '0x0A7FA8D8B0B420c5f4849178a90960716509FE50',
+      '0xe5a325ef78660df15b367d2f0e2469b4361c9884',
+      '0x92815b16a0563271dcf34ba6597123c136b671f7',
+      '0x7dfb98ac2167b16f667ad8ee3730cff849016a0f',
     ];
     if (!whiteAddressList.includes(account)) {
       return { mintProof: [], inAllowList: false };

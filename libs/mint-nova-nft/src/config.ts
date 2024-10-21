@@ -7,6 +7,10 @@ export const metadata: ActionMetadata<FieldTypes> = {
   description: '<div>This action allows you to mint Nova Cubo NFT</div>',
   networks: [
     {
+      name: 'zkLink Nova',
+      chainId: '810180',
+    },
+    {
       name: 'zkLink Nova sepolia',
       chainId: '810181',
     },
@@ -66,5 +70,6 @@ export const metadata: ActionMetadata<FieldTypes> = {
 };
 
 export const providerConfig: { [key in number]: string } = {
+  810180: 'https://rpc.zklink.io',
   810181: 'https://sepolia.rpc.zklink.io',
 };
