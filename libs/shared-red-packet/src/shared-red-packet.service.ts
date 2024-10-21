@@ -2,7 +2,6 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   Interface,
-  JsonRpcProvider,
   ethers,
   formatUnits,
   getBigInt,
@@ -66,7 +65,7 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
       infer: true,
     })!;
     this.config = configuration[this.env];
-    this.provider = new JsonRpcProvider(this.config.rpcUrl);
+    this.provider = this.chainService.getProvider(this.config.chainId);
 
     this.wallet = new ethers.Wallet(this.witnessPrivateKey, this.provider);
 
@@ -558,15 +557,17 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
   ): Promise<string> {
     return transactions
       .map((tx) => {
-        const browserUrl = this.config.browserUrl;
-        const prefixedTxhash = `${browserUrl}${tx.txhash}`;
+        const explorerUrl = this.chainService.buildTransactionExplorerLink(
+          tx.txhash,
+          this.config.chainId,
+        );
         return `
           <br/>
           <br/>
           <div>
             <div>To: ${tx.recipient} </div>
             <div>Amount: ${tx.amount} ${tx.symbol} </div>
-            <div>Transaction Hash: <a href=${prefixedTxhash}>${prefixedTxhash}</a><div>
+            <div>Transaction Hash: <a href=${explorerUrl}>${explorerUrl}</a><div>
           </div>
         `;
       })

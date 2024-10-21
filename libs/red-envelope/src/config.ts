@@ -9,7 +9,6 @@ export const configuration = {
     quoterContractAddress: '0x86Fc6ab84CFc6a506d51FC722D3aDe959599A98A',
     redPacketContractAddress: '0x2f7821161C6c11a473A6DC03896ea6BB5ac5Cb2F',
     paymasterContractAddress: '0x0a7f97fbF3cf238aAD21119CE70aB157CE11ce01',
-    browserUrl: 'https://sepolia.explorer.zklink.io/tx/',
     tokens: [
       {
         label: 'ETH',
@@ -27,7 +26,6 @@ export const configuration = {
     quoterContractAddress: '0x86Fc6ab84CFc6a506d51FC722D3aDe959599A98A',
     redPacketContractAddress: '0x6cd5E9a05dD9ef0c4C9F533eb9Df6044ecAf2297',
     paymasterContractAddress: '0x30A37F965cE59c28698292268fC2e7Df450cAca4',
-    browserUrl: 'https://explorer.zklink.io/tx/',
     tokens: [
       {
         label: 'ETH',

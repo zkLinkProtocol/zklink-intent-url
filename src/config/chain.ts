@@ -91,12 +91,4 @@ export const chainConfig: Array<{
     rpc: ['https://rpc.mantle.xyz', 'https://mantle.drpc.org'],
     explorer: 'https://explorer.mantle.xyz',
   },
-  {
-    chainId: Chains.Sonala,
-    name: 'Sonala',
-    rpc: [
-      'https://solana-mainnet.g.alchemy.com/v2/0cNsvrP9a82KWY24wOyUVpgKf8T7WJKQ',
-    ],
-    explorer: 'https://solscan.io',
-  },
 ];
