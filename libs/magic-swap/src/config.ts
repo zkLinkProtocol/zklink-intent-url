@@ -80,7 +80,7 @@ export const METADATA: ActionMetadata<FieldTypes> = {
         label: 'Token From ',
         desc: 'The token you want to swap',
         type: 'input',
-        regex: '^0x[a-fA-F0-9]{40}$',
+        regex: '^.*$',
         regexDesc: 'Invalid Address',
       },
       {
@@ -88,7 +88,7 @@ export const METADATA: ActionMetadata<FieldTypes> = {
         label: 'Token To',
         desc: 'The address of the token you want to receive',
         type: 'input',
-        regex: '^0x[a-fA-F0-9]{40}$',
+        regex: '^.*$',
         regexDesc: 'Invalid Address',
       },
     ],
