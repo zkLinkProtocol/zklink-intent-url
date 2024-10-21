@@ -1,9 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { ethers } from 'ethers';
 import { IsNull, Not } from 'typeorm';
 
-import { ConfigType } from 'src/config';
+import { ChainService } from '@core/shared';
 import {
   IntentionRecord,
   IntentionRecordStatus,
@@ -23,16 +22,15 @@ import { IntentionRecordAddRequestDto } from './intentionRecord.dto';
 @Injectable()
 export class IntentionRecordService {
   logger: Logger;
-  private readonly rpcs: ConfigType['rpc'];
   constructor(
-    readonly configService: ConfigService,
+    private readonly configService: ConfigService,
     private readonly intentionRepository: IntentionRepository,
     public readonly intentionRecordRepository: IntentionRecordRepository,
     private readonly intentionRecordTxRepository: IntentionRecordTxRepository,
     private readonly intentionService: ActionUrlService,
+    private readonly chainService: ChainService,
   ) {
     this.logger = new Logger(IntentionRecordService.name);
-    this.rpcs = configService.get('rpc', { infer: true })!;
   }
 
   async findOneById(id: bigint): Promise<IntentionRecord> {
@@ -213,10 +211,7 @@ export class IntentionRecordService {
       order: { id: 'ASC' },
     });
     for (const tx of txs) {
-      const status = await this.checkTxStatus(
-        tx.txHash,
-        tx.chainId as keyof ConfigType['rpc'],
-      );
+      const status = await this.checkTxStatus(tx.txHash, tx.chainId);
       if (status === IntentionRecordTxStatus.PENDING) {
         continue;
       }
@@ -225,16 +220,8 @@ export class IntentionRecordService {
   }
 
   // use ethers.js to check tx status
-  private async checkTxStatus(
-    txHash: string,
-    chainId: keyof ConfigType['rpc'],
-  ) {
-    const rpc = this.rpcs[chainId];
-    if (!rpc) {
-      this.logger.log(`Had no supported the chinId: ${chainId}`);
-      return IntentionRecordTxStatus.FAILED;
-    }
-    const provider = new ethers.JsonRpcProvider(rpc);
+  private async checkTxStatus(txHash: string, chainId: number) {
+    const provider = this.chainService.getProvider(chainId);
     const tx = await provider.getTransaction(txHash);
     if (!tx) {
       return IntentionRecordTxStatus.PENDING;

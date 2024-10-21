@@ -8,11 +8,14 @@ import {
   IsArray,
   IsBoolean,
   IsEnum,
+  IsNumber,
   IsOptional,
   IsString,
   ValidateIf,
   ValidateNested,
 } from 'class-validator';
+
+import { Chains } from 'src/constants';
 
 import { ValidateOptions } from '../decorators';
 
@@ -22,8 +25,8 @@ export class NetworkDto {
   name: string;
 
   @ApiProperty({ type: String, description: 'Network chain ID' })
-  @IsString()
-  chainId: string;
+  @IsNumber()
+  chainId: Chains;
 }
 
 export class AuthorDto {
@@ -75,7 +78,7 @@ export class OptionDto {
       'If there are multiple networks, please specify the chainId, indicating which network this option can be selected on.',
   })
   @IsString()
-  chainId?: string;
+  chainId?: Chains;
 
   @ApiPropertyOptional({
     description:

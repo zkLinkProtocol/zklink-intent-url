@@ -1,22 +1,18 @@
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { ethers } from 'ethers';
 
 import { TransactionInfo } from 'src/common/dto';
-import { ConfigType } from 'src/config';
 
+import { ChainService } from './chain.service';
 import { DataService } from './data.service';
 import ERC20ABI from '../abis/ERC20.json';
 
 @Injectable()
 export class HelperService {
-  private readonly rpcs: ConfigType['rpc'];
   constructor(
     private readonly dataService: DataService,
-    readonly configService: ConfigService,
-  ) {
-    this.rpcs = configService.get('rpc', { infer: true })!;
-  }
+    private readonly chainService: ChainService,
+  ) {}
 
   public async parseCommissionTx(params: {
     code: string;
@@ -30,8 +26,7 @@ export class HelperService {
     if (!account) {
       throw new Error(`account not found on magic link ${code}`);
     }
-    const providerUrl = this.rpcs[chainId as keyof ConfigType['rpc']];
-    const provider = new ethers.JsonRpcProvider(providerUrl);
+    const provider = this.chainService.getProvider(chainId);
     let transferTx = { to: account.address, data: '0x' };
 
     if (token !== '') {

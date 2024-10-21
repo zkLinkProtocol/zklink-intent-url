@@ -3,3 +3,11 @@ export type FieldTypes = {
   value: string;
   recipient: string;
 };
+
+export type TransactionResult = {
+  toAddress: string;
+  tokenAddress: string;
+  value: string;
+  txhash: string;
+  chainId: number;
+};

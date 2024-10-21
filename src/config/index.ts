@@ -1,3 +1,5 @@
+import { chainConfig } from './chain';
+
 const configFactory = async () => {
   return {
     env: (process.env.ENV || 'dev') as 'dev' | 'prod',
@@ -16,20 +18,7 @@ const configFactory = async () => {
     },
     witnessPrivateKey: process.env.WITNESS_PRIVATE_KEY || '',
     turnkeyApi: process.env.TURNKEY_API || '',
-    rpc: {
-      810181: process.env.Nova_Sepolia_RPC_URL || '',
-      810180: process.env.Nova_RPC_URL || '',
-      1: process.env.Ethereum_RPC_URL || '',
-      324: process.env.Zksync_RPC_URL || '',
-      59144: process.env.Linea_RPC_URL || '',
-      42161: process.env.Arbitrum_RPC_URL || '',
-      10: process.env.Optimism_RPC_URL || '',
-      8453: process.env.Base_RPC_URL || '',
-      84532: process.env.Base_Sepolia_RPC_URL || '',
-      5000: process.env.Mantle_RPC_URL || '',
-      169: process.env.Manta_RPC_URL || '',
-      534352: process.env.Scroll_RPC_URL || '',
-    },
+    chains: chainConfig,
     tgbot: {
       tgbot: process.env.TGBOT || '',
       webHookUrl: process.env.TGBOT_WEBHOOK_URL || '',

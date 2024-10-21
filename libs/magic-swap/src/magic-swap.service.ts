@@ -1,29 +1,72 @@
 import { RegistryPlug } from '@action/registry';
-import { OKXService } from '@core/shared';
-import { HelperService } from '@core/shared';
+import { ChainService, HelperService, OKXService } from '@core/shared';
 import { getERC20SymbolAndDecimals } from '@core/utils';
 import { Injectable } from '@nestjs/common';
 import { ethers } from 'ethers';
 import {
   Action as ActionDto,
+  ActionMetadata,
   GenerateTransactionParams,
   TransactionInfo,
 } from 'src/common/dto';
+import { Chains } from 'src/constants';
 
-import { FieldTypes, METADATA } from './config';
-import { RPC_URL } from './config';
+import { FieldTypes } from './types';
 @RegistryPlug('magic-swap', 'v1')
 @Injectable()
 export class MagicSwapService extends ActionDto<FieldTypes> {
   constructor(
     private readonly okxService: OKXService,
     private readonly helperService: HelperService,
+    private readonly chainService: ChainService,
   ) {
     super();
   }
 
-  async getMetadata() {
-    return METADATA;
+  async getMetadata(): Promise<ActionMetadata<FieldTypes>> {
+    return {
+      title: 'Magic Swap',
+      description:
+        '<div>Perform news seamlessly across multiple networks</div>',
+      networks: this.chainService.buildSupportedNetworks([
+        Chains.EthereumMainnet,
+        Chains.ArbitrumOne,
+        Chains.OpMainnet,
+        Chains.Mantle,
+        Chains.Base,
+      ]),
+      author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
+      magicLinkMetadata: {},
+      intent: {
+        components: [
+          {
+            name: 'amountToBuy',
+            label: 'Amount to Buy',
+            desc: 'The amount of input tokens used to buy output tokens',
+            type: 'input',
+            regex: '^[0-9]+(.[0-9]+)?$',
+            regexDesc: 'Positive number',
+          },
+          {
+            name: 'tokenFrom',
+            label: 'Token From ',
+            desc: 'The token you want to swap',
+            type: 'input',
+            regex: '^.*$',
+            regexDesc: 'Invalid Address',
+          },
+          {
+            name: 'tokenTo',
+            label: 'Token To',
+            desc: 'The address of the token you want to receive',
+            type: 'input',
+            regex: '^.*$',
+            regexDesc: 'Invalid Address',
+          },
+        ],
+      },
+      maxCommission: 0.03,
+    };
   }
 
   async generateTransaction(
@@ -65,9 +108,7 @@ export class MagicSwapService extends ActionDto<FieldTypes> {
       commissionRate,
     });
 
-    const provider = new ethers.JsonRpcProvider(
-      RPC_URL[chainId as unknown as keyof typeof RPC_URL],
-    );
+    const provider = this.chainService.getProvider(chainId);
 
     const { amountToBuy, ...restParams } = formData;
     let tokenInAddress = formData.tokenFrom;
