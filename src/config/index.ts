@@ -48,6 +48,9 @@ const configFactory = async () => {
       passphrase: process.env.OKX_PASSPHRASE || '',
       nftSignerPrivateKey: process.env.OKX_SIGNER_PRIVATE_KEY || '',
     },
+    coingecko: {
+      apiKey: process.env.COINGECKO_API_KEY || '',
+    },
   };
 };
 

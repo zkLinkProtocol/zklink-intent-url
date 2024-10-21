@@ -249,7 +249,7 @@ export class IntentionRecordService {
     networkId: number,
     userOphash: string,
   ): Promise<string[]> {
-    const turnkeyApi = this.configService.get('turnkeyApi', { infer: true })!;
+    const turnkeyApi = this.configService.get('turnkeyApi', { infer: true });
     const url = `${turnkeyApi}/deposit/findBundlerTxReceipt`;
     const response = await fetch(url, {
       method: 'post',
