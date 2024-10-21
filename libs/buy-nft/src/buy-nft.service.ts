@@ -61,7 +61,7 @@ export class BuyNftService extends ActionDto<FieldTypes> {
             desc: 'Enter the contract address or URL (e.g., https://magiceden.io/collections/ethereum/cryptopunks)',
             type: 'input',
             regex:
-              '^(0x[a-fA-F0-9]{40}(:\\d+)?)|(https?://magiceden..+/collections/ethereum/.+)$',
+              '^(0x[a-fA-F0-9]{40}(:\\d+)?)|(https?://magiceden..+/collections/.+)$',
             regexDesc: 'NFT Query Value',
           },
           {
