@@ -1,6 +1,6 @@
 import { RegistryPlug } from '@action/registry';
 import { ChainService, OKXService } from '@core/shared';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ethers } from 'ethers';
 import {
   Action as ActionDto,
@@ -18,6 +18,7 @@ import { FieldTypes } from './types';
 @RegistryPlug('news', 'v1')
 @Injectable()
 export class NewsService extends ActionDto<FieldTypes> {
+  private logger = new Logger(NewsService.name);
   constructor(
     private readonly tgbotService: TgbotService,
     private readonly okxService: OKXService,
@@ -123,10 +124,14 @@ export class NewsService extends ActionDto<FieldTypes> {
         decimal: Number(token.decimals),
       }))[0];
 
+    this.logger.log(
+      `amonttobuy: ${amountToBuy}, deciaml: ${tokenFrom.decimal}`,
+    );
     const params = {
       ...restParams,
       amountToBuy: ethers.parseUnits(amountToBuy, tokenFrom.decimal),
     };
+    this.logger.log('parseUnit success');
 
     let approveTx: TransactionInfo;
     let swapTx: TransactionInfo;

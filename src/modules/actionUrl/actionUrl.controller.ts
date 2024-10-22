@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Logger,
   Param,
   Post,
   Put,
@@ -10,6 +11,7 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import {
   ApiBody,
   ApiParam,
@@ -59,12 +61,14 @@ interface TransactionBody {
 @Controller('action-url')
 @ApiTags('action-url')
 export class ActionUrlController extends BaseController {
+  private logger = new Logger(ActionUrlController.name);
   constructor(
     private readonly actionUrlService: ActionUrlService,
     private readonly commissionService: CommissionService,
     private readonly actionService: ActionService,
     private readonly intentionRecordService: IntentionRecordService,
     private readonly blinkService: BlinkService,
+    private readonly configService: ConfigService,
     private readonly okxService: OKXService,
   ) {
     super();
@@ -210,8 +214,18 @@ export class ActionUrlController extends BaseController {
   @UseGuards(JwtAuthGuard)
   async create(
     @Body() request: ActionUrlAddRequestDto,
-    @GetCreator() creator: { id: bigint },
+    @GetCreator() creator: { id: bigint; address: string },
   ): Promise<ResponseDto<string>> {
+    this.logger.log(`creator: ` + JSON.stringify(creator));
+
+    // const addressList = this.configService
+    //   .get<string>('NEWS_WHITE_ADDRESS')
+    //   ?.split(',')
+    //   .map((address) => address.toLowerCase());
+    // if (addressList && !addressList?.includes(creator.address)) {
+    //   return this.error('No permission to edit');
+    // }
+
     const actionStore = await this.actionService.getActionStore(
       request.actionId,
     );
@@ -230,8 +244,16 @@ export class ActionUrlController extends BaseController {
   async edit(
     @Param('code') code: string,
     @Body() request: ActionUrlUpdateRequestDto,
-    @GetCreator() creator: { id: bigint },
+    @GetCreator() creator: { id: bigint; address: string },
   ): Promise<ResponseDto<string>> {
+    // const addressList = this.configService
+    //   .get<string>('NEWS_WHITE_ADDRESS')
+    //   ?.split(',')
+    //   .map((address) => address.toLowerCase());
+    // if (addressList && !addressList?.includes(creator.address)) {
+    //   return this.error('No permission to edit');
+    // }
+
     const result = await this.actionUrlService.updateByCode(
       code,
       request,
@@ -623,6 +645,7 @@ export class ActionUrlController extends BaseController {
     return supportTokens.map((token) => ({
       lable: token.tokenSymbol,
       address: token.tokenContractAddress,
+      decimals: token.tokenSymbol,
     }));
   }
 }
