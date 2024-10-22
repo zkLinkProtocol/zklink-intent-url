@@ -135,4 +135,15 @@ export class IntentionRecordRepository extends BaseRepository<IntentionRecord> {
       .getTransactionManager()
       .update(IntentionRecord, { id: In(ids) }, { status });
   }
+
+  async countByCodes(codes: string[]) {
+    return await this.unitOfWork
+      .getTransactionManager()
+      .createQueryBuilder(IntentionRecord, 'intentionrecord')
+      .select('intentionrecord.intention', 'code')
+      .addSelect('COUNT(*)', 'count')
+      .where('intentionrecord.intention IN (:...codes)', { codes })
+      .groupBy('intentionrecord.intention')
+      .getRawMany();
+  }
 }

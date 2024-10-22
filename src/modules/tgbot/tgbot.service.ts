@@ -3,12 +3,17 @@ import { ethers } from 'ethers';
 import html2md from 'html-to-md';
 import { LRUCache } from 'lru-cache';
 import TelegramBot, { ParseMode } from 'node-telegram-bot-api';
+import { MoreThanOrEqual } from 'typeorm';
 
 import { ChainService } from '@core/shared';
 import { NetworkDto } from 'src/common/dto';
 import configFactory from 'src/config';
 import { Chains } from 'src/constants';
-import { CreatorRepository, IntentionRepository } from 'src/repositories';
+import {
+  CreatorRepository,
+  IntentionRepository,
+  TgMessageRepository,
+} from 'src/repositories';
 
 import { ActionUrlService } from '../actionUrl/actionUrl.service';
 import { BlinkService } from '../actionUrl/blink.service';
@@ -34,6 +39,7 @@ export class TgbotService implements OnModuleInit {
     private readonly intentionRecordService: IntentionRecordService,
     private readonly coingeckoService: CoingeckoService,
     private readonly chainService: ChainService,
+    private readonly tgMessageRepository: TgMessageRepository,
   ) {}
 
   async update(body: any) {
@@ -42,12 +48,31 @@ export class TgbotService implements OnModuleInit {
   }
 
   async onModuleInit() {
+    this.handleUpdateMagicNews();
     const config = await configFactory();
     const token = config.tgbot.token as string;
     const webHookUrl = config.tgbot.webHookUrl;
     this.bot = new TelegramBot(token);
     this.bot.setWebHook(webHookUrl);
     await this.eventInit();
+  }
+
+  async handleUpdateMagicNews() {
+    const loop = true;
+    while (loop) {
+      try {
+        this.logger.log('start updateMagicNews');
+        await this.updateMagicNews();
+        this.logger.log('end updateMagicNews');
+      } catch (error) {
+        this.logger.error(error);
+      }
+      await this.delay(10 * 1000);
+    }
+  }
+
+  async delay(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   private async eventInit() {
@@ -88,24 +113,24 @@ export class TgbotService implements OnModuleInit {
 
     const photo = `${aws3url}/dev/tg/onstart.png`;
     // const photo = 'https://pic.imgdb.cn/item/66bb2b02d9c307b7e9c8ec19.png';
-    let caption = `Welcome to magicLink! The magicLink TG Mini APP is a dedicated application under magicLink, specifically designed for the TG ecosystem. 
+    const caption = `Welcome to magicLink\\! The magicLink TG Mini APP is a dedicated application under magicLink\\, specifically designed for the TG ecosystem\\. 
 
-🔮 The app supports users in creating and managing magicLinks while providing essential interaction capabilities, enabling seamless connections with other magicLinks.
+🔮 The app supports users in creating and managing magicLinks while providing essential interaction capabilities\\, enabling seamless connections with other magicLinks\\.
     
-💫 [*__Create__*](https://magic.zklink.io/dashboard/intent) magicLink & unlock potential to grab even more strategies with fun! 
+💫 [*__Create__*](https://magic.zklink.io/dashboard/intent) magicLink & unlock potential to grab even more strategies with fun\\! 
 
-🗞 [*__Follow__*](https://t.me/${config.tgbot.newsChannelIdEn}) up with Magic News to know the first-hand crypto message!
+🗞 [*__Follow__*](https://t.me/${config.tgbot.newsChannelIdEn}) up with Magic News to know the first\\-hand crypto message\\!
 
 💳 [*__Check__*](${userMiniApp}?startapp=portfolio) your Portfolio & Magic Account 
 
-💰 [*__Deposit__*](${userMiniApp}?startapp=deposit) Crypto Assets to your Magic Account in multiple Chains including all EVM Chain, Solana, SUI and so on.
+💰 [*__Deposit__*](${userMiniApp}?startapp=deposit) Crypto Assets to your Magic Account in multiple Chains including all EVM Chain\\, Solana\\, SUI and so on\\.
 
-🧠 Learn about magicLink with Magic Academy.
+🧠 Learn about magicLink with Magic Academy\\.
 
-🫂 [*__Invite__*](${userMiniApp}?startapp=invite) your friends to magicLink to get part of their transaction fees and earn extra rewards.
+🫂 [*__Invite__*](${userMiniApp}?startapp=invite) your friends to magicLink to get part of their transaction fees and earn extra rewards\\.
 
-⛓ Manage magicLinks you create before.`;
-    caption = this.formatMarkdownV2(caption);
+⛓ Manage magicLinks you create before\\.`;
+    // caption = this.formatMarkdownV2(caption);
     const parse_mode: ParseMode = 'MarkdownV2';
     const reply_markup = {
       is_persistent: true,
@@ -149,8 +174,8 @@ export class TgbotService implements OnModuleInit {
   async onCreate(tgUserId: string) {
     const config = await configFactory();
     const miniapp = config.tgbot.miniApp;
-    let text = `It's the start for your Magic Journey, choose a Topic and Create your own magicLink here!`;
-    text = this.formatMarkdownV2(text);
+    const text = `It's the start for your Magic Journey\\, choose a Topic and Create your own magicLink here\\!`;
+    // text = this.formatMarkdownV2(text);
     const parse_mode: ParseMode = 'MarkdownV2';
     const reply_markup = {
       inline_keyboard: [
@@ -186,13 +211,13 @@ export class TgbotService implements OnModuleInit {
         this.logger.error(`onStart error`, error.stack);
       }
     }
-    let text = `Manage and review your trading portfolio 💼
+    const text = `Manage and review your trading portfolio 💼
 
 💰 *My Wallet Address: \`${walletAddress ? walletAddress : 'You have not yet bind your Smart Account'}\`*
-🪙 *ETH balance: ${Number(ethers.formatEther(ethBalance)).toFixed(6)} ETH*
+🪙 *ETH balance: ${this.formatMarkdownV2(Number(ethers.formatEther(ethBalance)).toFixed(6))} ETH*
         
     Don't have ETH yet? Open your account and deposit from here 👇`;
-    text = this.formatMarkdownV2(text);
+    // text = this.formatMarkdownV2(text);
     const parse_mode: ParseMode = 'MarkdownV2';
     const reply_markup = {
       inline_keyboard: [
@@ -216,8 +241,8 @@ export class TgbotService implements OnModuleInit {
   async onSupport(tgUserId: string) {
     const config = await configFactory();
     const supportLink = config.tgbot.supportLink;
-    let text = `Need a hand? Open a ticket in our Support Bot 🤝`;
-    text = this.formatMarkdownV2(text);
+    const text = `Need a hand? Open a ticket in our Support Bot 🤝`;
+    // text = this.formatMarkdownV2(text);
     const parse_mode: ParseMode = 'MarkdownV2';
     const reply_markup = {
       inline_keyboard: [
@@ -241,8 +266,8 @@ export class TgbotService implements OnModuleInit {
   async onNews(tgUserId: string) {
     const config = await configFactory();
     const channelLink = `https://t.me/${config.tgbot.newsChannelIdEn}`;
-    let text = `Want to know first hand Crypto News? Follow up with our Magic News Channel!`;
-    text = this.formatMarkdownV2(text);
+    const text = `Want to know first hand Crypto News? Follow up with our Magic News Channel\\!`;
+    // text = this.formatMarkdownV2(text);
     const parse_mode: ParseMode = 'MarkdownV2';
     const reply_markup = {
       inline_keyboard: [
@@ -271,11 +296,11 @@ export class TgbotService implements OnModuleInit {
 🔮The magicLink TG Mini APP is a dedicated application under magicLink, specifically designed for the TG ecosystem. 
 
 🔮magicLink offers multi-chain wallet and asset management features, allowing users to quickly create and manage magicLinks across multiple chains, simplifying asset transfers and interactions.`;
-    let text = `Invite your friends to magicLink to get part of their transaction fees and earn extra rewards.
+    const text = `Invite your friends to magicLink to get part of their transaction fees and earn extra rewards\\.
 
 Current Invitee: 0
-Share to More friends and groups here!`;
-    text = this.formatMarkdownV2(text);
+Share to More friends and groups here\\!`;
+    // text = this.formatMarkdownV2(text);
     const parse_mode: ParseMode = 'MarkdownV2';
     const reply_markup = {
       inline_keyboard: [
@@ -297,8 +322,7 @@ Share to More friends and groups here!`;
   }
 
   async onEarn(tgUserId: string) {
-    let text = `Coming soon!`;
-    text = this.formatMarkdownV2(text);
+    const text = `Coming soon\\!`;
     const parse_mode: ParseMode = 'MarkdownV2';
     const options = { parse_mode };
     try {
@@ -336,8 +360,8 @@ Share to More friends and groups here!`;
       const shareUrl = `${userMiniApp}?startapp%3D${intent.code}`;
       caption += `
 *${++count}*
-*Title* : ${intent.title}
-*Description* : ${content}
+*Title* : ${this.formatMarkdownV2(intent.title)}
+*Description* : ${this.formatMarkdownV2(content)}
 *Create Time* : ${date}
 [Go to tg mini app](${userMiniApp}?startapp=${intent.code})              [Share to others](tg://msg_url?url=${shareUrl}&text=${intent.title})
 \\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\n
@@ -345,7 +369,7 @@ Share to More friends and groups here!`;
     }
     const options = { parse_mode: 'MarkdownV2' as ParseMode };
     try {
-      caption = this.formatMarkdownV2(caption);
+      // caption = this.formatMarkdownV2(caption);
       const res = await this.bot.sendMessage(tgUserId, caption, options);
       this.logger.log('onMyMagicLink success', JSON.stringify(res));
     } catch (error) {
@@ -376,10 +400,10 @@ Share to More friends and groups here!`;
       magicLink.createdAt?.toISOString().split('T')[0] +
       ` ${magicLink.createdAt?.toISOString().split('T')[1].split('.')[0]}`;
     const shareUrl = `${userMiniApp}?startapp%3D${magicLink.code}`;
-    let caption = `
-*Title* : ${magicLink.title}
-*Description* : ${content}
-*Create Time* : ${date}
+    const caption = `
+*Title* : ${this.formatMarkdownV2(magicLink.title)}
+*Description* : ${this.formatMarkdownV2(content)}
+*Create Time* : ${this.formatMarkdownV2(date)}
 [Go to tg mini app](${userMiniApp}?startapp=${magicLink.code})              [Share to others](tg://msg_url?url=${shareUrl}&text=${magicLink.title})
         `;
     const actions = this.blinkService.magicLinkToBlinkActions(
@@ -406,7 +430,7 @@ Share to More friends and groups here!`;
     const reply_markup = {
       inline_keyboard: inlineKeyboard,
     };
-    caption = this.formatMarkdownV2(caption);
+    // caption = this.formatMarkdownV2(caption);
     const parse_mode: ParseMode = 'MarkdownV2';
     try {
       let res = null;
@@ -463,7 +487,7 @@ Share to More friends and groups here!`;
     const links: string[] = [];
     const content = description.replaceAll(markdownLinkPattern, (match) => {
       links.push(match);
-      return '<<LINK>>';
+      return '<<LINK<<';
     });
     const network = settings.intentInfo.network.name;
     const chainId = settings.intentInfo.network.chainId;
@@ -496,17 +520,17 @@ Share to More friends and groups here!`;
     if (this.containsChineseCharacters(content)) {
       newsChannelId = newsChannelIdCn;
       captionTemplate = `
-🟢*${news.title.replaceAll('(', '\\(').replaceAll(')', '\\)')}*🟢
-${content
-  .replaceAll('(', '\\(')
-  .replaceAll(')', '\\)')
-  .replaceAll('<<LINK>>', () => links[linkIndex++])}
+      🟢*${this.formatMarkdownV2(news.title)}*🟢
+      ${this.formatMarkdownV2(content).replaceAll(
+        '<<LINK<<',
+        () => links[linkIndex++],
+      )}
 
 👨‍🍳交易策略:
 
-📍 ${network}
-➡️Token From: ${fromObj?.symbol.toUpperCase()} \\(*$${fromObj?.usdPrice}*\\)
-⬅️Token To: ${toObj?.symbol.toUpperCase()} \\(*$${toObj?.usdPrice}*\\)
+📍 ${this.formatMarkdownV2(network)}
+➡️Token From: ${fromObj?.symbol.toUpperCase()} \\(*$${this.formatMarkdownV2(fromObj?.usdPrice.toString())}*\\)
+⬅️Token To: ${toObj?.symbol.toUpperCase()} \\(*$${this.formatMarkdownV2(toObj?.usdPrice.toString())}*\\)
 👥参与人数: $participants
 
 🔥更多信息请到 👉magicLink TG \\([Go to mini app](${userMiniApp}?startapp=${news.code})\\)
@@ -516,17 +540,17 @@ ${content
     } else {
       newsChannelId = newsChannelIdEn;
       captionTemplate = `
-🟢*${news.title.replaceAll('(', '\\(').replaceAll(')', '\\)')}*🟢
-${content
-  .replaceAll('(', '\\(')
-  .replaceAll(')', '\\)')
-  .replaceAll('<<LINK>>', () => links[linkIndex++])}
+🟢*${this.formatMarkdownV2(news.title)}*🟢
+${this.formatMarkdownV2(content).replaceAll(
+  '<<LINK<<',
+  () => links[linkIndex++],
+)}
 
 👨‍🍳Trading Strategy:
 
-📍 ${network}
-➡️Token From: ${fromObj?.symbol.toUpperCase()} \\(*$${fromObj?.usdPrice}*\\)
-⬅️Token To: ${toObj?.symbol.toUpperCase()} \\(*$${toObj?.usdPrice}*\\)
+📍 ${this.formatMarkdownV2(network)}
+➡️Token From: ${fromObj?.symbol.toUpperCase()} \\(*$${this.formatMarkdownV2(fromObj?.usdPrice.toString())}*\\)
+⬅️Token To: ${toObj?.symbol.toUpperCase()} \\(*$${this.formatMarkdownV2(toObj?.usdPrice.toString())}*\\)
 👥Participants: $participants
 
 🔥More details Click here to 👉magicLink TG \\([Go to mini app](${userMiniApp}?startapp=${news.code})\\)
@@ -535,11 +559,11 @@ ${content
 `;
     }
 
-    let caption = captionTemplate.replaceAll(
+    const caption = captionTemplate.replaceAll(
       '$participants',
       participants.toString(),
     );
-    caption = this.formatMarkdownV2(caption);
+    // caption = captionTemplate;
     const parse_mode: ParseMode = 'MarkdownV2';
 
     const inlineKeyboard = [];
@@ -604,17 +628,26 @@ ${content
         const options = { reply_markup, parse_mode, caption };
         res = await this.bot.sendPhoto(newsChannelId, photo, options);
       }
+      const data = {
+        messageId: res.message_id.toString(),
+        chatId: res.chat.id.toString(),
+        code: code,
+        text: captionTemplate,
+      };
+      await this.tgMessageRepository.add(data);
       this.logger.log('sendNews success', JSON.stringify(res));
     } catch (error) {
-      this.logger.error(`sendNews error`, error.stack);
-      this.logger.log(`caption:${caption}, newsChannelId:${newsChannelId}`);
+      this.logger.error(
+        `sendNews error,caption:${caption}, newsChannelId:${newsChannelId},error:`,
+        error.stack,
+      );
     }
   }
 
   async sendMemeRedPacketMsg(inviteLink: string, tgUserId: string) {
-    let caption = `
-    ✅Your Meme Red Packet Already claimed.  Check your fortune!
-    🧧 Share2Earn: Receive a 20% reward based on the value claimed by your invitees.
+    const caption = `
+    ✅Your Meme Red Packet Already claimed\\.  Check your fortune\\!
+    🧧 Share2Earn: Receive a 20% reward based on the value claimed by your invitees\\.
     Your Invite Link: \`${inviteLink}\`
     `;
     const parse_mode: ParseMode = 'MarkdownV2';
@@ -629,7 +662,7 @@ ${content
     const reply_markup = {
       inline_keyboard: inlineKeyboard,
     };
-    caption = this.formatMarkdownV2(caption);
+    // caption = this.formatMarkdownV2(caption);
     try {
       const options = { reply_markup, parse_mode };
       const res = await this.bot.sendMessage(tgUserId, caption, options);
@@ -702,26 +735,60 @@ ${content
     }
   }
 
-  async updateMagicNews(code: string) {
-    // this.bot.editMessageCaption(caption, {
-    //   inline_message_id: inlinkMessageId,
-    // });
+  async updateMagicNews() {
+    // update magic news participants which was sended in 24 hours
+    const tgMessages = await this.tgMessageRepository.find({
+      where: {
+        createdAt: MoreThanOrEqual(new Date(Date.now() - 24 * 60 * 60 * 1000)),
+      },
+    });
+    const codes = Array.from(
+      new Set(tgMessages.map((tgMessage) => tgMessage.code)),
+    );
+    const countsByCode = await this.intentionRecordService.countByCodes(codes);
+    tgMessages.forEach(async (tgMessage) => {
+      const participants = countsByCode[tgMessage.code] ?? 0;
+      const caption = tgMessage.text.replaceAll(
+        '$participants',
+        participants.toString(),
+      );
+      try {
+        await this.bot.editMessageCaption(caption, {
+          chat_id: tgMessage.chatId,
+          message_id: Number(tgMessage.messageId),
+        });
+      } catch (error) {
+        this.logger.log(
+          `updateMagicNews error, chatId:${tgMessage.chatId}, messageId:${tgMessage.messageId}, error:`,
+          error.message,
+        );
+      }
+    });
   }
 
-  async insertMagicNews(
-    code: string,
-    inlinkMessageId: string,
-    caption: string,
-  ) {}
-
   formatMarkdownV2(text: string) {
-    return text
-      .replaceAll('.', '\\.')
-      .replaceAll('-', '\\-')
-      .replaceAll('?', '\\?')
-      .replaceAll('!', '\\!')
-      .replaceAll('#', '\\#')
-      .replaceAll('=', '\\=');
+    // '_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!'
+    return !text
+      ? ''
+      : text
+          .replaceAll('.', '\\.')
+          .replaceAll('-', '\\-')
+          .replaceAll('*', '\\*')
+          .replaceAll('[', '\\[')
+          .replaceAll(']', '\\]')
+          .replaceAll('~', '\\~')
+          .replaceAll('`', '\\`')
+          .replaceAll('>', '\\>')
+          .replaceAll('+', '\\+')
+          .replaceAll('|', '\\|')
+          .replaceAll('{', '\\{')
+          .replaceAll('}', '\\}')
+          .replaceAll('?', '\\?')
+          .replaceAll('!', '\\!')
+          .replaceAll('#', '\\#')
+          .replaceAll('=', '\\=')
+          .replaceAll('(', '\\(')
+          .replaceAll(')', '\\)');
   }
 
   containsChineseCharacters(str: string) {
