@@ -115,7 +115,8 @@ export class ActionUrlService {
   }
 
   async updateByCode(code: string, params: any, creatorId: bigint) {
-    const actionUrl = await this.findOneByCode(code);
+    const actionUrl =
+      await this.intentionRepository.queryIntentionWithoutRecordsByCode(code);
     if (!actionUrl) {
       throw new BusinessException('ActionUrl not found');
     }
@@ -137,7 +138,8 @@ export class ActionUrlService {
   }
 
   async updateActiveStatusByCode(code: string, creatorId: bigint) {
-    const actionUrl = await this.findOneByCode(code);
+    const actionUrl =
+      await this.intentionRepository.queryIntentionWithoutRecordsByCode(code);
     if (!actionUrl) {
       throw new BusinessException('ActionUrl not found');
     }
