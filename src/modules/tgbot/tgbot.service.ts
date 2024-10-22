@@ -100,11 +100,11 @@ export class TgbotService implements OnModuleInit {
 
 💰 [*__Deposit__*](${userMiniApp}?startapp=deposit) Crypto Assets to your Magic Account in multiple Chains including all EVM Chain, Solana, SUI and so on.
 
-🧠 Learn about MagicLink with Magic Academy.
+🧠 Learn about magicLink with Magic Academy.
 
 🫂 [*__Invite__*](${userMiniApp}?startapp=invite) your friends to magicLink to get part of their transaction fees and earn extra rewards.
 
-⛓ Manage MagicLinks you create before.`;
+⛓ Manage magicLinks you create before.`;
     caption = this.formatMarkdownV2(caption);
     const parse_mode: ParseMode = 'MarkdownV2';
     const reply_markup = {
@@ -223,7 +223,7 @@ export class TgbotService implements OnModuleInit {
       inline_keyboard: [
         [
           {
-            text: '🤝Open MagicLink Support Bot',
+            text: '🤝Open magicLink Support Bot',
             url: supportLink,
           },
         ],
@@ -266,7 +266,7 @@ export class TgbotService implements OnModuleInit {
   async onInvite(tgUserId: string) {
     const config = await configFactory();
     const url = config.tgbot.tgbot;
-    const tgShareUrl = `tg://msg_url?url=${url}&text=💫 Join MagicLink Telegram and enjoy lower transaction fees with my referral code.
+    const tgShareUrl = `tg://msg_url?url=${url}&text=💫 Join magicLink Telegram and enjoy lower transaction fees with my referral code.
 
 🔮The magicLink TG Mini APP is a dedicated application under magicLink, specifically designed for the TG ecosystem. 
 
@@ -392,7 +392,7 @@ Share to More friends and groups here!`;
       const action = actions[i];
       lineButtons.push({
         text: action.label,
-        //url: `${userMiniApp}${action.href}&startapp=${magicLink.code}__________${action.index}`,
+        //url: `${userMiniApp}${action.href}&startapp=${magicLink.code}_${action.index}`,
         url: `${userMiniApp}${action.href}&startapp=${magicLink.code}`,
       });
       if ((i + 1) % 3 === 0) {
@@ -507,11 +507,11 @@ ${content
 📍 ${network}
 ➡️Token From: ${fromObj?.symbol.toUpperCase()} \\(*$${fromObj?.usdPrice}*\\)
 ⬅️Token To: ${toObj?.symbol.toUpperCase()} \\(*$${toObj?.usdPrice}*\\)
-👥Participants: $participants
+👥参与人数: $participants
 
-🔥更多信息请到 👉MagicLink TG \\([Go to mini app](${userMiniApp}?startapp=${news.code})\\)
+🔥更多信息请到 👉magicLink TG \\([Go to mini app](${userMiniApp}?startapp=${news.code})\\)
 
-🌈在您的群中推送 Magic Link 邀请 [@MagicLink](${tgbot}?startgroup=join&admin=edit_messages) 到您的群中
+🌈在您的群中推送 magicNews 邀请 [@magicLink](${tgbot}?startgroup=join&admin=edit_messages) 到您的群中
 `;
     } else {
       newsChannelId = newsChannelIdEn;
@@ -529,9 +529,9 @@ ${content
 ⬅️Token To: ${toObj?.symbol.toUpperCase()} \\(*$${toObj?.usdPrice}*\\)
 👥Participants: $participants
 
-🔥More details Click here to 👉MagicLink TG \\([Go to mini app](${userMiniApp}?startapp=${news.code})\\)
+🔥More details Click here to 👉magicLink TG \\([Go to mini app](${userMiniApp}?startapp=${news.code})\\)
 
-🌈Push Magic News Alerts in group? Invite [@MagicLink](${tgbot}?startgroup=join&admin=edit_messages) in your group
+🌈Push Magic News Alerts in group? Invite [@magicLink](${tgbot}?startgroup=join&admin=edit_messages) in your group
 `;
     }
 
@@ -578,7 +578,7 @@ ${content
       const action = actions[i];
       lineButtons.push({
         text: action.label,
-        // url: `${userMiniApp}${action.href}&startapp=${news.code}__________${action.index}`,
+        // url: `${userMiniApp}${action.href}&startapp=${news.code}_${action.index}`,
         url: `${userMiniApp}${action.href}&startapp=${news.code}`,
       });
       if ((i + 1) % 3 === 0) {
