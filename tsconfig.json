@@ -113,6 +113,12 @@
       ],
       "@action/pre-sale/*": [
         "libs/pre-sale/src/*"
+      ],
+      "@action/magic-swap": [
+        "libs/magic-swap/src"
+      ],
+      "@action/magic-swap/*": [
+        "libs/magic-swap/src/*"
       ]
     }
   }

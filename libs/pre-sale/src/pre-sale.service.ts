@@ -2,16 +2,18 @@ import { Injectable } from '@nestjs/common';
 import { ethers } from 'ethers';
 
 import { RegistryPlug } from '@action/registry';
-import { DataService } from '@core/shared';
+import { ChainService, DataService } from '@core/shared';
 import {
   Action as ActionDto,
+  ActionMetadata,
   GenerateTransactionParams,
   TransactionInfo,
 } from 'src/common/dto';
+import { Chains } from 'src/constants';
 
 import PreSaleABI from './abis/PreSale.json';
 import TokenABI from './abis/Token.json';
-import { CHAIN_ID, PRE_SALE_ADDRESS, metadata } from './config';
+import { PRE_SALE_ADDRESS } from './config';
 import { FieldTypes } from './types';
 
 @RegistryPlug('pre-sale', 'v1')
@@ -19,7 +21,10 @@ import { FieldTypes } from './types';
 export class PreSaleService extends ActionDto<FieldTypes> {
   private preSale: ethers.Contract;
   private provider: ethers.Provider;
-  constructor(private readonly dataService: DataService) {
+  constructor(
+    private readonly dataService: DataService,
+    private readonly chainService: ChainService,
+  ) {
     super();
     this.provider = new ethers.JsonRpcProvider('https://sepolia.rpc.zklink.io');
     this.preSale = new ethers.Contract(
@@ -29,8 +34,69 @@ export class PreSaleService extends ActionDto<FieldTypes> {
     );
   }
 
-  async getMetadata() {
-    return metadata;
+  async getMetadata(): Promise<ActionMetadata<FieldTypes>> {
+    return {
+      title: 'PreSale',
+      description:
+        '<div>PreSale is a platform for participating in token presales.</div>',
+      networks: this.chainService.buildSupportedNetworks([
+        Chains.ZkLinkNovaSepolia,
+      ]),
+      author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
+      magicLinkMetadata: {},
+      intent: {
+        components: [
+          {
+            name: 'tokenName',
+            label: 'Token Name',
+            desc: 'The name of the token',
+            type: 'input',
+            regex: '^[a-zA-Z0-9]+$',
+            regexDesc: 'Token Name',
+          },
+          {
+            name: 'tokenSymbol',
+            label: 'Token Symbol',
+            desc: 'The symbol of the token',
+            type: 'input',
+            regex: '^[a-zA-Z0-9]+$',
+            regexDesc: 'Token Symbol',
+          },
+          {
+            name: 'tokenMaxSupply',
+            label: 'Max Supply',
+            desc: 'The max supply of the token',
+            type: 'input',
+            regex: '^[a-zA-Z0-9]+$',
+            regexDesc: 'Token Max Supply',
+          },
+          {
+            name: 'creatorAmount',
+            label: 'Creator Amount',
+            desc: 'The amount of tokens the creator will receive',
+            type: 'input',
+            regex: '^[a-zA-Z0-9]+$',
+            regexDesc: 'Creator Amount',
+          },
+          {
+            name: 'price',
+            label: 'Price',
+            desc: 'The amount of ETH required to purchase one token',
+            type: 'input',
+            regex: '^[0-9]+(\\.[0-9]+)?$',
+            regexDesc: 'Price',
+          },
+          {
+            name: 'offerAmount',
+            label: 'Offer Amount',
+            desc: 'The amount of ETH the user wants to use to purchase tokens',
+            type: 'input',
+            regex: '^[0-9]+(\\.[0-9]+)?$',
+            regexDesc: 'Offer Amount',
+          },
+        ],
+      },
+    };
   }
 
   async generateTransaction(
@@ -50,7 +116,7 @@ export class PreSaleService extends ActionDto<FieldTypes> {
       ethers.parseEther(formData.tokenMaxSupply),
       creator,
       ethers.parseEther(formData.creatorAmount),
-      Number(formData.price),
+      ethers.parseEther(formData.price),
       additionalData.code,
     );
 
@@ -63,7 +129,7 @@ export class PreSaleService extends ActionDto<FieldTypes> {
     const buy = await token.buy.populateTransaction();
     return [
       {
-        chainId: CHAIN_ID,
+        chainId: Chains.ZkLinkNovaSepolia,
         to: tokenAddress,
         value: ethers.parseEther(formData.offerAmount).toString(),
         data: buy.data,
@@ -81,13 +147,13 @@ export class PreSaleService extends ActionDto<FieldTypes> {
       formData.tokenSymbol,
       ethers.parseEther(formData.tokenMaxSupply),
       ethers.parseEther(formData.creatorAmount),
-      Number(formData.price),
+      ethers.parseEther(formData.price),
       additionalData.code,
     );
 
     return [
       {
-        chainId: CHAIN_ID,
+        chainId: Chains.ZkLinkNovaSepolia,
         to: PRE_SALE_ADDRESS,
         value: '0',
         data: createTokenData.data,

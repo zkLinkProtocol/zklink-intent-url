@@ -8,11 +8,14 @@ import {
   IsArray,
   IsBoolean,
   IsEnum,
+  IsNumber,
   IsOptional,
   IsString,
   ValidateIf,
   ValidateNested,
 } from 'class-validator';
+
+import { Chains } from 'src/constants';
 
 import { ValidateOptions } from '../decorators';
 
@@ -22,8 +25,8 @@ export class NetworkDto {
   name: string;
 
   @ApiProperty({ type: String, description: 'Network chain ID' })
-  @IsString()
-  chainId: string;
+  @IsNumber()
+  chainId: Chains;
 }
 
 export class AuthorDto {
@@ -75,7 +78,7 @@ export class OptionDto {
       'If there are multiple networks, please specify the chainId, indicating which network this option can be selected on.',
   })
   @IsString()
-  chainId?: string;
+  chainId?: Chains;
 
   @ApiPropertyOptional({
     description:
@@ -306,7 +309,11 @@ export class IntentDto<R extends Record<string, any> = Record<string, any>> {
 
   @ApiPropertyOptional({
     type: String,
-    description: 'should bind value with submit button',
+    description: `
+      should bind value with submit button.
+      if it is true, then customization of a specific field is not possible, and all fields will be bound to the submit button.
+      if it is 'R', it indicates that the creator can customize the value of that field, setting it to the submit button.
+    `,
   })
   @IsOptional()
   binding?: keyof R | true;
@@ -417,6 +424,19 @@ export class ActionMetadata<
   })
   @ValidateNested()
   magicLinkMetadata?: MagicLinkMetadataDto;
+
+  @ApiProperty({
+    type: Number,
+    description: `
+      Set the maximum value for the commission, which is
+      a percentage representing the share of the commission that the
+      creator of the magic link will receive. Once this value is set,
+      as an action developer, you need to create a transfer transaction
+      in the generateTransaction method to reimburse the creator based
+      on the commission value.`,
+  })
+  @IsOptional()
+  maxCommission?: number;
 }
 
 export function isOptionComponentDto<R extends Record<string, any>>(

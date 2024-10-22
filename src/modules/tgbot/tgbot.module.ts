@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 
+import { SharedModule } from '@core/shared';
 import {
   ActionRepository,
   CreatorRepository,
@@ -14,9 +15,10 @@ import { TgbotService } from './tgbot.service';
 import { ActionUrlService } from '../actionUrl/actionUrl.service';
 import { BlinkService } from '../actionUrl/blink.service';
 import { IntentionRecordService } from '../actionUrl/intentionRecord.service';
+import { CoingeckoService } from '../coingecko/coingecko.service';
 
 @Module({
-  imports: [UnitOfWorkModule],
+  imports: [UnitOfWorkModule, SharedModule],
   providers: [
     IntentionRepository,
     CreatorRepository,
@@ -27,6 +29,7 @@ import { IntentionRecordService } from '../actionUrl/intentionRecord.service';
     IntentionRecordService,
     ActionRepository,
     BlinkService,
+    CoingeckoService,
   ],
   exports: [TgbotService],
   controllers: [TgbotController],

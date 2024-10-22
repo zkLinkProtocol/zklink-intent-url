@@ -1,12 +1,15 @@
 import { RegistryPlug } from '@action/registry';
-import { DataService } from '@core/shared';
+import { ChainService, DataService } from '@core/shared';
 import { Injectable } from '@nestjs/common';
 import { ethers } from 'ethers';
 import {
   Action as ActionDto,
+  ActionMetadata,
+  ConditionalComponentDto,
   GenerateTransactionParams,
   TransactionInfo,
 } from 'src/common/dto';
+import { Chains } from 'src/constants';
 
 import PumpFunABI from './abis/PumpFun.json';
 import PumpFunFactoryABI from './abis/PumpFunFactory.json';
@@ -15,7 +18,6 @@ import {
   POOL_FACTORY_CONTRACT_ADDRESS,
   PUMP_FUN_FACTORY_ADDRESS,
   SWAP_ROUTER_CONTRACT_ADDRESS,
-  metadata,
 } from './config';
 import { NovaSwap } from './swap';
 import { FieldTypes } from './types';
@@ -26,7 +28,10 @@ export class PumpFunService extends ActionDto<FieldTypes> {
   private pumpFunFactory: ethers.Contract;
   private provider: ethers.Provider;
   private novaswap: NovaSwap;
-  constructor(private readonly dataService: DataService) {
+  constructor(
+    private readonly dataService: DataService,
+    private readonly chainService: ChainService,
+  ) {
     super();
     this.provider = new ethers.JsonRpcProvider('https://sepolia.rpc.zklink.io');
     this.pumpFunFactory = new ethers.Contract(
@@ -42,8 +47,81 @@ export class PumpFunService extends ActionDto<FieldTypes> {
     );
   }
 
-  async getMetadata() {
-    return metadata;
+  async getMetadata(): Promise<ActionMetadata<FieldTypes>> {
+    const orderType: ConditionalComponentDto<FieldTypes> = {
+      name: 'orderType',
+      label: 'Order Type',
+      desc: 'The type of the order',
+      type: 'conditionalSelect',
+      options: [
+        { label: 'Buy', value: 'buy' },
+        { label: 'Sell', value: 'sell' },
+      ],
+    };
+
+    return {
+      title: 'PumpFun',
+      description:
+        '<div>PumpFun is a platform for creating and participating in token pump events</div>',
+      networks: this.chainService.buildSupportedNetworks([
+        Chains.ZkLinkNovaSepolia,
+      ]),
+      author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
+      magicLinkMetadata: {},
+      intent: {
+        components: [
+          {
+            name: 'tokenName',
+            label: 'Token Name',
+            desc: 'The name of the token',
+            type: 'input',
+            regex: '^[a-zA-Z0-9]+$',
+            regexDesc: 'Token Name',
+          },
+          {
+            name: 'tokenSymbol',
+            label: 'Token Symbol',
+            desc: 'The symbol of the token',
+            type: 'input',
+            regex: '^[a-zA-Z0-9]+$',
+            regexDesc: 'Token Symbol',
+          },
+          {
+            name: 'creatorInitialBuyAmount',
+            label: 'Creator Initial Buy Amount(in ETH)',
+            desc: 'The amount of ETH you want to buy the token with',
+            type: 'input',
+            regex: '^[0-9]+(\\.[0-9]+)?$',
+            regexDesc: 'Initial Buy Amount',
+          },
+          {
+            name: 'buyAmount',
+            label: 'Buy Amount (in ETH)',
+            desc: 'The amount of ETH you want to buy the token with',
+            type: 'input',
+            regex: '^[0-9]+(\\.[0-9]+)?$',
+            regexDesc: 'Buy Amount',
+            conditionalRendering: {
+              component: orderType,
+              value: ['buy'],
+            },
+          },
+          {
+            name: 'sellPercent',
+            label: 'Sell Percent',
+            desc: 'The percentage of the token you want to sell',
+            type: 'input',
+            regex: '^(?:100|[1-9]?[0-9])$',
+            regexDesc: 'Sell Percent',
+            conditionalRendering: {
+              value: ['sell'],
+              component: orderType,
+            },
+          },
+          orderType,
+        ],
+      },
+    };
   }
 
   async generateTransaction(

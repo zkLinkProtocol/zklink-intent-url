@@ -7,6 +7,7 @@ export type BasicAdditionalParams = {
   code?: string;
   account?: string;
   inviter?: string;
+  commissionRate?: number;
 };
 
 type NetworkAdditionalParams = {
@@ -105,7 +106,7 @@ export abstract class Action<
    */
   async reportTransaction(
     _data: GenerateTransactionParams<T>,
-    _txHash: string,
+    _txHashes: Array<{ hash: string; chainId: number }>,
   ): Promise<SuccessMessage> {
     return '';
   }

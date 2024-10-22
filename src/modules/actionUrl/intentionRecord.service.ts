@@ -1,9 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { ethers } from 'ethers';
 import { IsNull, Not } from 'typeorm';
 
-import { ConfigType } from 'src/config';
+import { ChainService } from '@core/shared';
 import {
   IntentionRecord,
   IntentionRecordStatus,
@@ -23,16 +22,15 @@ import { IntentionRecordAddRequestDto } from './intentionRecord.dto';
 @Injectable()
 export class IntentionRecordService {
   logger: Logger;
-  private readonly rpcs: ConfigType['rpc'];
   constructor(
-    readonly configService: ConfigService,
+    private readonly configService: ConfigService,
     private readonly intentionRepository: IntentionRepository,
     public readonly intentionRecordRepository: IntentionRecordRepository,
     private readonly intentionRecordTxRepository: IntentionRecordTxRepository,
     private readonly intentionService: ActionUrlService,
+    private readonly chainService: ChainService,
   ) {
     this.logger = new Logger(IntentionRecordService.name);
-    this.rpcs = configService.get('rpc', { infer: true })!;
   }
 
   async findOneById(id: bigint): Promise<IntentionRecord> {
@@ -42,11 +40,11 @@ export class IntentionRecordService {
       throw new BusinessException(`Intention record ${id} not found`);
     }
     const intentionTmp = await this.intentionService.findOneByCode(
-      intentionRecord.intentionCode,
+      intentionRecord.intention.code,
     );
     if (!intentionTmp) {
       throw new BusinessException(
-        `Intention ${intentionRecord.intentionCode} not found`,
+        `Intention ${intentionRecord.intention.code} not found`,
       );
     }
     intentionRecord.intention = {
@@ -93,16 +91,19 @@ export class IntentionRecordService {
     params: IntentionRecordAddRequestDto,
   ): Promise<boolean> {
     // code is intention code
-    const intention = await this.intentionRepository.findOneBy({ code });
+    const intention = await this.intentionRepository.findOne({
+      where: { code },
+      relations: { action: true },
+    });
     if (!intention) {
       throw new BusinessException('Intention not found');
     }
 
     const intentionRecord = new IntentionRecord();
-    intentionRecord.intentionCode = code;
+    intentionRecord.action = intention.action;
+    intentionRecord.intention = intention;
     intentionRecord.address = params.address;
     intentionRecord.status = IntentionRecordStatus.PENDING;
-    intentionRecord.intention = intention;
 
     const txs = params.txs.map((tx) => {
       const intentionRecordTx = new IntentionRecordTx();
@@ -112,7 +113,7 @@ export class IntentionRecordService {
       if (tx.opUserHash) {
         intentionRecordTx.opUserHash = tx.opUserHash;
       }
-      intentionRecordTx.intentionRecordId = BigInt(0);
+      intentionRecordTx.intentionRecord = intentionRecord;
       intentionRecordTx.chainId = tx.chainId;
       intentionRecordTx.createdAt = new Date(tx.createdAt);
       intentionRecordTx.status = IntentionRecordTxStatus.PENDING;
@@ -189,16 +190,16 @@ export class IntentionRecordService {
       );
     }
 
-    //set faild
-    const faildRecords =
+    //set failed
+    const failedRecords =
       await this.intentionRecordRepository.getIntentionRecordListTxStatus(
-        IntentionRecordTxStatus.FAILD,
+        IntentionRecordTxStatus.FAILED,
       );
-    if (faildRecords.length > 0) {
-      const faildRecordIds = faildRecords.map((item) => item.id);
+    if (failedRecords.length > 0) {
+      const failedRecordIds = failedRecords.map((item) => item.id);
       await this.intentionRecordRepository.updateStatusByIds(
-        faildRecordIds,
-        IntentionRecordStatus.FAILD,
+        failedRecordIds,
+        IntentionRecordStatus.FAILED,
       );
     }
   }
@@ -210,10 +211,7 @@ export class IntentionRecordService {
       order: { id: 'ASC' },
     });
     for (const tx of txs) {
-      const status = await this.checkTxStatus(
-        tx.txHash,
-        tx.chainId as keyof ConfigType['rpc'],
-      );
+      const status = await this.checkTxStatus(tx.txHash, tx.chainId);
       if (status === IntentionRecordTxStatus.PENDING) {
         continue;
       }
@@ -222,16 +220,8 @@ export class IntentionRecordService {
   }
 
   // use ethers.js to check tx status
-  private async checkTxStatus(
-    txHash: string,
-    chainId: keyof ConfigType['rpc'],
-  ) {
-    const rpc = this.rpcs[chainId];
-    if (!rpc) {
-      this.logger.log(`Had no supported the chinId: ${chainId}`);
-      return IntentionRecordTxStatus.FAILD;
-    }
-    const provider = new ethers.JsonRpcProvider(rpc);
+  private async checkTxStatus(txHash: string, chainId: number) {
+    const provider = this.chainService.getProvider(chainId);
     const tx = await provider.getTransaction(txHash);
     if (!tx) {
       return IntentionRecordTxStatus.PENDING;
@@ -239,14 +229,14 @@ export class IntentionRecordService {
     if (tx.blockNumber) {
       return IntentionRecordTxStatus.SUCCESS;
     }
-    return IntentionRecordTxStatus.FAILD;
+    return IntentionRecordTxStatus.FAILED;
   }
 
   private async fetchTxReceipt(
     networkId: number,
     userOphash: string,
   ): Promise<string[]> {
-    const turnkeyApi = this.configService.get('turnkeyApi', { infer: true })!;
+    const turnkeyApi = this.configService.get('turnkeyApi', { infer: true });
     const url = `${turnkeyApi}/deposit/findBundlerTxReceipt`;
     const response = await fetch(url, {
       method: 'post',
@@ -257,7 +247,7 @@ export class IntentionRecordService {
       }),
     });
     const responseJson = await response.json();
-    // if faild
+    // if failed
     if (responseJson.status !== 1) {
       return [];
     }
@@ -265,9 +255,9 @@ export class IntentionRecordService {
     if (logs.length === 0) {
       return [];
     }
-    const txHashs = logs.map((item: any) => {
+    const txHashes = logs.map((item: any) => {
       return item.transactionHash;
     });
-    return txHashs;
+    return txHashes;
   }
 }

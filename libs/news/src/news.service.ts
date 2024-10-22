@@ -1,16 +1,18 @@
 import { RegistryPlug } from '@action/registry';
-import { OKXService } from '@core/shared';
+import { ChainService, OKXService } from '@core/shared';
 import { Injectable } from '@nestjs/common';
 import { ethers } from 'ethers';
 import {
   Action as ActionDto,
+  ActionMetadata,
   GenerateTransactionParams,
   TransactionInfo,
 } from 'src/common/dto';
+import { Chains } from 'src/constants';
 import { TgbotService } from 'src/modules/tgbot/tgbot.service';
 import { Address } from 'src/types';
 
-import { FieldTypes, METADATA } from './config';
+import { FieldTypes } from './types';
 
 //magic news
 @RegistryPlug('news', 'v1')
@@ -19,11 +21,85 @@ export class NewsService extends ActionDto<FieldTypes> {
   constructor(
     private readonly tgbotService: TgbotService,
     private readonly okxService: OKXService,
+    private readonly chainService: ChainService,
   ) {
     super();
   }
-  async getMetadata() {
-    return METADATA;
+  async getMetadata(): Promise<ActionMetadata<FieldTypes>> {
+    return {
+      title: 'Magic News',
+      description:
+        '<div>Perform news seamlessly across multiple networks</div>',
+      networks: this.chainService.buildSupportedNetworks([
+        Chains.EthereumMainnet,
+        Chains.ArbitrumOne,
+        Chains.OpMainnet,
+        Chains.ZkSync,
+        Chains.Mantle,
+        Chains.Linea,
+        Chains.Base,
+        Chains.ScrollMainnet,
+        Chains.MantaPacificMainnet,
+      ]),
+      author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
+      magicLinkMetadata: {},
+      intent: {
+        components: [
+          {
+            name: 'amountToBuy',
+            label: 'Amount to Buy',
+            desc: 'The amount of input tokens used to buy output tokens',
+            type: 'input',
+            regex: '^[0-9]+(.[0-9]+)?$',
+            regexDesc: 'Positive number',
+          },
+          {
+            name: 'tokenFrom',
+            label: 'Token From ',
+            desc: 'The token you want to swap',
+            type: 'inputSelect',
+            options: [
+              {
+                label: 'WBTC',
+                value: 'wbtc',
+              },
+              {
+                label: 'USDT',
+                value: 'usdt',
+              },
+              {
+                label: 'USDC',
+                value: 'usdc',
+              },
+            ],
+            regex: '^0x[a-fA-F0-9]{40}$',
+            regexDesc: 'Invalid Address',
+          },
+          {
+            name: 'tokenTo',
+            label: 'Token To',
+            desc: 'The address of the token you want to receive',
+            type: 'inputSelect',
+            options: [
+              {
+                label: 'WBTC',
+                value: 'wbtc',
+              },
+              {
+                label: 'USDT',
+                value: 'usdt',
+              },
+              {
+                label: 'USDC',
+                value: 'usdc',
+              },
+            ],
+            regex: '^0x[a-fA-F0-9]{40}$',
+            regexDesc: 'Invalid Address',
+          },
+        ],
+      },
+    };
   }
 
   async generateTransaction(

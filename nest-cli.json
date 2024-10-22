@@ -135,6 +135,15 @@
       "compilerOptions": {
         "tsConfigPath": "libs/pre-sale/tsconfig.lib.json"
       }
+    },
+    "magic-swap": {
+      "type": "library",
+      "root": "libs/magic-swap",
+      "entryFile": "index",
+      "sourceRoot": "libs/magic-swap/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/magic-swap/tsconfig.lib.json"
+      }
     }
   }
 }

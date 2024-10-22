@@ -1,5 +1,5 @@
 import { RegistryPlug } from '@action/registry';
-import { DataService } from '@core/shared';
+import { ChainService, DataService } from '@core/shared';
 import { getERC20SymbolAndDecimals } from '@core/utils';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -16,6 +16,7 @@ import {
 } from 'ethers';
 import {
   Action as ActionDto,
+  ActionMetadata,
   BasicAdditionalParams,
   GenerateFormParams,
   GenerateTransactionParams,
@@ -33,7 +34,6 @@ import ERC20ABI from './abis/ERC20.json';
 import QuoterV2 from './abis/QuoterV2.json';
 import RedPacketABI from './abis/RedPacket.json';
 import { TransactionResult, Value, configuration, feeMap } from './config';
-import { genMetadata } from './metadata';
 import {
   ClaimRedPacketParams,
   CreateRedPacketParams,
@@ -60,6 +60,7 @@ export class RedEnvelopeService extends ActionDto<FieldTypes> {
   constructor(
     readonly configService: ConfigService,
     private readonly dataService: DataService,
+    private readonly chainService: ChainService,
   ) {
     super();
     this.env = configService.get('env', { infer: true })!;
@@ -67,7 +68,7 @@ export class RedEnvelopeService extends ActionDto<FieldTypes> {
       infer: true,
     })!;
     this.config = configuration[this.env];
-    this.provider = new JsonRpcProvider(this.config.rpcUrl);
+    this.provider = this.chainService.getProvider(this.config.chainId);
     const mainNetProvider = new JsonRpcProvider('https://rpc.zklink.io');
 
     this.wallet = new ethers.Wallet(this.witnessPrivateKey, this.provider);
@@ -87,8 +88,78 @@ export class RedEnvelopeService extends ActionDto<FieldTypes> {
     );
   }
 
-  public async getMetadata() {
-    return genMetadata(this.config);
+  public async getMetadata(): Promise<ActionMetadata<FieldTypes>> {
+    return {
+      title: 'Red Packet 🧧',
+      description:
+        '<div>This action is designed to distribute token rewards</div>',
+      networks: this.chainService.buildSupportedNetworks([this.config.chainId]),
+      author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
+      magicLinkMetadata: {
+        title: 'Red Packet 🧧',
+        description: 'Best wishes!',
+      },
+      intent: {
+        binding: true,
+        components: [
+          {
+            name: 'distributionMode',
+            label: 'Distribution Method',
+            desc: 'Choose Mode to distribute Red Envelopes',
+            type: 'searchSelect',
+            options: [
+              {
+                label: 'Equal Amount Per Address',
+                value: DistributionModeValue.EqualAmountPerAddress,
+              },
+              {
+                label: 'Random Amount Per Address',
+                value: DistributionModeValue.RandomAmountPerAddress,
+              },
+            ],
+          },
+          {
+            name: 'totalDistributionAmount',
+            label: 'Total Token Amount',
+            desc: 'The total amount of tokens to be distributed',
+            type: 'input',
+            regex: '^\\d+\\.?\\d*$|^\\d*\\.\\d+$',
+            regexDesc: 'Int',
+          },
+          {
+            name: 'distributionToken',
+            label: 'Token to Distribute',
+            desc: 'Choose a token to distribute',
+            type: 'searchSelect',
+            options: this.config.tokens,
+          },
+          {
+            name: 'amountOfRedEnvelopes',
+            label: 'Number of Red Packets',
+            desc: 'Total number of Red Packets',
+            type: 'input',
+            regex: '^[1-9]\\d*$',
+            regexDesc: 'It should be a positive integer.',
+          },
+          {
+            name: 'gasToken',
+            label: 'Who should pay for the claiming gas fee',
+            desc: 'Gas can be deducted from distributed amount, allowing recipient to grab red envelope with 0 gas',
+            type: 'searchSelect',
+            options: [
+              {
+                label: 'Recipient',
+                value: GasTokenValue.Eth,
+              },
+              {
+                label: 'Red Packet Creator (Requires additional tokens)',
+                value: GasTokenValue.DistributedToken,
+              },
+            ],
+          },
+        ],
+      },
+    };
   }
 
   private async genCreateSignature(params: CreateRedPacketParams) {
@@ -408,14 +479,16 @@ export class RedEnvelopeService extends ActionDto<FieldTypes> {
 
   async reportTransaction(
     data: GenerateTransactionParams<FieldTypes>,
-    txHash: string,
+    txHashes: Array<{ hash: string; chainId: number }>,
   ): Promise<ErrorMessage> {
     const { formData } = data;
     const { distributionToken } = formData;
     const iface = new Interface(RedPacketABI);
     const eventTopic = ethers.id('RedPacketClaimed(uint256,address,uint256)');
     try {
-      const receipt = await this.provider.getTransactionReceipt(txHash);
+      const receipt = await this.provider.getTransactionReceipt(
+        txHashes[0].hash,
+      );
       if (!receipt) {
         throw new Error('wrong transaction hash');
       }
@@ -491,9 +564,11 @@ export class RedEnvelopeService extends ActionDto<FieldTypes> {
     claimRecords: TransactionResult[],
   ): Promise<string> {
     return claimRecords
-      .map((record) => {
-        const browserUrl = this.config.browserUrl;
-        const prefixedTxhash = `${browserUrl}${record.txhash}`;
+      .map(async (record) => {
+        const prefixedTxhash = this.chainService.buildTransactionExplorerLink(
+          record.txhash,
+          record.chainId,
+        );
         return `
           <br/>
           <br/>
