@@ -67,7 +67,7 @@ export class TgbotService implements OnModuleInit {
       } catch (error) {
         this.logger.error(error);
       }
-      await this.delay(10 * 1000);
+      await this.delay(60 * 1000);
     }
   }
 
