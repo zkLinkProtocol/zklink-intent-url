@@ -106,8 +106,19 @@ export class ActionService implements OnApplicationBootstrap {
       throw new BusinessException(`ActionId ${id} not found`);
     }
     const actionStore = this.getActionStore(id);
+    const metadata = await actionStore.getMetadata();
     const hasPostTxs = !!actionStore.onMagicLinkCreated;
-    return { ...actionMetadata, hasPostTxs };
+    if (metadata.maxCommission) {
+      return {
+        ...actionMetadata,
+        maxCommission: metadata.maxCommission,
+        hasPostTxs,
+      };
+    }
+    return {
+      ...actionMetadata,
+      hasPostTxs,
+    };
   }
 
   async getAllActionMetadata() {
