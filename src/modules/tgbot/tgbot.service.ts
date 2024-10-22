@@ -484,7 +484,7 @@ Share to More friends and groups here\\!`;
         }[];
       };
     };
-    const photo = ''; //news.metadata;
+    const photo = news.metadata;
     const description = html2md(news.description.replaceAll(/<img[^>]*>/g, ''));
     // eslint-disable-next-line no-useless-escape
     const markdownLinkPattern = /\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g;
