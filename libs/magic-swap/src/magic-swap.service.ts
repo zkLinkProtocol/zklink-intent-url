@@ -38,6 +38,7 @@ export class MagicSwapService extends ActionDto<FieldTypes> {
       author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
       magicLinkMetadata: {},
       intent: {
+        binding: 'amountToBuy',
         components: [
           {
             name: 'amountToBuy',
@@ -125,7 +126,9 @@ export class MagicSwapService extends ActionDto<FieldTypes> {
     const params = {
       ...restParams,
       amountToBuy: ethers.parseUnits(
-        String(Number(amountToBuy) - commissionRate * Number(amountToBuy)),
+        (Number(amountToBuy) - commissionRate * Number(amountToBuy)).toFixed(
+          Number(decimals),
+        ),
         decimals,
       ),
     };

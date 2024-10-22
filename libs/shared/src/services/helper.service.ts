@@ -37,7 +37,7 @@ export class HelperService {
       );
       const decimals = await contract.decimals();
       const amountToSend = ethers.parseUnits(
-        (amount * commissionRate).toFixed(18),
+        (amount * commissionRate).toFixed(Number(decimals)),
         decimals,
       );
       transferTx = await contract.transfer.populateTransaction(
