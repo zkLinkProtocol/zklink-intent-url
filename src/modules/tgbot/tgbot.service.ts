@@ -392,7 +392,8 @@ Share to More friends and groups here!`;
       const action = actions[i];
       lineButtons.push({
         text: action.label,
-        url: `${userMiniApp}${action.href}&startapp=${magicLink.code}__________${action.index}`,
+        //url: `${userMiniApp}${action.href}&startapp=${magicLink.code}__________${action.index}`,
+        url: `${userMiniApp}${action.href}&startapp=${magicLink.code}`,
       });
       if ((i + 1) % 3 === 0) {
         inlineKeyboard.push(lineButtons);
@@ -490,8 +491,31 @@ Share to More friends and groups here!`;
       toObj = { symbol: toTokenAddress, usdPrice: '-' };
     }
     const participants = await this.intentionRecordService.countByCode(code);
+    let captionTemplate = '';
     let linkIndex = 0;
-    const captionTemplate = `
+    if (this.containsChineseCharacters(content)) {
+      newsChannelId = newsChannelIdCn;
+      captionTemplate = `
+🟢*${news.title.replaceAll('(', '\\(').replaceAll(')', '\\)')}*🟢
+${content
+  .replaceAll('(', '\\(')
+  .replaceAll(')', '\\)')
+  .replaceAll('<<LINK>>', () => links[linkIndex++])}
+
+👨‍🍳交易策略:
+
+📍 ${network}
+💧Token From: ${fromObj?.symbol.toUpperCase()} \\(*$${fromObj?.usdPrice}*\\)
+👝Token To: ${toObj?.symbol.toUpperCase()} \\(*$${toObj?.usdPrice}*\\)
+👥Participants: $participants
+
+🔥更多信息请到 👉MagicLink TG \\([Go to mini app](${userMiniApp}?startapp=${news.code})\\)
+
+🌈在您的群中推送 Magic Link 邀请 [@MagicLink](${tgbot}?startgroup=join&admin=edit_messages) 到您的群中
+`;
+    } else {
+      newsChannelId = newsChannelIdEn;
+      captionTemplate = `
 🟢*${news.title.replaceAll('(', '\\(').replaceAll(')', '\\)')}*🟢
 ${content
   .replaceAll('(', '\\(')
@@ -507,18 +531,15 @@ ${content
 
 🔥More details Click here to 👉MagicLink TG \\([Go to mini app](${userMiniApp}?startapp=${news.code})\\)
 
-🌈Push Magic News Alerts in group? Invite [@BOT](${tgbot}?startgroup=join&admin=edit_messages) in your group
+🌈Push Magic News Alerts in group? Invite [@MagicLink](${tgbot}?startgroup=join&admin=edit_messages) in your group
 `;
+    }
+
     let caption = captionTemplate.replaceAll(
       '$participants',
       participants.toString(),
     );
     caption = this.formatMarkdownV2(caption);
-    if (this.containsChineseCharacters(caption)) {
-      newsChannelId = newsChannelIdCn;
-    } else {
-      newsChannelId = newsChannelIdEn;
-    }
     const parse_mode: ParseMode = 'MarkdownV2';
 
     const inlineKeyboard = [];
@@ -557,7 +578,8 @@ ${content
       const action = actions[i];
       lineButtons.push({
         text: action.label,
-        url: `${userMiniApp}${action.href}&startapp=${news.code}__________${action.index}`,
+        // url: `${userMiniApp}${action.href}&startapp=${news.code}__________${action.index}`,
+        url: `${userMiniApp}${action.href}&startapp=${news.code}`,
       });
       if ((i + 1) % 3 === 0) {
         inlineKeyboard.push(lineButtons);
