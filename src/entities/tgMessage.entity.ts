@@ -19,4 +19,10 @@ export class TgMessage extends BaseEntity {
 
   @Column({ type: 'varchar' })
   public text: string;
+
+  @Column({ type: 'varchar' })
+  public replyMarkup: string;
+
+  @Column({ type: 'varchar' })
+  public metadata: string;
 }

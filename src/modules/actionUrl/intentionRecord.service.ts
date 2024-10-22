@@ -93,7 +93,7 @@ export class IntentionRecordService {
     const res = await this.intentionRecordRepository.countByCodes(codes);
     const countByCode: { [key: string]: number } = {};
     res.forEach((record) => {
-      countByCode[record.intention] = parseInt(record.count, 10);
+      countByCode[record.code] = parseInt(record.count, 10);
     });
     codes.forEach((code) => {
       if (!(code in countByCode)) {

@@ -290,8 +290,8 @@ export class TgbotService implements OnModuleInit {
 
   async onInvite(tgUserId: string) {
     const config = await configFactory();
-    const url = config.tgbot.tgbot;
-    const tgShareUrl = `tg://msg_url?url=${url}&text=💫 Join magicLink Telegram and enjoy lower transaction fees with my referral code.
+    const url = encodeURIComponent(config.tgbot.tgbot);
+    const tgShareUrl = `https://t.me/share/url?url=${url}&text=💫 Join magicLink Telegram and enjoy lower transaction fees with my referral code.
 
 🔮The magicLink TG Mini APP is a dedicated application under magicLink, specifically designed for the TG ecosystem. 
 
@@ -357,13 +357,15 @@ Share to More friends and groups here\\!`;
       const date =
         intent.createdAt?.toISOString().split('T')[0] +
         ` ${intent.createdAt?.toISOString().split('T')[1].split('.')[0]}`;
-      const shareUrl = `${userMiniApp}?startapp%3D${intent.code}`;
+      const shareUrl = encodeURIComponent(
+        `${userMiniApp}?startapp=${intent.code}`,
+      );
       caption += `
 *${++count}*
 *Title* : ${this.formatMarkdownV2(intent.title)}
 *Description* : ${this.formatMarkdownV2(content)}
 *Create Time* : ${date}
-[Go to tg mini app](${userMiniApp}?startapp=${intent.code})              [Share to others](tg://msg_url?url=${shareUrl}&text=${intent.title})
+[Go to tg mini app](${userMiniApp}?startapp=${intent.code})              [Share to others](https://t.me/share/url?url=${shareUrl}&text=${intent.title})
 \\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\n
         `;
     }
@@ -399,12 +401,14 @@ Share to More friends and groups here\\!`;
     const date =
       magicLink.createdAt?.toISOString().split('T')[0] +
       ` ${magicLink.createdAt?.toISOString().split('T')[1].split('.')[0]}`;
-    const shareUrl = `${userMiniApp}?startapp%3D${magicLink.code}`;
+    const shareUrl = encodeURIComponent(
+      `${userMiniApp}?startapp=${magicLink.code}`,
+    );
     const caption = `
 *Title* : ${this.formatMarkdownV2(magicLink.title)}
 *Description* : ${this.formatMarkdownV2(content)}
 *Create Time* : ${this.formatMarkdownV2(date)}
-[Go to tg mini app](${userMiniApp}?startapp=${magicLink.code})              [Share to others](tg://msg_url?url=${shareUrl}&text=${magicLink.title})
+[Go to tg mini app](${userMiniApp}?startapp=${magicLink.code})              [Share to others](https://t.me/share/url?url=${shareUrl}&text=${magicLink.title})
         `;
     const actions = this.blinkService.magicLinkToBlinkActions(
       '',
@@ -480,7 +484,7 @@ Share to More friends and groups here\\!`;
         }[];
       };
     };
-    const photo = news.metadata;
+    const photo = ''; //news.metadata;
     const description = html2md(news.description.replaceAll(/<img[^>]*>/g, ''));
     // eslint-disable-next-line no-useless-escape
     const markdownLinkPattern = /\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g;
@@ -633,6 +637,8 @@ ${this.formatMarkdownV2(content).replaceAll(
         chatId: res.chat.id.toString(),
         code: code,
         text: captionTemplate,
+        replyMarkup: JSON.stringify(reply_markup),
+        metadata: photo,
       };
       await this.tgMessageRepository.add(data);
       this.logger.log('sendNews success', JSON.stringify(res));
@@ -651,7 +657,7 @@ ${this.formatMarkdownV2(content).replaceAll(
     Your Invite Link: \`${inviteLink}\`
     `;
     const parse_mode: ParseMode = 'MarkdownV2';
-    const shareUrl = `tg://msg_url?url=${inviteLink}&text=Claim your Meme Red Packet`;
+    const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(inviteLink)}&text=Claim your Meme Red Packet`;
     const inlineKeyboard = [];
     inlineKeyboard.push([
       {
@@ -721,6 +727,10 @@ ${this.formatMarkdownV2(content).replaceAll(
       const reply_markup = {
         inline_keyboard: inlineKeyboard,
       };
+      await this.tgMessageRepository.update(
+        { replyMarkup: JSON.stringify(reply_markup) },
+        { chatId, messageId },
+      );
       const res = await this.bot.editMessageReplyMarkup(reply_markup, {
         chat_id: chatId,
         message_id: Number(messageId),
@@ -753,10 +763,17 @@ ${this.formatMarkdownV2(content).replaceAll(
         participants.toString(),
       );
       try {
-        await this.bot.editMessageCaption(caption, {
+        const options = {
           chat_id: tgMessage.chatId,
           message_id: Number(tgMessage.messageId),
-        });
+          parse_mode: 'MarkdownV2' as ParseMode,
+          reply_markup: JSON.parse(tgMessage.replyMarkup),
+        };
+        if (tgMessage.metadata) {
+          await this.bot.editMessageCaption(caption, options);
+        } else {
+          await this.bot.editMessageText(caption, options);
+        }
       } catch (error) {
         this.logger.log(
           `updateMagicNews error, chatId:${tgMessage.chatId}, messageId:${tgMessage.messageId}, error:`,
