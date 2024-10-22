@@ -1,5 +1,5 @@
 import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
-import { nanoid } from 'nanoid';
+import { customAlphabet } from 'nanoid';
 
 import { GenerateTransactionParams, TransactionInfo } from 'src/common/dto';
 import { BusinessException } from 'src/exception/business.exception';
@@ -89,7 +89,10 @@ export class ActionUrlService {
     if (!creator) {
       throw new BusinessException('Creator not found');
     }
-
+    const nanoid = customAlphabet(
+      '1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-',
+      8,
+    );
     const code = nanoid(8);
     const intentionRecord = this.intentionRepository.create({
       ...params,

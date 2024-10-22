@@ -498,12 +498,12 @@ ${content
   .replaceAll(')', '\\)')
   .replaceAll('<<LINK>>', () => links[linkIndex++])}
 
-👨‍🍳Trading Strategy: 
+👨‍🍳Trading Strategy:
 
 📍 ${network}
-➡️ Token From: ${fromObj?.symbol}\\(${fromObj?.usdPrice}\\)
-⬅️ Token To: ${toObj?.symbol}\\(${toObj?.usdPrice}\\)
-👥 Participants: $participants
+💧Token From: ${fromObj?.symbol.toUpperCase()} \\(*$${fromObj?.usdPrice}*\\)
+👝Token To: ${toObj?.symbol.toUpperCase()} \\(*$${toObj?.usdPrice}*\\)
+👥Participants: $participants
 
 🔥More details Click here to 👉MagicLink TG \\([Go to mini app](${userMiniApp}?startapp=${news.code})\\)
 
@@ -573,7 +573,10 @@ ${content
     try {
       let res = null;
       if (photo === '') {
-        const options = { reply_markup, parse_mode };
+        const options = {
+          reply_markup,
+          parse_mode,
+        };
         res = await this.bot.sendMessage(newsChannelId, caption, options);
       } else {
         const options = { reply_markup, parse_mode, caption };
