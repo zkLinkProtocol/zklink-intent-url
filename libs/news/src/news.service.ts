@@ -1,7 +1,7 @@
 import { RegistryPlug } from '@action/registry';
 import { ChainService, OKXService } from '@core/shared';
 import { Injectable, Logger } from '@nestjs/common';
-import { ethers } from 'ethers';
+import { Contract, ethers } from 'ethers';
 import {
   Action as ActionDto,
   ActionMetadata,
@@ -114,26 +114,22 @@ export class NewsService extends ActionDto<FieldTypes> {
       throw new Error('Missing account!');
     }
     const { amountToBuy, ...restParams } = formData;
-    const supportTokens = await this.okxService.getAllTokens(chainId);
-    const tokenFrom = supportTokens
-      .filter(
-        (token) =>
-          token.tokenContractAddress.toLowerCase() ===
-          formData.tokenFrom.toLowerCase(),
-      )
-      .map((token) => ({
-        address: token.tokenContractAddress.toLowerCase() as Address,
-        decimal: Number(token.decimals),
-      }))[0];
+    const provider = this.chainService.getProvider(chainId);
+    const tokenFromContract = await new Contract(
+      formData.tokenFrom,
+      ['function decimals() view returns (uint8)'],
+      provider,
+    );
+    const tokenFromDecimal = await tokenFromContract.decimals();
 
     const params = {
       ...restParams,
-      amountToBuy: ethers.parseUnits(amountToBuy, tokenFrom.decimal),
+      amountToBuy: ethers.parseUnits(amountToBuy, tokenFromDecimal),
     };
 
     let approveTx: TransactionInfo;
     let swapTx: TransactionInfo;
-    const tokenInAddress = tokenFrom.address;
+    const tokenInAddress = formData.tokenFrom.toLowerCase() as Address;
 
     const tokens: TransactionInfo['requiredTokenAmount'] = [
       {

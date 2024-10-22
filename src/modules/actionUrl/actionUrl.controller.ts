@@ -223,7 +223,8 @@ export class ActionUrlController extends BaseController {
     if (
       addressList &&
       addressList.length > 0 &&
-      !addressList?.includes(creator.address)
+      !addressList?.includes(creator.address) &&
+      request.actionId === 'news'
     ) {
       return this.error('No permission to create');
     }
@@ -255,7 +256,8 @@ export class ActionUrlController extends BaseController {
     if (
       addressList &&
       addressList.length > 0 &&
-      !addressList?.includes(creator.address)
+      !addressList?.includes(creator.address) &&
+      request.actionId === 'news'
     ) {
       return this.error('No permission to edit');
     }
