@@ -5,12 +5,13 @@ import { ethers } from 'ethers';
 import {
   Action as ActionDto,
   ActionMetadata,
+  GenerateFormParams,
   GenerateTransactionParams,
   TransactionInfo,
 } from 'src/common/dto';
 import { Chains } from 'src/constants';
 import { TgbotService } from 'src/modules/tgbot/tgbot.service';
-import { Address } from 'src/types';
+import { Address, ErrorMessage } from 'src/types';
 
 import { FieldTypes } from './types';
 
@@ -45,6 +46,7 @@ export class NewsService extends ActionDto<FieldTypes> {
       author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
       magicLinkMetadata: {},
       intent: {
+        binding: 'amountToBuy',
         components: [
           {
             name: 'amountToBuy',
@@ -124,14 +126,10 @@ export class NewsService extends ActionDto<FieldTypes> {
         decimal: Number(token.decimals),
       }))[0];
 
-    this.logger.log(
-      `amonttobuy: ${amountToBuy}, deciaml: ${tokenFrom.decimal}`,
-    );
     const params = {
       ...restParams,
       amountToBuy: ethers.parseUnits(amountToBuy, tokenFrom.decimal),
     };
-    this.logger.log('parseUnit success');
 
     let approveTx: TransactionInfo;
     let swapTx: TransactionInfo;
@@ -174,6 +172,42 @@ export class NewsService extends ActionDto<FieldTypes> {
       swapTx.requiredTokenAmount = tokens;
       return [approveTx, swapTx];
     }
+  }
+
+  async validateFormData(
+    formData: GenerateFormParams<FieldTypes>,
+  ): Promise<ErrorMessage> {
+    if (!this.isNumeric(formData.amountToBuy)) return 'Amount must be a number';
+
+    const checkParasm: GenerateTransactionParams<FieldTypes> = {
+      additionalData: {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        //@ts-ignore
+        chainId: formData.chainId,
+        // just for pre-check swap conditions,it can be any address
+        account: '0xA510dbc9aC79a686EBB78cDaE791d91F3f45b3a9',
+      },
+      formData,
+    };
+    try {
+      await this.generateTransaction(checkParasm);
+    } catch (err) {
+      return err.toString();
+    }
+    return '';
+  }
+
+  async preCheckTransaction(
+    params: GenerateTransactionParams<FieldTypes>,
+  ): Promise<ErrorMessage> {
+    if (!this.isNumeric(params.formData.amountToBuy))
+      return 'Amount must be a number';
+    return '';
+  }
+
+  isNumeric(value: string): boolean {
+    const num = Number(value);
+    return !isNaN(num);
   }
 
   public async onMagicLinkCreated(
