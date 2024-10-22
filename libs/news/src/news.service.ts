@@ -179,11 +179,17 @@ export class NewsService extends ActionDto<FieldTypes> {
   ): Promise<ErrorMessage> {
     if (!this.isNumeric(formData.amountToBuy)) return 'Amount must be a number';
 
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    //@ts-ignore
+    let chainId = formData.chainId;
+    if (!chainId) {
+      return 'Missing chainId';
+    }
+    chainId = Number(chainId);
+
     const checkParasm: GenerateTransactionParams<FieldTypes> = {
       additionalData: {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        //@ts-ignore
-        chainId: formData.chainId,
+        chainId,
         // just for pre-check swap conditions,it can be any address
         account: '0xA510dbc9aC79a686EBB78cDaE791d91F3f45b3a9',
       },
