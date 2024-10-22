@@ -28,7 +28,7 @@ export class ActionUrlService {
 
   async findOneByCode(code: string) {
     const intention = await this.intentionRepository.queryIntentionByCode(code);
-    if (!intention) throw new BusinessException(`magic link ${code} not found`);
+    if (!intention) throw new BusinessException(`magiclink ${code} not found`);
     return intention;
   }
 

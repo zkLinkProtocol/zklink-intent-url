@@ -5,6 +5,7 @@ import { LRUCache } from 'lru-cache';
 import TelegramBot, { ParseMode } from 'node-telegram-bot-api';
 
 import { ChainService } from '@core/shared';
+import { NetworkDto } from 'src/common/dto';
 import configFactory from 'src/config';
 import { Chains } from 'src/constants';
 import { CreatorRepository, IntentionRepository } from 'src/repositories';
@@ -12,6 +13,7 @@ import { CreatorRepository, IntentionRepository } from 'src/repositories';
 import { ActionUrlService } from '../actionUrl/actionUrl.service';
 import { BlinkService } from '../actionUrl/blink.service';
 import { IntentionRecordService } from '../actionUrl/intentionRecord.service';
+import { CoingeckoService } from '../coingecko/coingecko.service';
 
 const options = {
   max: 240 * 7 * 10000,
@@ -30,6 +32,7 @@ export class TgbotService implements OnModuleInit {
     private readonly actionUrlService: ActionUrlService,
     private readonly blinkService: BlinkService,
     private readonly intentionRecordService: IntentionRecordService,
+    private readonly coingeckoService: CoingeckoService,
     private readonly chainService: ChainService,
   ) {}
 
@@ -85,11 +88,11 @@ export class TgbotService implements OnModuleInit {
 
     const photo = `${aws3url}/dev/tg/onstart.png`;
     // const photo = 'https://pic.imgdb.cn/item/66bb2b02d9c307b7e9c8ec19.png';
-    let caption = `Welcome to Magic Link! The Magic Link TG Mini APP is a dedicated application under Magic Link, specifically designed for the TG ecosystem. 
+    let caption = `Welcome to magicLink! The magicLink TG Mini APP is a dedicated application under magicLink, specifically designed for the TG ecosystem. 
 
-🔮 The app supports users in creating and managing Magic Links while providing essential interaction capabilities, enabling seamless connections with other Magic Links.
+🔮 The app supports users in creating and managing magicLinks while providing essential interaction capabilities, enabling seamless connections with other magicLinks.
     
-💫 [*__Create__*](https://magic.zklink.io/dashboard/intent) Magic Link & unlock potential to grab even more strategies with fun! 
+💫 [*__Create__*](https://magic.zklink.io/dashboard/intent) magicLink & unlock potential to grab even more strategies with fun! 
 
 🗞 [*__Follow__*](https://t.me/${config.tgbot.newsChannelIdEn}) up with Magic News to know the first-hand crypto message!
 
@@ -99,7 +102,7 @@ export class TgbotService implements OnModuleInit {
 
 🧠 Learn about MagicLink with Magic Academy.
 
-🫂 [*__Invite__*](${userMiniApp}?startapp=invite) your friends to Magic Link to get part of their transaction fees and earn extra rewards.
+🫂 [*__Invite__*](${userMiniApp}?startapp=invite) your friends to magicLink to get part of their transaction fees and earn extra rewards.
 
 ⛓ Manage MagicLinks you create before.`;
     caption = this.formatMarkdownV2(caption);
@@ -129,7 +132,7 @@ export class TgbotService implements OnModuleInit {
             text: '✅Invite',
           },
           {
-            text: '🌱Earn',
+            text: '🌱Earn(Coimg Soon)',
           },
         ],
       ],
@@ -146,14 +149,14 @@ export class TgbotService implements OnModuleInit {
   async onCreate(tgUserId: string) {
     const config = await configFactory();
     const miniapp = config.tgbot.miniApp;
-    let text = `It's the start for your Magic Journey, choose a Topic and Create your own Magic Link here!`;
+    let text = `It's the start for your Magic Journey, choose a Topic and Create your own magicLink here!`;
     text = this.formatMarkdownV2(text);
     const parse_mode: ParseMode = 'MarkdownV2';
     const reply_markup = {
       inline_keyboard: [
         [
           {
-            text: '💫Create Magic Link',
+            text: '💫Create magicLink',
             url: `https://magic.zklink.io/dashboard/intent`,
           },
         ],
@@ -265,10 +268,10 @@ export class TgbotService implements OnModuleInit {
     const url = config.tgbot.tgbot;
     const tgShareUrl = `tg://msg_url?url=${url}&text=💫 Join MagicLink Telegram and enjoy lower transaction fees with my referral code.
 
-🔮The Magic Link TG Mini APP is a dedicated application under Magic Link, specifically designed for the TG ecosystem. 
+🔮The magicLink TG Mini APP is a dedicated application under magicLink, specifically designed for the TG ecosystem. 
 
-🔮Magic Link offers multi-chain wallet and asset management features, allowing users to quickly create and manage Magic Links across multiple chains, simplifying asset transfers and interactions.`;
-    let text = `Invite your friends to Magic Link to get part of their transaction fees and earn extra rewards.
+🔮magicLink offers multi-chain wallet and asset management features, allowing users to quickly create and manage magicLinks across multiple chains, simplifying asset transfers and interactions.`;
+    let text = `Invite your friends to magicLink to get part of their transaction fees and earn extra rewards.
 
 Current Invitee: 0
 Share to More friends and groups here!`;
@@ -441,13 +444,11 @@ Share to More friends and groups here!`;
     const settings = news.settings as {
       newsType: string;
       intentInfo: {
-        network: {
-          name: string;
-        };
+        network: NetworkDto;
         components: {
           value: string;
           options?: {
-            label: string;
+            label?: string;
             value: string;
             default: boolean;
           }[];
@@ -455,30 +456,53 @@ Share to More friends and groups here!`;
       };
     };
     const photo = news.metadata;
-    const content = html2md(news.description.replaceAll(/<img[^>]*>/g, ''));
-    const date =
-      news.createdAt?.toISOString().split('T')[0] +
-      ` ${news.createdAt?.toISOString().split('T')[1].split('.')[0]}`;
+    const description = html2md(news.description.replaceAll(/<img[^>]*>/g, ''));
+    // eslint-disable-next-line no-useless-escape
+    const markdownLinkPattern = /\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g;
+    const links: string[] = [];
+    const content = description.replaceAll(markdownLinkPattern, (match) => {
+      links.push(match);
+      return '<<LINK>>';
+    });
     const network = settings.intentInfo.network.name;
+    const chainId = settings.intentInfo.network.chainId;
     const components = settings.intentInfo.components;
-    const from = this.getOptionsLabelFromValue(
+    const fromTokenAddress = this.getOptionsLabelFromValue(
       components[1].value,
       components[1].options ?? [],
     );
-    const to = this.getOptionsLabelFromValue(
+    const toTokenAddress = this.getOptionsLabelFromValue(
       components[2].value,
       components[2].options ?? [],
     );
+    let fromObj = await this.getTokenInfo(Number(chainId), fromTokenAddress);
+    if (!fromObj) {
+      this.logger.error(
+        `sendNews error : fromToken not exists. code:${code}, fromTokenAddress:${fromTokenAddress}`,
+      );
+      fromObj = { symbol: fromTokenAddress, usdPrice: '-' };
+    }
+    let toObj = await this.getTokenInfo(Number(chainId), toTokenAddress);
+    if (!toObj) {
+      this.logger.error(
+        `sendNews error : toToken not exists. code:${code}, toTokenAddress:${toTokenAddress}`,
+      );
+      toObj = { symbol: toTokenAddress, usdPrice: '-' };
+    }
     const participants = await this.intentionRecordService.countByCode(code);
+    let linkIndex = 0;
     const captionTemplate = `
 🟢*${news.title.replaceAll('(', '\\(').replaceAll(')', '\\)')}*🟢
-${content.replaceAll('(', '\\(').replaceAll(')', '\\)')}
+${content
+  .replaceAll('(', '\\(')
+  .replaceAll(')', '\\)')
+  .replaceAll('<<LINK>>', () => links[linkIndex++])}
 
 👨‍🍳Trading Strategy: 
 
 📍 ${network}
-➡️ Token From: ${from}
-⬅️ Token To: ${to}
+➡️ Token From: ${fromObj?.symbol}\\(${fromObj?.usdPrice}\\)
+⬅️ Token To: ${toObj?.symbol}\\(${toObj?.usdPrice}\\)
 👥 Participants: $participants
 
 🔥More details Click here to 👉MagicLink TG \\([Go to mini app](${userMiniApp}?startapp=${news.code})\\)
@@ -489,6 +513,7 @@ ${content.replaceAll('(', '\\(').replaceAll(')', '\\)')}
       '$participants',
       participants.toString(),
     );
+    caption = this.formatMarkdownV2(caption);
     if (this.containsChineseCharacters(caption)) {
       newsChannelId = newsChannelIdCn;
     } else {
@@ -502,22 +527,22 @@ ${content.replaceAll('(', '\\(').replaceAll(')', '\\)')}
     if (newsType == 'poll') {
       typeActions = [
         {
-          text: 'Long(0)',
+          text: '👍Pump(0)',
           callback_data: `long_0_0_poll`,
         },
         {
-          text: 'Short(0)',
+          text: '👎Dump(0)',
           callback_data: `short_0_0_poll`,
         },
       ];
     } else {
       typeActions = [
         {
-          text: 'Support(0)',
+          text: '👍Support(0)',
           callback_data: `long_0_0_intent`,
         },
         {
-          text: 'Oppose(0)',
+          text: '👎Oppose(0)',
           callback_data: `short_0_0_intent`,
         },
       ];
@@ -545,7 +570,6 @@ ${content.replaceAll('(', '\\(').replaceAll(')', '\\)')}
     const reply_markup = {
       inline_keyboard: inlineKeyboard,
     };
-    caption = this.formatMarkdownV2(caption);
     try {
       let res = null;
       if (photo === '') {
@@ -614,22 +638,22 @@ ${content.replaceAll('(', '\\(').replaceAll(')', '\\)')}
     if (pollOrIntent == 'poll') {
       inlineKeyboard[0] = [
         {
-          text: `Long(${long})`,
+          text: `👍Pump(${long})`,
           callback_data: `long_${long}_${short}_poll`,
         },
         {
-          text: `Short(${short})`,
+          text: `👎Dump(${short})`,
           callback_data: `short_${long}_${short}_poll`,
         },
       ];
     } else {
       inlineKeyboard[0] = [
         {
-          text: `Support(${long})`,
+          text: `👍Support(${long})`,
           callback_data: `long_${long}_${short}_intent`,
         },
         {
-          text: `Oppose(${short})`,
+          text: `👎Oppose(${short})`,
           callback_data: `short_${long}_${short}_intent`,
         },
       ];
@@ -682,15 +706,32 @@ ${content.replaceAll('(', '\\(').replaceAll(')', '\\)')}
 
   private getOptionsLabelFromValue(
     value: string,
-    options: { label: string; value: string; default: boolean }[],
+    options: { label?: string; value: string; default: boolean }[],
   ) {
     if (options.length > 0) {
       for (const option of options) {
         if (option.value == value) {
-          return option.label;
+          return option?.label ?? option.value;
         }
       }
     }
     return value;
+  }
+
+  private async getTokenInfo(chainId: number, tokenAddress: string) {
+    const cgId = this.coingeckoService.transfChainidToCgid(chainId);
+    if (!cgId) {
+      return null;
+    }
+    const tokenInfo = await this.coingeckoService.getCoinDataByTokenAddress(
+      cgId,
+      tokenAddress,
+    );
+    return tokenInfo
+      ? {
+          symbol: tokenInfo.symbol,
+          usdPrice: tokenInfo.market_data.current_price.usd,
+        }
+      : null;
   }
 }

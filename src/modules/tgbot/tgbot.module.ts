@@ -15,6 +15,7 @@ import { TgbotService } from './tgbot.service';
 import { ActionUrlService } from '../actionUrl/actionUrl.service';
 import { BlinkService } from '../actionUrl/blink.service';
 import { IntentionRecordService } from '../actionUrl/intentionRecord.service';
+import { CoingeckoService } from '../coingecko/coingecko.service';
 
 @Module({
   imports: [UnitOfWorkModule, SharedModule],
@@ -28,6 +29,7 @@ import { IntentionRecordService } from '../actionUrl/intentionRecord.service';
     IntentionRecordService,
     ActionRepository,
     BlinkService,
+    CoingeckoService,
   ],
   exports: [TgbotService],
   controllers: [TgbotController],
