@@ -505,8 +505,8 @@ ${content
 👨‍🍳交易策略:
 
 📍 ${network}
-💧Token From: ${fromObj?.symbol.toUpperCase()} \\(*$${fromObj?.usdPrice}*\\)
-👝Token To: ${toObj?.symbol.toUpperCase()} \\(*$${toObj?.usdPrice}*\\)
+➡️Token From: ${fromObj?.symbol.toUpperCase()} \\(*$${fromObj?.usdPrice}*\\)
+⬅️Token To: ${toObj?.symbol.toUpperCase()} \\(*$${toObj?.usdPrice}*\\)
 👥Participants: $participants
 
 🔥更多信息请到 👉MagicLink TG \\([Go to mini app](${userMiniApp}?startapp=${news.code})\\)
@@ -525,8 +525,8 @@ ${content
 👨‍🍳Trading Strategy:
 
 📍 ${network}
-💧Token From: ${fromObj?.symbol.toUpperCase()} \\(*$${fromObj?.usdPrice}*\\)
-👝Token To: ${toObj?.symbol.toUpperCase()} \\(*$${toObj?.usdPrice}*\\)
+➡️Token From: ${fromObj?.symbol.toUpperCase()} \\(*$${fromObj?.usdPrice}*\\)
+⬅️Token To: ${toObj?.symbol.toUpperCase()} \\(*$${toObj?.usdPrice}*\\)
 👥Participants: $participants
 
 🔥More details Click here to 👉MagicLink TG \\([Go to mini app](${userMiniApp}?startapp=${news.code})\\)
