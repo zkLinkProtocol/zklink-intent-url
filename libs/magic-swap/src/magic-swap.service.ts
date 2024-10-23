@@ -78,9 +78,9 @@ export class MagicSwapService extends ActionDto<FieldTypes> {
     const { additionalData, formData } = data;
     const { code, chainId, account, commissionRate = 0.001 } = additionalData;
 
-    if (!code) {
-      throw Error('Missing code');
-    }
+    // if (!code) {
+    //   throw Error('Missing code');
+    // }
 
     if (!commissionRate) {
       throw Error('Missing commissionRate');
@@ -102,14 +102,14 @@ export class MagicSwapService extends ActionDto<FieldTypes> {
       ];
     }
 
-    const commissionTx = await this.helperService.parseCommissionTx({
-      code,
-      chainId,
-      amount: Number(formData.amountToBuy),
-      token:
-        formData.tokenFrom === ethers.ZeroAddress ? '' : formData.tokenFrom,
-      commissionRate,
-    });
+    // const commissionTx = await this.helperService.parseCommissionTx({
+    //   code,
+    //   chainId,
+    //   amount: Number(formData.amountToBuy),
+    //   token:
+    //     formData.tokenFrom === ethers.ZeroAddress ? '' : formData.tokenFrom,
+    //   commissionRate,
+    // });
 
     const provider = this.chainService.getProvider(chainId);
 
@@ -155,7 +155,7 @@ export class MagicSwapService extends ActionDto<FieldTypes> {
       );
 
       swapTx.requiredTokenAmount = tokens;
-      return [commissionTx, swapTx];
+      return [swapTx];
     } else {
       //buy
       approveTx = await this.okxService.getApproveData(
@@ -173,7 +173,7 @@ export class MagicSwapService extends ActionDto<FieldTypes> {
       );
 
       swapTx.requiredTokenAmount = tokens;
-      return [commissionTx, approveTx, swapTx];
+      return [approveTx, swapTx];
     }
   }
 
