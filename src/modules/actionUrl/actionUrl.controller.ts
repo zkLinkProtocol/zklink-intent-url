@@ -216,15 +216,18 @@ export class ActionUrlController extends BaseController {
     @Body() request: ActionUrlAddRequestDto,
     @GetCreator() creator: { id: bigint; address: string },
   ): Promise<ResponseDto<string>> {
-    this.logger.log(`creator: ` + JSON.stringify(creator));
-
-    // const addressList = this.configService
-    //   .get<string>('NEWS_WHITE_ADDRESS')
-    //   ?.split(',')
-    //   .map((address) => address.toLowerCase());
-    // if (addressList && !addressList?.includes(creator.address)) {
-    //   return this.error('No permission to edit');
-    // }
+    const addressList = this.configService
+      .get<string>('NEWS_WHITE_ADDRESS')
+      ?.split(',')
+      .map((address) => address.toLowerCase());
+    if (
+      addressList &&
+      addressList.length > 0 &&
+      !addressList?.includes(creator.address) &&
+      request.actionId === 'news'
+    ) {
+      return this.error('No permission to create');
+    }
 
     const actionStore = await this.actionService.getActionStore(
       request.actionId,
@@ -246,13 +249,18 @@ export class ActionUrlController extends BaseController {
     @Body() request: ActionUrlUpdateRequestDto,
     @GetCreator() creator: { id: bigint; address: string },
   ): Promise<ResponseDto<string>> {
-    // const addressList = this.configService
-    //   .get<string>('NEWS_WHITE_ADDRESS')
-    //   ?.split(',')
-    //   .map((address) => address.toLowerCase());
-    // if (addressList && !addressList?.includes(creator.address)) {
-    //   return this.error('No permission to edit');
-    // }
+    const addressList = this.configService
+      .get<string>('NEWS_WHITE_ADDRESS')
+      ?.split(',')
+      .map((address) => address.toLowerCase());
+    if (
+      addressList &&
+      addressList.length > 0 &&
+      !addressList?.includes(creator.address) &&
+      request.actionId === 'news'
+    ) {
+      return this.error('No permission to edit');
+    }
 
     const result = await this.actionUrlService.updateByCode(
       code,
@@ -645,7 +653,7 @@ export class ActionUrlController extends BaseController {
     return supportTokens.map((token) => ({
       lable: token.tokenSymbol,
       address: token.tokenContractAddress,
-      decimals: token.tokenSymbol,
+      decimals: token.decimals,
     }));
   }
 }

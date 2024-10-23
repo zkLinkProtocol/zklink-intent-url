@@ -5,3 +5,4 @@ export * from './intention.repository';
 export * from './intentionRecord.repository';
 export * from './intentionRecordTx.repository';
 export * from './commission.repository';
+export * from './tgMessage.repository';

@@ -86,6 +86,24 @@ export class IntentionRecordService {
     return res ? res.length : 0;
   }
 
+  async countByCodes(codes: string[]): Promise<{ [key: string]: number }> {
+    if (codes.length === 0) {
+      return {};
+    }
+    const res = await this.intentionRecordRepository.countByCodes(codes);
+    const countByCode: { [key: string]: number } = {};
+    res.forEach((record) => {
+      countByCode[record.code] = parseInt(record.count, 10);
+    });
+    codes.forEach((code) => {
+      if (!(code in countByCode)) {
+        countByCode[code] = 0;
+      }
+    });
+
+    return countByCode;
+  }
+
   async add(
     code: string,
     params: IntentionRecordAddRequestDto,
