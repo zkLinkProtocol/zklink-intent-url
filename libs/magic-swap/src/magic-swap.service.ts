@@ -102,14 +102,14 @@ export class MagicSwapService extends ActionDto<FieldTypes> {
       ];
     }
 
-    const commissionTx = await this.helperService.parseCommissionTx({
-      code,
-      chainId,
-      amount: Number(formData.amountToBuy),
-      token:
-        formData.tokenFrom === ethers.ZeroAddress ? '' : formData.tokenFrom,
-      commissionRate,
-    });
+    // const commissionTx = await this.helperService.parseCommissionTx({
+    //   code,
+    //   chainId,
+    //   amount: Number(formData.amountToBuy),
+    //   token:
+    //     formData.tokenFrom === ethers.ZeroAddress ? '' : formData.tokenFrom,
+    //   commissionRate,
+    // });
 
     const provider = this.chainService.getProvider(chainId);
 
