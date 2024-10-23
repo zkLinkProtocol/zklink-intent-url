@@ -151,7 +151,7 @@ export class ActionService implements OnApplicationBootstrap {
           intentions,
         } = actionMetadata;
         const actionStore = this.getActionStore(id);
-        if (await this.checkActionWhitelist(id, account)) {
+        if (!(await this.checkActionWhitelist(id, account))) {
           return;
         }
 
