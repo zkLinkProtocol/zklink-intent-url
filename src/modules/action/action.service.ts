@@ -126,6 +126,7 @@ export class ActionService implements OnApplicationBootstrap {
     const metadata = await actionStore.getMetadata();
     if (
       metadata.whiteList &&
+      metadata.whiteList.length > 0 &&
       !metadata.whiteList
         .map((address) => address.toLowerCase())
         .includes(account.toLowerCase())

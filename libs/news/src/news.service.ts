@@ -1,6 +1,7 @@
 import { RegistryPlug } from '@action/registry';
 import { ChainService, OKXService } from '@core/shared';
 import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Contract, ethers } from 'ethers';
 import {
   Action as ActionDto,
@@ -24,6 +25,7 @@ export class NewsService extends ActionDto<FieldTypes> {
     private readonly tgbotService: TgbotService,
     private readonly okxService: OKXService,
     private readonly chainService: ChainService,
+    private readonly configService: ConfigService,
   ) {
     super();
   }
@@ -36,15 +38,16 @@ export class NewsService extends ActionDto<FieldTypes> {
         Chains.EthereumMainnet,
         Chains.ArbitrumOne,
         Chains.OpMainnet,
-        Chains.ZkSync,
-        Chains.Mantle,
         Chains.Linea,
         Chains.Base,
-        Chains.ScrollMainnet,
         Chains.MantaPacificMainnet,
       ]),
       author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
       magicLinkMetadata: {},
+      whiteList: this.configService
+        .get<string>('NEWS_WHITE_ADDRESS')
+        ?.split(',')
+        .map((address) => address.toLowerCase()),
       intent: {
         binding: 'amountToBuy',
         components: [
