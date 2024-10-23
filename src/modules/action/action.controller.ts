@@ -54,20 +54,9 @@ export class ActionController extends BaseController {
   async findAll(
     @GetCreator() creator: { address: string },
   ): Promise<ResponseDto<ActionResponseDto[]>> {
-    let actions = await this.actionService.getAllActionMetadata();
-
-    const addressList = this.configService
-      .get<string>('NEWS_WHITE_ADDRESS')
-      ?.split(',')
-      .map((address) => address.toLowerCase());
-    if (
-      !creator ||
-      (addressList &&
-        addressList.length > 0 &&
-        !addressList.includes(creator.address))
-    ) {
-      actions = actions.filter((action) => action.id !== 'news');
-    }
+    const actions = await this.actionService.getAllActionMetadata(
+      creator.address,
+    );
 
     return this.success(actions);
   }

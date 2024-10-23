@@ -437,6 +437,13 @@ export class ActionMetadata<
   })
   @IsOptional()
   maxCommission?: number;
+
+  @ApiProperty({
+    type: Array<string>,
+    description: `Only specific users are allowed to configure the magic link.`,
+  })
+  @IsOptional()
+  whiteList?: Array<string>;
 }
 
 export function isOptionComponentDto<R extends Record<string, any>>(

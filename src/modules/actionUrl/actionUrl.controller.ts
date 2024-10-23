@@ -216,24 +216,18 @@ export class ActionUrlController extends BaseController {
     @Body() request: ActionUrlAddRequestDto,
     @GetCreator() creator: { id: bigint; address: string },
   ): Promise<ResponseDto<string>> {
-    const addressList = this.configService
-      .get<string>('NEWS_WHITE_ADDRESS')
-      ?.split(',')
-      .map((address) => address.toLowerCase());
-    if (
-      addressList &&
-      addressList.length > 0 &&
-      !addressList?.includes(creator.address) &&
-      request.actionId === 'news'
-    ) {
-      return this.error('No permission to create');
-    }
-
     const actionStore = await this.actionService.getActionStore(
       request.actionId,
     );
     if (!actionStore) {
       return this.error('Action not found');
+    }
+    const whiteListPermission = await this.actionService.checkActionWhitelist(
+      request.actionId,
+      creator.address,
+    );
+    if (!whiteListPermission) {
+      return this.error('No permission to create');
     }
     const active = actionStore.onMagicLinkCreated ? false : true;
     const requestData = { ...request, active };
@@ -249,16 +243,11 @@ export class ActionUrlController extends BaseController {
     @Body() request: ActionUrlUpdateRequestDto,
     @GetCreator() creator: { id: bigint; address: string },
   ): Promise<ResponseDto<string>> {
-    const addressList = this.configService
-      .get<string>('NEWS_WHITE_ADDRESS')
-      ?.split(',')
-      .map((address) => address.toLowerCase());
-    if (
-      addressList &&
-      addressList.length > 0 &&
-      !addressList?.includes(creator.address) &&
-      request.actionId === 'news'
-    ) {
+    const whiteListPermission = await this.actionService.checkActionWhitelist(
+      code,
+      creator.address,
+    );
+    if (!whiteListPermission) {
       return this.error('No permission to edit');
     }
 

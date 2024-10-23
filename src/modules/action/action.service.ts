@@ -121,10 +121,24 @@ export class ActionService implements OnApplicationBootstrap {
     };
   }
 
-  async getAllActionMetadata() {
+  public async checkActionWhitelist(actionId: string, account: string) {
+    const actionStore = this.getActionStore(actionId);
+    const metadata = await actionStore.getMetadata();
+    if (
+      metadata.whiteList &&
+      !metadata.whiteList
+        .map((address) => address.toLowerCase())
+        .includes(account.toLowerCase())
+    ) {
+      return false;
+    }
+    return true;
+  }
+
+  async getAllActionMetadata(account: string) {
     const allActionMetadataRaw = await this.actionRepository.getAllActions();
-    const allActionMetadata = allActionMetadataRaw.map(
-      async (actionMetadata) => {
+    const allActionMetadata = await Promise.all(
+      allActionMetadataRaw.map(async (actionMetadata) => {
         const {
           id,
           logo,
@@ -136,7 +150,12 @@ export class ActionService implements OnApplicationBootstrap {
           intentions,
         } = actionMetadata;
         const actionStore = this.getActionStore(id);
+        if (await this.checkActionWhitelist(id, account)) {
+          return;
+        }
+
         const hasPostTxs = !!actionStore.onMagicLinkCreated;
+
         return {
           id,
           logo,
@@ -148,9 +167,9 @@ export class ActionService implements OnApplicationBootstrap {
           interaction: intentionRecords.length,
           hasPostTxs,
         };
-      },
+      }),
     );
-    return Promise.all(allActionMetadata);
+    return await allActionMetadata.filter((item) => !!item);
   }
 
   getActionStore(id: ActionId): Action {
