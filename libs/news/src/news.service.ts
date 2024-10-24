@@ -8,7 +8,7 @@ import {
   ActionMetadata,
   GenerateTransactionParams,
   TransactionInfo,
-  ValidateFormData,
+  UpdateFieldType,
 } from 'src/common/dto';
 import { Chains } from 'src/constants';
 import { TgbotService } from 'src/modules/tgbot/tgbot.service';
@@ -174,30 +174,32 @@ export class NewsService extends ActionDto<FieldTypes> {
   }
 
   async validateFormData(
-    formData: ValidateFormData<FieldTypes>,
+    formData: UpdateFieldType<FieldTypes, 'amountToBuy'>,
   ): Promise<ErrorMessage> {
-    if (!this.isNumeric(formData.amountToBuy)) return 'Amount must be a number';
-
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    //@ts-ignore
-    let chainId = formData.chainId;
+    const chainId = formData.chainId;
     if (!chainId) {
       return 'Missing chainId';
     }
-    chainId = Number(chainId);
+    for (const amount of formData.amountToBuy) {
+      if (!this.isNumeric(amount)) return 'Amount must be a number';
 
-    const checkParasm: GenerateTransactionParams<FieldTypes> = {
-      additionalData: {
-        chainId,
-        // just for pre-check swap conditions,it can be any address
-        account: '0xA510dbc9aC79a686EBB78cDaE791d91F3f45b3a9',
-      },
-      formData,
-    };
-    try {
-      await this.generateTransaction(checkParasm);
-    } catch (err) {
-      return err.toString();
+      const checkParasm: GenerateTransactionParams<FieldTypes> = {
+        additionalData: {
+          chainId,
+          // just for pre-check swap conditions,it can be any address
+          account: '0xA510dbc9aC79a686EBB78cDaE791d91F3f45b3a9',
+        },
+        formData: {
+          amountToBuy: amount,
+          tokenFrom: formData.tokenFrom,
+          tokenTo: formData.tokenTo,
+        },
+      };
+      try {
+        await this.generateTransaction(checkParasm);
+      } catch (err) {
+        return err.toString();
+      }
     }
     return '';
   }
