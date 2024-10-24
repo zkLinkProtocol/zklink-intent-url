@@ -27,7 +27,7 @@ export class MagicSwapService extends ActionDto<FieldTypes> {
 
   async getMetadata(): Promise<ActionMetadata<FieldTypes>> {
     return {
-      title: 'Magic Swap',
+      title: 'Swap via OKX swap',
       description:
         '<div>Perform news seamlessly across multiple networks</div>',
       networks: this.chainService.buildSupportedNetworks([
