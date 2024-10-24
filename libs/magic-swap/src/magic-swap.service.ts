@@ -213,7 +213,7 @@ export class MagicSwapService extends ActionDto<FieldTypes> {
         tokenInAddress,
         formData.tokenTo,
         ethers.parseUnits(
-          Number(formData.amountToBuy).toFixed(decimals),
+          Number(formData.amountToBuy).toFixed(Number(decimals)),
           decimals,
         ),
       );
