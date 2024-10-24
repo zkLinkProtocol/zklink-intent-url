@@ -45,6 +45,7 @@ export class PreSaleService extends ActionDto<FieldTypes> {
       author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
       magicLinkMetadata: {},
       intent: {
+        binding: 'offerAmount',
         components: [
           {
             name: 'tokenName',
