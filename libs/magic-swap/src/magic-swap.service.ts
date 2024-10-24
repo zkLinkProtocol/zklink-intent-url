@@ -8,7 +8,7 @@ import {
   ActionMetadata,
   GenerateTransactionParams,
   TransactionInfo,
-  ValidateFormData,
+  UpdateFieldType,
 } from 'src/common/dto';
 import { Chains } from 'src/constants';
 import { ErrorMessage } from 'src/types';
@@ -178,26 +178,18 @@ export class MagicSwapService extends ActionDto<FieldTypes> {
   }
 
   async validateFormData(
-    formData: ValidateFormData<FieldTypes>,
+    formData: UpdateFieldType<FieldTypes, 'amountToBuy'>,
   ): Promise<ErrorMessage> {
-    if (!this.isNumeric(formData.amountToBuy)) return 'Amount must be a number';
-    const checkParasm: GenerateTransactionParams<FieldTypes> = {
-      additionalData: {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        //@ts-ignore
-        chainId: formData.chainId,
-        // just for pre-check swap conditions,it can be any address
-        account: '0xA510dbc9aC79a686EBB78cDaE791d91F3f45b3a9',
-      },
-      formData,
-    };
+    for (const amountToBuy of formData.amountToBuy) {
+      if (!this.isNumeric(amountToBuy)) return 'Amount must be a number';
+    }
+    const chainId = formData.chainId;
+    const mockAccount = '0xA510dbc9aC79a686EBB78cDaE791d91F3f45b3a9';
 
     let decimals;
     let tokenInAddress = formData.tokenFrom;
 
-    const provider = this.chainService.getProvider(
-      checkParasm.additionalData.chainId,
-    );
+    const provider = this.chainService.getProvider(chainId);
     if (formData.tokenFrom === ethers.ZeroAddress) {
       tokenInAddress = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
       decimals = 18;
@@ -207,16 +199,18 @@ export class MagicSwapService extends ActionDto<FieldTypes> {
     }
 
     try {
-      await this.okxService.getSwapData(
-        checkParasm.additionalData.account!,
-        checkParasm.additionalData.chainId,
-        tokenInAddress,
-        formData.tokenTo,
-        ethers.parseUnits(
-          Number(formData.amountToBuy).toFixed(Number(decimals)),
-          decimals,
-        ),
-      );
+      for (const amountToBuy of formData.amountToBuy) {
+        await this.okxService.getSwapData(
+          mockAccount,
+          chainId,
+          tokenInAddress,
+          formData.tokenTo,
+          ethers.parseUnits(
+            Number(amountToBuy).toFixed(Number(decimals)),
+            decimals,
+          ),
+        );
+      }
     } catch (err) {
       return err.toString();
     }
