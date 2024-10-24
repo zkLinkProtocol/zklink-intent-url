@@ -64,6 +64,8 @@ export abstract class Action<
    * this allows you to run your custom validation logic,
    * providing complex validation for the parameters used to create the magic link,
    * rather than just simple regular expressions.
+   *
+   * When you set a key from type T as a "binding" property, you should use UpdateFieldType<T, key>.
    */
   async validateFormData(
     _: GenerateFormParams<T> | UpdateFieldType<T, any>,
