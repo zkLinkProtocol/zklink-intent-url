@@ -39,12 +39,10 @@ export type GenerateTransactionParams<
 
 export type UpdateFieldType<
   T extends Record<string, any>, // This is the type used in GenerateFormParams
-  K extends keyof T | undefined, // The field to modify (optional)
-> = K extends keyof T
-  ? Omit<ValidateFormData<T>, K> & {
-      [key in K]: T[K][];
-    } // If field is provided, set it to an array of its original type
-  : ValidateFormData<T>;
+  K extends keyof T, // The field to modify (optional)
+> = Omit<ValidateFormData<T>, K> & {
+  [key in K]: T[K][];
+};
 
 export abstract class Action<
   T extends Record<string, any> = Record<string, any>,
