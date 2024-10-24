@@ -6,9 +6,9 @@ import { ethers } from 'ethers';
 import {
   Action as ActionDto,
   ActionMetadata,
-  GenerateFormParams,
   GenerateTransactionParams,
   TransactionInfo,
+  ValidateFormData,
 } from 'src/common/dto';
 import { Chains } from 'src/constants';
 import { ErrorMessage } from 'src/types';
@@ -178,7 +178,7 @@ export class MagicSwapService extends ActionDto<FieldTypes> {
   }
 
   async validateFormData(
-    formData: GenerateFormParams<FieldTypes>,
+    formData: ValidateFormData<FieldTypes>,
   ): Promise<ErrorMessage> {
     if (!this.isNumeric(formData.amountToBuy)) return 'Amount must be a number';
     const checkParasm: GenerateTransactionParams<FieldTypes> = {

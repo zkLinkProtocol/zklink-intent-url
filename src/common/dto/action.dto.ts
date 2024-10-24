@@ -20,6 +20,10 @@ export type GenerateFormParams<
   [key in keyof T]: T[key];
 };
 
+export type ValidateFormData<
+  T extends Record<string, any> = Record<string, any>,
+> = GenerateFormParams<T> & NetworkAdditionalParams;
+
 export type AdditionalParams = BasicAdditionalParams & NetworkAdditionalParams;
 
 export type ActionTransactionParams<
@@ -35,12 +39,10 @@ export type GenerateTransactionParams<
 
 export type UpdateFieldType<
   T extends Record<string, any>, // This is the type used in GenerateFormParams
-  K extends keyof T | undefined, // The field to modify (optional)
-> = K extends keyof T
-  ? Omit<GenerateFormParams<T>, K> & {
-      [key in K]: T[K][];
-    } & NetworkAdditionalParams // If field is provided, set it to an array of its original type
-  : GenerateFormParams<T> & NetworkAdditionalParams;
+  K extends keyof T, // The field to modify (optional)
+> = Omit<ValidateFormData<T>, K> & {
+  [key in K]: T[K][];
+};
 
 export abstract class Action<
   T extends Record<string, any> = Record<string, any>,
@@ -70,7 +72,7 @@ export abstract class Action<
    * When you set a key from type T as a "binding" property, you should use UpdateFieldType<T, key>.
    */
   async validateFormData(
-    _: GenerateFormParams<T> | UpdateFieldType<T, any>,
+    _: ValidateFormData<T> | UpdateFieldType<T, keyof T>,
   ): Promise<ErrorMessage> {
     return '';
   }

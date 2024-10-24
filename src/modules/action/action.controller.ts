@@ -11,7 +11,7 @@ import {
 
 import { BaseController } from 'src/common/base.controller';
 import { CommonApiOperation } from 'src/common/base.decorators';
-import { ActionMetadata, GenerateFormParams } from 'src/common/dto';
+import { ActionMetadata, ValidateFormData } from 'src/common/dto';
 import { ResponseDto } from 'src/common/response.dto';
 
 import { ActionService } from './action.service';
@@ -121,7 +121,7 @@ export class ActionController extends BaseController {
   async validateTransaction(
     @Param('id') id: string,
     @Body()
-    body: GenerateFormParams,
+    body: ValidateFormData,
   ): Promise<ResponseDto<string>> {
     const actionStore = await this.actionService.getActionStore(id);
     const response = await actionStore.validateFormData(body);

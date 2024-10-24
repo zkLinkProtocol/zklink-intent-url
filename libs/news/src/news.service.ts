@@ -6,9 +6,9 @@ import { Contract, ethers } from 'ethers';
 import {
   Action as ActionDto,
   ActionMetadata,
-  GenerateFormParams,
   GenerateTransactionParams,
   TransactionInfo,
+  ValidateFormData,
 } from 'src/common/dto';
 import { Chains } from 'src/constants';
 import { TgbotService } from 'src/modules/tgbot/tgbot.service';
@@ -30,11 +30,6 @@ export class NewsService extends ActionDto<FieldTypes> {
     super();
   }
   async getMetadata(): Promise<ActionMetadata<FieldTypes>> {
-    const whiteListConfig =
-      this.configService.get<string>('NEWS_WHITE_ADDRESS');
-    const whiteList = whiteListConfig
-      ? whiteListConfig.split(',').map((address) => address.toLowerCase())
-      : [];
     return {
       title: 'Magic News',
       description:
@@ -48,7 +43,11 @@ export class NewsService extends ActionDto<FieldTypes> {
         Chains.MantaPacificMainnet,
       ]),
       author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
-      whiteList: whiteList,
+      magicLinkMetadata: {},
+      whiteList: this.configService
+        .get<string>('NEWS_WHITE_ADDRESS')
+        ?.split(',')
+        .map((address) => address.toLowerCase()),
       intent: {
         binding: 'amountToBuy',
         components: [
@@ -175,7 +174,7 @@ export class NewsService extends ActionDto<FieldTypes> {
   }
 
   async validateFormData(
-    formData: GenerateFormParams<FieldTypes>,
+    formData: ValidateFormData<FieldTypes>,
   ): Promise<ErrorMessage> {
     if (!this.isNumeric(formData.amountToBuy)) return 'Amount must be a number';
 
