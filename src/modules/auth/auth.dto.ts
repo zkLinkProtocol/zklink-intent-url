@@ -1,6 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString } from 'class-validator';
 
+import { WebAppInitData } from './auth.type';
+
 // request dto
 export class RegisterByPrivatekeyRequestDto {
   @ApiProperty({
@@ -72,6 +74,39 @@ export class LoginByPrivatekeyRequestDto {
   @IsNotEmpty()
   @IsString()
   message: string;
+
+  @ApiProperty({
+    name: 'signature',
+    description: 'Signed string.',
+    example: '0x1234567890abcdef1234567890abcdef12345678',
+  })
+  @IsNotEmpty()
+  @IsString()
+  signature: string;
+}
+
+export class BindTgUserIdRequestDto {
+  @ApiProperty({
+    name: 'address',
+    description: 'Address.',
+    example: '0x1234567890abcdef1234567890abcdef12345678',
+  })
+  @IsNotEmpty()
+  @IsString()
+  address: string;
+
+  @ApiProperty({
+    name: 'initData',
+    description: 'telegrame mini app initData.',
+    example: '',
+  })
+  initData: string;
+
+  @ApiProperty({
+    name: 'initDataUnsafe',
+    description: 'telegrame mini app initDataUnsafe.',
+  })
+  initDataUnsafe: WebAppInitData;
 
   @ApiProperty({
     name: 'signature',

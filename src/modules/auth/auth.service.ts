@@ -1,13 +1,18 @@
+import { createHmac } from 'crypto';
+
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { TSignedRequest } from '@turnkey/sdk-server';
 import { verifyMessage } from 'ethers';
 
-import { ConfigType } from 'src/config';
+import configFactory, { ConfigType } from 'src/config';
 import { Creator, CreatorStatus } from 'src/entities/creator.entity';
 import { BusinessException } from 'src/exception/business.exception';
+import { UserRepository } from 'src/repositories';
 import { CreatorRepository } from 'src/repositories/creator.repository';
+
+import { WebAppInitData } from './auth.type';
 
 @Injectable()
 export class AuthService {
@@ -16,6 +21,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly creatorRepository: CreatorRepository,
     private readonly configService: ConfigService<ConfigType>,
+    private readonly userRepository: UserRepository,
   ) {
     this.logger = new Logger(AuthService.name);
   }
@@ -163,5 +169,60 @@ export class AuthService {
     } catch (error) {
       return false;
     }
+  }
+
+  async bindTgUserId(
+    address: string,
+    signature: string,
+    initData: string,
+    initDataUnsafe: WebAppInitData,
+  ) {
+    const hash = initDataUnsafe.hash;
+    const tgUserId = initDataUnsafe.user.id.toString();
+    const tgUserName = initDataUnsafe.user.username;
+
+    // check address is valids
+    const message = `${address}${initData}${hash}`;
+    const validateAddressStatus = await this.validatePrivatekey(
+      address,
+      message,
+      signature,
+    );
+    if (!validateAddressStatus) {
+      throw new BusinessException('Invalid signature');
+    }
+
+    // check initData is valids
+    const config = await configFactory();
+    const token = config.tgbot.token as string;
+    const secretKey = this.hmacSHA256(token, 'WebAppData');
+    const computedHash = this.hmacSHA256(initData, secretKey);
+    if (computedHash !== hash) {
+      throw new BusinessException('Invalid initData');
+    }
+
+    // update creator
+    try {
+      await this.userRepository.upsert(
+        {
+          address,
+          tgUserId,
+          tgUserName,
+        },
+        true,
+        ['address'],
+      );
+    } catch (err) {
+      this.logger.error(
+        `update creator ${address} failed,address:${address},tgUserId:${tgUserId},tgUserName:${tgUserName}`,
+      );
+      throw new BusinessException(`update creator ${address} failed`);
+    }
+
+    return true;
+  }
+
+  private hmacSHA256(data: string, key: string) {
+    return createHmac('sha256', key).update(data).digest('hex');
   }
 }

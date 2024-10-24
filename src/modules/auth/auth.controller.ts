@@ -10,6 +10,7 @@ import { ResponseDto } from 'src/common/response.dto';
 import { BusinessException } from 'src/exception/business.exception';
 
 import {
+  BindTgUserIdRequestDto,
   LoginByPasskeyResponseDto,
   LoginByPrivatekeyRequestDto,
   LoginByPrivatekeyResponseDto,
@@ -75,6 +76,20 @@ export class AuthController extends BaseController {
       accessToken: result.accessToken,
       expiresIn: result.expiresIn,
     });
+  }
+
+  @Post('bind/tg')
+  @CommonApiOperation('Bind tguserid and address.')
+  async bindTgUserId(
+    @Body() params: BindTgUserIdRequestDto,
+  ): Promise<ResponseDto<boolean>> {
+    const res = await this.authService.bindTgUserId(
+      params.address,
+      params.signature,
+      params.initData,
+      params.initDataUnsafe,
+    );
+    return this.success(res);
   }
 
   @Get('message')

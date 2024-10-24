@@ -13,6 +13,7 @@ import {
   CreatorRepository,
   IntentionRepository,
   TgMessageRepository,
+  UserRepository,
 } from 'src/repositories';
 
 import { ActionUrlService } from '../actionUrl/actionUrl.service';
@@ -40,6 +41,7 @@ export class TgbotService implements OnModuleInit {
     private readonly coingeckoService: CoingeckoService,
     private readonly chainService: ChainService,
     private readonly tgMessageRepository: TgMessageRepository,
+    private readonly userRepository: UserRepository,
   ) {}
 
   async update(body: any) {
@@ -199,11 +201,11 @@ export class TgbotService implements OnModuleInit {
   async onPortfolio(tgUserId: string) {
     const config = await configFactory();
     const userMiniApp = config.tgbot.userMiniApp;
-    const creator = await this.creatorRepository.findOneBy({ tgUserId });
+    const user = await this.userRepository.findOneBy({ tgUserId });
     let walletAddress = '';
     let ethBalance = BigInt(0);
-    if (creator) {
-      walletAddress = creator.address;
+    if (user) {
+      walletAddress = user.address;
       try {
         const novaProvider = this.chainService.getProvider(Chains.ZkLinkNova);
         ethBalance = await novaProvider.getBalance(walletAddress);
