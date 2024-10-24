@@ -43,6 +43,7 @@ export class MintNftService extends ActionDto<FieldTypes> {
           'Magic Link Enthusiast | Donate with your love for zkLink magic',
       },
       intent: {
+        binding: true,
         components: [
           {
             name: 'contract',

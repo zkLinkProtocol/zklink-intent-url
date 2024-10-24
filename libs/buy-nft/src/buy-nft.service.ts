@@ -38,6 +38,7 @@ export class BuyNftService extends ActionDto<FieldTypes> {
         description: '',
       },
       intent: {
+        binding: 'queryValue',
         components: [
           {
             name: 'queryType',
