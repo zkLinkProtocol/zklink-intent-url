@@ -34,6 +34,7 @@ export class CrossChainSwapService extends ActionDto<FieldTypes> {
       author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
       magicLinkMetadata: {},
       intent: {
+        binding: 'amountToBuy',
         components: [
           {
             name: 'amountToBuy',
