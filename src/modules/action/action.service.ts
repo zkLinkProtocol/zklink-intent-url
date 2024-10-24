@@ -121,18 +121,24 @@ export class ActionService implements OnApplicationBootstrap {
     };
   }
 
-  public async checkActionWhitelist(actionId: string, account: string) {
+  public async checkActionWhitelist(actionId: string, account?: string) {
     const actionStore = this.getActionStore(actionId);
     const metadata = await actionStore.getMetadata();
-    if (
-      metadata.whiteList &&
-      metadata.whiteList.length > 0 &&
-      !metadata.whiteList
+
+    if (!metadata.whiteList) {
+      return true;
+    }
+
+    if (metadata.whiteList.length > 0 && account) {
+      return metadata.whiteList
         .map((address) => address.toLowerCase())
-        .includes(account.toLowerCase())
-    ) {
+        .includes(account.toLowerCase());
+    }
+
+    if (metadata.whiteList.length > 0 && !account) {
       return false;
     }
+
     return true;
   }
 
