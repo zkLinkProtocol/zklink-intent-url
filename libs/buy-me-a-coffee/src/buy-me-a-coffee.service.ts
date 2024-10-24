@@ -1,6 +1,7 @@
 import { RegistryPlug } from '@action/registry';
 import { ChainService, DataService } from '@core/shared';
 import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import {
   Contract,
   dataSlice,
@@ -18,6 +19,7 @@ import {
   TransactionInfo,
   isOptionComponentDto,
 } from 'src/common/dto';
+import { ConfigType } from 'src/config';
 import { Chains } from 'src/constants';
 import {
   IntentionRecordTx,
@@ -31,32 +33,151 @@ import { FieldTypes, TransactionResult } from './types';
 @Injectable()
 export class BuyMeACoffeeService extends ActionDto<FieldTypes> {
   private readonly logger = new Logger(BuyMeACoffeeService.name);
+  readonly env: ConfigType['env'];
+
   constructor(
+    private readonly configService: ConfigService,
     private readonly dataService: DataService,
     private readonly chainService: ChainService,
   ) {
     super();
+    this.env = this.configService.get('env', { infer: true })!;
   }
 
   async getMetadata(): Promise<ActionMetadata<FieldTypes>> {
-    return {
-      title: 'Buy me a coffee ☕',
-      description:
-        '<div>This action allows you to create a Magic Link to receive donations</div>',
-      networks: this.chainService.buildSupportedNetworks([
-        Chains.EthereumMainnet,
-        Chains.Linea,
-        Chains.Base,
-        Chains.MantaPacificMainnet,
-        Chains.OpMainnet,
-        Chains.ScrollMainnet,
-        Chains.ArbitrumOne,
-        Chains.ZkLinkNova,
+    const supportedNetwork = [
+      Chains.EthereumMainnet,
+      Chains.Linea,
+      Chains.Base,
+      Chains.MantaPacificMainnet,
+      Chains.OpMainnet,
+      Chains.ScrollMainnet,
+      Chains.ArbitrumOne,
+      Chains.ZkLinkNova,
+    ];
+    const supportedToken = [
+      {
+        label: 'ETH',
+        value: '',
+        chainId: Chains.ArbitrumOne,
+        default: true,
+      },
+      {
+        label: 'USDT',
+        value: '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9',
+        chainId: Chains.ArbitrumOne,
+      },
+      {
+        label: 'USDC',
+        value: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831',
+        chainId: Chains.ArbitrumOne,
+      },
+      {
+        label: 'ETH',
+        value: '',
+        chainId: Chains.ZkLinkNova,
+        default: true,
+      },
+      {
+        label: 'USDT',
+        value: '0x2F8A25ac62179B31D62D7F80884AE57464699059',
+        chainId: Chains.ZkLinkNova,
+      },
+      {
+        label: 'USDC',
+        value: '0x1a1A3b2ff016332e866787B311fcB63928464509',
+        chainId: Chains.ZkLinkNova,
+      },
+
+      {
+        label: 'ETH',
+        value: '',
+        chainId: Chains.EthereumMainnet,
+      },
+      {
+        label: 'ETH',
+        value: '',
+        chainId: Chains.Base,
+      },
+      {
+        label: 'ETH',
+        value: '',
+        chainId: Chains.Linea,
+      },
+      {
+        label: 'ETH',
+        value: '',
+        chainId: Chains.MantaPacificMainnet,
+      },
+      {
+        label: 'ETH',
+        value: '',
+        chainId: Chains.OpMainnet,
+      },
+      {
+        label: 'ETH',
+        value: '',
+        chainId: Chains.ScrollMainnet,
+      },
+    ];
+    if (this.env === 'dev') {
+      supportedNetwork.push(
         Chains.ZkLinkNovaSepolia,
         Chains.ZklinkDev,
         Chains.BaseSepolia,
         Chains.ArbitrumSepolia,
-      ]),
+      );
+      supportedToken.push(
+        {
+          label: 'ETH',
+          value: '',
+          chainId: Chains.ZkLinkNovaSepolia,
+          default: true,
+        },
+        {
+          label: 'USDT',
+          value: '0x0efDC9f3948BE4509e8c57d49Df97660CF038F9a',
+          chainId: Chains.ZkLinkNovaSepolia,
+        },
+        {
+          label: 'USDC',
+          value: '0xAC4a95747cB3f291BC4a26630862FfA0A4b01B44',
+          chainId: Chains.ZkLinkNovaSepolia,
+        },
+        {
+          label: 'ETH',
+          value: '',
+          chainId: Chains.ZklinkDev,
+          default: true,
+        },
+        {
+          label: 'USDT',
+          value: '0xDBBD57f02DdbC9f1e2B80D8DAcfEC34BC8B287e3',
+          chainId: Chains.ZklinkDev,
+        },
+        {
+          label: 'USDC',
+          value: '0x09B141F8a41BA6d2A0Ec1d55d67De3C8f3846921',
+          chainId: Chains.ZklinkDev,
+        },
+        {
+          label: 'ETH',
+          value: '',
+          chainId: Chains.BaseSepolia,
+        },
+        {
+          label: 'ETH',
+          value: '',
+          chainId: Chains.ArbitrumSepolia,
+        },
+      );
+    }
+
+    return {
+      title: 'Buy me a coffee ☕',
+      description:
+        '<div>This action allows you to create a Magic Link to receive donations</div>',
+      networks: this.chainService.buildSupportedNetworks(supportedNetwork),
       author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
       magicLinkMetadata: {
         title: 'Buy me a coffee ☕',
@@ -71,112 +192,7 @@ export class BuyMeACoffeeService extends ActionDto<FieldTypes> {
             label: 'Token',
             desc: 'The token you want to cost',
             type: 'searchSelect',
-            options: [
-              {
-                label: 'ETH',
-                value: '',
-                chainId: Chains.ArbitrumOne,
-                default: true,
-              },
-              {
-                label: 'USDT',
-                value: '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9',
-                chainId: Chains.ArbitrumOne,
-              },
-              {
-                label: 'USDC',
-                value: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831',
-                chainId: Chains.ArbitrumOne,
-              },
-              {
-                label: 'ETH',
-                value: '',
-                chainId: Chains.ZkLinkNova,
-                default: true,
-              },
-              {
-                label: 'USDT',
-                value: '0x2F8A25ac62179B31D62D7F80884AE57464699059',
-                chainId: Chains.ZkLinkNova,
-              },
-              {
-                label: 'USDC',
-                value: '0x1a1A3b2ff016332e866787B311fcB63928464509',
-                chainId: Chains.ZkLinkNova,
-              },
-              {
-                label: 'ETH',
-                value: '',
-                chainId: Chains.ZkLinkNovaSepolia,
-                default: true,
-              },
-              {
-                label: 'USDT',
-                value: '0x0efDC9f3948BE4509e8c57d49Df97660CF038F9a',
-                chainId: Chains.ZkLinkNovaSepolia,
-              },
-              {
-                label: 'USDC',
-                value: '0xAC4a95747cB3f291BC4a26630862FfA0A4b01B44',
-                chainId: Chains.ZkLinkNovaSepolia,
-              },
-              {
-                label: 'ETH',
-                value: '',
-                chainId: Chains.ZklinkDev,
-                default: true,
-              },
-              {
-                label: 'USDT',
-                value: '0xDBBD57f02DdbC9f1e2B80D8DAcfEC34BC8B287e3',
-                chainId: Chains.ZklinkDev,
-              },
-              {
-                label: 'USDC',
-                value: '0x09B141F8a41BA6d2A0Ec1d55d67De3C8f3846921',
-                chainId: Chains.ZklinkDev,
-              },
-              {
-                label: 'ETH',
-                value: '',
-                chainId: Chains.BaseSepolia,
-              },
-              {
-                label: 'ETH',
-                value: '',
-                chainId: Chains.ArbitrumSepolia,
-              },
-              {
-                label: 'ETH',
-                value: '',
-                chainId: Chains.EthereumMainnet,
-              },
-              {
-                label: 'ETH',
-                value: '',
-                chainId: Chains.Base,
-              },
-              {
-                label: 'ETH',
-                value: '',
-                chainId: Chains.Linea,
-              },
-              {
-                label: 'ETH',
-                value: '',
-                chainId: Chains.MantaPacificMainnet,
-              },
-              {
-                label: 'ETH',
-                value: '',
-                chainId: Chains.OpMainnet,
-              },
-              {
-                label: 'ETH',
-                value: '',
-                chainId: Chains.ScrollMainnet,
-              },
-            ],
+            options: supportedToken,
           },
           {
             name: 'value',
