@@ -69,6 +69,7 @@ export class PumpFunService extends ActionDto<FieldTypes> {
       author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
       magicLinkMetadata: {},
       intent: {
+        binding: 'orderType',
         components: [
           {
             name: 'tokenName',
