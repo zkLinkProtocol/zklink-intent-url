@@ -17,9 +17,9 @@ import {
   Action as ActionDto,
   ActionMetadata,
   BasicAdditionalParams,
-  GenerateFormParams,
   GenerateTransactionParams,
   TransactionInfo,
+  ValidateFormData,
 } from 'src/common/dto';
 import { ConfigType } from 'src/config';
 import {
@@ -153,7 +153,7 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
     };
   }
 
-  public async validateFormData(formData: GenerateFormParams<FieldTypes>) {
+  public async validateFormData(formData: ValidateFormData<FieldTypes>) {
     const { amountOfRedEnvelopes } = formData;
     if (
       Number(amountOfRedEnvelopes) < 200 ||
