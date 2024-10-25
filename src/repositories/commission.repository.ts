@@ -15,7 +15,7 @@ export class CommissionRepository extends BaseRepository<Commission> {
     try {
       await this.add(commission);
     } catch (error) {
-      throw new Error(`getAllActions failed: ${error.message}`);
+      throw new Error(`save commission failed: ${error.message}`);
     }
   }
 }
