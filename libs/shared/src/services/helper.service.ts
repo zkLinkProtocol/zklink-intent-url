@@ -24,7 +24,7 @@ export class HelperService {
     const { code, chainId, amount, token, commissionRate } = params;
     const account = await this.dataService.getMagicLinkCreatorInfoByCode(code);
     if (!account) {
-      throw new Error(`account not found on magic link ${code}`);
+      throw new Error(`account not found on magicLink ${code}`);
     }
     const provider = this.chainService.getProvider(chainId);
     let transferTx = { to: account.address, data: '0x' };
