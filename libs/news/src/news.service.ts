@@ -78,6 +78,14 @@ export class NewsService extends ActionDto<FieldTypes> {
                 label: 'USDC',
                 value: 'usdc',
               },
+              {
+                label: 'WETH',
+                value: 'WETH',
+              },
+              {
+                label: 'ETH',
+                value: 'ETH',
+              },
             ],
             regex: '^0x[a-fA-F0-9]{40}$',
             regexDesc: 'Invalid Address',
