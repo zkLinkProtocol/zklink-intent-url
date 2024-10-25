@@ -115,15 +115,28 @@ export class PreSaleService extends ActionDto<FieldTypes> {
       PreSaleABI.abi,
       provider,
     );
-    const tokenAddress = await preSale.getCreate2Address(
-      formData.tokenName,
-      formData.tokenSymbol,
-      ethers.parseEther(formData.tokenMaxSupply),
-      creator,
-      ethers.parseEther(formData.creatorAmount),
-      ethers.parseEther(formData.price),
-      additionalData.code,
-    );
+    let tokenAddress;
+    if (additionalData.chainId === Chains.ZkLinkNovaSepolia) {
+      tokenAddress = await preSale.getCreate2Address(
+        formData.tokenName,
+        formData.tokenSymbol,
+        ethers.parseEther(formData.tokenMaxSupply),
+        creator,
+        ethers.parseEther(formData.creatorAmount),
+        ethers.parseEther(formData.price),
+        additionalData.code,
+      );
+    } else {
+      tokenAddress = await preSale.getEVMCreate2Address(
+        formData.tokenName,
+        formData.tokenSymbol,
+        ethers.parseEther(formData.tokenMaxSupply),
+        creator,
+        ethers.parseEther(formData.creatorAmount),
+        ethers.parseEther(formData.price),
+        additionalData.code,
+      );
+    }
 
     const token = new ethers.Contract(tokenAddress, TokenABI.abi, provider);
 
