@@ -51,6 +51,7 @@ export type GenerateTransactionResponse = {
     tokens: Array<{
       tokenAddress: string;
       amount: string; // raw data, with decimals
+      direction?: 'from' | 'to';
     }>;
   };
   transactions: TransactionInfo[];
