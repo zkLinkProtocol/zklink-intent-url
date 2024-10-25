@@ -46,6 +46,16 @@ export type UpdateFieldType<
     } // If field is provided, set it to an array of its original type
   : ValidateFormData<T>;
 
+export type GenerateTransactionResponse = {
+  displayInfo?: {
+    tokens: Array<{
+      tokenAddress: string;
+      amount: string; // raw data, with decimals
+    }>;
+  };
+  transactions: TransactionInfo[];
+};
+
 export abstract class Action<
   T extends Record<string, any> = Record<string, any>,
 > {
@@ -63,7 +73,7 @@ export abstract class Action<
    */
   abstract generateTransaction(
     data: GenerateTransactionParams<T>,
-  ): Promise<TransactionInfo[]>;
+  ): Promise<GenerateTransactionResponse>;
 
   /**
    * During the creation process of the magic link,

@@ -16,6 +16,7 @@ import {
   ActionMetadata,
   BasicAdditionalParams,
   GenerateTransactionParams,
+  GenerateTransactionResponse,
   TransactionInfo,
   isOptionComponentDto,
 } from 'src/common/dto';
@@ -236,7 +237,7 @@ export class BuyMeACoffeeService extends ActionDto<FieldTypes> {
 
   async generateTransaction(
     data: GenerateTransactionParams<FieldTypes>,
-  ): Promise<TransactionInfo[]> {
+  ): Promise<GenerateTransactionResponse> {
     const { additionalData, formData } = data;
     const { code, chainId } = additionalData;
     const { token, value, recipient } = formData;
@@ -264,7 +265,7 @@ export class BuyMeACoffeeService extends ActionDto<FieldTypes> {
       data: transferTx.data,
       shouldPublishToChain: true,
     };
-    return [tx];
+    return { transactions: [tx] };
   }
 
   public async reloadAdvancedInfo(

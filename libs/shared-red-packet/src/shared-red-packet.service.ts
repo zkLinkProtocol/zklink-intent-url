@@ -18,6 +18,7 @@ import {
   ActionMetadata,
   BasicAdditionalParams,
   GenerateTransactionParams,
+  GenerateTransactionResponse,
   TransactionInfo,
   ValidateFormData,
 } from 'src/common/dto';
@@ -458,7 +459,7 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
 
   public async generateTransaction(
     data: GenerateTransactionParams<FieldTypes>,
-  ): Promise<TransactionInfo[]> {
+  ): Promise<GenerateTransactionResponse> {
     const { additionalData } = data;
     const { code, account, inviter } = additionalData;
     if (!code) {
@@ -483,15 +484,17 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
       expiry,
       signature,
     );
-    return [
-      {
-        chainId: this.config.chainId,
-        to: this.config.redPacketContractAddress,
-        value: '0',
-        data: tx.data,
-        shouldPublishToChain: true,
-      },
-    ];
+    return {
+      transactions: [
+        {
+          chainId: this.config.chainId,
+          to: this.config.redPacketContractAddress,
+          value: '0',
+          data: tx.data,
+          shouldPublishToChain: true,
+        },
+      ],
+    };
   }
 
   private async getClaimedRecords(code: string, account?: string) {

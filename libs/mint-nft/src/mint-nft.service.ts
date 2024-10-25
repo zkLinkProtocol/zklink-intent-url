@@ -7,6 +7,7 @@ import {
   Action as ActionDto,
   ActionMetadata,
   GenerateTransactionParams,
+  GenerateTransactionResponse,
   TransactionInfo,
 } from 'src/common/dto';
 import { Chains } from 'src/constants';
@@ -119,7 +120,7 @@ export class MintNftService extends ActionDto<FieldTypes> {
 
   async generateTransaction(
     data: GenerateTransactionParams<FieldTypes>,
-  ): Promise<TransactionInfo[]> {
+  ): Promise<GenerateTransactionResponse> {
     const { additionalData, formData } = data;
     const { chainId } = additionalData;
     const provider = this.chainService.getProvider(chainId);
@@ -162,6 +163,6 @@ export class MintNftService extends ActionDto<FieldTypes> {
       data: mintTx.data,
       shouldPublishToChain: true,
     };
-    return [tx];
+    return { transactions: [tx] };
   }
 }

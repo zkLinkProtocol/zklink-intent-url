@@ -8,6 +8,7 @@ import {
   Action as ActionDto,
   ActionMetadata,
   GenerateTransactionParams,
+  GenerateTransactionResponse,
   TransactionInfo,
 } from 'src/common/dto';
 import { ConfigType } from 'src/config';
@@ -178,7 +179,7 @@ export class MintNovaNftService extends ActionDto<FieldTypes> {
 
   async generateTransaction(
     data: GenerateTransactionParams<FieldTypes>,
-  ): Promise<TransactionInfo[]> {
+  ): Promise<GenerateTransactionResponse> {
     const { additionalData, formData } = data;
     const { code, chainId, account } = additionalData;
     if (!code) {
@@ -255,6 +256,6 @@ export class MintNovaNftService extends ActionDto<FieldTypes> {
       data: mintTx.data,
       shouldPublishToChain: true,
     };
-    return [tx];
+    return { transactions: [tx] };
   }
 }

@@ -16,6 +16,7 @@ import {
   ActionMetadata,
   BasicAdditionalParams,
   GenerateTransactionParams,
+  GenerateTransactionResponse,
   TransactionInfo,
   isOptionComponentDto,
 } from 'src/common/dto';
@@ -159,7 +160,7 @@ export class SplitBillService extends ActionDto<FieldTypes> {
 
   async generateTransaction(
     data: GenerateTransactionParams<FieldTypes>,
-  ): Promise<TransactionInfo[]> {
+  ): Promise<GenerateTransactionResponse> {
     const { additionalData, formData } = data;
     const { chainId } = additionalData;
     const provider = this.chainService.getProvider(chainId);
@@ -188,7 +189,9 @@ export class SplitBillService extends ActionDto<FieldTypes> {
       data: transferTx.data,
       shouldPublishToChain: true,
     };
-    return [tx];
+    return {
+      transactions: [tx],
+    };
   }
 
   public async reloadAdvancedInfo(

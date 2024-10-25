@@ -7,6 +7,7 @@ import {
   Action as ActionDto,
   ActionMetadata,
   GenerateTransactionParams,
+  GenerateTransactionResponse,
   TransactionInfo,
   UpdateFieldType,
 } from 'src/common/dto';
@@ -73,7 +74,7 @@ export class MagicSwapService extends ActionDto<FieldTypes> {
 
   async generateTransaction(
     data: GenerateTransactionParams<FieldTypes>,
-  ): Promise<TransactionInfo[]> {
+  ): Promise<GenerateTransactionResponse> {
     const { additionalData, formData } = data;
     const { code, chainId, account, commissionRate = 0.001 } = additionalData;
 
@@ -90,15 +91,17 @@ export class MagicSwapService extends ActionDto<FieldTypes> {
     }
 
     if (chainId === 51) {
-      return [
-        await this.okxService.getSwapData(
-          '93AikG5NnncNRMFzHRRUYtmxDpkStwvZSwnmRLgn4Tmt',
-          chainId,
-          formData.tokenFrom,
-          formData.tokenTo,
-          BigInt(formData.amountToBuy),
-        ),
-      ];
+      return {
+        transactions: [
+          await this.okxService.getSwapData(
+            '93AikG5NnncNRMFzHRRUYtmxDpkStwvZSwnmRLgn4Tmt',
+            chainId,
+            formData.tokenFrom,
+            formData.tokenTo,
+            BigInt(formData.amountToBuy),
+          ),
+        ],
+      };
     }
 
     const commissionTx = await this.helperService.parseCommissionTx({
@@ -154,7 +157,7 @@ export class MagicSwapService extends ActionDto<FieldTypes> {
       );
 
       swapTx.requiredTokenAmount = tokens;
-      return [commissionTx, swapTx];
+      return { transactions: [commissionTx, swapTx] };
     } else {
       //buy
       approveTx = await this.okxService.getApproveData(
@@ -172,7 +175,7 @@ export class MagicSwapService extends ActionDto<FieldTypes> {
       );
 
       swapTx.requiredTokenAmount = tokens;
-      return [commissionTx, approveTx, swapTx];
+      return { transactions: [commissionTx, approveTx, swapTx] };
     }
   }
 

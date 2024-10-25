@@ -1,7 +1,10 @@
 import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { customAlphabet } from 'nanoid';
 
-import { GenerateTransactionParams, TransactionInfo } from 'src/common/dto';
+import {
+  GenerateTransactionParams,
+  GenerateTransactionResponse,
+} from 'src/common/dto';
 import { BusinessException } from 'src/exception/business.exception';
 import { ActionService } from 'src/modules/action/action.service';
 import {
@@ -176,7 +179,7 @@ export class ActionUrlService {
 
   async generateTransaction(
     data: GenerateTransactionParams,
-  ): Promise<TransactionInfo[]> {
+  ): Promise<GenerateTransactionResponse> {
     const actionUrl = await this.findOneByCode(data.additionalData.code!);
     const { action, actionVersion } = actionUrl;
     const actionStore = this.actionService.getActionVersionStore(

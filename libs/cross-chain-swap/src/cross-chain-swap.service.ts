@@ -7,6 +7,7 @@ import {
   Action as ActionDto,
   ActionMetadata,
   GenerateTransactionParams,
+  GenerateTransactionResponse,
   TransactionInfo,
 } from 'src/common/dto';
 import { Chains } from 'src/constants';
@@ -82,7 +83,7 @@ export class CrossChainSwapService extends ActionDto<FieldTypes> {
 
   async generateTransaction(
     data: GenerateTransactionParams<FieldTypes>,
-  ): Promise<TransactionInfo[]> {
+  ): Promise<GenerateTransactionResponse> {
     const { additionalData, formData } = data;
     const { chainId, account } = additionalData;
     if (!account) {
@@ -136,7 +137,7 @@ export class CrossChainSwapService extends ActionDto<FieldTypes> {
         BigInt(params.amountToBuy) - BigInt(totalFee),
       );
       swapTx.requiredTokenAmount = tokens;
-      return [swapTx];
+      return { transactions: [swapTx] };
     } else {
       //buy
       approveTx = await this.okxService.getApproveData(
@@ -186,7 +187,7 @@ export class CrossChainSwapService extends ActionDto<FieldTypes> {
         BigInt(params.amountToBuy) - BigInt(totalFee),
       );
       swapTx.requiredTokenAmount = tokens;
-      return [approveTx, swapTx];
+      return { transactions: [approveTx, swapTx] };
     }
   }
 }
