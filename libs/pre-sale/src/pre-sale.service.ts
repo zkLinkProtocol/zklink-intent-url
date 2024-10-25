@@ -8,6 +8,7 @@ import {
   Action as ActionDto,
   ActionMetadata,
   GenerateTransactionParams,
+  GenerateTransactionResponse,
   TransactionInfo,
 } from 'src/common/dto';
 import { Chains } from 'src/constants';
@@ -105,7 +106,7 @@ export class PreSaleService extends ActionDto<FieldTypes> {
 
   async generateTransaction(
     data: GenerateTransactionParams<FieldTypes>,
-  ): Promise<TransactionInfo[]> {
+  ): Promise<GenerateTransactionResponse> {
     const { additionalData, formData } = data;
     const creatorInfo = await this.dataService.getMagicLinkCreatorInfoByCode(
       additionalData.code!,
@@ -148,15 +149,17 @@ export class PreSaleService extends ActionDto<FieldTypes> {
     const token = new ethers.Contract(tokenAddress, TokenABI.abi, provider);
 
     const buy = await token.buy.populateTransaction();
-    return [
-      {
-        chainId: additionalData.chainId,
-        to: tokenAddress,
-        value: ethers.parseEther(formData.offerAmount).toString(),
-        data: buy.data,
-        shouldPublishToChain: true,
-      },
-    ];
+    return {
+      transactions: [
+        {
+          chainId: additionalData.chainId,
+          to: tokenAddress,
+          value: ethers.parseEther(formData.offerAmount).toString(),
+          data: buy.data,
+          shouldPublishToChain: true,
+        },
+      ],
+    };
   }
 
   public async onMagicLinkCreated(

@@ -93,10 +93,10 @@ export class BlinkService {
     this.logger.log(
       `blink : buildTransactions : result: ${JSON.stringify(result)}`,
     );
-    if (!result || result.length == 0) {
+    if (!result?.transactions || result.transactions.length == 0) {
       return '';
     }
-    const tx = result[0];
+    const tx = result.transactions[0];
     const transaction = new ethers.Transaction();
     transaction.chainId = tx.chainId;
     transaction.to = tx.to;

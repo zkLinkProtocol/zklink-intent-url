@@ -7,6 +7,7 @@ import {
   ActionMetadata,
   ConditionalComponentDto,
   GenerateTransactionParams,
+  GenerateTransactionResponse,
   TransactionInfo,
 } from 'src/common/dto';
 import { Chains } from 'src/constants';
@@ -127,7 +128,7 @@ export class PumpFunService extends ActionDto<FieldTypes> {
 
   async generateTransaction(
     data: GenerateTransactionParams<FieldTypes>,
-  ): Promise<TransactionInfo[]> {
+  ): Promise<GenerateTransactionResponse> {
     const { additionalData, formData } = data;
     const stringSalt = additionalData.code;
 
@@ -155,13 +156,15 @@ export class PumpFunService extends ActionDto<FieldTypes> {
     const isPaused = await tokenContract.isPaused();
     if (isPaused) {
       if (formData.orderType === 'buy') {
-        return await this.novaswap.swapToken(
-          ethers.ZeroAddress,
-          tokenAddress,
-          ethers.parseEther(formData.buyAmount),
-          additionalData.account!,
-          3000,
-        );
+        return {
+          transactions: await this.novaswap.swapToken(
+            ethers.ZeroAddress,
+            tokenAddress,
+            ethers.parseEther(formData.buyAmount),
+            additionalData.account!,
+            3000,
+          ),
+        };
       } else {
         const userBalance = await tokenContract.balanceOf(
           additionalData.account!,
@@ -179,16 +182,18 @@ export class PumpFunService extends ActionDto<FieldTypes> {
           additionalData.account!,
           3000,
         );
-        return [
-          {
-            chainId: additionalData.chainId,
-            to: tokenAddress,
-            value: '0',
-            data: approveData.data,
-            shouldPublishToChain: true,
-          },
-          sellTx[0],
-        ];
+        return {
+          transactions: [
+            {
+              chainId: additionalData.chainId,
+              to: tokenAddress,
+              value: '0',
+              data: approveData.data,
+              shouldPublishToChain: true,
+            },
+            sellTx[0],
+          ],
+        };
       }
     } else {
       if (formData.orderType === 'buy') {
@@ -198,15 +203,17 @@ export class PumpFunService extends ActionDto<FieldTypes> {
             ? ethers.parseEther(formData.buyAmount)
             : maxToBuy;
         const buyData = await tokenContract.buy.populateTransaction();
-        return [
-          {
-            chainId: additionalData.chainId,
-            to: tokenAddress,
-            value: buyAmount.toString(),
-            data: buyData.data,
-            shouldPublishToChain: true,
-          },
-        ];
+        return {
+          transactions: [
+            {
+              chainId: additionalData.chainId,
+              to: tokenAddress,
+              value: buyAmount.toString(),
+              data: buyData.data,
+              shouldPublishToChain: true,
+            },
+          ],
+        };
       } else {
         const userBalance = await tokenContract.balanceOf(
           additionalData.account!,
@@ -216,15 +223,17 @@ export class PumpFunService extends ActionDto<FieldTypes> {
         const sellData = await tokenContract.sell.populateTransaction(
           BigInt(sellAmount),
         );
-        return [
-          {
-            chainId: additionalData.chainId,
-            to: tokenAddress,
-            value: '0',
-            data: sellData.data,
-            shouldPublishToChain: true,
-          },
-        ];
+        return {
+          transactions: [
+            {
+              chainId: additionalData.chainId,
+              to: tokenAddress,
+              value: '0',
+              data: sellData.data,
+              shouldPublishToChain: true,
+            },
+          ],
+        };
       }
     }
   }

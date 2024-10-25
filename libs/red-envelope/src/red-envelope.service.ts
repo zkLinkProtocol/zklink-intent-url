@@ -20,6 +20,7 @@ import {
   BasicAdditionalParams,
   GenerateFormParams,
   GenerateTransactionParams,
+  GenerateTransactionResponse,
   TransactionInfo,
 } from 'src/common/dto';
 import { ConfigType } from 'src/config';
@@ -511,7 +512,7 @@ export class RedEnvelopeService extends ActionDto<FieldTypes> {
 
   public async generateTransaction(
     data: GenerateTransactionParams<FieldTypes>,
-  ): Promise<TransactionInfo[]> {
+  ): Promise<GenerateTransactionResponse> {
     const { additionalData, formData } = data;
     const { gasToken } = formData;
     const isGasfree = gasToken === GasTokenValue.DistributedToken;
@@ -543,21 +544,23 @@ export class RedEnvelopeService extends ActionDto<FieldTypes> {
       expiry,
       signature,
     );
-    return [
-      {
-        chainId: this.config.chainId,
-        to: this.config.redPacketContractAddress,
-        value: '0',
-        data: tx.data,
-        customData: isGasfree
-          ? {
-              gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
-              paymasterParams,
-            }
-          : null,
-        shouldPublishToChain: true,
-      },
-    ];
+    return {
+      transactions: [
+        {
+          chainId: this.config.chainId,
+          to: this.config.redPacketContractAddress,
+          value: '0',
+          data: tx.data,
+          customData: isGasfree
+            ? {
+                gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
+                paymasterParams,
+              }
+            : null,
+          shouldPublishToChain: true,
+        },
+      ],
+    };
   }
 
   private async generateHTML(

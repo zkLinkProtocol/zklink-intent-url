@@ -25,7 +25,11 @@ import { Response } from 'express';
 import { OKXService } from '@core/shared';
 import { BaseController } from 'src/common/base.controller';
 import { CommonApiOperation } from 'src/common/base.decorators';
-import { ActionTransactionParams, TransactionInfo } from 'src/common/dto';
+import {
+  ActionTransactionParams,
+  GenerateTransactionResponse,
+  TransactionInfo,
+} from 'src/common/dto';
 import { PagingOptionsDto } from 'src/common/pagingOptionsDto.param';
 import { PagingMetaDto, ResponseDto } from 'src/common/response.dto';
 import { BusinessException } from 'src/exception/business.exception';
@@ -478,7 +482,7 @@ export class ActionUrlController extends BaseController {
     @Param('code') code: string,
     @Body()
     body: TransactionBody,
-  ): Promise<ResponseDto<TransactionInfo[]>> {
+  ): Promise<ResponseDto<GenerateTransactionResponse>> {
     const { params, account, inviter, chainId, commissionRate } = body;
     const data = {
       additionalData: {

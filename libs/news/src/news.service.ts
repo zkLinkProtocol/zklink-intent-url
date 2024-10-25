@@ -7,6 +7,7 @@ import {
   Action as ActionDto,
   ActionMetadata,
   GenerateTransactionParams,
+  GenerateTransactionResponse,
   TransactionInfo,
   UpdateFieldType,
 } from 'src/common/dto';
@@ -110,7 +111,7 @@ export class NewsService extends ActionDto<FieldTypes> {
 
   async generateTransaction(
     data: GenerateTransactionParams<FieldTypes>,
-  ): Promise<TransactionInfo[]> {
+  ): Promise<GenerateTransactionResponse> {
     const { additionalData, formData } = data;
     const { chainId, account } = additionalData;
     if (!account) {
@@ -151,7 +152,7 @@ export class NewsService extends ActionDto<FieldTypes> {
       );
 
       swapTx.requiredTokenAmount = tokens;
-      return [swapTx];
+      return { transactions: [swapTx] };
     } else {
       //buy
       approveTx = await this.okxService.getApproveData(
@@ -169,7 +170,7 @@ export class NewsService extends ActionDto<FieldTypes> {
       );
 
       swapTx.requiredTokenAmount = tokens;
-      return [approveTx, swapTx];
+      return { transactions: [approveTx, swapTx] };
     }
   }
 

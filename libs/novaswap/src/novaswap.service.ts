@@ -6,7 +6,7 @@ import {
   Action as ActionDto,
   ActionMetadata,
   GenerateTransactionParams,
-  TransactionInfo,
+  GenerateTransactionResponse,
 } from 'src/common/dto';
 import { Chains } from 'src/constants';
 
@@ -91,8 +91,8 @@ export class NovaswapService extends ActionDto<FieldTypes> {
 
   async generateTransaction(
     data: GenerateTransactionParams<FieldTypes>,
-  ): Promise<TransactionInfo[]> {
+  ): Promise<GenerateTransactionResponse> {
     const tx = await novaswap.swapToken(data, FEE);
-    return tx;
+    return { transactions: tx };
   }
 }

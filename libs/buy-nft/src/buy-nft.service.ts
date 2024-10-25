@@ -7,6 +7,7 @@ import {
   ActionMetadata,
   BasicAdditionalParams,
   GenerateTransactionParams,
+  GenerateTransactionResponse,
   TransactionInfo,
 } from 'src/common/dto';
 import { Chains } from 'src/constants';
@@ -81,7 +82,7 @@ export class BuyNftService extends ActionDto<FieldTypes> {
 
   async generateTransaction(
     data: GenerateTransactionParams<FieldTypes>,
-  ): Promise<TransactionInfo[]> {
+  ): Promise<GenerateTransactionResponse> {
     const { additionalData, formData } = data;
     if (!additionalData.account) {
       throw new Error('Missing account!');
@@ -154,7 +155,7 @@ export class BuyNftService extends ActionDto<FieldTypes> {
         }
       }
     }
-    return txs;
+    return { transactions: txs };
   }
 
   public async reloadAdvancedInfo(
