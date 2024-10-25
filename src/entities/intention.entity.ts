@@ -1,6 +1,7 @@
 import {
   Column,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   OneToMany,
@@ -22,10 +23,12 @@ export class Intention extends BaseEntity {
 
   @ManyToOne(() => Creator, (creator) => creator.id)
   @JoinColumn({ name: 'creatorId' })
+  @Index()
   public readonly creator: Creator;
 
   @ManyToOne(() => Action, (action) => action.intentions)
   @JoinColumn({ name: 'actionId' })
+  @Index()
   public action: Action;
 
   @Column({ type: 'varchar', default: 'v1' })

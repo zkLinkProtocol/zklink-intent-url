@@ -153,8 +153,8 @@ export class ActionService implements OnApplicationBootstrap {
           networks,
           description,
           author,
-          intentionRecords,
-          intentions,
+          intentionRecordsCount,
+          intentionsCount,
         } = actionMetadata;
         const actionStore = this.getActionStore(id);
         if (!(await this.checkActionWhitelist(id, account))) {
@@ -170,8 +170,8 @@ export class ActionService implements OnApplicationBootstrap {
           networks,
           description,
           author,
-          intentionCount: intentions.length,
-          interaction: intentionRecords.length,
+          intentionCount: intentionsCount,
+          interaction: intentionRecordsCount,
           hasPostTxs,
         };
       }),

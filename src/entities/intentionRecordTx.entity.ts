@@ -26,6 +26,7 @@ export class IntentionRecordTx extends BaseEntity {
 
   @ManyToOne(() => IntentionRecord, (intentionRecord) => intentionRecord.id)
   @JoinColumn({ name: 'intentionRecordId' })
+  @Index()
   public intentionRecord: IntentionRecord;
 
   @Column({ type: 'bytea', transformer: hexTransformer, nullable: true })
