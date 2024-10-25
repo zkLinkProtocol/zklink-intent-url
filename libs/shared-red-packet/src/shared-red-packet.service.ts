@@ -441,6 +441,9 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
       }
       const userInfo = await this.dataService.getUserInfo(account);
       if (userInfo?.tgUserId) {
+        this.logger.log(
+          `Send message to tgUser: ${userInfo.tgUserId}, account: ${account}`,
+        );
         const sharedLink = `${this.config.magicLinkUrl}/${code}?referrer=${account}`;
         await this.tgbotService.sendMemeRedPacketMsg(
           sharedLink,
