@@ -132,7 +132,13 @@ export class NewsService extends ActionDto<FieldTypes> {
     };
 
     let approveTx: TransactionInfo;
-    let swapTx: TransactionInfo;
+    let swapTx: TransactionInfo & {
+      tokens: Array<{
+        tokenAddress: string;
+        amount: string;
+        direction?: 'from' | 'to';
+      }>;
+    };
     const tokenInAddress = formData.tokenFrom.toLowerCase() as Address;
 
     const tokens: TransactionInfo['requiredTokenAmount'] = [
@@ -152,7 +158,7 @@ export class NewsService extends ActionDto<FieldTypes> {
       );
 
       swapTx.requiredTokenAmount = tokens;
-      return { transactions: [swapTx] };
+      return { displayInfo: { tokens: swapTx.tokens }, transactions: [swapTx] };
     } else {
       //buy
       approveTx = await this.okxService.getApproveData(
@@ -170,7 +176,10 @@ export class NewsService extends ActionDto<FieldTypes> {
       );
 
       swapTx.requiredTokenAmount = tokens;
-      return { transactions: [approveTx, swapTx] };
+      return {
+        displayInfo: { tokens: swapTx.tokens },
+        transactions: [approveTx, swapTx],
+      };
     }
   }
 

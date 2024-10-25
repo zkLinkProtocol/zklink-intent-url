@@ -122,13 +122,23 @@ export class OKXService {
     tokenInAddress: string,
     tokenOutAddress: string,
     amount: bigint,
-  ): Promise<TransactionInfo & { estimateGasFee: string }> {
+  ): Promise<
+    TransactionInfo & {
+      estimateGasFee: string;
+    } & {
+      tokens: Array<{
+        tokenAddress: string;
+        amount: string; // raw data, with decimals
+        direction?: 'from' | 'to';
+      }>;
+    }
+  > {
     const swapParams = {
       amount,
       chainId,
       toTokenAddress: tokenOutAddress,
       fromTokenAddress: tokenInAddress,
-      slippage: '0.1',
+      slippage: '0.005',
       userWalletAddress: userAddress,
     };
     logger.log('swapparams', swapParams.amount);
@@ -145,7 +155,11 @@ export class OKXService {
     const result: {
       code: string;
       data: {
-        routerResult: { estimateGasFee: string };
+        routerResult: {
+          estimateGasFee: string;
+          fromTokenAmount: string;
+          toTokenAmount: string;
+        };
         tx: { to: string; value: string; data: any };
       }[];
       msg: string;
@@ -156,7 +170,8 @@ export class OKXService {
       throw new BusinessException(`okx swap failed: ${result.msg}`);
     }
     const resData = result.data[0];
-    const estimateGasFee = resData.routerResult.estimateGasFee;
+    const routerResult = resData.routerResult;
+    const estimateGasFee = routerResult.estimateGasFee;
     return {
       chainId,
       to: resData.tx.to,
@@ -165,6 +180,18 @@ export class OKXService {
 
       shouldPublishToChain: true,
       estimateGasFee: estimateGasFee,
+      tokens: [
+        {
+          tokenAddress: tokenInAddress,
+          amount: routerResult.fromTokenAmount.toString(),
+          direction: 'from',
+        },
+        {
+          tokenAddress: tokenOutAddress,
+          amount: routerResult.toTokenAmount.toString(),
+          direction: 'to',
+        },
+      ],
     };
   }
 
