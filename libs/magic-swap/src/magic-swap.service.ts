@@ -138,7 +138,13 @@ export class MagicSwapService extends ActionDto<FieldTypes> {
     };
 
     let approveTx: TransactionInfo;
-    let swapTx: TransactionInfo;
+    let swapTx: TransactionInfo & {
+      tokens: Array<{
+        tokenAddress: string;
+        amount: string;
+        direction?: 'from' | 'to';
+      }>;
+    };
 
     const tokens: TransactionInfo['requiredTokenAmount'] = [
       {
@@ -157,7 +163,10 @@ export class MagicSwapService extends ActionDto<FieldTypes> {
       );
 
       swapTx.requiredTokenAmount = tokens;
-      return { transactions: [commissionTx, swapTx] };
+      return {
+        displayInfo: { tokens: swapTx.tokens },
+        transactions: [commissionTx, swapTx],
+      };
     } else {
       //buy
       approveTx = await this.okxService.getApproveData(
@@ -175,7 +184,10 @@ export class MagicSwapService extends ActionDto<FieldTypes> {
       );
 
       swapTx.requiredTokenAmount = tokens;
-      return { transactions: [commissionTx, approveTx, swapTx] };
+      return {
+        displayInfo: { tokens: swapTx.tokens },
+        transactions: [commissionTx, approveTx, swapTx],
+      };
     }
   }
 
