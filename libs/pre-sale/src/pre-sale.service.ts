@@ -13,25 +13,17 @@ import { Chains } from 'src/constants';
 
 import PreSaleABI from './abis/PreSale.json';
 import TokenABI from './abis/Token.json';
-import { PRE_SALE_ADDRESS } from './config';
+import { PRE_SALE_ADDRESSES } from './config';
 import { FieldTypes } from './types';
 
 @RegistryPlug('pre-sale', 'v1')
 @Injectable()
 export class PreSaleService extends ActionDto<FieldTypes> {
-  private preSale: ethers.Contract;
-  private provider: ethers.Provider;
   constructor(
     private readonly dataService: DataService,
     private readonly chainService: ChainService,
   ) {
     super();
-    this.provider = new ethers.JsonRpcProvider('https://sepolia.rpc.zklink.io');
-    this.preSale = new ethers.Contract(
-      PRE_SALE_ADDRESS,
-      PreSaleABI.abi,
-      this.provider,
-    );
   }
 
   async getMetadata(): Promise<ActionMetadata<FieldTypes>> {
@@ -41,6 +33,10 @@ export class PreSaleService extends ActionDto<FieldTypes> {
         '<div>PreSale is a platform for participating in token presales.</div>',
       networks: this.chainService.buildSupportedNetworks([
         Chains.ZkLinkNovaSepolia,
+        Chains.Base,
+        Chains.ArbitrumOne,
+        Chains.OpMainnet,
+        Chains.Mantle,
       ]),
       author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
       magicLinkMetadata: {},
@@ -111,7 +107,15 @@ export class PreSaleService extends ActionDto<FieldTypes> {
       throw new Error('Creator information not found for the given code.');
     }
     const creator = creatorInfo.address;
-    const tokenAddress = await this.preSale.getCreate2Address(
+    const provider = this.chainService.getProvider(additionalData.chainId);
+    const preSale = new ethers.Contract(
+      PRE_SALE_ADDRESSES[
+        additionalData.chainId as keyof typeof PRE_SALE_ADDRESSES
+      ],
+      PreSaleABI.abi,
+      provider,
+    );
+    const tokenAddress = await preSale.getCreate2Address(
       formData.tokenName,
       formData.tokenSymbol,
       ethers.parseEther(formData.tokenMaxSupply),
@@ -121,16 +125,12 @@ export class PreSaleService extends ActionDto<FieldTypes> {
       additionalData.code,
     );
 
-    const token = new ethers.Contract(
-      tokenAddress,
-      TokenABI.abi,
-      this.provider,
-    );
+    const token = new ethers.Contract(tokenAddress, TokenABI.abi, provider);
 
     const buy = await token.buy.populateTransaction();
     return [
       {
-        chainId: Chains.ZkLinkNovaSepolia,
+        chainId: additionalData.chainId,
         to: tokenAddress,
         value: ethers.parseEther(formData.offerAmount).toString(),
         data: buy.data,
@@ -143,7 +143,15 @@ export class PreSaleService extends ActionDto<FieldTypes> {
     data: GenerateTransactionParams<FieldTypes>,
   ): Promise<TransactionInfo[]> {
     const { additionalData, formData } = data;
-    const createTokenData = await this.preSale.createToken.populateTransaction(
+    const provider = this.chainService.getProvider(additionalData.chainId);
+    const preSale = new ethers.Contract(
+      PRE_SALE_ADDRESSES[
+        additionalData.chainId as keyof typeof PRE_SALE_ADDRESSES
+      ],
+      PreSaleABI.abi,
+      provider,
+    );
+    const createTokenData = await preSale.createToken.populateTransaction(
       formData.tokenName,
       formData.tokenSymbol,
       ethers.parseEther(formData.tokenMaxSupply),
@@ -154,8 +162,10 @@ export class PreSaleService extends ActionDto<FieldTypes> {
 
     return [
       {
-        chainId: Chains.ZkLinkNovaSepolia,
-        to: PRE_SALE_ADDRESS,
+        chainId: additionalData.chainId,
+        to: PRE_SALE_ADDRESSES[
+          additionalData.chainId as keyof typeof PRE_SALE_ADDRESSES
+        ],
         value: '0',
         data: createTokenData.data,
         shouldPublishToChain: true,
