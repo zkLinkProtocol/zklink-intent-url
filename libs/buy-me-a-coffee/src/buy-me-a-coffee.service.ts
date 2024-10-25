@@ -176,13 +176,13 @@ export class BuyMeACoffeeService extends ActionDto<FieldTypes> {
     return {
       title: 'Buy me a coffee ☕',
       description:
-        '<div>This action allows you to create a Magic Link to receive donations</div>',
+        '<div>This action allows you to create a magicLink to receive donations</div>',
       networks: this.chainService.buildSupportedNetworks(supportedNetwork),
       author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
       magicLinkMetadata: {
         title: 'Buy me a coffee ☕',
         description:
-          'Magic Link Enthusiast | Donate with your love for zkLink magic',
+          'magicLink Enthusiast | Donate with your love for zkLink magic',
       },
       intent: {
         binding: 'value',

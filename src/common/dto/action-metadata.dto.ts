@@ -262,7 +262,7 @@ export class ConditionalComponentDto<
 export class PresetItemDto<R extends Record<string, any>> {
   @ApiProperty({
     type: String,
-    description: 'Pre-set which form field the MagicLink trigger is bound to.',
+    description: 'Pre-set which form field the magicLink trigger is bound to.',
   })
   field: keyof R;
 
@@ -335,14 +335,14 @@ export class IntentDto<R extends Record<string, any> = Record<string, any>> {
 export class MagicLinkMetadataDto {
   @ApiPropertyOptional({
     type: String,
-    description: 'display title of the created Magic Link page.',
+    description: 'display title of the created magicLink page.',
   })
   @IsString()
   title?: string;
 
   @ApiPropertyOptional({
     type: String,
-    description: 'description of the magic link',
+    description: 'description of the magicLink',
   })
   @IsString()
   description?: string;
@@ -350,7 +350,7 @@ export class MagicLinkMetadataDto {
   @ApiPropertyOptional({
     type: String,
     description:
-      'main image of the magic link. You can set a picture link, or by placing an image with the same name as the action id under assets/galleries, to set the main image.',
+      'main image of the magicLink. You can set a picture link, or by placing an image with the same name as the action id under assets/galleries, to set the main image.',
   })
   @IsString()
   gallery?: string;
@@ -420,7 +420,7 @@ export class ActionMetadata<
   @ApiPropertyOptional({
     type: MagicLinkMetadataDto,
     description:
-      'Set the default title, description, and main image for the Magic Link.',
+      'Set the default title, description, and main image for the magicLink.',
   })
   @ValidateNested()
   magicLinkMetadata?: MagicLinkMetadataDto;
@@ -430,7 +430,7 @@ export class ActionMetadata<
     description: `
       Set the maximum value for the commission, which is
       a percentage representing the share of the commission that the
-      creator of the magic link will receive. Once this value is set,
+      creator of the magicLink will receive. Once this value is set,
       as an action developer, you need to create a transfer transaction
       in the generateTransaction method to reimburse the creator based
       on the commission value.`,
@@ -440,7 +440,7 @@ export class ActionMetadata<
 
   @ApiProperty({
     type: Array<string>,
-    description: `Only specific users are allowed to configure the magic link.`,
+    description: `Only specific users are allowed to configure the magicLink.`,
   })
   @IsOptional()
   whiteList?: Array<string>;
