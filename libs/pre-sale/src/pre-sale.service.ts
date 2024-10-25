@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { ethers } from 'ethers';
 
 import { RegistryPlug } from '@action/registry';
@@ -19,25 +20,31 @@ import { FieldTypes } from './types';
 @RegistryPlug('pre-sale', 'v1')
 @Injectable()
 export class PreSaleService extends ActionDto<FieldTypes> {
+  private readonly isDev: boolean;
   constructor(
     private readonly dataService: DataService,
     private readonly chainService: ChainService,
+    private readonly configService: ConfigService,
   ) {
     super();
+    this.isDev = this.configService.get('env')! === 'dev';
   }
 
   async getMetadata(): Promise<ActionMetadata<FieldTypes>> {
+    const supportedNetwork = [
+      Chains.Base,
+      Chains.ArbitrumOne,
+      Chains.OpMainnet,
+      Chains.Mantle,
+    ];
+    if (this.isDev) {
+      supportedNetwork.push(Chains.ZkLinkNovaSepolia);
+    }
     return {
       title: 'PreSale',
       description:
         '<div>PreSale is a platform for participating in token presales.</div>',
-      networks: this.chainService.buildSupportedNetworks([
-        Chains.ZkLinkNovaSepolia,
-        Chains.Base,
-        Chains.ArbitrumOne,
-        Chains.OpMainnet,
-        Chains.Mantle,
-      ]),
+      networks: this.chainService.buildSupportedNetworks(supportedNetwork),
       author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
       magicLinkMetadata: {},
       intent: {

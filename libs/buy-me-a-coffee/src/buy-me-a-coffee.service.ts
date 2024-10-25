@@ -19,7 +19,6 @@ import {
   TransactionInfo,
   isOptionComponentDto,
 } from 'src/common/dto';
-import { ConfigType } from 'src/config';
 import { Chains } from 'src/constants';
 import {
   IntentionRecordTx,
@@ -33,7 +32,7 @@ import { FieldTypes, TransactionResult } from './types';
 @Injectable()
 export class BuyMeACoffeeService extends ActionDto<FieldTypes> {
   private readonly logger = new Logger(BuyMeACoffeeService.name);
-  readonly env: ConfigType['env'];
+  private readonly isDev: boolean;
 
   constructor(
     private readonly configService: ConfigService,
@@ -41,7 +40,7 @@ export class BuyMeACoffeeService extends ActionDto<FieldTypes> {
     private readonly chainService: ChainService,
   ) {
     super();
-    this.env = this.configService.get('env', { infer: true })!;
+    this.isDev = this.configService.get('env')! === 'dev';
   }
 
   async getMetadata(): Promise<ActionMetadata<FieldTypes>> {
@@ -120,7 +119,7 @@ export class BuyMeACoffeeService extends ActionDto<FieldTypes> {
         chainId: Chains.ScrollMainnet,
       },
     ];
-    if (this.env === 'dev') {
+    if (this.isDev) {
       supportedNetwork.push(
         Chains.ZkLinkNovaSepolia,
         Chains.ZklinkDev,

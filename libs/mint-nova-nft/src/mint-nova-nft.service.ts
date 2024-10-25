@@ -24,7 +24,8 @@ import { FieldTypes } from './types';
 @Injectable()
 export class MintNovaNftService extends ActionDto<FieldTypes> {
   private logger: Logger = new Logger(MintNovaNftService.name);
-  readonly okxConfig: ConfigType['okx'];
+  private readonly okxConfig: ConfigType['okx'];
+  private readonly isDev: boolean;
   constructor(
     readonly configService: ConfigService,
     private readonly dataService: DataService,
@@ -32,16 +33,18 @@ export class MintNovaNftService extends ActionDto<FieldTypes> {
   ) {
     super();
     this.okxConfig = configService.get('okx', { infer: true })!;
+    this.isDev = this.configService.get('env')! === 'dev';
   }
 
   async getMetadata(): Promise<ActionMetadata<FieldTypes>> {
+    const supportedNetwork = [Chains.ZkLinkNova];
+    if (this.isDev) {
+      supportedNetwork.push(Chains.ZkLinkNovaSepolia);
+    }
     return {
       title: 'Mint Nova Cubo NFT',
       description: '<div>This action allows you to mint Nova Cubo NFT</div>',
-      networks: this.chainService.buildSupportedNetworks([
-        Chains.ZkLinkNova,
-        Chains.ZkLinkNovaSepolia,
-      ]),
+      networks: this.chainService.buildSupportedNetworks(supportedNetwork),
       author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
       magicLinkMetadata: {
         title: 'Mint NFT',
