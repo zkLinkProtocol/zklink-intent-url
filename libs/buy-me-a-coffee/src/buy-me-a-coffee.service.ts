@@ -178,7 +178,10 @@ export class BuyMeACoffeeService extends ActionDto<FieldTypes> {
       description:
         '<div>This action allows you to create a magicLink to receive donations</div>',
       networks: this.chainService.buildSupportedNetworks(supportedNetwork),
-      author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
+      author: {
+        name: 'zkLink Labs',
+        github: 'https://github.com/zkLinkProtocol',
+      },
       magicLinkMetadata: {
         title: 'Buy me a coffee ☕',
         description:

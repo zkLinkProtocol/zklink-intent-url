@@ -41,7 +41,10 @@ export class NovaswapService extends ActionDto<FieldTypes> {
       description:
         '<div>This action is designed to allow you to create token swap on <a href="https://novaswap.fi">https://novaswap.fi</a></div>',
       networks: this.chainService.buildSupportedNetworks([Chains.ZkLinkNova]),
-      author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
+      author: {
+        name: 'zkLink Labs',
+        github: 'https://github.com/zkLinkProtocol',
+      },
       magicLinkMetadata: {
         title: 'Buy the dip!!!',
         description: 'Now’s the perfect moment to buy the dip!!!',
