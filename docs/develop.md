@@ -159,7 +159,7 @@ async getMetadata() {
   return {
     title: 'Action Title',
     description:
-      'This action allows you to create a Magic Link... This is an action example description.',
+      'This action allows you to create a magicLink... This is an action example description.',
     networks: [
       {
         name: 'Arbitrum',
@@ -173,8 +173,8 @@ async getMetadata() {
     author: { name: 'Action Author', github: 'https://github.com/zkLinkProtocol' },
     magicLinkMetadata: {
       description:
-        'Magic Link Enthusiast | Donate with your love for zkLink magic',
-      title: 'This is a magic link'
+        'magicLink Enthusiast | Donate with your love for zkLink magic',
+      title: 'This is a magicLink'
     },
     intent: {
       components: [
@@ -282,7 +282,7 @@ async getMetadata() {
 
 Now, follow along with me as we explore each field in the metadata and understand its meaning in conjunction with the UI.
 
-The left side of this image is the Magic Link creation area, and the right side is the Magic Link preview area, where creators can create their own Magic Link by setting and modifying metadata.
+The left side of this image is the magicLink creation area, and the right side is the magicLink preview area, where creators can create their own magicLink by setting and modifying metadata.
 
 The metadata defined above will be reflected in the corresponding UI controls on the frontend and the highlighted fields correspond to the metadata object literals you defined.
 
@@ -293,26 +293,26 @@ The metadata defined above will be reflected in the corresponding UI controls on
 
 I will provide further explanations for some fields that need clarification.
 
-- *networks*: It is an array, indicating which network the target chain of the created Magic Link belongs to. For example, you allow the creation of a donation link, enabling users to donate to you on Ethereum, and also allow the creation of a Magic Link for donations on the Arbitrum network
+- *networks*: It is an array, indicating which network the target chain of the created magicLink belongs to. For example, you allow the creation of a donation link, enabling users to donate to you on Ethereum, and also allow the creation of a magicLink for donations on the Arbitrum network
 
   <div align="center">
   <img src="./img/select-network.png" width="500">
   </div>
-- *magicLinkMetadata*: You can set the default values for the Magic Link's title, main image, and description here, as shown in the image above. You might be curious about where to set this main image. There are two ways to set it: you can explicitly set the 'gallery' field, whose value is a URL of an image accessible over the internet. Alternatively, you can set it implicitly by uploading an image with the same name as the id in the assets/galleries directory. We will help you upload it to S3 and set it as the value for the `gallery`. Therefore, the default image in the preview section of the Magic Link above is because there is an image in assets/galleries with the same name as the id.
+- *magicLinkMetadata*: You can set the default values for the magicLink's title, main image, and description here, as shown in the image above. You might be curious about where to set this main image. There are two ways to set it: you can explicitly set the 'gallery' field, whose value is a URL of an image accessible over the internet. Alternatively, you can set it implicitly by uploading an image with the same name as the id in the assets/galleries directory. We will help you upload it to S3 and set it as the value for the `gallery`. Therefore, the default image in the preview section of the magicLink above is because there is an image in assets/galleries with the same name as the id.
   ```ts
   // 1. explicitly
   magicLinkMetadata: {
     description:
-      'Magic Link Enthusiast | Donate with your love for zkLink magic',
-    title: 'This is a magic link',
+      'magicLink Enthusiast | Donate with your love for zkLink magic',
+    title: 'This is a magicLink',
     gallery: 'https://zklink-nova-nft.s3.ap-northeast-1.amazonaws.com/cuboimage-test/193.png'
   }
 
   // 2. implicitly
   magicLinkMetadata: {
     description:
-      'Magic Link Enthusiast | Donate with your love for zkLink magic',
-    title: 'This is a magic link',
+      'magicLink Enthusiast | Donate with your love for zkLink magic',
+    title: 'This is a magicLink',
   }
   // main image location
   assets/
@@ -333,14 +333,14 @@ I will provide further explanations for some fields that need clarification.
   </div>
 
 - preset: 
-This field presets the default trigger for the Magic Link. `field` refers to the name of a specific `name`, `value` is the value of `name`, `title` is used for display, and `type` can be set to either 'Button' or 'Input'.
+This field presets the default trigger for the magicLink. `field` refers to the name of a specific `name`, `value` is the value of `name`, `title` is used for display, and `type` can be set to either 'Button' or 'Input'.
 
   <div align="center">
     <img src="./img/preset.png" width="500">
   </div>
 
 #### 2.2 generateTransaction
-Another function that must be implemented is `generateTransaction`, whose return data type is [`TransactionInfo[]`](../src/common/dto/transaction.dto.ts#57). When a user clicks the **0.001ETH** button on the Magic Link page, the `TransactionInfo[]` will be sequentially constructed into on-chain transactions and sent to the network.
+Another function that must be implemented is `generateTransaction`, whose return data type is [`TransactionInfo[]`](../src/common/dto/transaction.dto.ts#57). When a user clicks the **0.001ETH** button on the magicLink page, the `TransactionInfo[]` will be sequentially constructed into on-chain transactions and sent to the network.
 
 It is necessary to delve into the parameters of GenerateTransactionParams here
 ```ts
@@ -353,13 +353,13 @@ export type GenerateTransactionParams<
 
 type AdditionalParams = {
   chainId: string; // Network chain ID
-  code?: string; // magic link code, a unique 8-character random string
+  code?: string; // magicLink code, a unique 8-character random string
   account?: string; // the user address that initiates the transaction.
   inviter?: string;
 };
 ```
-  - code: You can leverage the code with the contract or your external service for deep binding, where each magic link has a unique and unrepeatable code.
-  - inviter: The inviter is a field used to handle invitation-related information. When users share the magic link, they include their address as the inviter. If your action has a sharing commission feature, you can incorporate the inviter into your contract to implement the logic.
+  - code: You can leverage the code with the contract or your external service for deep binding, where each magicLink has a unique and unrepeatable code.
+  - inviter: The inviter is a field used to handle invitation-related information. When users share the magicLink, they include their address as the inviter. If your action has a sharing commission feature, you can incorporate the inviter into your contract to implement the logic.
   - formData: It is the component you define in the component, and it is the raw form data used to construct the transaction.
 Next, we will implement a straightforward generateTransaction method
 
@@ -382,7 +382,7 @@ As you can see, the simplest version of `TransactionInfo` only needs to define 4
 
 - _shouldPublishToChain_: In most cases where a user needs to send an on-chain transaction, this field needs to be set to true.
 - _customData_: If you are familiar with [paymaster](https://docs.zksync.io/build/start-coding/zksync-101/paymaster), then you will be quite accustomed to this. [Learn how to send a transaction through a paymaster](https://docs.zksync.io/build/start-coding/quick-start/paymasters-introduction#how-to-send-a-transaction-through-a-paymaster) 
-- _requiredTokenAmount_: Magic Link has the capability to allow developers to implement **Nova cross-chain** functionality with simple configurations. For example, the aforementioned transaction occurs on the Arbitrum chain, but if you want to allow users to attempt a cross-chain transfer of a corresponding amount of tokens from the Nova network when they do not have enough tokens on Arbitrum, you only need to configure this parameter, and it will try to execute the corresponding cross-chain request.
+- _requiredTokenAmount_: magicLink has the capability to allow developers to implement **Nova cross-chain** functionality with simple configurations. For example, the aforementioned transaction occurs on the Arbitrum chain, but if you want to allow users to attempt a cross-chain transfer of a corresponding amount of tokens from the Nova network when they do not have enough tokens on Arbitrum, you only need to configure this parameter, and it will try to execute the corresponding cross-chain request.
   ```ts
   async generateTransaction(
       params: GenerateTransactionParams,
@@ -493,17 +493,17 @@ Our framework will register your Action implementation into the routing system. 
     <img src="./img/real-time-example.png" width="300">
   </div>
 
-- **magicLink binds to on-chain transactions**. After creating the magicLink, it may not become active immediately and you need to initiate one or more transactions on-chain before you can create an active magicLink. For example, with a red packet contract, you need to deposit a red packet asset into the contract before the Magic Link can become active. This way, users can claim the red envelope created through your Magic Link.
+- **magicLink binds to on-chain transactions**. After creating the magicLink, it may not become active immediately and you need to initiate one or more transactions on-chain before you can create an active magicLink. For example, with a red packet contract, you need to deposit a red packet asset into the contract before the magicLink can become active. This way, users can claim the red envelope created through your magicLink.
 
-  The `onMagicLinkCreated` provides this capability. It returns `TransactionInfo[]`. Its signature is the same as `generateTransaction`, but it is an on-chain transaction executed immediately after the Magic Link is created.
+  The `onMagicLinkCreated` provides this capability. It returns `TransactionInfo[]`. Its signature is the same as `generateTransaction`, but it is an on-chain transaction executed immediately after the magicLink is created.
 
   <div align="center">
     <img src="./img/on-magic-link-created.png" width="300">
   </div>
 
-  In the image above, we can see that after creating a Magic Link, the transaction returned by `onMagicLinkCreated` is constructed and sent as an on-chain transaction.
+  In the image above, we can see that after creating a magicLink, the transaction returned by `onMagicLinkCreated` is constructed and sent as an on-chain transaction.
 
-- `preCheckTransaction`, the magic link is not always available to users. Imagine a scenario where you expect users to participate in a vote only once through the magic link. Therefore, when loading the magic link, you need to query the on-chain information to check if the user has already voted. If they have voted, this function should return a message to inform the user of the reason they cannot vote again.
+- `preCheckTransaction`, the magicLink is not always available to users. Imagine a scenario where you expect users to participate in a vote only once through the magicLink. Therefore, when loading the magicLink, you need to query the on-chain information to check if the user has already voted. If they have voted, this function should return a message to inform the user of the reason they cannot vote again.
   ```ts
   // pseudocode
 
@@ -557,7 +557,7 @@ Our framework will register your Action implementation into the routing system. 
       }
     }
   ```
-  The above reportTransaction function politely informs the user of the successful outcome after they have successfully claimed the red envelope through the magic link
+  The above reportTransaction function politely informs the user of the successful outcome after they have successfully claimed the red envelope through the magicLink
 
 ### 4. Switch `env`
 We offer two environment variables, `dev` and `prod`, that allow you to configure contract addresses or settings for both environments. The env variable for the **dev** branch is set to `dev`, while the env variable for the **main** branch is set to `prod`. In the **dev** branch, you can test with the test-network's magicLink, and once the code is merged into the main branch, it will read the mainnet network's contract configurations.
@@ -631,9 +631,9 @@ If you want to conveniently use local actions, create magic links, and initiate 
   <img src="./img/debug-breakpoint.png" width="300">
 </div>
 
-4. Access the magic link [dev dashboard](https://zklink.io/dashboard/) page using a browser, open the browser console, and type in the console `localStorage.setItem('baseUrl', 'http://localhost:4101/api')`. After refreshing the browser, all service requests will be directed to http://localhost:4101/api. Note that `4101` should match the `PORT` in your local .env file.
+4. Access the magicLink [dev dashboard](https://zklink.io/dashboard/) page using a browser, open the browser console, and type in the console `localStorage.setItem('baseUrl', 'http://localhost:4101/api')`. After refreshing the browser, all service requests will be directed to http://localhost:4101/api. Note that `4101` should match the `PORT` in your local .env file.
 
-    Next, log back into the dashboard using MetaMask or Passkey, create a magic link, and initiate a transaction using the magic link. All this data will be stored in your local database.
+    Next, log back into the dashboard using MetaMask or Passkey, create a magicLink, and initiate a transaction using the magicLink. All this data will be stored in your local database.
 
     Be sure to check the requests in the browser's network tab to see if they are reaching the local port service; if not, set the `localStorage`.
 
@@ -658,9 +658,9 @@ Security is our top priority. Minimizing dependencies and external services enha
 
 ## FAQs
 
-### 1. How to set the logo and main image for the Magic Link.
+### 1. How to set the logo and main image for the magicLink.
 
-You have two ways to set it. One is to set it directly in the metadata as literals, under `logo` and `magicLinkMetadata.gallery` for the logo and the main image of the Magic Link, respectively. The other way is to upload images with the same action id in the 'assets' directory at the root."
+You have two ways to set it. One is to set it directly in the metadata as literals, under `logo` and `magicLinkMetadata.gallery` for the logo and the main image of the magicLink, respectively. The other way is to upload images with the same action id in the 'assets' directory at the root."
 
 
 ### 2. How do I update or upgrade an action?

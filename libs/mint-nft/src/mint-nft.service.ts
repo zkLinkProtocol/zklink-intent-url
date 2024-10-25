@@ -52,7 +52,7 @@ export class MintNftService extends ActionDto<FieldTypes> {
       magicLinkMetadata: {
         title: 'Mint NFT',
         description:
-          'Magic Link Enthusiast | Donate with your love for zkLink magic',
+          'magicLink Enthusiast | Donate with your love for zkLink magic',
       },
       intent: {
         binding: true,

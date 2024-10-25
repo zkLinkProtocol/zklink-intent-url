@@ -146,7 +146,7 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
           {
             name: 'isInvitable',
             label: 'Whether to give a commission to the inviter',
-            desc: 'When this switch is turned on, users who share the Magic Link will receive a portion of the recipient’s red envelope reward.',
+            desc: 'When this switch is turned on, users who share the magicLink will receive a portion of the recipient’s red envelope reward.',
             type: 'switch',
           },
         ],
@@ -585,14 +585,14 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
     const magicLinkInfo = await this.dataService.getMagicLinkInfoByCode(code);
 
     if (!magicLinkInfo) {
-      throw new Error(`magic link ${code} not found`);
+      throw new Error(`magicLink ${code} not found`);
     }
     const distributionToken = magicLinkInfo.components.find(
       (i) => i.name === 'distributionToken',
     );
 
     if (!distributionToken) {
-      throw new Error(`magic link ${code} distributionToken not found`);
+      throw new Error(`magicLink ${code} distributionToken not found`);
     }
 
     let symbol = 'ETH';
