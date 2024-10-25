@@ -95,7 +95,10 @@ export class RedEnvelopeService extends ActionDto<FieldTypes> {
       description:
         '<div>This action is designed to distribute token rewards</div>',
       networks: this.chainService.buildSupportedNetworks([this.config.chainId]),
-      author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
+      author: {
+        name: 'zkLink Labs',
+        github: 'https://github.com/zkLinkProtocol',
+      },
       magicLinkMetadata: {
         title: 'Red Packet 🧧',
         description: 'Best wishes!',

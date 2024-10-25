@@ -43,7 +43,10 @@ export class NewsService extends ActionDto<FieldTypes> {
         Chains.Base,
         Chains.MantaPacificMainnet,
       ]),
-      author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
+      author: {
+        name: 'zkLink Labs',
+        github: 'https://github.com/zkLinkProtocol',
+      },
       magicLinkMetadata: {},
       whiteList: this.configService
         .get<string>('NEWS_WHITE_ADDRESS')

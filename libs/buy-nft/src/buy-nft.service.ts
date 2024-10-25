@@ -34,7 +34,10 @@ export class BuyNftService extends ActionDto<FieldTypes> {
         Chains.Base,
         Chains.ArbitrumOne,
       ]),
-      author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
+      author: {
+        name: 'zkLink Labs',
+        github: 'https://github.com/zkLinkProtocol',
+      },
       magicLinkMetadata: {
         description: '',
       },

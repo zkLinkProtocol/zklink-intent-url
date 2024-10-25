@@ -46,7 +46,10 @@ export class MintNovaNftService extends ActionDto<FieldTypes> {
       title: 'Mint Nova Cubo NFT',
       description: '<div>This action allows you to mint Nova Cubo NFT</div>',
       networks: this.chainService.buildSupportedNetworks(supportedNetwork),
-      author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
+      author: {
+        name: 'zkLink Labs',
+        github: 'https://github.com/zkLinkProtocol',
+      },
       magicLinkMetadata: {
         title: 'Mint NFT',
         description:

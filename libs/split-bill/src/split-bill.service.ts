@@ -121,7 +121,10 @@ export class SplitBillService extends ActionDto<FieldTypes> {
       description:
         '<div>This action is made for friends to split the bill</div>',
       networks: this.chainService.buildSupportedNetworks(supportedNetwork),
-      author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
+      author: {
+        name: 'zkLink Labs',
+        github: 'https://github.com/zkLinkProtocol',
+      },
       magicLinkMetadata: {
         title: 'Split Bill 💰',
         description: 'Each friend will pay you the same amount',

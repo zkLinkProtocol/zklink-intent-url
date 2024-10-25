@@ -67,7 +67,10 @@ export class PumpFunService extends ActionDto<FieldTypes> {
       networks: this.chainService.buildSupportedNetworks([
         Chains.ZkLinkNovaSepolia,
       ]),
-      author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
+      author: {
+        name: 'zkLink Labs',
+        github: 'https://github.com/zkLinkProtocol',
+      },
       magicLinkMetadata: {},
       intent: {
         binding: 'orderType',
