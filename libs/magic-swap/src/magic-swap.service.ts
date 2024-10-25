@@ -38,7 +38,6 @@ export class MagicSwapService extends ActionDto<FieldTypes> {
         Chains.Base,
       ]),
       author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
-      magicLinkMetadata: {},
       intent: {
         binding: 'amountToBuy',
         components: [

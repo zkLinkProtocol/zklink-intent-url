@@ -1,6 +1,7 @@
 import { RegistryPlug } from '@action/registry';
 import { ChainService } from '@core/shared';
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Contract, Interface, ethers } from 'ethers';
 import {
   Action as ActionDto,
@@ -15,27 +16,37 @@ import { FieldTypes } from './types';
 @RegistryPlug('mint-nft', 'v1')
 @Injectable()
 export class MintNftService extends ActionDto<FieldTypes> {
-  constructor(private readonly chainService: ChainService) {
+  private readonly isDev: boolean;
+  constructor(
+    private readonly chainService: ChainService,
+    private readonly configService: ConfigService,
+  ) {
     super();
+    this.isDev = this.configService.get('env')! === 'dev';
   }
 
   async getMetadata(): Promise<ActionMetadata<FieldTypes>> {
+    const supportedNetwork = [
+      Chains.ZkLinkNova,
+      Chains.ArbitrumOne,
+      Chains.EthereumMainnet,
+      Chains.Base,
+      Chains.Linea,
+      Chains.MantaPacificMainnet,
+      Chains.OpMainnet,
+      Chains.ScrollMainnet,
+    ];
+    if (this.isDev) {
+      supportedNetwork.push(
+        Chains.ZkLinkNovaSepolia,
+        Chains.ArbitrumSepolia,
+        Chains.BaseSepolia,
+      );
+    }
     return {
       title: 'Mint NFT',
       description: '<div>This action allows you to mint NFT</div>',
-      networks: this.chainService.buildSupportedNetworks([
-        Chains.ZkLinkNova,
-        Chains.ZkLinkNovaSepolia,
-        Chains.ArbitrumSepolia,
-        Chains.ArbitrumOne,
-        Chains.EthereumMainnet,
-        Chains.Base,
-        Chains.BaseSepolia,
-        Chains.Linea,
-        Chains.MantaPacificMainnet,
-        Chains.OpMainnet,
-        Chains.ScrollMainnet,
-      ]),
+      networks: this.chainService.buildSupportedNetworks(supportedNetwork),
       author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
       magicLinkMetadata: {
         title: 'Mint NFT',

@@ -1,6 +1,7 @@
 import { RegistryPlug } from '@action/registry';
 import { ChainService, DataService } from '@core/shared';
 import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import {
   Contract,
   dataSlice,
@@ -31,24 +32,94 @@ import { FieldTypes, TransactionResult } from './types';
 @Injectable()
 export class SplitBillService extends ActionDto<FieldTypes> {
   private readonly logger = new Logger(SplitBillService.name);
+  private readonly isDev: boolean;
   constructor(
     private readonly dataService: DataService,
     private readonly chainService: ChainService,
+    private readonly configService: ConfigService,
   ) {
     super();
+    this.isDev = this.configService.get('env')! === 'dev';
   }
 
   async getMetadata(): Promise<ActionMetadata<FieldTypes>> {
+    const supportedNetwork = [Chains.ArbitrumOne, Chains.ZkLinkNova];
+    const supportedToken = [
+      {
+        label: 'ETH',
+        value: '',
+        chainId: Chains.ArbitrumOne,
+      },
+      {
+        label: 'USDT',
+        value: '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9',
+        chainId: Chains.ArbitrumOne,
+      },
+      {
+        label: 'USDC',
+        value: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831',
+        chainId: Chains.ArbitrumOne,
+        default: true,
+      },
+      {
+        label: 'ETH',
+        value: '',
+        chainId: Chains.ZkLinkNova,
+      },
+      {
+        label: 'USDT',
+        value: '0x2F8A25ac62179B31D62D7F80884AE57464699059',
+        chainId: Chains.ZkLinkNova,
+      },
+      {
+        label: 'USDC',
+        value: '0x1a1A3b2ff016332e866787B311fcB63928464509',
+        chainId: Chains.ZkLinkNova,
+        default: true,
+      },
+    ];
+    if (this.isDev) {
+      supportedNetwork.push(Chains.ZkLinkNovaSepolia, Chains.ZklinkDev);
+      supportedToken.push(
+        {
+          label: 'ETH',
+          value: '',
+          chainId: Chains.ZkLinkNovaSepolia,
+        },
+        {
+          label: 'USDT',
+          value: '0x0efDC9f3948BE4509e8c57d49Df97660CF038F9a',
+          chainId: Chains.ZkLinkNovaSepolia,
+        },
+        {
+          label: 'USDC',
+          value: '0xAC4a95747cB3f291BC4a26630862FfA0A4b01B44',
+          chainId: Chains.ZkLinkNovaSepolia,
+          default: true,
+        },
+        {
+          label: 'ETH',
+          value: '',
+          chainId: Chains.ZklinkDev,
+        },
+        {
+          label: 'USDT',
+          value: '0xDBBD57f02DdbC9f1e2B80D8DAcfEC34BC8B287e3',
+          chainId: Chains.ZklinkDev,
+        },
+        {
+          label: 'USDC',
+          value: '0x09B141F8a41BA6d2A0Ec1d55d67De3C8f3846921',
+          chainId: Chains.ZklinkDev,
+          default: true,
+        },
+      );
+    }
     return {
       title: 'Split Bill 💰',
       description:
         '<div>This action is made for friends to split the bill</div>',
-      networks: this.chainService.buildSupportedNetworks([
-        Chains.ArbitrumOne,
-        Chains.ZkLinkNova,
-        Chains.ZkLinkNovaSepolia,
-        Chains.ZklinkDev,
-      ]),
+      networks: this.chainService.buildSupportedNetworks(supportedNetwork),
       author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
       magicLinkMetadata: {
         title: 'Split Bill 💰',
@@ -62,72 +133,7 @@ export class SplitBillService extends ActionDto<FieldTypes> {
             label: 'Token',
             desc: 'The token you want to cost',
             type: 'searchSelect',
-            options: [
-              {
-                label: 'ETH',
-                value: '',
-                chainId: Chains.ArbitrumOne,
-              },
-              {
-                label: 'USDT',
-                value: '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9',
-                chainId: Chains.ArbitrumOne,
-              },
-              {
-                label: 'USDC',
-                value: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831',
-                chainId: Chains.ArbitrumOne,
-                default: true,
-              },
-              {
-                label: 'ETH',
-                value: '',
-                chainId: Chains.ZkLinkNova,
-              },
-              {
-                label: 'USDT',
-                value: '0x2F8A25ac62179B31D62D7F80884AE57464699059',
-                chainId: Chains.ZkLinkNova,
-              },
-              {
-                label: 'USDC',
-                value: '0x1a1A3b2ff016332e866787B311fcB63928464509',
-                chainId: Chains.ZkLinkNova,
-                default: true,
-              },
-              {
-                label: 'ETH',
-                value: '',
-                chainId: Chains.ZkLinkNovaSepolia,
-              },
-              {
-                label: 'USDT',
-                value: '0x0efDC9f3948BE4509e8c57d49Df97660CF038F9a',
-                chainId: Chains.ZkLinkNovaSepolia,
-              },
-              {
-                label: 'USDC',
-                value: '0xAC4a95747cB3f291BC4a26630862FfA0A4b01B44',
-                chainId: Chains.ZkLinkNovaSepolia,
-                default: true,
-              },
-              {
-                label: 'ETH',
-                value: '',
-                chainId: Chains.ZklinkDev,
-              },
-              {
-                label: 'USDT',
-                value: '0xDBBD57f02DdbC9f1e2B80D8DAcfEC34BC8B287e3',
-                chainId: Chains.ZklinkDev,
-              },
-              {
-                label: 'USDC',
-                value: '0x09B141F8a41BA6d2A0Ec1d55d67De3C8f3846921',
-                chainId: Chains.ZklinkDev,
-                default: true,
-              },
-            ],
+            options: supportedToken,
           },
           {
             name: 'value',

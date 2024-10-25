@@ -32,7 +32,6 @@ export class CrossChainSwapService extends ActionDto<FieldTypes> {
         '<div>Perform cross-chain token swaps seamlessly across multiple networks</div>',
       networks: this.chainService.buildSupportedNetworks([Chains.ArbitrumOne]),
       author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
-      magicLinkMetadata: {},
       intent: {
         binding: 'amountToBuy',
         components: [
