@@ -5,6 +5,12 @@ import { Action } from 'src/entities/action.entity';
 import { BaseRepository } from './base.repository';
 import { UnitOfWork } from '../unitOfWork';
 
+type ActionsData = Action & {
+  intentionsCount: number;
+  commissionsCount: number;
+  intentionRecordsCount: number;
+};
+
 @Injectable()
 export class ActionRepository extends BaseRepository<Action> {
   public constructor(unitOfWork: UnitOfWork) {
@@ -17,14 +23,30 @@ export class ActionRepository extends BaseRepository<Action> {
 
   async getAllActions() {
     try {
-      const allActionMetadataRaw = await this.find({
-        select: ['id', 'logo', 'title', 'networks', 'description', 'author'],
-        order: {
-          sortOrder: 'asc',
-        },
-        relations: ['intentions', 'commissions', 'intentionRecords'],
-      });
-      return allActionMetadataRaw;
+      const transactionManager = this.unitOfWork.getTransactionManager();
+      const allActionMetadataRaw = await transactionManager
+        .createQueryBuilder(Action, 'action')
+        .select([
+          'action.id',
+          'action.logo',
+          'action.title',
+          'action.networks',
+          'action.description',
+          'action.author',
+        ])
+        .loadRelationCountAndMap('action.intentionsCount', 'action.intentions')
+        .loadRelationCountAndMap(
+          'action.commissionsCount',
+          'action.commissions',
+        )
+        .loadRelationCountAndMap(
+          'action.intentionRecordsCount',
+          'action.intentionRecords',
+        )
+        .orderBy('action.sortOrder', 'ASC')
+        .getMany();
+
+      return allActionMetadataRaw as ActionsData[];
     } catch (error) {
       throw new Error(`getAllActions failed: ${error.message}`);
     }

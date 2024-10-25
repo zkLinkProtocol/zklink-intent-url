@@ -35,10 +35,12 @@ export class IntentionRecord extends BaseEntity {
 
   @ManyToOne(() => Intention, (intention) => intention.intentionRecords)
   @JoinColumn({ name: 'intentionCode' })
+  @Index()
   public intention: Intention;
 
   @ManyToOne(() => Action, (action) => action.intentionRecords)
   @JoinColumn({ name: 'actionId' })
+  @Index()
   public action: Action;
 
   // join intention record txs
