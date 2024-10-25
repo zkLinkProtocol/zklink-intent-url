@@ -1,5 +1,4 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { ethers } from 'ethers';
 import html2md from 'html-to-md';
 import { LRUCache } from 'lru-cache';
 import TelegramBot, { ParseMode } from 'node-telegram-bot-api';
@@ -113,6 +112,23 @@ export class TgbotService implements OnModuleInit {
 
     const photo = `${aws3url}/dev/tg/onstart.png`;
     // const photo = 'https://pic.imgdb.cn/item/66bb2b02d9c307b7e9c8ec19.png';
+    //     const caption = `Welcome to magicLink\\! The magicLink TG Mini APP is a dedicated application under magicLink\\, specifically designed for the TG ecosystem\\.
+
+    // 🔮 The app supports users in creating and managing magicLinks while providing essential interaction capabilities\\, enabling seamless connections with other magicLinks\\.
+
+    // 💫 [*__Create__*](https://magic.zklink.io/dashboard/intent) magicLink & unlock potential to grab even more strategies with fun\\!
+
+    // 🗞 [*__Follow__*](https://t.me/${config.tgbot.newsChannelIdEn}) up with Magic News to know the first\\-hand crypto message\\!
+
+    // 💳 [*__Check__*](${userMiniApp}?startapp=portfolio) your Portfolio & Magic Account
+
+    // 💰 [*__Deposit__*](${userMiniApp}?startapp=deposit) Crypto Assets to your Magic Account in multiple Chains including all EVM Chain\\, Solana\\, SUI and so on\\.
+
+    // 🧠 Learn about magicLink with Magic Academy\\.
+
+    // 🫂 [*__Invite__*](${userMiniApp}?startapp=invite) your friends to magicLink to get part of their transaction fees and earn extra rewards\\.
+
+    // ⛓ Manage magicLinks you create before\\.`;
     const caption = `Welcome to magicLink\\! The magicLink TG Mini APP is a dedicated application under magicLink\\, specifically designed for the TG ecosystem\\. 
 
 🔮 The app supports users in creating and managing magicLinks while providing essential interaction capabilities\\, enabling seamless connections with other magicLinks\\.
@@ -121,9 +137,9 @@ export class TgbotService implements OnModuleInit {
 
 🗞 [*__Follow__*](https://t.me/${config.tgbot.newsChannelIdEn}) up with Magic News to know the first\\-hand crypto message\\!
 
-💳 [*__Check__*](${userMiniApp}?startapp=portfolio) your Portfolio & Magic Account 
+💳 Check your Portfolio & Magic Account 
 
-💰 [*__Deposit__*](${userMiniApp}?startapp=deposit) Crypto Assets to your Magic Account in multiple Chains including all EVM Chain\\, Solana\\, SUI and so on\\.
+💰 Deposit Crypto Assets to your Magic Account in multiple Chains including all EVM Chain\\, Solana\\, SUI and so on\\.
 
 🧠 Learn about magicLink with Magic Academy\\.
 
@@ -157,7 +173,7 @@ export class TgbotService implements OnModuleInit {
             text: '✅Invite',
           },
           {
-            text: '🌱Earn(Coimg Soon)',
+            text: '🌱Earn',
           },
         ],
       ],
@@ -211,25 +227,26 @@ export class TgbotService implements OnModuleInit {
         this.logger.error(`onStart error`, error.stack);
       }
     }
-    const text = `Manage and review your trading portfolio 💼
+    //     const text = `Manage and review your trading portfolio 💼
 
-💰 *My Wallet Address: \`${walletAddress ? walletAddress : 'You have not yet bind your Smart Account'}\`*
-🪙 *ETH balance: ${this.formatMarkdownV2(Number(ethers.formatEther(ethBalance)).toFixed(6))} ETH*
-        
-    Don't have ETH yet? Open your account and deposit from here 👇`;
-    // text = this.formatMarkdownV2(text);
+    // 💰 *My Wallet Address: \`${walletAddress ? walletAddress : 'You have not yet bind your Smart Account'}\`*
+    // 🪙 *ETH balance: ${this.formatMarkdownV2(Number(ethers.formatEther(ethBalance)).toFixed(6))} ETH*
+
+    //     Don't have ETH yet? Open your account and deposit from here 👇`;
+    //     const reply_markup = {
+    //       inline_keyboard: [
+    //         [
+    //           {
+    //             text: '📈View my Magic Account',
+    //             url: `${userMiniApp}?startapp=portfolio`,
+    //           },
+    //         ],
+    //       ],
+    //     };
+    const text = `Coming soon\\!`;
     const parse_mode: ParseMode = 'MarkdownV2';
-    const reply_markup = {
-      inline_keyboard: [
-        [
-          {
-            text: '📈View my Magic Account',
-            url: `${userMiniApp}?startapp=portfolio`,
-          },
-        ],
-      ],
-    };
-    const options = { reply_markup: reply_markup, parse_mode };
+    // const options = { reply_markup: reply_markup, parse_mode };
+    const options = { parse_mode };
     try {
       const res = await this.bot.sendMessage(tgUserId, text, options);
       this.logger.log(`onPortfolio success : `, JSON.stringify(res));
@@ -266,6 +283,7 @@ export class TgbotService implements OnModuleInit {
   async onNews(tgUserId: string) {
     const config = await configFactory();
     const channelLink = `https://t.me/${config.tgbot.newsChannelIdEn}`;
+    const channelLinkCn = `https://t.me/${config.tgbot.newsChannelIdCn}`;
     const text = `Want to know first hand Crypto News? Follow up with our Magic News Channel\\!`;
     // text = this.formatMarkdownV2(text);
     const parse_mode: ParseMode = 'MarkdownV2';
@@ -275,6 +293,10 @@ export class TgbotService implements OnModuleInit {
           {
             text: 'Open Magic News Channel',
             url: channelLink,
+          },
+          {
+            text: '打开Magic News中文频道',
+            url: channelLinkCn,
           },
         ],
       ],
