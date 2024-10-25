@@ -1,6 +1,7 @@
 import {
   Column,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
@@ -32,9 +33,11 @@ export class Commission {
 
   @ManyToOne(() => Intention, (intention) => intention.commissions)
   @JoinColumn({ name: 'intentionCode' })
+  @Index()
   public intention: Intention;
 
   @ManyToOne(() => Action, (action) => action.commissions)
   @JoinColumn({ name: 'actionId' })
+  @Index()
   public action: Action;
 }
