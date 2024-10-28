@@ -36,12 +36,14 @@ export class MintNftService extends ActionDto<FieldTypes> {
       Chains.MantaPacificMainnet,
       Chains.OpMainnet,
       Chains.ScrollMainnet,
+      Chains.BSCMainnet,
     ];
     if (this.isDev) {
       supportedNetwork.push(
         Chains.ZkLinkNovaSepolia,
         Chains.ArbitrumSepolia,
         Chains.BaseSepolia,
+        Chains.BSCTestnet,
       );
     }
     return {
