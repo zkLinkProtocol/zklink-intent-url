@@ -619,7 +619,7 @@ export class ActionUrlController extends BaseController {
     };
     const intention = await this.actionUrlService.findOneByCode(code);
     if (!intention) {
-      return { error: { message: 'Action not found' } };
+      return { message: 'Action not found' };
     }
 
     const chainId =
@@ -635,7 +635,7 @@ export class ActionUrlController extends BaseController {
       );
       response.transaction = transaction;
     } catch (error) {
-      return { error: { message: error.message } };
+      return { message: error.message };
     }
     return response;
   }
