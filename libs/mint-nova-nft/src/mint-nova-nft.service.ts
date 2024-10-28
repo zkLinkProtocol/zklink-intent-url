@@ -48,7 +48,7 @@ export class MintNovaNftService extends ActionDto<FieldTypes> {
       magicLinkMetadata: {
         title: 'Cubo the Block',
         description:
-          'Description: The Cubo NFT Genesis Collection will generate 50k different NFTs, holders of the NFT will get bonus points for selected future zkLink Nova campaign.',
+          'The Cubo NFT Genesis Collection will generate 50k different NFTs, holders of the NFT will get bonus points for selected future zkLink Nova campaign.',
       },
       intent: {
         binding: true,
@@ -155,7 +155,7 @@ export class MintNovaNftService extends ActionDto<FieldTypes> {
       );
       const resTx = await res.json();
       if (resTx.errorMessage) {
-        throw new Error(resTx.error);
+        throw new Error(resTx.errorMessage);
       }
       const tx: TransactionInfo = {
         chainId,
