@@ -15,7 +15,7 @@ export class LoggingInterceptor implements NestInterceptor {
 
   constructor(private configService: ConfigService) {
     this.threshold = Number(
-      configService.get<number>('SLOW_INTERFACE_LOGGING_THRESHOLD') || 2500,
+      configService.get<number>('SLOW_INTERFACE_LOGGING_THRESHOLD') || 2000,
     );
   }
 
