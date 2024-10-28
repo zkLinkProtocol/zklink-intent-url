@@ -640,6 +640,8 @@ export class ActionUrlController extends BaseController {
     return response;
   }
 
+  // should be removed after refactor
+  // it can be obtained from front-end
   @Get('/magicnews/support/tokens')
   public async getTokens(@Query('chainId') chainId: number) {
     const supportTokens = await this.okxService.getAllTokens(Number(chainId));
