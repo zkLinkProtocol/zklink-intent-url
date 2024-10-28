@@ -130,4 +130,15 @@ export class TgbotController extends BaseController {
       return false;
     }
   }
+
+  @Post('testOnJoin')
+  async testOnJoin(@Body('data') data: any, @Query('lang') lang: string) {
+    try {
+      this.tgbotService.onJoin(data, lang);
+      return true;
+    } catch (error) {
+      this.logger.error(error);
+      return false;
+    }
+  }
 }

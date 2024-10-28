@@ -7,6 +7,7 @@ import {
   IntentionRecordRepository,
   IntentionRecordTxRepository,
   IntentionRepository,
+  TgGroupAndChannelRepository,
   TgMessageRepository,
 } from 'src/repositories';
 import { UnitOfWorkModule } from 'src/unitOfWork';
@@ -32,6 +33,7 @@ import { CoingeckoService } from '../coingecko/coingecko.service';
     BlinkService,
     CoingeckoService,
     TgMessageRepository,
+    TgGroupAndChannelRepository,
   ],
   exports: [TgbotService],
   controllers: [TgbotController],
