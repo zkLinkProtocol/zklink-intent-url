@@ -616,12 +616,10 @@ export class ActionUrlController extends BaseController {
     res.setHeader('Access-Control-Expose-Headers', 'X-Blockchain-Ids');
     const response = {
       transaction: '',
-      message: '',
     };
     const intention = await this.actionUrlService.findOneByCode(code);
     if (!intention) {
-      response.message = 'Action not found';
-      return response;
+      return { message: 'Action not found' };
     }
 
     const chainId =
@@ -637,7 +635,7 @@ export class ActionUrlController extends BaseController {
       );
       response.transaction = transaction;
     } catch (error) {
-      response.message = error.message;
+      return { message: error.message };
     }
     return response;
   }
