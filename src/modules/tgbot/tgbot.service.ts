@@ -11,6 +11,7 @@ import { Chains } from 'src/constants';
 import {
   CreatorRepository,
   IntentionRepository,
+  TgGroupAndChannelRepository,
   TgMessageRepository,
 } from 'src/repositories';
 
@@ -39,6 +40,7 @@ export class TgbotService implements OnModuleInit {
     private readonly coingeckoService: CoingeckoService,
     private readonly chainService: ChainService,
     private readonly tgMessageRepository: TgMessageRepository,
+    private readonly tgGroupAndChannelRepository: TgGroupAndChannelRepository,
   ) {}
 
   async update(body: any) {
@@ -75,7 +77,9 @@ export class TgbotService implements OnModuleInit {
   }
 
   private async eventInit() {
-    this.bot.onText(/\/start/, (msg: any) => this.onStart(msg.from.id));
+    const config = await configFactory();
+    const tgbot = config.tgbot.tgbot;
+    // this.bot.onText(/\/start/, (msg: any) => this.onStart(msg.from.id));
     this.bot.onText(/\/my/, (msg: any) => this.onMyMagicLink(msg.from.id));
     this.bot.onText(/Create/, (msg: any) => this.onCreate(msg.from.id));
     this.bot.onText(/Portfolio/, (msg: any) => this.onPortfolio(msg.from.id));
@@ -83,6 +87,15 @@ export class TgbotService implements OnModuleInit {
     this.bot.onText(/News/, (msg: any) => this.onNews(msg.from.id));
     this.bot.onText(/Invite/, (msg: any) => this.onInvite(msg.from.id));
     this.bot.onText(/Earn/, (msg: any) => this.onEarn(msg.from.id));
+    this.bot.onText(/join_en/, (msg: any) => this.onJoin(msg, 'en'));
+    this.bot.onText(/join_cn/, (msg: any) => this.onJoin(msg, 'cn'));
+    this.bot.on('text', (msg: any) => {
+      switch (msg.text) {
+        case '/start':
+          this.onStart(msg.from.id);
+          break;
+      }
+    });
     this.bot.on('callback_query', (callbackQuery: any) => {
       this.logger.log(`callback_query:`, JSON.stringify(callbackQuery));
       const chatId = callbackQuery.message.chat.id;
@@ -103,6 +116,33 @@ export class TgbotService implements OnModuleInit {
         userId,
       );
     });
+  }
+
+  async onJoin(msg: any, lang: string) {
+    const chatId = msg.chat.id;
+    const chatTitle = msg.chat.title;
+    const chatType = msg.chat.type;
+    const fromId = msg.from.id;
+    const fromUsername = msg.from.username;
+    const fromIsBot = msg.from.is_bot;
+    const inviteDate = msg.date;
+    const tgGroupAndChannel = {
+      chatId,
+      chatTitle,
+      chatType,
+      fromId,
+      fromUsername,
+      fromIsBot,
+      inviteDate,
+      lang,
+    };
+    try {
+      await this.tgGroupAndChannelRepository.upsert(tgGroupAndChannel, true, [
+        'chatId',
+      ]);
+    } catch (error) {
+      this.logger.error('onJoin error', error.stack);
+    }
   }
 
   async onStart(tgUserId: string) {
@@ -291,11 +331,11 @@ export class TgbotService implements OnModuleInit {
       inline_keyboard: [
         [
           {
-            text: 'Open Magic News Channel',
+            text: 'Magic News Channel',
             url: channelLink,
           },
           {
-            text: '打开Magic News中文频道',
+            text: 'Magic News中文频道',
             url: channelLinkCn,
           },
         ],
@@ -312,24 +352,30 @@ export class TgbotService implements OnModuleInit {
 
   async onInvite(tgUserId: string) {
     const config = await configFactory();
-    const url = encodeURIComponent(config.tgbot.tgbot);
+    const botLink = `https://t.me/${config.tgbot.tgbot}`;
+    const url = encodeURIComponent(botLink);
+
     const tgShareUrl = `https://t.me/share/url?url=${url}&text=💫 Join magicLink Telegram and enjoy lower transaction fees with my referral code.
 
 🔮The magicLink TG Mini APP is a dedicated application under magicLink, specifically designed for the TG ecosystem. 
 
 🔮magicLink offers multi-chain wallet and asset management features, allowing users to quickly create and manage magicLinks across multiple chains, simplifying asset transfers and interactions.`;
-    const text = `Invite your friends to magicLink to get part of their transaction fees and earn extra rewards\\.
+    //     const text = `Invite your friends to magicLink to get part of their transaction fees and earn extra rewards\\.
 
-Current Invitee: 0
-Share to More friends and groups here\\!`;
-    // text = this.formatMarkdownV2(text);
+    // Current Invitee: 0
+    // Share to More friends and groups here\\!`;
+    const text = `Invite magicLink bot to you group and channel\\. Choose Language you want [@magicLink](${botLink}) Bot Speak\\!`;
     const parse_mode: ParseMode = 'MarkdownV2';
     const reply_markup = {
       inline_keyboard: [
         [
           {
-            text: 'Share',
-            url: tgShareUrl,
+            text: 'English',
+            url: `${botLink}?startgroup=join_en&startchannel=join_en`,
+          },
+          {
+            text: '中文',
+            url: `${botLink}?startgroup=join_cn&startchannel=join_cn`,
           },
         ],
       ],
@@ -480,7 +526,7 @@ Share to More friends and groups here\\!`;
     const newsChannelIdEn = config.tgbot.newsChannelIdEn;
     let newsChannelId = '';
     const userMiniApp = config.tgbot.userMiniApp;
-    const tgbot = config.tgbot.tgbot;
+    const tgbot = `https://t.me/${config.tgbot.tgbot}`;
     let news = null;
     try {
       news = await this.actionUrlService.findOneByCode(code);
@@ -561,7 +607,7 @@ Share to More friends and groups here\\!`;
 
 🔥更多信息请到 👉magicLink TG \\([Go to mini app](${userMiniApp}?startapp=${news.code})\\)
 
-🌈在您的群中推送 magicNews 邀请 [@magicLink](${tgbot}?startgroup=join&admin=edit_messages) 到您的群中
+🌈在您的群中推送 magicNews 邀请 [@magicLink](${tgbot}?startgroup=join_cn&startchannel=join_cn) 到您的群中
 `;
     } else {
       newsChannelId = newsChannelIdEn;
@@ -581,7 +627,7 @@ ${this.formatMarkdownV2(content).replaceAll(
 
 🔥More details Click here to 👉magicLink TG \\([Go to mini app](${userMiniApp}?startapp=${news.code})\\)
 
-🌈Push Magic News Alerts in group? Invite [@magicLink](${tgbot}?startgroup=join&admin=edit_messages) in your group
+🌈Push Magic News Alerts in group? Invite [@magicLink](${tgbot}?startgroup=join_en&startchannel=join_en) in your group
 `;
     }
 
