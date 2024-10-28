@@ -21,6 +21,7 @@ export const typeOrmModuleOptions: DataSourceOptions = {
   migrationsRun: false,
   synchronize: false,
   logging: false,
+  maxQueryExecutionTime: 1500,
   subscribers: [],
   migrations: ['dist/migrations/*.js'],
 };
