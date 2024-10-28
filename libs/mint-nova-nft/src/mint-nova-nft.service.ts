@@ -1,6 +1,6 @@
 import { RegistryPlug } from '@action/registry';
 import { ChainService, DataService } from '@core/shared';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Contract, ethers } from 'ethers';
 import {
@@ -10,7 +10,6 @@ import {
   GenerateTransactionResponse,
   TransactionInfo,
 } from 'src/common/dto';
-import { ConfigType } from 'src/config';
 import { Chains } from 'src/constants';
 import {
   IntentionRecordTx,
@@ -23,8 +22,6 @@ import { FieldTypes } from './types';
 @RegistryPlug('mint-nova-nft', 'v1')
 @Injectable()
 export class MintNovaNftService extends ActionDto<FieldTypes> {
-  private logger: Logger = new Logger(MintNovaNftService.name);
-  private readonly okxConfig: ConfigType['okx'];
   private readonly isDev: boolean;
   constructor(
     readonly configService: ConfigService,
@@ -32,7 +29,6 @@ export class MintNovaNftService extends ActionDto<FieldTypes> {
     private readonly chainService: ChainService,
   ) {
     super();
-    this.okxConfig = configService.get('okx', { infer: true })!;
     this.isDev = this.configService.get('env')! === 'dev';
   }
 
@@ -50,9 +46,9 @@ export class MintNovaNftService extends ActionDto<FieldTypes> {
         github: 'https://github.com/zkLinkProtocol',
       },
       magicLinkMetadata: {
-        title: 'Mint NFT',
+        title: 'Cubo the Block',
         description:
-          'magicLink Enthusiast | Donate with your love for zkLink magic',
+          'Description: The Cubo NFT Genesis Collection will generate 50k different NFTs, holders of the NFT will get bonus points for selected future zkLink Nova campaign.',
       },
       intent: {
         binding: true,
@@ -143,27 +139,34 @@ export class MintNovaNftService extends ActionDto<FieldTypes> {
     }
 
     const expiry = Math.round(Date.now() / 1000) + 60 * 60;
-    const res = await fetch(
-      'https://gruesome-coffin-wr7qq5p99r9ph9pwv-10080.app.github.dev/mint',
-      {
-        method: 'post',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({
-          recipient: additionalData.account,
-          tokenId,
-          expiry,
-          stage: formData.stage,
-        }),
-      },
-    );
-    const resTx = await res.json();
-    const tx: TransactionInfo = {
-      chainId,
-      to: resTx.to,
-      value: ethers.parseEther(formData.fee).toString(),
-      data: resTx.data,
-      shouldPublishToChain: true,
-    };
-    return { transactions: [tx] };
+    try {
+      const res = await fetch(
+        'https://gruesome-coffin-wr7qq5p99r9ph9pwv-10080.app.github.dev/mint',
+        {
+          method: 'post',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            recipient: additionalData.account,
+            tokenId,
+            expiry,
+            stage: formData.stage,
+          }),
+        },
+      );
+      const resTx = await res.json();
+      if (resTx.errorMessage) {
+        throw new Error(resTx.error);
+      }
+      const tx: TransactionInfo = {
+        chainId,
+        to: resTx.to,
+        value: ethers.parseEther(formData.fee).toString(),
+        data: resTx.data,
+        shouldPublishToChain: true,
+      };
+      return { transactions: [tx] };
+    } catch (err) {
+      throw new Error(err);
+    }
   }
 }
