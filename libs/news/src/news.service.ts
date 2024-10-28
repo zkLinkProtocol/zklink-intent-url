@@ -167,7 +167,10 @@ export class NewsService extends ActionDto<FieldTypes> {
       },
     ];
 
-    if (tokenInAddress === '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee') {
+    if (
+      tokenInAddress.toLocaleLowerCase() ===
+      '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
+    ) {
       swapTx = await this.okxService.getSwapData(
         account,
         chainId,
