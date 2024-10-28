@@ -91,4 +91,16 @@ export const chainConfig: Array<{
     rpc: ['https://rpc.mantle.xyz', 'https://mantle.drpc.org'],
     explorer: 'https://explorer.mantle.xyz',
   },
+  {
+    chainId: Chains.BSCMainnet,
+    name: 'BNB Smart Chain Mainnet',
+    rpc: ['https://binance.llamarpc.com', 'https://bsc.drpc.org	'],
+    explorer: 'https://bscscan.com',
+  },
+  {
+    chainId: Chains.BSCTestnet,
+    name: 'BNB Smart Chain Testnet',
+    rpc: ['https://bsc-testnet-rpc.publicnode.com'],
+    explorer: 'https://testnet.bscscan.com',
+  },
 ];

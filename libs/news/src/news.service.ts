@@ -138,12 +138,21 @@ export class NewsService extends ActionDto<FieldTypes> {
     }
     const { amountToBuy, ...restParams } = formData;
     const provider = this.chainService.getProvider(chainId);
-    const tokenFromContract = await new Contract(
-      formData.tokenFrom,
-      ['function decimals() view returns (uint8)'],
-      provider,
-    );
-    const tokenFromDecimal = await tokenFromContract.decimals();
+
+    let tokenFromDecimal;
+    if (
+      formData.tokenFrom.toLocaleLowerCase() ===
+      '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
+    ) {
+      tokenFromDecimal = 18;
+    } else {
+      const tokenFromContract = await new Contract(
+        formData.tokenFrom,
+        ['function decimals() view returns (uint8)'],
+        provider,
+      );
+      tokenFromDecimal = await tokenFromContract.decimals();
+    }
 
     const params = {
       ...restParams,
@@ -167,7 +176,10 @@ export class NewsService extends ActionDto<FieldTypes> {
       },
     ];
 
-    if (tokenInAddress === '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee') {
+    if (
+      tokenInAddress.toLocaleLowerCase() ===
+      '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
+    ) {
       swapTx = await this.okxService.getSwapData(
         account,
         chainId,

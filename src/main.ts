@@ -6,6 +6,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { ResponseDto } from './common/response.dto';
 import { ExceptionsFilter } from './exception/exceptions.filter';
+import { LoggingInterceptor } from './interceptors/logging.interceptor';
 import logger from './logger';
 
 const API_PREFIX = 'api';
@@ -26,6 +27,7 @@ async function bootstrap() {
     exclude: [{ path: 'actions.json', method: RequestMethod.GET }],
   });
   app.useGlobalFilters(new ExceptionsFilter());
+  app.useGlobalInterceptors(new LoggingInterceptor(configService));
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle('zkIntent api docs')
