@@ -124,7 +124,7 @@ export class TgbotService implements OnModuleInit {
     const chatType = msg.chat.type;
     const fromId = msg.from.id;
     const fromUsername = msg.from.username;
-    const fromIsBot = msg.from.is_bot;
+    const fromIsBot = msg.from.is_bot ? 1 : 0;
     const inviteDate = msg.date;
     const tgGroupAndChannel = {
       chatId,
@@ -589,6 +589,7 @@ export class TgbotService implements OnModuleInit {
     const participants = await this.intentionRecordService.countByCode(code);
     let captionTemplate = '';
     let linkIndex = 0;
+    let lang = 'cn';
     if (this.containsChineseCharacters(content)) {
       newsChannelId = newsChannelIdCn;
       captionTemplate = `
@@ -610,6 +611,7 @@ export class TgbotService implements OnModuleInit {
 🌈在您的群中推送 magicNews 邀请 [@magicLink](${tgbot}?startgroup=join_cn&startchannel=join_cn) 到您的群中
 `;
     } else {
+      lang = 'en';
       newsChannelId = newsChannelIdEn;
       captionTemplate = `
 🟢*${this.formatMarkdownV2(news.title)}*🟢
@@ -690,26 +692,35 @@ ${this.formatMarkdownV2(content).replaceAll(
     };
     try {
       let res = null;
-      if (photo === '') {
-        const options = {
-          reply_markup,
-          parse_mode,
+      const tgGroups = await this.tgGroupAndChannelRepository.find({
+        select: ['chatId'],
+        where: { lang },
+        order: { inviteDate: 'ASC' },
+      });
+      const tgGroupIds = tgGroups.map((tgGroup) => tgGroup.chatId);
+      tgGroupIds.push(newsChannelId);
+      for (const tgGroupId of tgGroupIds) {
+        if (photo === '') {
+          const options = {
+            reply_markup,
+            parse_mode,
+          };
+          res = await this.bot.sendMessage(tgGroupId, caption, options);
+        } else {
+          const options = { reply_markup, parse_mode, caption };
+          res = await this.bot.sendPhoto(tgGroupId, photo, options);
+        }
+        const data = {
+          messageId: res.message_id.toString(),
+          chatId: res.chat.id.toString(),
+          code: code,
+          text: captionTemplate,
+          replyMarkup: JSON.stringify(reply_markup),
+          metadata: photo,
         };
-        res = await this.bot.sendMessage(newsChannelId, caption, options);
-      } else {
-        const options = { reply_markup, parse_mode, caption };
-        res = await this.bot.sendPhoto(newsChannelId, photo, options);
+        await this.tgMessageRepository.add(data);
+        this.logger.log('sendNews success', JSON.stringify(res));
       }
-      const data = {
-        messageId: res.message_id.toString(),
-        chatId: res.chat.id.toString(),
-        code: code,
-        text: captionTemplate,
-        replyMarkup: JSON.stringify(reply_markup),
-        metadata: photo,
-      };
-      await this.tgMessageRepository.add(data);
-      this.logger.log('sendNews success', JSON.stringify(res));
     } catch (error) {
       this.logger.error(
         `sendNews error,caption:${caption}, newsChannelId:${newsChannelId},error:`,
