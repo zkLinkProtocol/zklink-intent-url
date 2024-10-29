@@ -129,6 +129,7 @@ export class TgbotService implements OnModuleInit {
   }
 
   async onMyChatMember(msg: ChatMemberUpdated) {
+    this.logger.log(`onMyChatMember msg:`, JSON.stringify(msg));
     const config = await configFactory();
     const bot = config.tgbot.tgbot;
     const joinUser = msg.new_chat_member.user;
@@ -398,7 +399,7 @@ export class TgbotService implements OnModuleInit {
 
     // Current Invitee: 0
     // Share to More friends and groups here\\!`;
-    const text = `Do you want add magicLink bot to you group or channel \\?`;
+    const text = `Would you like to add the MagicLink bot to your group or channel \\?`;
     const parse_mode: ParseMode = 'MarkdownV2';
     const reply_markup = {
       inline_keyboard: [
@@ -409,7 +410,7 @@ export class TgbotService implements OnModuleInit {
           },
           {
             text: 'Channel',
-            url: `${botLink}?startchannel&admin=post_messages`,
+            url: `${botLink}?startchannel=join&admin=post_messages`,
           },
         ],
       ],
@@ -682,7 +683,7 @@ export class TgbotService implements OnModuleInit {
 
 🔥更多信息请到 👉magicLink TG \\([Go to mini app](${userMiniApp}?startapp=${news.code})\\)
 
-🌈在您的群中推送 magicNews 邀请 [@magicLink](${tgbot}?startgroup=join_cn&startchannel=join_cn) 到您的群中
+🌈在您的群中推送 magicNews 邀请 [@magicLink](${tgbot}?startgroup=join_cn&startchannel=join) 到您的群中
 `;
     } else {
       lang = 'en';
@@ -703,7 +704,7 @@ ${this.formatMarkdownV2(content).replaceAll(
 
 🔥More details Click here to 👉magicLink TG \\([Go to mini app](${userMiniApp}?startapp=${news.code})\\)
 
-🌈Push Magic News Alerts in group? Invite [@magicLink](${tgbot}?startgroup=join_en&startchannel=join_en) in your group
+🌈Push Magic News Alerts in group? Invite [@magicLink](${tgbot}?startgroup=join_en&startchannel=join) in your group
 `;
     }
 
