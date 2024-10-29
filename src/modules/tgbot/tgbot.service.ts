@@ -105,6 +105,10 @@ export class TgbotService implements OnModuleInit {
       const messageId = callbackQuery.message.message_id;
       const userId = callbackQuery.from.id;
       const data = callbackQuery.data;
+      if (data == 'addbot_group') {
+        this.onInviteReply(userId, chatId, messageId);
+        return;
+      }
       const replyMarkup = callbackQuery.message.reply_markup;
       const [longOrShort, originLong, originShort, pollOrIntent] =
         data.split('_');
@@ -384,29 +388,29 @@ export class TgbotService implements OnModuleInit {
   async onInvite(tgUserId: string) {
     const config = await configFactory();
     const botLink = `https://t.me/${config.tgbot.tgbot}`;
-    const url = encodeURIComponent(botLink);
+    // const url = encodeURIComponent(botLink);
 
-    const tgShareUrl = `https://t.me/share/url?url=${url}&text=💫 Join magicLink Telegram and enjoy lower transaction fees with my referral code.
+    //     const tgShareUrl = `https://t.me/share/url?url=${url}&text=💫 Join magicLink Telegram and enjoy lower transaction fees with my referral code.
 
-🔮The magicLink TG Mini APP is a dedicated application under magicLink, specifically designed for the TG ecosystem. 
+    // 🔮The magicLink TG Mini APP is a dedicated application under magicLink, specifically designed for the TG ecosystem.
 
-🔮magicLink offers multi-chain wallet and asset management features, allowing users to quickly create and manage magicLinks across multiple chains, simplifying asset transfers and interactions.`;
+    // 🔮magicLink offers multi-chain wallet and asset management features, allowing users to quickly create and manage magicLinks across multiple chains, simplifying asset transfers and interactions.`;
     //     const text = `Invite your friends to magicLink to get part of their transaction fees and earn extra rewards\\.
 
     // Current Invitee: 0
     // Share to More friends and groups here\\!`;
-    const text = `Invite magicLink bot to you group and channel\\. Choose Language you want [@magicLink](${botLink}) Bot Speak\\!`;
+    const text = `Do you want add magicLink bot to you group or channel \\?`;
     const parse_mode: ParseMode = 'MarkdownV2';
     const reply_markup = {
       inline_keyboard: [
         [
           {
-            text: 'English',
-            url: `${botLink}?startgroup=join_en`,
+            text: 'Group',
+            callback_data: `addbot_group`,
           },
           {
-            text: '中文',
-            url: `${botLink}?startgroup=join_cn`,
+            text: 'Channel',
+            url: `${botLink}?startchannel&admin=post_messages`,
           },
         ],
       ],
@@ -417,6 +421,46 @@ export class TgbotService implements OnModuleInit {
       this.logger.log(`onInvite success : `, JSON.stringify(res));
     } catch (error) {
       this.logger.error(`onInvite error`, error.stack);
+    }
+  }
+
+  async onInviteReply(tgUserId: string, chatId: string, messageId: string) {
+    const config = await configFactory();
+    const botLink = `https://t.me/${config.tgbot.tgbot}`;
+    // const url = encodeURIComponent(botLink);
+
+    //     const tgShareUrl = `https://t.me/share/url?url=${url}&text=💫 Join magicLink Telegram and enjoy lower transaction fees with my referral code.
+
+    // 🔮The magicLink TG Mini APP is a dedicated application under magicLink, specifically designed for the TG ecosystem.
+
+    // 🔮magicLink offers multi-chain wallet and asset management features, allowing users to quickly create and manage magicLinks across multiple chains, simplifying asset transfers and interactions.`;
+    //     const text = `Invite your friends to magicLink to get part of their transaction fees and earn extra rewards\\.
+
+    // Current Invitee: 0
+    // Share to More friends and groups here\\!`;
+    const text = `Choose Language you want [@magicLink](${botLink}) Bot Speak\\!`;
+    const parse_mode: ParseMode = 'MarkdownV2';
+    const reply_markup = {
+      inline_keyboard: [
+        [
+          {
+            text: 'English',
+            url: `${botLink}?startgroup=join_en&admin=post_messages`,
+          },
+          {
+            text: '中文',
+            url: `${botLink}?startgroup=join_cn&admin=post_messages`,
+          },
+        ],
+      ],
+    };
+    const options = { reply_markup: reply_markup, parse_mode };
+    try {
+      await this.bot.deleteMessage(chatId, Number(messageId));
+      const res = await this.bot.sendMessage(tgUserId, text, options);
+      this.logger.log(`onInviteReply success : `, JSON.stringify(res));
+    } catch (error) {
+      this.logger.error(`onInviteReply error`, error.stack);
     }
   }
 
