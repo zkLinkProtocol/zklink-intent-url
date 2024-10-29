@@ -155,10 +155,10 @@ export class TgbotService implements OnModuleInit {
 
   async onJoin(msg: any, lang: string) {
     const chatId = msg.chat.id;
-    const chatTitle = msg.chat.title;
-    const chatType = msg.chat.type;
+    const chatTitle = msg.chat.title ?? '';
+    const chatType = msg.chat.type ?? '';
     const fromId = msg.from.id;
-    const fromUsername = msg.from.username;
+    const fromUsername = msg.from.username ?? '';
     const fromIsBot = msg.from.is_bot ? 1 : 0;
     const inviteDate = msg.date;
     const tgGroupAndChannel = {
