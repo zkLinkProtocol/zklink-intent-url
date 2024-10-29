@@ -1,7 +1,10 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import html2md from 'html-to-md';
 import { LRUCache } from 'lru-cache';
-import TelegramBot, { ParseMode } from 'node-telegram-bot-api';
+import TelegramBot, {
+  ChatMemberUpdated,
+  ParseMode,
+} from 'node-telegram-bot-api';
 import { MoreThanOrEqual } from 'typeorm';
 
 import { ChainService } from '@core/shared';
@@ -95,8 +98,8 @@ export class TgbotService implements OnModuleInit {
       }
     });
 
-    this.bot.on('message', (msg: any, metadata: any) =>
-      this.onMessage(msg, metadata),
+    this.bot.on('my_chat_member', (msg: ChatMemberUpdated) =>
+      this.onMyChatMember(msg),
     );
 
     this.bot.on('callback_query', (callbackQuery: any) => {
@@ -125,21 +128,17 @@ export class TgbotService implements OnModuleInit {
     });
   }
 
-  async onMessage(msg: any, metadata: any) {
-    if (!(msg.my_chat_member ?? null)) {
-      this.logger.log('canNotAddBot:', JSON.stringify(msg));
-      return;
-    }
+  async onMyChatMember(msg: ChatMemberUpdated) {
     const config = await configFactory();
     const bot = config.tgbot.tgbot;
-    const joinUser = msg.my_chat_member.new_chat_member.user;
-    const joinStatus = msg.my_chat_member.new_chat_member.status;
-    const from = msg.my_chat_member.from;
+    const joinUser = msg.new_chat_member.user;
+    const joinStatus = msg.new_chat_member.status;
+    const from = msg.from;
     const lang = from.language_code == 'zh-hans' ? 'cn' : 'en';
     if (joinStatus != 'left' && joinUser.is_bot && joinUser.username == bot) {
       const tgGroupOrChannel = await this.tgGroupAndChannelRepository.findOneBy(
         {
-          chatId: msg.my_chat_member.chat.id,
+          chatId: msg.chat.id.toString(),
         },
       );
       if (tgGroupOrChannel) {
@@ -149,7 +148,7 @@ export class TgbotService implements OnModuleInit {
         );
         return;
       }
-      await this.onJoin(msg.my_chat_member, lang);
+      await this.onJoin(msg, lang);
     }
   }
 
