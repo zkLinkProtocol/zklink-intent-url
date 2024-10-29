@@ -765,16 +765,16 @@ ${this.formatMarkdownV2(content).replaceAll(
     const reply_markup = {
       inline_keyboard: inlineKeyboard,
     };
-    try {
-      let res = null;
-      const tgGroups = await this.tgGroupAndChannelRepository.find({
-        select: ['chatId'],
-        where: { lang },
-        order: { inviteDate: 'ASC' },
-      });
-      const tgGroupIds = tgGroups.map((tgGroup) => tgGroup.chatId);
-      tgGroupIds.push(newsChannelId);
-      for (const tgGroupId of tgGroupIds) {
+    let res = null;
+    const tgGroups = await this.tgGroupAndChannelRepository.find({
+      select: ['chatId'],
+      where: { lang },
+      order: { inviteDate: 'ASC' },
+    });
+    const tgGroupIds = tgGroups.map((tgGroup) => tgGroup.chatId);
+    tgGroupIds.push(newsChannelId);
+    for (const tgGroupId of tgGroupIds) {
+      try {
         if (photo === '') {
           const options = {
             reply_markup,
@@ -795,12 +795,12 @@ ${this.formatMarkdownV2(content).replaceAll(
         };
         await this.tgMessageRepository.add(data);
         this.logger.log('sendNews success', JSON.stringify(res));
+      } catch (error) {
+        this.logger.error(
+          `sendNews error,caption:${caption}, newsChannelId:${newsChannelId},error:`,
+          error.stack,
+        );
       }
-    } catch (error) {
-      this.logger.error(
-        `sendNews error,caption:${caption}, newsChannelId:${newsChannelId},error:`,
-        error.stack,
-      );
     }
   }
 
