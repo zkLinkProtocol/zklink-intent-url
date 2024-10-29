@@ -1,7 +1,10 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import html2md from 'html-to-md';
 import { LRUCache } from 'lru-cache';
-import TelegramBot, { ParseMode } from 'node-telegram-bot-api';
+import TelegramBot, {
+  ChatMemberUpdated,
+  ParseMode,
+} from 'node-telegram-bot-api';
 import { MoreThanOrEqual } from 'typeorm';
 
 import { ChainService } from '@core/shared';
@@ -11,6 +14,7 @@ import { Chains } from 'src/constants';
 import {
   CreatorRepository,
   IntentionRepository,
+  TgGroupAndChannelRepository,
   TgMessageRepository,
 } from 'src/repositories';
 
@@ -39,6 +43,7 @@ export class TgbotService implements OnModuleInit {
     private readonly coingeckoService: CoingeckoService,
     private readonly chainService: ChainService,
     private readonly tgMessageRepository: TgMessageRepository,
+    private readonly tgGroupAndChannelRepository: TgGroupAndChannelRepository,
   ) {}
 
   async update(body: any) {
@@ -75,7 +80,7 @@ export class TgbotService implements OnModuleInit {
   }
 
   private async eventInit() {
-    this.bot.onText(/\/start/, (msg: any) => this.onStart(msg.from.id));
+    // this.bot.onText(/\/start/, (msg: any) => this.onStart(msg.from.id));
     this.bot.onText(/\/my/, (msg: any) => this.onMyMagicLink(msg.from.id));
     this.bot.onText(/Create/, (msg: any) => this.onCreate(msg.from.id));
     this.bot.onText(/Portfolio/, (msg: any) => this.onPortfolio(msg.from.id));
@@ -83,12 +88,30 @@ export class TgbotService implements OnModuleInit {
     this.bot.onText(/News/, (msg: any) => this.onNews(msg.from.id));
     this.bot.onText(/Invite/, (msg: any) => this.onInvite(msg.from.id));
     this.bot.onText(/Earn/, (msg: any) => this.onEarn(msg.from.id));
+    this.bot.onText(/join_en/, (msg: any) => this.onJoin(msg, 'en'));
+    this.bot.onText(/join_cn/, (msg: any) => this.onJoin(msg, 'cn'));
+    this.bot.on('text', (msg: any) => {
+      switch (msg.text) {
+        case '/start':
+          this.onStart(msg.from.id);
+          break;
+      }
+    });
+
+    this.bot.on('my_chat_member', (msg: ChatMemberUpdated) =>
+      this.onMyChatMember(msg),
+    );
+
     this.bot.on('callback_query', (callbackQuery: any) => {
       this.logger.log(`callback_query:`, JSON.stringify(callbackQuery));
       const chatId = callbackQuery.message.chat.id;
       const messageId = callbackQuery.message.message_id;
       const userId = callbackQuery.from.id;
       const data = callbackQuery.data;
+      if (data == 'addbot_group') {
+        this.onInviteReply(userId, chatId, messageId);
+        return;
+      }
       const replyMarkup = callbackQuery.message.reply_markup;
       const [longOrShort, originLong, originShort, pollOrIntent] =
         data.split('_');
@@ -103,6 +126,58 @@ export class TgbotService implements OnModuleInit {
         userId,
       );
     });
+  }
+
+  async onMyChatMember(msg: ChatMemberUpdated) {
+    const config = await configFactory();
+    const bot = config.tgbot.tgbot;
+    this.logger.log(`onMyChatMember msg: ${JSON.stringify(msg)}, bot:${bot}`);
+    const joinUser = msg.new_chat_member.user;
+    const joinStatus = msg.new_chat_member.status;
+    const from = msg.from;
+    const lang = from.language_code == 'zh-hans' ? 'cn' : 'en';
+    if (joinStatus != 'left' && joinUser.is_bot && joinUser.username == bot) {
+      const tgGroupOrChannel = await this.tgGroupAndChannelRepository.findOneBy(
+        {
+          chatId: msg.chat.id.toString(),
+        },
+      );
+      if (tgGroupOrChannel) {
+        this.logger.log(
+          'canNotAddBot, group or channel exist:',
+          JSON.stringify(msg),
+        );
+        return;
+      }
+      await this.onJoin(msg, lang);
+    }
+  }
+
+  async onJoin(msg: any, lang: string) {
+    const chatId = msg.chat.id;
+    const chatTitle = msg.chat.title ?? '';
+    const chatType = msg.chat.type ?? '';
+    const fromId = msg.from.id;
+    const fromUsername = msg.from.username ?? '';
+    const fromIsBot = msg.from.is_bot ? 1 : 0;
+    const inviteDate = msg.date;
+    const tgGroupAndChannel = {
+      chatId,
+      chatTitle,
+      chatType,
+      fromId,
+      fromUsername,
+      fromIsBot,
+      inviteDate,
+      lang,
+    };
+    try {
+      await this.tgGroupAndChannelRepository.upsert(tgGroupAndChannel, true, [
+        'chatId',
+      ]);
+    } catch (error) {
+      this.logger.error('onJoin error', error.stack);
+    }
   }
 
   async onStart(tgUserId: string) {
@@ -291,11 +366,11 @@ export class TgbotService implements OnModuleInit {
       inline_keyboard: [
         [
           {
-            text: 'Open Magic News Channel',
+            text: 'Magic News Channel',
             url: channelLink,
           },
           {
-            text: '打开Magic News中文频道',
+            text: 'Magic News中文频道',
             url: channelLinkCn,
           },
         ],
@@ -312,24 +387,30 @@ export class TgbotService implements OnModuleInit {
 
   async onInvite(tgUserId: string) {
     const config = await configFactory();
-    const url = encodeURIComponent(config.tgbot.tgbot);
-    const tgShareUrl = `https://t.me/share/url?url=${url}&text=💫 Join magicLink Telegram and enjoy lower transaction fees with my referral code.
+    const botLink = `https://t.me/${config.tgbot.tgbot}`;
+    // const url = encodeURIComponent(botLink);
 
-🔮The magicLink TG Mini APP is a dedicated application under magicLink, specifically designed for the TG ecosystem. 
+    //     const tgShareUrl = `https://t.me/share/url?url=${url}&text=💫 Join magicLink Telegram and enjoy lower transaction fees with my referral code.
 
-🔮magicLink offers multi-chain wallet and asset management features, allowing users to quickly create and manage magicLinks across multiple chains, simplifying asset transfers and interactions.`;
-    const text = `Invite your friends to magicLink to get part of their transaction fees and earn extra rewards\\.
+    // 🔮The magicLink TG Mini APP is a dedicated application under magicLink, specifically designed for the TG ecosystem.
 
-Current Invitee: 0
-Share to More friends and groups here\\!`;
-    // text = this.formatMarkdownV2(text);
+    // 🔮magicLink offers multi-chain wallet and asset management features, allowing users to quickly create and manage magicLinks across multiple chains, simplifying asset transfers and interactions.`;
+    //     const text = `Invite your friends to magicLink to get part of their transaction fees and earn extra rewards\\.
+
+    // Current Invitee: 0
+    // Share to More friends and groups here\\!`;
+    const text = `Would you like to add the MagicLink bot to your group or channel \\?`;
     const parse_mode: ParseMode = 'MarkdownV2';
     const reply_markup = {
       inline_keyboard: [
         [
           {
-            text: 'Share',
-            url: tgShareUrl,
+            text: 'Group',
+            callback_data: `addbot_group`,
+          },
+          {
+            text: 'Channel',
+            url: `${botLink}?startchannel=join&admin=post_messages`,
           },
         ],
       ],
@@ -340,6 +421,46 @@ Share to More friends and groups here\\!`;
       this.logger.log(`onInvite success : `, JSON.stringify(res));
     } catch (error) {
       this.logger.error(`onInvite error`, error.stack);
+    }
+  }
+
+  async onInviteReply(tgUserId: string, chatId: string, messageId: string) {
+    const config = await configFactory();
+    const botLink = `https://t.me/${config.tgbot.tgbot}`;
+    // const url = encodeURIComponent(botLink);
+
+    //     const tgShareUrl = `https://t.me/share/url?url=${url}&text=💫 Join magicLink Telegram and enjoy lower transaction fees with my referral code.
+
+    // 🔮The magicLink TG Mini APP is a dedicated application under magicLink, specifically designed for the TG ecosystem.
+
+    // 🔮magicLink offers multi-chain wallet and asset management features, allowing users to quickly create and manage magicLinks across multiple chains, simplifying asset transfers and interactions.`;
+    //     const text = `Invite your friends to magicLink to get part of their transaction fees and earn extra rewards\\.
+
+    // Current Invitee: 0
+    // Share to More friends and groups here\\!`;
+    const text = `Choose Language you want [@magicLink](${botLink}) Bot Speak\\!`;
+    const parse_mode: ParseMode = 'MarkdownV2';
+    const reply_markup = {
+      inline_keyboard: [
+        [
+          {
+            text: 'English',
+            url: `${botLink}?startgroup=join_en&admin=post_messages`,
+          },
+          {
+            text: '中文',
+            url: `${botLink}?startgroup=join_cn&admin=post_messages`,
+          },
+        ],
+      ],
+    };
+    const options = { reply_markup: reply_markup, parse_mode };
+    try {
+      await this.bot.deleteMessage(chatId, Number(messageId));
+      const res = await this.bot.sendMessage(tgUserId, text, options);
+      this.logger.log(`onInviteReply success : `, JSON.stringify(res));
+    } catch (error) {
+      this.logger.error(`onInviteReply error`, error.stack);
     }
   }
 
@@ -480,7 +601,7 @@ Share to More friends and groups here\\!`;
     const newsChannelIdEn = config.tgbot.newsChannelIdEn;
     let newsChannelId = '';
     const userMiniApp = config.tgbot.userMiniApp;
-    const tgbot = config.tgbot.tgbot;
+    const tgbot = `https://t.me/${config.tgbot.tgbot}`;
     let news = null;
     try {
       news = await this.actionUrlService.findOneByCode(code);
@@ -543,6 +664,7 @@ Share to More friends and groups here\\!`;
     const participants = await this.intentionRecordService.countByCode(code);
     let captionTemplate = '';
     let linkIndex = 0;
+    let lang = 'cn';
     if (this.containsChineseCharacters(content)) {
       newsChannelId = newsChannelIdCn;
       captionTemplate = `
@@ -561,9 +683,10 @@ Share to More friends and groups here\\!`;
 
 🔥更多信息请到 👉magicLink TG \\([Go to mini app](${userMiniApp}?startapp=${news.code})\\)
 
-🌈在您的群中推送 magicNews 邀请 [@magicLink](${tgbot}?startgroup=join&admin=edit_messages) 到您的群中
+🌈在您的群中推送 magicNews 邀请 [@magicLink](${tgbot}?startgroup=join_cn&startchannel=join) 到您的群中
 `;
     } else {
+      lang = 'en';
       newsChannelId = newsChannelIdEn;
       captionTemplate = `
 🟢*${this.formatMarkdownV2(news.title)}*🟢
@@ -581,7 +704,7 @@ ${this.formatMarkdownV2(content).replaceAll(
 
 🔥More details Click here to 👉magicLink TG \\([Go to mini app](${userMiniApp}?startapp=${news.code})\\)
 
-🌈Push Magic News Alerts in group? Invite [@magicLink](${tgbot}?startgroup=join&admin=edit_messages) in your group
+🌈Push Magic News Alerts in group? Invite [@magicLink](${tgbot}?startgroup=join_en&startchannel=join) in your group
 `;
     }
 
@@ -644,26 +767,35 @@ ${this.formatMarkdownV2(content).replaceAll(
     };
     try {
       let res = null;
-      if (photo === '') {
-        const options = {
-          reply_markup,
-          parse_mode,
+      const tgGroups = await this.tgGroupAndChannelRepository.find({
+        select: ['chatId'],
+        where: { lang },
+        order: { inviteDate: 'ASC' },
+      });
+      const tgGroupIds = tgGroups.map((tgGroup) => tgGroup.chatId);
+      tgGroupIds.push(newsChannelId);
+      for (const tgGroupId of tgGroupIds) {
+        if (photo === '') {
+          const options = {
+            reply_markup,
+            parse_mode,
+          };
+          res = await this.bot.sendMessage(tgGroupId, caption, options);
+        } else {
+          const options = { reply_markup, parse_mode, caption };
+          res = await this.bot.sendPhoto(tgGroupId, photo, options);
+        }
+        const data = {
+          messageId: res.message_id.toString(),
+          chatId: res.chat.id.toString(),
+          code: code,
+          text: captionTemplate,
+          replyMarkup: JSON.stringify(reply_markup),
+          metadata: photo,
         };
-        res = await this.bot.sendMessage(newsChannelId, caption, options);
-      } else {
-        const options = { reply_markup, parse_mode, caption };
-        res = await this.bot.sendPhoto(newsChannelId, photo, options);
+        await this.tgMessageRepository.add(data);
+        this.logger.log('sendNews success', JSON.stringify(res));
       }
-      const data = {
-        messageId: res.message_id.toString(),
-        chatId: res.chat.id.toString(),
-        code: code,
-        text: captionTemplate,
-        replyMarkup: JSON.stringify(reply_markup),
-        metadata: photo,
-      };
-      await this.tgMessageRepository.add(data);
-      this.logger.log('sendNews success', JSON.stringify(res));
     } catch (error) {
       this.logger.error(
         `sendNews error,caption:${caption}, newsChannelId:${newsChannelId},error:`,

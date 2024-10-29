@@ -182,12 +182,18 @@ export class OKXService {
       estimateGasFee: estimateGasFee,
       tokens: [
         {
-          tokenAddress: tokenInAddress,
+          tokenAddress:
+            tokenInAddress === '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
+              ? ethers.ZeroAddress
+              : tokenInAddress,
           amount: routerResult.fromTokenAmount.toString(),
           direction: 'from',
         },
         {
-          tokenAddress: tokenOutAddress,
+          tokenAddress:
+            tokenOutAddress === '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
+              ? ethers.ZeroAddress
+              : tokenOutAddress,
           amount: routerResult.toTokenAmount.toString(),
           direction: 'to',
         },

@@ -6,3 +6,4 @@ export * from './intentionRecord.repository';
 export * from './intentionRecordTx.repository';
 export * from './commission.repository';
 export * from './tgMessage.repository';
+export * from './tgGroupAndChannel.repository';

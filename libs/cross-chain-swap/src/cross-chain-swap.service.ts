@@ -2,7 +2,6 @@ import { RegistryPlug } from '@action/registry';
 import { ChainService, OKXService } from '@core/shared';
 import { Injectable } from '@nestjs/common';
 import { ethers } from 'ethers';
-import { RPC_URL } from 'src/common/chain/config';
 import {
   Action as ActionDto,
   ActionMetadata,
@@ -32,7 +31,10 @@ export class CrossChainSwapService extends ActionDto<FieldTypes> {
       description:
         '<div>Perform cross-chain token swaps seamlessly across multiple networks</div>',
       networks: this.chainService.buildSupportedNetworks([Chains.ArbitrumOne]),
-      author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
+      author: {
+        name: 'zkLink Labs',
+        github: 'https://github.com/zkLinkProtocol',
+      },
       intent: {
         binding: 'amountToBuy',
         components: [
@@ -100,7 +102,7 @@ export class CrossChainSwapService extends ActionDto<FieldTypes> {
     let approveTx: TransactionInfo;
     let swapTx: TransactionInfo;
 
-    const provider = new ethers.JsonRpcProvider(RPC_URL[chainId]) as any;
+    const provider = this.chainService.getProvider(chainId);
 
     const tokens: TransactionInfo['requiredTokenAmount'] = [
       {

@@ -1,5 +1,6 @@
 import { RegistryPlug } from '@action/registry';
 import { ChainService, OKXService } from '@core/shared';
+import { getERC20SymbolAndDecimals } from '@core/utils';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Contract, ethers } from 'ethers';
@@ -8,6 +9,7 @@ import {
   ActionMetadata,
   GenerateTransactionParams,
   GenerateTransactionResponse,
+  ReporterResponse,
   TransactionInfo,
   UpdateFieldType,
 } from 'src/common/dto';
@@ -43,7 +45,10 @@ export class NewsService extends ActionDto<FieldTypes> {
         Chains.Base,
         Chains.MantaPacificMainnet,
       ]),
-      author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
+      author: {
+        name: 'zkLink Labs',
+        github: 'https://github.com/zkLinkProtocol',
+      },
       magicLinkMetadata: {},
       whiteList: this.configService
         .get<string>('NEWS_WHITE_ADDRESS')
@@ -135,12 +140,21 @@ export class NewsService extends ActionDto<FieldTypes> {
     }
     const { amountToBuy, ...restParams } = formData;
     const provider = this.chainService.getProvider(chainId);
-    const tokenFromContract = await new Contract(
-      formData.tokenFrom,
-      ['function decimals() view returns (uint8)'],
-      provider,
-    );
-    const tokenFromDecimal = await tokenFromContract.decimals();
+
+    let tokenFromDecimal;
+    if (
+      formData.tokenFrom.toLocaleLowerCase() ===
+      '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
+    ) {
+      tokenFromDecimal = 18;
+    } else {
+      const tokenFromContract = await new Contract(
+        formData.tokenFrom,
+        ['function decimals() view returns (uint8)'],
+        provider,
+      );
+      tokenFromDecimal = await tokenFromContract.decimals();
+    }
 
     const params = {
       ...restParams,
@@ -164,7 +178,10 @@ export class NewsService extends ActionDto<FieldTypes> {
       },
     ];
 
-    if (tokenInAddress === '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee') {
+    if (
+      tokenInAddress.toLocaleLowerCase() ===
+      '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
+    ) {
       swapTx = await this.okxService.getSwapData(
         account,
         chainId,
@@ -238,7 +255,7 @@ export class NewsService extends ActionDto<FieldTypes> {
     return '';
   }
 
-  isNumeric(value: string): boolean {
+  private isNumeric(value: string): boolean {
     const num = Number(value);
     return !isNaN(num);
   }
@@ -248,5 +265,47 @@ export class NewsService extends ActionDto<FieldTypes> {
   ): Promise<TransactionInfo[]> {
     await this.tgbotService.sendNews(data.additionalData.code!);
     return [];
+  }
+
+  public async reportTransaction(
+    data: GenerateTransactionParams<FieldTypes>,
+    _txHashes: Array<{ hash: string; chainId: number }>,
+  ): Promise<ReporterResponse> {
+    const { formData, additionalData } = data;
+    const { chainId } = additionalData;
+    let tokenFromDecimal: bigint;
+    let tokenSymbol: string;
+    const provider = this.chainService.getProvider(chainId);
+    if (
+      formData.tokenFrom.toLocaleLowerCase() ===
+      '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
+    ) {
+      tokenFromDecimal = 18n;
+      tokenSymbol = 'ETH';
+    } else {
+      const { symbol, decimals } = await getERC20SymbolAndDecimals(
+        provider,
+        formData.tokenFrom,
+      );
+      tokenFromDecimal = decimals;
+      tokenSymbol = symbol;
+    }
+    const amount = ethers.formatUnits(formData.amountToBuy, tokenFromDecimal);
+    return {
+      tip: `Buy ${amount} worthed ${tokenSymbol} successfully`,
+      sharedContent: {
+        en: `I want to share My MagicNews Trading Journey with you!---I buy ${amount} worthed ${tokenSymbol}. Trade your Magic News directly from here!`,
+        zh: `我想与您分享我的magicLinks交易之旅!---我购买了${amount}个${tokenSymbol}. 您可以直接从这里交互您的magicLinks！`,
+      },
+    };
+  }
+
+  public async generateSharedContent(
+    _data: GenerateTransactionParams<FieldTypes>,
+  ) {
+    return {
+      en: 'I want to share My MagicNews Trading Journey with you! Trade your Magic News directly from here!',
+      zh: '我想与您分享我的MagicNews交易之旅！您可以直接从这里交易您的Magic News！',
+    };
   }
 }

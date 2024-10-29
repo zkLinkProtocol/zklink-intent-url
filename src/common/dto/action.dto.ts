@@ -57,6 +57,17 @@ export type GenerateTransactionResponse = {
   transactions: TransactionInfo[];
 };
 
+export type SharedContent = {
+  en?: string;
+  zh?: string;
+  [key: string]: string | undefined;
+};
+
+export type ReporterResponse = {
+  tip: SuccessMessage;
+  sharedContent?: SharedContent;
+};
+
 export abstract class Action<
   T extends Record<string, any> = Record<string, any>,
 > {
@@ -75,6 +86,15 @@ export abstract class Action<
   abstract generateTransaction(
     data: GenerateTransactionParams<T>,
   ): Promise<GenerateTransactionResponse>;
+
+  /**
+   * The function generateSharedContent is used to create custom message content for sharing to X/Telegram channels.
+   */
+  async generateSharedContent(
+    _data: GenerateTransactionParams<T>,
+  ): Promise<SharedContent> {
+    return {};
+  }
 
   /**
    * During the creation process of the magicLink,
@@ -135,8 +155,10 @@ export abstract class Action<
   async reportTransaction(
     _data: GenerateTransactionParams<T>,
     _txHashes: Array<{ hash: string; chainId: number }>,
-  ): Promise<SuccessMessage> {
-    return '';
+  ): Promise<ReporterResponse> {
+    return {
+      tip: '',
+    };
   }
 
   /**

@@ -36,19 +36,24 @@ export class MintNftService extends ActionDto<FieldTypes> {
       Chains.MantaPacificMainnet,
       Chains.OpMainnet,
       Chains.ScrollMainnet,
+      Chains.BSCMainnet,
     ];
     if (this.isDev) {
       supportedNetwork.push(
         Chains.ZkLinkNovaSepolia,
         Chains.ArbitrumSepolia,
         Chains.BaseSepolia,
+        Chains.BSCTestnet,
       );
     }
     return {
       title: 'Mint NFT',
       description: '<div>This action allows you to mint NFT</div>',
       networks: this.chainService.buildSupportedNetworks(supportedNetwork),
-      author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
+      author: {
+        name: 'zkLink Labs',
+        github: 'https://github.com/zkLinkProtocol',
+      },
       magicLinkMetadata: {
         title: 'Mint NFT',
         description:

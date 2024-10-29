@@ -54,6 +54,7 @@ export class BuyMeACoffeeService extends ActionDto<FieldTypes> {
       Chains.ScrollMainnet,
       Chains.ArbitrumOne,
       Chains.ZkLinkNova,
+      Chains.BSCMainnet,
     ];
     const supportedToken = [
       {
@@ -119,6 +120,11 @@ export class BuyMeACoffeeService extends ActionDto<FieldTypes> {
         value: '',
         chainId: Chains.ScrollMainnet,
       },
+      {
+        label: 'ETH',
+        value: '',
+        chainId: Chains.BSCMainnet,
+      },
     ];
     if (this.isDev) {
       supportedNetwork.push(
@@ -126,6 +132,7 @@ export class BuyMeACoffeeService extends ActionDto<FieldTypes> {
         Chains.ZklinkDev,
         Chains.BaseSepolia,
         Chains.ArbitrumSepolia,
+        Chains.BSCTestnet,
       );
       supportedToken.push(
         {
@@ -170,6 +177,11 @@ export class BuyMeACoffeeService extends ActionDto<FieldTypes> {
           value: '',
           chainId: Chains.ArbitrumSepolia,
         },
+        {
+          label: 'ETH',
+          value: '',
+          chainId: Chains.BSCTestnet,
+        },
       );
     }
 
@@ -178,7 +190,10 @@ export class BuyMeACoffeeService extends ActionDto<FieldTypes> {
       description:
         '<div>This action allows you to create a magicLink to receive donations</div>',
       networks: this.chainService.buildSupportedNetworks(supportedNetwork),
-      author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
+      author: {
+        name: 'zkLink Labs',
+        github: 'https://github.com/zkLinkProtocol',
+      },
       magicLinkMetadata: {
         title: 'Buy me a coffee ☕',
         description:

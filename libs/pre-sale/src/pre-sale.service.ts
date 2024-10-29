@@ -46,7 +46,10 @@ export class PreSaleService extends ActionDto<FieldTypes> {
       description:
         '<div>PreSale is a platform for participating in token presales.</div>',
       networks: this.chainService.buildSupportedNetworks(supportedNetwork),
-      author: { name: 'zkLink', github: 'https://github.com/zkLinkProtocol' },
+      author: {
+        name: 'zkLink Labs',
+        github: 'https://github.com/zkLinkProtocol',
+      },
       magicLinkMetadata: {},
       intent: {
         binding: 'offerAmount',
