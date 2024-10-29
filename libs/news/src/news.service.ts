@@ -37,10 +37,6 @@ export class NewsService extends ActionDto<FieldTypes> {
       title: 'Magic News',
       description:
         '<div>Perform news seamlessly across multiple networks</div>',
-      sharedContent: {
-        en: 'I want to share My MagicNews Trading Journey with you! Trade your Magic News directly from here!',
-        zh: '我想与您分享我的MagicNews交易之旅！您可以直接从这里交易您的Magic News！',
-      },
       networks: this.chainService.buildSupportedNetworks([
         Chains.EthereumMainnet,
         Chains.ArbitrumOne,
@@ -259,7 +255,7 @@ export class NewsService extends ActionDto<FieldTypes> {
     return '';
   }
 
-  isNumeric(value: string): boolean {
+  private isNumeric(value: string): boolean {
     const num = Number(value);
     return !isNaN(num);
   }
@@ -301,6 +297,15 @@ export class NewsService extends ActionDto<FieldTypes> {
         en: `I want to share My MagicNews Trading Journey with you!---I buy ${amount} worthed ${tokenSymbol}. Trade your Magic News directly from here!`,
         zh: `我想与您分享我的magicLinks交易之旅!---我购买了${amount}个${tokenSymbol}. 您可以直接从这里交互您的magicLinks！`,
       },
+    };
+  }
+
+  public async generateSharedContent(
+    _data: GenerateTransactionParams<FieldTypes>,
+  ) {
+    return {
+      en: 'I want to share My MagicNews Trading Journey with you! Trade your Magic News directly from here!',
+      zh: '我想与您分享我的MagicNews交易之旅！您可以直接从这里交易您的Magic News！',
     };
   }
 }
