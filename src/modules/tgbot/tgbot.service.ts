@@ -77,8 +77,6 @@ export class TgbotService implements OnModuleInit {
   }
 
   private async eventInit() {
-    const config = await configFactory();
-    const tgbot = config.tgbot.tgbot;
     // this.bot.onText(/\/start/, (msg: any) => this.onStart(msg.from.id));
     this.bot.onText(/\/my/, (msg: any) => this.onMyMagicLink(msg.from.id));
     this.bot.onText(/Create/, (msg: any) => this.onCreate(msg.from.id));
