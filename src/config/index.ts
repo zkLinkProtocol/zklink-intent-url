@@ -1,5 +1,5 @@
 import { chainConfig } from './chain';
-
+console.log(`process.env.TGBOT:${process.env.TGBOT}`);
 const configFactory = async () => {
   return {
     env: (process.env.ENV || 'dev') as 'dev' | 'prod',
