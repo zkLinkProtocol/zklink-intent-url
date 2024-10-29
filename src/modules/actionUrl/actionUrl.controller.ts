@@ -91,7 +91,6 @@ export class ActionUrlController extends BaseController {
       result.action.id,
       result.actionVersion,
     );
-    const metadata = await actionStore.getMetadata();
 
     const response = {
       code: result.code,
@@ -108,11 +107,22 @@ export class ActionUrlController extends BaseController {
       },
     } as ActionUrlResponseDto;
 
-    if (metadata.sharedContent) {
-      response.sharedContent = this.actionUrlService.encodeSharedContent(
-        metadata.sharedContent,
-      );
-    }
+    const settingValue = result.settings.intentInfo.components.reduce(
+      (res, cur) => {
+        res[cur.name] = cur.value;
+        return res;
+      },
+      {} as { [key: string]: any },
+    );
+    const sharedContent = await actionStore.generateSharedContent({
+      additionalData: {
+        chainId: result.settings.intentInfo.network.chainId,
+      },
+      formData: settingValue,
+    });
+    response.sharedContent =
+      this.actionUrlService.encodeSharedContent(sharedContent);
+
     return this.success(response);
   }
 
