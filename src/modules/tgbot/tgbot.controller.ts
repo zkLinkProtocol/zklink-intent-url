@@ -155,4 +155,19 @@ export class TgbotController extends BaseController {
       return false;
     }
   }
+
+  @Get('onInviteReply')
+  async onInviteReply(
+    @Query('userId') userId: string,
+    @Query('chatId') chatId: string,
+    @Query('messageId') messageId: string,
+  ) {
+    try {
+      this.tgbotService.onInviteReply(userId, chatId, messageId);
+      return true;
+    } catch (error) {
+      this.logger.error(error);
+      return false;
+    }
+  }
 }
