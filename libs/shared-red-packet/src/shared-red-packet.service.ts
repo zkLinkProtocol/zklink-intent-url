@@ -28,7 +28,7 @@ import {
   IntentionRecordTxStatus,
 } from 'src/entities/intentionRecordTx.entity';
 import { TgbotService } from 'src/modules/tgbot/tgbot.service';
-import { Address, ErrorMessage } from 'src/types';
+import { Address } from 'src/types';
 
 import ERC20ABI from './abis/ERC20.json';
 import MemeRedPacketABI from './abis/MemeRedPacket.json';
@@ -417,7 +417,7 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
   async reportTransaction(
     data: GenerateTransactionParams<FieldTypes>,
     txHashes: Array<{ hash: string; chainId: number }>,
-  ): Promise<ErrorMessage> {
+  ) {
     const { formData, additionalData } = data;
     const { distributionToken } = formData;
     const iface = new Interface(MemeRedPacketABI);
@@ -454,7 +454,9 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
           userInfo.tgUserId,
         );
       }
-      return `You have received ${claimedAmount} in red packet amount!`;
+      return {
+        tip: `You have received ${claimedAmount} in red packet amount!`,
+      };
     } catch (error) {
       throw new Error(`Failed to fetch transaction receipt: ${error.message}`);
     }
@@ -521,7 +523,7 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
         token === ethers.ZeroAddress
           ? {
               symbol: 'ETH',
-              decimals: 18,
+              decimals: 18n,
             }
           : await getERC20SymbolAndDecimals(this.provider, token);
       transferInfos.push({
@@ -599,7 +601,7 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
     }
 
     let symbol = 'ETH';
-    let decimals = 18;
+    let decimals = 18n;
 
     if (distributionToken.value !== ethers.ZeroAddress) {
       const tokenData = await getERC20SymbolAndDecimals(
