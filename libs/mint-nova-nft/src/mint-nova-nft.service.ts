@@ -1,6 +1,6 @@
 import { RegistryPlug } from '@action/registry';
 import { ChainService, DataService } from '@core/shared';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Contract, ethers } from 'ethers';
 import {
@@ -10,12 +10,12 @@ import {
   GenerateTransactionResponse,
   TransactionInfo,
 } from 'src/common/dto';
-import { ConfigType } from 'src/config';
 import { Chains } from 'src/constants';
 import {
   IntentionRecordTx,
   IntentionRecordTxStatus,
 } from 'src/entities/intentionRecordTx.entity';
+import { ErrorMessage } from 'src/types';
 
 import ERC721ABI from './abis/ERC721.json';
 import { FieldTypes } from './types';
@@ -23,16 +23,15 @@ import { FieldTypes } from './types';
 @RegistryPlug('mint-nova-nft', 'v1')
 @Injectable()
 export class MintNovaNftService extends ActionDto<FieldTypes> {
-  private logger: Logger = new Logger(MintNovaNftService.name);
-  private readonly okxConfig: ConfigType['okx'];
   private readonly isDev: boolean;
+  cacheTx: TransactionInfo;
+
   constructor(
     readonly configService: ConfigService,
     private readonly dataService: DataService,
     private readonly chainService: ChainService,
   ) {
     super();
-    this.okxConfig = configService.get('okx', { infer: true })!;
     this.isDev = this.configService.get('env')! === 'dev';
   }
 
@@ -50,9 +49,9 @@ export class MintNovaNftService extends ActionDto<FieldTypes> {
         github: 'https://github.com/zkLinkProtocol',
       },
       magicLinkMetadata: {
-        title: 'Mint NFT',
+        title: 'Cubo the Block',
         description:
-          'magicLink Enthusiast | Donate with your love for zkLink magic',
+          'The Cubo NFT Genesis Collection will generate 50k different NFTs, holders of the NFT will get bonus points for selected future zkLink Nova campaign.',
       },
       intent: {
         binding: true,
@@ -107,26 +106,36 @@ export class MintNovaNftService extends ActionDto<FieldTypes> {
   async generateTransaction(
     data: GenerateTransactionParams<FieldTypes>,
   ): Promise<GenerateTransactionResponse> {
-    const { additionalData, formData } = data;
-    const { code, chainId, account } = additionalData;
+    const { additionalData } = data;
+    const { code, account } = additionalData;
     if (!code) {
       throw new Error('missing code');
     }
     if (!account) {
       throw new Error('missing account');
     }
+    return { transactions: [this.cacheTx] };
+  }
 
+  async preCheckTransaction(
+    data: GenerateTransactionParams<FieldTypes>,
+  ): Promise<ErrorMessage> {
+    const { additionalData, formData } = data;
+    const { code, chainId, account } = additionalData;
+    if (!code) {
+      return 'missing code';
+    }
+    if (!account) {
+      return 'missing account';
+    }
     const provider = this.chainService.getProvider(chainId);
     const nftContractAddress = formData.contract;
-
     const contract = new Contract(nftContractAddress, ERC721ABI, provider);
     try {
       await contract.validateActive(formData.stage);
       await contract.validateAmount(1, account, formData.stage);
     } catch (error) {
-      throw new Error(
-        `Can't mint NFT in ${formData.stage} stage, Reason: ${error.revert.name}`,
-      );
+      return `Can't mint NFT in ${formData.stage} stage, Reason: ${error.revert.name}`;
     }
 
     let tokenId = Number(formData.tokenId);
@@ -143,27 +152,34 @@ export class MintNovaNftService extends ActionDto<FieldTypes> {
     }
 
     const expiry = Math.round(Date.now() / 1000) + 60 * 60;
-    const res = await fetch(
-      'https://gruesome-coffin-wr7qq5p99r9ph9pwv-10080.app.github.dev/mint',
-      {
-        method: 'post',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({
-          recipient: additionalData.account,
-          tokenId,
-          expiry,
-          stage: formData.stage,
-        }),
-      },
-    );
-    const resTx = await res.json();
-    const tx: TransactionInfo = {
-      chainId,
-      to: resTx.to,
-      value: ethers.parseEther(formData.fee).toString(),
-      data: resTx.data,
-      shouldPublishToChain: true,
-    };
-    return { transactions: [tx] };
+    try {
+      const res = await fetch(
+        'https://gruesome-coffin-wr7qq5p99r9ph9pwv-10080.app.github.dev/mint',
+        {
+          method: 'post',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            recipient: additionalData.account,
+            tokenId,
+            expiry,
+            stage: formData.stage,
+          }),
+        },
+      );
+      const resTx = await res.json();
+      if (resTx.errorMessage) {
+        return resTx.errorMessage;
+      }
+      this.cacheTx = {
+        chainId,
+        to: resTx.to,
+        value: ethers.parseEther(formData.fee).toString(),
+        data: resTx.data,
+        shouldPublishToChain: true,
+      };
+      return '';
+    } catch (err) {
+      return 'Unable to connect to auth server';
+    }
   }
 }
