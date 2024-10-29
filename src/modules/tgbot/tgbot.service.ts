@@ -129,6 +129,7 @@ export class TgbotService implements OnModuleInit {
   }
 
   async onMyChatMember(msg: ChatMemberUpdated) {
+    this.logger.log(`onMyChatMember msg:`, JSON.stringify(msg));
     const config = await configFactory();
     const bot = config.tgbot.tgbot;
     const joinUser = msg.new_chat_member.user;
@@ -398,7 +399,7 @@ export class TgbotService implements OnModuleInit {
 
     // Current Invitee: 0
     // Share to More friends and groups here\\!`;
-    const text = `Do you want add magicLink bot to you group or channel \\?`;
+    const text = `Would you like to add the MagicLink bot to your group or channel \\?`;
     const parse_mode: ParseMode = 'MarkdownV2';
     const reply_markup = {
       inline_keyboard: [
