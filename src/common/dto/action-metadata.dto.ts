@@ -444,6 +444,12 @@ export class ActionMetadata<
   })
   @IsOptional()
   whiteList?: Array<string>;
+
+  @ApiProperty({
+    description: `This content will be displayed as shared tg/twitter content`,
+  })
+  @IsOptional()
+  sharedContent?: { en?: string; zh?: string };
 }
 
 export function isOptionComponentDto<R extends Record<string, any>>(

@@ -28,12 +28,13 @@ import { CommonApiOperation } from 'src/common/base.decorators';
 import {
   ActionTransactionParams,
   GenerateTransactionResponse,
+  ReporterResponse,
   TransactionInfo,
 } from 'src/common/dto';
 import { PagingOptionsDto } from 'src/common/pagingOptionsDto.param';
 import { PagingMetaDto, ResponseDto } from 'src/common/response.dto';
 import { BusinessException } from 'src/exception/business.exception';
-import { ErrorMessage, SuccessMessage } from 'src/types';
+import { ErrorMessage } from 'src/types';
 
 import {
   ActionUrlAddRequestDto,
@@ -402,7 +403,7 @@ export class ActionUrlController extends BaseController {
     body: TransactionBody & {
       txHashes: Array<{ hash: string; chainId: number }>;
     },
-  ): Promise<ResponseDto<SuccessMessage>> {
+  ): Promise<ResponseDto<ReporterResponse>> {
     const { params, account, chainId, txHashes } = body;
 
     const intention = await this.actionUrlService.findOneByCode(code);
