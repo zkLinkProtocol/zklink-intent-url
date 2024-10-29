@@ -87,6 +87,11 @@ export class ActionUrlController extends BaseController {
     @Param('code') code: string,
   ): Promise<ResponseDto<ActionUrlResponseDto>> {
     const result = await this.actionUrlService.findOneByCode(code);
+    const actionStore = await this.actionService.getActionVersionStore(
+      result.action.id,
+      result.actionVersion,
+    );
+    const metadata = await actionStore.getMetadata();
 
     const response = {
       code: result.code,
@@ -101,7 +106,13 @@ export class ActionUrlController extends BaseController {
       creator: {
         address: result.creator.address,
       },
-    };
+    } as ActionUrlResponseDto;
+
+    if (metadata.sharedContent) {
+      response.sharedContent = this.actionUrlService.encodeSharedContent(
+        metadata.sharedContent,
+      );
+    }
     return this.success(response);
   }
 
@@ -430,8 +441,14 @@ export class ActionUrlController extends BaseController {
       },
       formData: params,
     };
-    const response = await actionStore.reportTransaction(data, txHashes);
-    return this.success(response);
+    const responseData = await actionStore.reportTransaction(data, txHashes);
+    if (responseData.sharedContent) {
+      responseData.sharedContent = this.actionUrlService.encodeSharedContent(
+        responseData.sharedContent,
+      );
+    }
+
+    return this.success(responseData);
   }
 
   @Post(':code/transaction')

@@ -4,6 +4,7 @@ import { customAlphabet } from 'nanoid';
 import {
   GenerateTransactionParams,
   GenerateTransactionResponse,
+  SharedContent,
 } from 'src/common/dto';
 import { BusinessException } from 'src/exception/business.exception';
 import { ActionService } from 'src/modules/action/action.service';
@@ -31,7 +32,7 @@ export class ActionUrlService {
 
   async findOneByCode(code: string) {
     const intention = await this.intentionRepository.queryIntentionByCode(code);
-    if (!intention) throw new BusinessException(`magiclink ${code} not found`);
+    if (!intention) throw new BusinessException(`magicLink ${code} not found`);
     return intention;
   }
 
@@ -211,5 +212,16 @@ export class ActionUrlService {
       this.logger.error(error);
       throw new BusinessException('Failed to generate transaction');
     }
+  }
+
+  public encodeSharedContent(response: SharedContent): SharedContent {
+    Object.keys(response).forEach((key) => {
+      const value = response![key];
+      if (value) {
+        response![key] = encodeURIComponent(value);
+      }
+    });
+
+    return response;
   }
 }
