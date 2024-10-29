@@ -57,12 +57,15 @@ export type GenerateTransactionResponse = {
   transactions: TransactionInfo[];
 };
 
+export type SharedContent = {
+  en?: string;
+  zh?: string;
+  [key: string]: string | undefined;
+};
+
 export type ReporterResponse = {
   tip: SuccessMessage;
-  sharedContent?: {
-    en?: string;
-    zh?: string;
-  };
+  sharedContent?: SharedContent;
 };
 
 export abstract class Action<
