@@ -23,12 +23,12 @@ export class TgGroupAndChannel extends BaseEntity {
   @Column({ type: 'varchar' })
   public fromUsername: string;
 
-  @Column({ type: 'varchar' })
-  public lang: string;
-
   @Column({ type: 'int' })
   public fromIsBot: number;
 
   @Column({ type: 'int' })
   public inviteDate: number;
+
+  @Column({ type: 'varchar' })
+  public lang: string;
 }
