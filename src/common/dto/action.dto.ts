@@ -57,6 +57,14 @@ export type GenerateTransactionResponse = {
   transactions: TransactionInfo[];
 };
 
+export type ReporterResponse = {
+  tip: SuccessMessage;
+  sharedContent?: {
+    en?: string;
+    zh?: string;
+  };
+};
+
 export abstract class Action<
   T extends Record<string, any> = Record<string, any>,
 > {
@@ -135,8 +143,10 @@ export abstract class Action<
   async reportTransaction(
     _data: GenerateTransactionParams<T>,
     _txHashes: Array<{ hash: string; chainId: number }>,
-  ): Promise<SuccessMessage> {
-    return '';
+  ): Promise<ReporterResponse> {
+    return {
+      tip: '',
+    };
   }
 
   /**

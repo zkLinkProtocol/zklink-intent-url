@@ -1,5 +1,6 @@
 import { RegistryPlug } from '@action/registry';
 import { ChainService, OKXService } from '@core/shared';
+import { getERC20SymbolAndDecimals } from '@core/utils';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Contract, ethers } from 'ethers';
@@ -8,6 +9,7 @@ import {
   ActionMetadata,
   GenerateTransactionParams,
   GenerateTransactionResponse,
+  ReporterResponse,
   TransactionInfo,
   UpdateFieldType,
 } from 'src/common/dto';
@@ -35,6 +37,10 @@ export class NewsService extends ActionDto<FieldTypes> {
       title: 'Magic News',
       description:
         '<div>Perform news seamlessly across multiple networks</div>',
+      sharedContent: {
+        en: 'I want to share My MagicNews Trading Journey with you! Trade your Magic News directly from here!',
+        zh: '我想与您分享我的MagicNews交易之旅！您可以直接从这里交易您的Magic News！',
+      },
       networks: this.chainService.buildSupportedNetworks([
         Chains.EthereumMainnet,
         Chains.ArbitrumOne,
@@ -263,5 +269,38 @@ export class NewsService extends ActionDto<FieldTypes> {
   ): Promise<TransactionInfo[]> {
     await this.tgbotService.sendNews(data.additionalData.code!);
     return [];
+  }
+
+  public async reportTransaction(
+    data: GenerateTransactionParams<FieldTypes>,
+    _txHashes: Array<{ hash: string; chainId: number }>,
+  ): Promise<ReporterResponse> {
+    const { formData, additionalData } = data;
+    const { chainId } = additionalData;
+    let tokenFromDecimal: bigint;
+    let tokenSymbol: string;
+    const provider = this.chainService.getProvider(chainId);
+    if (
+      formData.tokenFrom.toLocaleLowerCase() ===
+      '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
+    ) {
+      tokenFromDecimal = 18n;
+      tokenSymbol = 'ETH';
+    } else {
+      const { symbol, decimals } = await getERC20SymbolAndDecimals(
+        provider,
+        formData.tokenFrom,
+      );
+      tokenFromDecimal = decimals;
+      tokenSymbol = symbol;
+    }
+    const amount = ethers.formatUnits(formData.amountToBuy, tokenFromDecimal);
+    return {
+      tip: `Buy ${amount} worthed ${tokenSymbol} successfully`,
+      sharedContent: {
+        en: `I want to share My MagicNews Trading Journey with you!---I buy ${amount} worthed ${tokenSymbol}. Trade your Magic News directly from here!`,
+        zh: `我想与您分享我的magicLinks交易之旅!---我购买了${amount}个${tokenSymbol}. 您可以直接从这里交互您的magicLinks！`,
+      },
+    };
   }
 }
