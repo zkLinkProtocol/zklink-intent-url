@@ -591,7 +591,7 @@ export class ActionUrlController extends BaseController {
     res.setHeader('X-Blockchain-Ids', `eip155:${chainId}`);
     metadata.icon = intention.metadata
       ? intention.metadata
-      : 'https://pic.imgdb.cn/item/671fa198d29ded1a8c594219.jpg';
+      : 'https://zklink-intent.s3.ap-northeast-1.amazonaws.com/dev/tg/magicnewsconver.jpeg';
     metadata.title = intention.title;
     metadata.description = intention.description.replaceAll(/<[^>]+>/g, '');
 
