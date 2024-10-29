@@ -129,9 +129,9 @@ export class TgbotService implements OnModuleInit {
   }
 
   async onMyChatMember(msg: ChatMemberUpdated) {
-    this.logger.log(`onMyChatMember msg:`, JSON.stringify(msg));
     const config = await configFactory();
     const bot = config.tgbot.tgbot;
+    this.logger.log(`onMyChatMember msg: ${JSON.stringify(msg)}, bot:${bot}`);
     const joinUser = msg.new_chat_member.user;
     const joinStatus = msg.new_chat_member.status;
     const from = msg.from;
