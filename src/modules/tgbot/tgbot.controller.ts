@@ -142,13 +142,10 @@ export class TgbotController extends BaseController {
     }
   }
 
-  @Post('testOnMessage')
-  async testOnMessage(
-    @Body('data') data: any,
-    @Query('metadata') metadata: string,
-  ) {
+  @Post('onMyChatMember')
+  async onMyChatMember(@Body('data') data: any) {
     try {
-      this.tgbotService.onMessage(data, metadata);
+      this.tgbotService.onMyChatMember(data);
       return true;
     } catch (error) {
       this.logger.error(error);
