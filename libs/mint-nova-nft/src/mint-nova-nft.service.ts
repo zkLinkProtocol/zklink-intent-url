@@ -15,6 +15,7 @@ import {
   IntentionRecordTx,
   IntentionRecordTxStatus,
 } from 'src/entities/intentionRecordTx.entity';
+import { ErrorMessage } from 'src/types';
 
 import ERC721ABI from './abis/ERC721.json';
 import { FieldTypes } from './types';
@@ -23,6 +24,8 @@ import { FieldTypes } from './types';
 @Injectable()
 export class MintNovaNftService extends ActionDto<FieldTypes> {
   private readonly isDev: boolean;
+  cacheTx: TransactionInfo;
+
   constructor(
     readonly configService: ConfigService,
     private readonly dataService: DataService,
@@ -103,26 +106,36 @@ export class MintNovaNftService extends ActionDto<FieldTypes> {
   async generateTransaction(
     data: GenerateTransactionParams<FieldTypes>,
   ): Promise<GenerateTransactionResponse> {
-    const { additionalData, formData } = data;
-    const { code, chainId, account } = additionalData;
+    const { additionalData } = data;
+    const { code, account } = additionalData;
     if (!code) {
       throw new Error('missing code');
     }
     if (!account) {
       throw new Error('missing account');
     }
+    return { transactions: [this.cacheTx] };
+  }
 
+  async preCheckTransaction(
+    data: GenerateTransactionParams<FieldTypes>,
+  ): Promise<ErrorMessage> {
+    const { additionalData, formData } = data;
+    const { code, chainId, account } = additionalData;
+    if (!code) {
+      return 'missing code';
+    }
+    if (!account) {
+      return 'missing account';
+    }
     const provider = this.chainService.getProvider(chainId);
     const nftContractAddress = formData.contract;
-
     const contract = new Contract(nftContractAddress, ERC721ABI, provider);
     try {
       await contract.validateActive(formData.stage);
       await contract.validateAmount(1, account, formData.stage);
     } catch (error) {
-      throw new Error(
-        `Can't mint NFT in ${formData.stage} stage, Reason: ${error.revert.name}`,
-      );
+      return `Can't mint NFT in ${formData.stage} stage, Reason: ${error.revert.name}`;
     }
 
     let tokenId = Number(formData.tokenId);
@@ -155,18 +168,18 @@ export class MintNovaNftService extends ActionDto<FieldTypes> {
       );
       const resTx = await res.json();
       if (resTx.errorMessage) {
-        throw new Error(resTx.errorMessage);
+        return resTx.errorMessage;
       }
-      const tx: TransactionInfo = {
+      this.cacheTx = {
         chainId,
         to: resTx.to,
         value: ethers.parseEther(formData.fee).toString(),
         data: resTx.data,
         shouldPublishToChain: true,
       };
-      return { transactions: [tx] };
+      return '';
     } catch (err) {
-      throw new Error(err);
+      return 'Unable to connect to auth server';
     }
   }
 }
