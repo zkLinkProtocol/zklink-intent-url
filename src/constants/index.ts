@@ -15,4 +15,6 @@ export const enum Chains {
   ScrollMainnet = 534352,
   ZkSync = 324,
   Mantle = 5000,
+  BSCMainnet = 56,
+  BSCTestnet = 97,
 }
