@@ -410,7 +410,7 @@ export class TgbotService implements OnModuleInit {
           },
           {
             text: 'Channel',
-            url: `${botLink}?startchannel&admin=post_messages`,
+            url: `${botLink}?startchannel=join&admin=post_messages`,
           },
         ],
       ],
@@ -683,7 +683,7 @@ export class TgbotService implements OnModuleInit {
 
 🔥更多信息请到 👉magicLink TG \\([Go to mini app](${userMiniApp}?startapp=${news.code})\\)
 
-🌈在您的群中推送 magicNews 邀请 [@magicLink](${tgbot}?startgroup=join_cn&startchannel=join_cn) 到您的群中
+🌈在您的群中推送 magicNews 邀请 [@magicLink](${tgbot}?startgroup=join_cn&startchannel=join) 到您的群中
 `;
     } else {
       lang = 'en';
@@ -704,7 +704,7 @@ ${this.formatMarkdownV2(content).replaceAll(
 
 🔥More details Click here to 👉magicLink TG \\([Go to mini app](${userMiniApp}?startapp=${news.code})\\)
 
-🌈Push Magic News Alerts in group? Invite [@magicLink](${tgbot}?startgroup=join_en&startchannel=join_en) in your group
+🌈Push Magic News Alerts in group? Invite [@magicLink](${tgbot}?startgroup=join_en&startchannel=join) in your group
 `;
     }
 
