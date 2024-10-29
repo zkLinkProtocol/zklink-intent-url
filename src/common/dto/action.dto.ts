@@ -88,6 +88,15 @@ export abstract class Action<
   ): Promise<GenerateTransactionResponse>;
 
   /**
+   * The function generateSharedContent is used to create custom message content for sharing to X/Telegram channels.
+   */
+  async generateSharedContent(
+    _data: GenerateTransactionParams<T>,
+  ): Promise<SharedContent> {
+    return {};
+  }
+
+  /**
    * During the creation process of the magicLink,
    * this allows you to run your custom validation logic,
    * providing complex validation for the parameters used to create the magicLink,
