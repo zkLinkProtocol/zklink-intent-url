@@ -94,6 +94,11 @@ export class TgbotService implements OnModuleInit {
           break;
       }
     });
+
+    this.bot.on('message', (msg: any, metadata: any) =>
+      this.onMessage(msg, metadata),
+    );
+
     this.bot.on('callback_query', (callbackQuery: any) => {
       this.logger.log(`callback_query:`, JSON.stringify(callbackQuery));
       const chatId = callbackQuery.message.chat.id;
@@ -114,6 +119,34 @@ export class TgbotService implements OnModuleInit {
         userId,
       );
     });
+  }
+
+  async onMessage(msg: any, metadata: any) {
+    if (!(msg.my_chat_member ?? null)) {
+      this.logger.log('canNotAddBot:', JSON.stringify(msg));
+      return;
+    }
+    const config = await configFactory();
+    const bot = config.tgbot.tgbot;
+    const joinUser = msg.my_chat_member.new_chat_member.user;
+    const joinStatus = msg.my_chat_member.new_chat_member.status;
+    const from = msg.my_chat_member.from;
+    const lang = from.language_code == 'zh-hans' ? 'cn' : 'en';
+    if (joinStatus != 'left' && joinUser.is_bot && joinUser.username == bot) {
+      const tgGroupOrChannel = await this.tgGroupAndChannelRepository.findOneBy(
+        {
+          chatId: msg.my_chat_member.chat.id,
+        },
+      );
+      if (tgGroupOrChannel) {
+        this.logger.log(
+          'canNotAddBot, group or channel exist:',
+          JSON.stringify(msg),
+        );
+        return;
+      }
+      await this.onJoin(msg.my_chat_member, lang);
+    }
   }
 
   async onJoin(msg: any, lang: string) {
@@ -369,11 +402,11 @@ export class TgbotService implements OnModuleInit {
         [
           {
             text: 'English',
-            url: `${botLink}?startgroup=join_en&startchannel=join_en`,
+            url: `${botLink}?startgroup=join_en`,
           },
           {
             text: '中文',
-            url: `${botLink}?startgroup=join_cn&startchannel=join_cn`,
+            url: `${botLink}?startgroup=join_cn`,
           },
         ],
       ],

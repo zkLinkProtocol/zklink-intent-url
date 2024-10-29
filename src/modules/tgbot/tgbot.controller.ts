@@ -141,4 +141,18 @@ export class TgbotController extends BaseController {
       return false;
     }
   }
+
+  @Post('testOnMessage')
+  async testOnMessage(
+    @Body('data') data: any,
+    @Query('metadata') metadata: string,
+  ) {
+    try {
+      this.tgbotService.onMessage(data, metadata);
+      return true;
+    } catch (error) {
+      this.logger.error(error);
+      return false;
+    }
+  }
 }
