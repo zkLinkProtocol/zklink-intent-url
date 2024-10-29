@@ -120,7 +120,8 @@ export class ActionUrlController extends BaseController {
       },
       formData: settingValue,
     });
-    response.sharedContent = sharedContent;
+    response.sharedContent =
+      this.actionUrlService.encodeSharedContent(sharedContent);
 
     return this.success(response);
   }
