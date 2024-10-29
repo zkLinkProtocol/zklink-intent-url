@@ -619,6 +619,7 @@ export class ActionUrlController extends BaseController {
     };
     const intention = await this.actionUrlService.findOneByCode(code);
     if (!intention) {
+      res.status(500);
       return { message: 'Action not found' };
     }
 
@@ -635,8 +636,10 @@ export class ActionUrlController extends BaseController {
       );
       response.transaction = transaction;
     } catch (error) {
+      res.status(500);
       return { message: error.message };
     }
+    res.status(200);
     return response;
   }
 
