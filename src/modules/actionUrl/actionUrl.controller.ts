@@ -269,6 +269,7 @@ export class ActionUrlController extends BaseController {
       throw new BusinessException('Action not found', HttpStatus.NOT_FOUND);
     }
     const whiteListPermission = await this.actionService.checkActionWhitelist(
+      request.actionId,
       creator.address,
     );
     if (!whiteListPermission) {
