@@ -15,9 +15,9 @@ import { Chains } from 'src/constants';
 import { apiConfig } from './config';
 import { FieldTypes } from './types';
 
-@RegistryPlug('buy-nft-magic-eden', 'v1')
+@RegistryPlug('buy-nft', 'v1')
 @Injectable()
-export class BuyNftMagicEdenService extends ActionDto<FieldTypes> {
+export class BuyNftService extends ActionDto<FieldTypes> {
   nftHtmlInfo: string[] = [];
 
   constructor(private readonly chainService: ChainService) {
