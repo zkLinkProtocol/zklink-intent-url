@@ -134,7 +134,7 @@
       "^@action/registry(|/.*)$": "<rootDir>/libs/registry/src/$1",
       "^@action/pump-fun(|/.*)$": "<rootDir>/libs/pump-fun/src/$1",
       "^@action/news(|/.*)$": "<rootDir>/libs/news/src/$1",
-      "^@action/buy-nft-magic-eden(|/.*)$": "<rootDir>/libs/buy-nft-magic-eden/src/$1",
+      "^@action/buy-nft(|/.*)$": "<rootDir>/libs/buy-nft/src/$1",
       "^@action/buy-nft-okx(|/.*)$": "<rootDir>/libs/buy-nft-okx/src/$1",
       "^@action/mint-nft(|/.*)$": "<rootDir>/libs/mint-nft/src/$1",
       "^@action/mint-nova-nft(|/.*)$": "<rootDir>/libs/mint-nova-nft/src/$1",

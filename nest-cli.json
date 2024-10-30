@@ -82,13 +82,13 @@
         "tsConfigPath": "libs/news/tsconfig.lib.json"
       }
     },
-    "buy-nft-magic-eden": {
+    "buy-nft": {
       "type": "library",
-      "root": "libs/buy-nft-magic-eden",
+      "root": "libs/buy-nft",
       "entryFile": "index",
-      "sourceRoot": "libs/buy-nft-magic-eden/src",
+      "sourceRoot": "libs/buy-nft/src",
       "compilerOptions": {
-        "tsConfigPath": "libs/buy-nft-magic-eden/tsconfig.lib.json"
+        "tsConfigPath": "libs/buy-nft/tsconfig.lib.json"
       }
     },
     "buy-nft-okx": {
