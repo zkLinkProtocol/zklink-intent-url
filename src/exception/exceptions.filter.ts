@@ -28,7 +28,7 @@ export class ExceptionsFilter implements ExceptionFilter {
         data: null,
       });
     } else if (exception instanceof Error) {
-      const status = HttpStatus.BAD_REQUEST;
+      const status = HttpStatus.INTERNAL_SERVER_ERROR;
       const message = exception.message;
       const request = ctx.getRequest<Request>();
       const requestData = {

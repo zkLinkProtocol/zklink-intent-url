@@ -98,10 +98,8 @@ export class ActionService implements OnApplicationBootstrap {
     }
   }
 
-  async getActionMetadata(id: ActionId) {
-    const actionMetadata = await this.actionRepository.findOne({
-      where: { id },
-    });
+  public async getActionMetadata(id: ActionId) {
+    const actionMetadata = await this.actionRepository.getActionById(id);
     if (!actionMetadata) {
       throw new BusinessException(`ActionId ${id} not found`);
     }
@@ -142,7 +140,7 @@ export class ActionService implements OnApplicationBootstrap {
     return true;
   }
 
-  async getAllActionMetadata(account: string) {
+  public async getAllActionMetadata(account?: string) {
     const allActionMetadataRaw = await this.actionRepository.getAllActions();
     const allActionMetadata = await Promise.all(
       allActionMetadataRaw.map(async (actionMetadata) => {
@@ -176,7 +174,7 @@ export class ActionService implements OnApplicationBootstrap {
         };
       }),
     );
-    return await allActionMetadata.filter((item) => !!item);
+    return allActionMetadata.filter((item) => !!item);
   }
 
   getActionStore(id: ActionId): Action {

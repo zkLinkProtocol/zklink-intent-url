@@ -31,6 +31,9 @@ export class NewsService extends ActionDto<FieldTypes> {
     super();
   }
   async getMetadata(): Promise<ActionMetadata<FieldTypes>> {
+    const whiteListConfig =
+      this.configService.get<string>('NEWS_WHITE_ADDRESS');
+    const whiteList = whiteListConfig ? whiteListConfig.split(',') : [];
     return {
       title: 'Magic News',
       description:
@@ -48,10 +51,7 @@ export class NewsService extends ActionDto<FieldTypes> {
         github: 'https://github.com/zkLinkProtocol',
       },
       magicLinkMetadata: {},
-      whiteList: this.configService
-        .get<string>('NEWS_WHITE_ADDRESS')
-        ?.split(',')
-        .map((address) => address.toLowerCase()),
+      whiteList: whiteList,
       intent: {
         binding: 'amountToBuy',
         components: [

@@ -10,7 +10,9 @@ export class ActionsJsonController extends BaseController {
   constructor() {
     super();
   }
-
+  // Important!!!
+  // This endpoint is specifically for OKX Blink usage.
+  // OKX uses this endpoint to render the magic link on X.
   @RequestMapping({ path: 'actions.json', method: RequestMethod.GET })
   @CommonApiOperation('actions.json')
   async getActions() {

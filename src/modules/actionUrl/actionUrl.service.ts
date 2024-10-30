@@ -1,4 +1,10 @@
-import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  Logger,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { customAlphabet } from 'nanoid';
 
 import {
@@ -7,14 +13,10 @@ import {
 } from 'src/common/dto';
 import { BusinessException } from 'src/exception/business.exception';
 import { ActionService } from 'src/modules/action/action.service';
-import {
-  ActionRepository,
-  CreatorRepository,
-  IntentionRepository,
-} from 'src/repositories';
+import { CreatorRepository, IntentionRepository } from 'src/repositories';
 import { UnitOfWork } from 'src/unitOfWork';
 
-import { ActionUrlAddRequestDto } from './actionUrl.dto';
+import { ActionUrlAddRequestDto } from './dto/actionUrl.dto';
 
 @Injectable()
 export class ActionUrlService {
@@ -23,15 +25,14 @@ export class ActionUrlService {
     private readonly unitOfWork: UnitOfWork,
     private readonly intentionRepository: IntentionRepository,
     private readonly creatorRepository: CreatorRepository,
-    private readonly actionRepository: ActionRepository,
     private readonly actionService: ActionService,
   ) {
     this.logger = new Logger(ActionUrlService.name);
   }
 
   async findOneByCode(code: string) {
-    const intention = await this.intentionRepository.queryIntentionByCode(code);
-    if (!intention) throw new BusinessException(`magiclink ${code} not found`);
+    const intention = await this.intentionRepository.getIntentionByCode(code);
+    if (!intention) throw new BusinessException(`magicLink ${code} not found`);
     return intention;
   }
 
@@ -41,21 +42,12 @@ export class ActionUrlService {
     limit: number = 20,
   ) {
     const offset = Math.max((page - 1) * limit, 0);
-    const [intentions, total] = await this.intentionRepository.findAndCount({
-      where: { creator: { id: creatorId } },
-      select: [
-        'code',
-        'title',
-        'metadata',
-        'description',
-        'createdAt',
-        'updatedAt',
-      ],
-      relations: ['action'],
-      take: limit,
-      skip: offset,
-      order: { createdAt: 'DESC' },
-    });
+    const [intentions, total] =
+      await this.intentionRepository.getIntentionsByCreator(
+        creatorId,
+        limit,
+        offset,
+      );
 
     const filteredActionUrls = intentions.map((item) => ({
       ...item,
@@ -86,11 +78,11 @@ export class ActionUrlService {
     const action = await this.actionService.getActionMetadata(params.actionId);
     const creator = await this.creatorRepository.findById(creatorId);
     if (!action) {
-      throw new BusinessException('Action not found');
+      throw new NotFoundException('Action not found');
     }
 
     if (!creator) {
-      throw new BusinessException('Creator not found');
+      throw new UnauthorizedException('Creator not found');
     }
     const nanoid = customAlphabet(
       '1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-',
@@ -111,31 +103,31 @@ export class ActionUrlService {
           resolve(code);
         });
       } catch (error) {
-        this.logger.error(error);
-        throw new BusinessException('Failed to add actionUrl');
+        this.logger.error(error, JSON.stringify({ params }));
+        throw new Error('Failed to add actionUrl');
       }
     });
   }
 
   async updateByCode(code: string, params: any, creatorId: bigint) {
-    const actionUrl =
+    const intention =
       await this.intentionRepository.queryIntentionWithoutRecordsByCode(code);
-    if (!actionUrl) {
-      throw new BusinessException('ActionUrl not found');
+    if (!intention) {
+      throw new NotFoundException(`ActionUrl ${code} not found`);
     }
-    if (actionUrl.creator.id !== creatorId) {
-      throw new BusinessException('ActionUrl not found');
+    if (intention.creator.id !== creatorId) {
+      throw new ForbiddenException('No permission');
     }
-    actionUrl.title = params.title;
-    actionUrl.description = params.description;
-    actionUrl.metadata = params.metadata;
-    actionUrl.settings = params.settings;
+    intention.title = params.title;
+    intention.description = params.description;
+    intention.metadata = params.metadata;
+    intention.settings = params.settings;
 
     try {
-      await this.intentionRepository.updateByCode(code, actionUrl);
+      await this.intentionRepository.updateByCode(code, intention);
     } catch (error) {
       this.logger.error(error);
-      throw new BusinessException('Failed to update actionUrl');
+      throw new Error('Failed to update actionUrl');
     }
     return code;
   }
@@ -144,36 +136,32 @@ export class ActionUrlService {
     const actionUrl =
       await this.intentionRepository.queryIntentionWithoutRecordsByCode(code);
     if (!actionUrl) {
-      throw new BusinessException('ActionUrl not found');
+      throw new NotFoundException('ActionUrl not found');
     }
     if (actionUrl.creator.id !== creatorId) {
       throw new UnauthorizedException('Not your own intent');
     }
     actionUrl.active = true;
+    await this.intentionRepository.updateByCode(code, actionUrl);
 
-    try {
-      await this.intentionRepository.updateByCode(code, actionUrl);
-    } catch (error) {
-      this.logger.error(error);
-      throw new BusinessException('Failed to update actionUrl');
-    }
     return code;
   }
 
   async deleteByCode(code: string, creatorId: bigint) {
     const actionUrl = await this.findOneByCode(code);
     if (!actionUrl) {
-      throw new BusinessException('ActionUrl not found');
+      throw new NotFoundException('ActionUrl not found');
     }
     if (actionUrl.creator.id !== creatorId) {
-      throw new BusinessException('ActionUrl not found');
+      throw new NotFoundException('ActionUrl not found');
     }
     try {
       await this.intentionRepository.deleteByCode(code);
     } catch (error) {
       this.logger.error(error);
-      throw new BusinessException('Failed to delete actionUrl');
+      throw new Error('Failed to delete actionUrl');
     }
+
     return true;
   }
 
@@ -190,8 +178,11 @@ export class ActionUrlService {
     try {
       return actionStore.generateTransaction(data);
     } catch (error) {
-      this.logger.error(error);
-      throw new BusinessException('Failed to generate transaction');
+      this.logger.error(
+        `generateTransaction failed`,
+        JSON.stringify({ data, error }),
+      );
+      throw new Error('Failed to generate transaction');
     }
   }
 
@@ -209,7 +200,7 @@ export class ActionUrlService {
         : null;
     } catch (error) {
       this.logger.error(error);
-      throw new BusinessException('Failed to generate transaction');
+      throw new Error('Failed to generate transaction');
     }
   }
 }
