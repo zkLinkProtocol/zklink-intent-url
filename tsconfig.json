@@ -78,11 +78,17 @@
       "@action/pump-fun/*": [
         "libs/pump-fun/src/*"
       ],
-      "@action/buy-nft": [
-        "libs/buy-nft/src"
+      "@action/buy-nft-magic-eden": [
+        "libs/buy-nft-magic-eden/src"
       ],
-      "@action/buy-nft/*": [
-        "libs/buy-nft/src/*"
+      "@action/buy-nft-magic-eden/*": [
+        "libs/buy-nft-magic-eden/src/*"
+      ],
+      "@action/buy-nft-okx": [
+        "libs/buy-nft-okx/src"
+      ],
+      "@action/buy-nft-okx/*": [
+        "libs/buy-nft-okx/src/*"
       ],
       "@action/mint-nft": [
         "libs/mint-nft/src"
