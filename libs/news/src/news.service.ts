@@ -326,7 +326,7 @@ export class NewsService extends ActionDto<FieldTypes> {
     const chainInfo = this.chains.find((chain) => chain.chainId === chainId);
     return {
       en: `Based on real-time news 🗞, our AI 🤖 has automatically generated a one-click trading strategy 🎯—go long on ${tokenSymbol} on the ${chainInfo?.name} 🤩 Don’t miss this easy opportunity to make a profit! Come here to start a smarter trade! 📈👇`,
-      zh: `基于实时新闻🗞，我们的AI🤖自动生成了一键完成的交易策略🎯—-在{}平台上 做多 ${tokenSymbol} 🤩别错过这个轻松赚取利润的时刻！快来这里，开启更聪明的交易体验吧！📈👇`,
+      zh: `基于实时新闻🗞，我们的AI🤖自动生成了一键完成的交易策略🎯—-在${chainInfo?.name}平台上 做多 ${tokenSymbol} 🤩别错过这个轻松赚取利润的时刻！快来这里，开启更聪明的交易体验吧！📈👇`,
     };
   }
 }
