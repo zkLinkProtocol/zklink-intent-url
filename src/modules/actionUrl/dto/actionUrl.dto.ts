@@ -1,7 +1,7 @@
 import { ApiProperty, OmitType } from '@nestjs/swagger';
 import { IsNotEmpty, IsNumber, IsObject, IsString } from 'class-validator';
 
-import { AuthorDto } from 'src/common/dto';
+import { AuthorDto, SharedContent } from 'src/common/dto';
 
 class CreatorDto {
   @ApiProperty({
@@ -140,4 +140,6 @@ export class ActionUrlResponseDto extends OmitType(ActionUrlAddRequestDto, [
   })
   @IsNumber()
   interaction: number;
+
+  sharedContent?: SharedContent;
 }

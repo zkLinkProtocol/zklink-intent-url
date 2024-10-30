@@ -1,6 +1,6 @@
 import { chainConfig } from './chain';
-
 const configFactory = async () => {
+  console.log(`************************process.env.TGBOT:${process.env.TGBOT}`);
   return {
     env: (process.env.ENV || 'dev') as 'dev' | 'prod',
     port: parseInt(process.env.PORT || '3010', 10),
@@ -42,6 +42,5 @@ const configFactory = async () => {
     },
   };
 };
-
 export default configFactory;
 export type ConfigType = Awaited<ReturnType<typeof configFactory>>;

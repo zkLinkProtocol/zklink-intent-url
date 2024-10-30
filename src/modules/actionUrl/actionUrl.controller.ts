@@ -31,12 +31,13 @@ import { CommonApiOperation } from 'src/common/base.decorators';
 import {
   ActionTransactionParams,
   GenerateTransactionResponse,
+  ReporterResponse,
   TransactionInfo,
 } from 'src/common/dto';
 import { PagingOptionsDto } from 'src/common/pagingOptionsDto.param';
 import { PagingMetaDto, ResponseDto } from 'src/common/response.dto';
 import { BusinessException } from 'src/exception/business.exception';
-import { ErrorMessage, SuccessMessage } from 'src/types';
+import { ErrorMessage } from 'src/types';
 
 import { ActionUrlService } from './actionUrl.service';
 import { BlinkService } from './blink.service';
@@ -87,6 +88,10 @@ export class ActionUrlController extends BaseController {
     @Param('code') code: string,
   ): Promise<ResponseDto<ActionUrlResponseDto>> {
     const result = await this.actionUrlService.findOneByCode(code);
+    const actionStore = await this.actionService.getActionVersionStore(
+      result.action.id,
+      result.actionVersion,
+    );
 
     const response = {
       code: result.code,
@@ -101,7 +106,24 @@ export class ActionUrlController extends BaseController {
       creator: {
         address: result.creator.address,
       },
-    };
+    } as ActionUrlResponseDto;
+
+    const settingValue = result.settings.intentInfo.components.reduce(
+      (res, cur) => {
+        res[cur.name] = cur.value;
+        return res;
+      },
+      {} as { [key: string]: any },
+    );
+    const sharedContent = await actionStore.generateSharedContent({
+      additionalData: {
+        chainId: result.settings.intentInfo.network.chainId,
+      },
+      formData: settingValue,
+    });
+    response.sharedContent =
+      this.actionUrlService.encodeSharedContent(sharedContent);
+
     return this.success(response);
   }
 
@@ -429,7 +451,7 @@ export class ActionUrlController extends BaseController {
     body: TransactionBody & {
       txHashes: Array<{ hash: string; chainId: number }>;
     },
-  ): Promise<ResponseDto<SuccessMessage>> {
+  ): Promise<ResponseDto<ReporterResponse>> {
     try {
       const { params, account, chainId, txHashes } = body;
 
@@ -457,8 +479,14 @@ export class ActionUrlController extends BaseController {
         },
         formData: params,
       };
-      const response = await actionStore.reportTransaction(data, txHashes);
-      return this.success(response);
+      const responseData = await actionStore.reportTransaction(data, txHashes);
+      if (responseData.sharedContent) {
+        responseData.sharedContent = this.actionUrlService.encodeSharedContent(
+          responseData.sharedContent,
+        );
+      }
+
+      return this.success(responseData);
     } catch (error) {
       this.logger.error(error, JSON.stringify({ body, code }));
       throw new InternalServerErrorException('reportTransactions failed');
@@ -626,7 +654,9 @@ export class ActionUrlController extends BaseController {
     const chainId =
       (intention.settings as any)?.intentInfo?.network?.chainId ?? 0;
     res.setHeader('X-Blockchain-Ids', `eip155:${chainId}`);
-    metadata.icon = intention.metadata;
+    metadata.icon = intention.metadata
+      ? intention.metadata
+      : 'https://zklink-intent.s3.ap-northeast-1.amazonaws.com/dev/tg/magicnewsconver.jpeg';
     metadata.title = intention.title;
     metadata.description = intention.description.replaceAll(/<[^>]+>/g, '');
 
@@ -651,12 +681,11 @@ export class ActionUrlController extends BaseController {
     res.setHeader('Access-Control-Expose-Headers', 'X-Blockchain-Ids');
     const response = {
       transaction: '',
-      message: '',
     };
     const intention = await this.actionUrlService.findOneByCode(code);
     if (!intention) {
-      response.message = 'Action not found';
-      return response;
+      res.status(500);
+      return { message: 'Action not found' };
     }
 
     const chainId =
@@ -672,8 +701,10 @@ export class ActionUrlController extends BaseController {
       );
       response.transaction = transaction;
     } catch (error) {
-      response.message = error.message;
+      res.status(500);
+      return { message: error.message };
     }
+    res.status(200);
     return response;
   }
 

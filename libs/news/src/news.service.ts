@@ -1,5 +1,6 @@
 import { RegistryPlug } from '@action/registry';
 import { ChainService, OKXService } from '@core/shared';
+import { getERC20SymbolAndDecimals } from '@core/utils';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Contract, ethers } from 'ethers';
@@ -8,9 +9,11 @@ import {
   ActionMetadata,
   GenerateTransactionParams,
   GenerateTransactionResponse,
+  ReporterResponse,
   TransactionInfo,
   UpdateFieldType,
 } from 'src/common/dto';
+import { ConfigType } from 'src/config';
 import { Chains } from 'src/constants';
 import { TgbotService } from 'src/modules/tgbot/tgbot.service';
 import { Address, ErrorMessage } from 'src/types';
@@ -22,6 +25,7 @@ import { FieldTypes } from './types';
 @Injectable()
 export class NewsService extends ActionDto<FieldTypes> {
   private logger = new Logger(NewsService.name);
+  private readonly chains: ConfigType['chains'];
   constructor(
     private readonly tgbotService: TgbotService,
     private readonly okxService: OKXService,
@@ -29,6 +33,7 @@ export class NewsService extends ActionDto<FieldTypes> {
     private readonly configService: ConfigService,
   ) {
     super();
+    this.chains = this.configService.get('chains', { infer: true })!;
   }
   async getMetadata(): Promise<ActionMetadata<FieldTypes>> {
     const whiteListConfig =
@@ -253,7 +258,7 @@ export class NewsService extends ActionDto<FieldTypes> {
     return '';
   }
 
-  isNumeric(value: string): boolean {
+  private isNumeric(value: string): boolean {
     const num = Number(value);
     return !isNaN(num);
   }
@@ -263,5 +268,65 @@ export class NewsService extends ActionDto<FieldTypes> {
   ): Promise<TransactionInfo[]> {
     await this.tgbotService.sendNews(data.additionalData.code!);
     return [];
+  }
+
+  public async reportTransaction(
+    data: GenerateTransactionParams<FieldTypes>,
+    _txHashes: Array<{ hash: string; chainId: number }>,
+  ): Promise<ReporterResponse> {
+    const { formData, additionalData } = data;
+    const { chainId } = additionalData;
+    let tokenFromDecimal: bigint;
+    let tokenSymbol: string;
+    const provider = this.chainService.getProvider(chainId);
+    if (
+      formData.tokenFrom.toLocaleLowerCase() ===
+      '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
+    ) {
+      tokenFromDecimal = 18n;
+      tokenSymbol = 'ETH';
+    } else {
+      const { symbol, decimals } = await getERC20SymbolAndDecimals(
+        provider,
+        formData.tokenFrom,
+      );
+      tokenFromDecimal = decimals;
+      tokenSymbol = symbol;
+    }
+    const amount = ethers.formatUnits(formData.amountToBuy, tokenFromDecimal);
+    const chainInfo = this.chains.find((chain) => chain.chainId === chainId);
+    return {
+      tip: `Buy ${amount} worthed ${tokenSymbol} successfully`,
+      sharedContent: {
+        en: `Hey!😎 I’ve been trading with magicNews! it's an 🤖AI-Powered 7 ✖️ 24 Real-time Crypto News🗞 & One-click Flash Trading. I’ve just bought ${amount} worth of ${tokenSymbol} in {chain_name}, don't loss the chance to earn, 🎯trade smarter here!👇`,
+        zh: `嘿！我一直在用新闻做交易！这是一个由人工智能驱动的实时加密新闻与一键交易平台。我刚刚在 ${chainInfo?.name} 中购买了价值 ${amount} 的 ${tokenSymbol}，不要错过赚取利润的机会，快来这里更聪明地交易吧！👇！`,
+      },
+    };
+  }
+
+  public async generateSharedContent(
+    data: GenerateTransactionParams<FieldTypes>,
+  ) {
+    const { formData, additionalData } = data;
+    const { chainId } = additionalData;
+    let tokenSymbol: string;
+    const provider = this.chainService.getProvider(chainId);
+    if (
+      formData.tokenFrom.toLocaleLowerCase() ===
+      '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
+    ) {
+      tokenSymbol = 'ETH';
+    } else {
+      const { symbol } = await getERC20SymbolAndDecimals(
+        provider,
+        formData.tokenFrom,
+      );
+      tokenSymbol = symbol;
+    }
+    const chainInfo = this.chains.find((chain) => chain.chainId === chainId);
+    return {
+      en: `Based on real-time news 🗞, our AI 🤖 has automatically generated a one-click trading strategy 🎯—go long on ${tokenSymbol} on the ${chainInfo?.name} 🤩 Don’t miss this easy opportunity to make a profit! Come here to start a smarter trade! 📈👇`,
+      zh: `基于实时新闻🗞，我们的AI🤖自动生成了一键完成的交易策略🎯—-在${chainInfo?.name}平台上 做多 ${tokenSymbol} 🤩别错过这个轻松赚取利润的时刻！快来这里，开启更聪明的交易体验吧！📈👇`,
+    };
   }
 }

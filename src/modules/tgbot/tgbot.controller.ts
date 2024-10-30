@@ -130,4 +130,41 @@ export class TgbotController extends BaseController {
       return false;
     }
   }
+
+  @Post('testOnJoin')
+  async testOnJoin(@Body('data') data: any, @Query('lang') lang: string) {
+    try {
+      this.tgbotService.onJoin(data, lang);
+      return true;
+    } catch (error) {
+      this.logger.error(error);
+      return false;
+    }
+  }
+
+  @Post('onMyChatMember')
+  async onMyChatMember(@Body('data') data: any) {
+    try {
+      this.tgbotService.onMyChatMember(data);
+      return true;
+    } catch (error) {
+      this.logger.error(error);
+      return false;
+    }
+  }
+
+  @Get('onInviteReply')
+  async onInviteReply(
+    @Query('userId') userId: string,
+    @Query('chatId') chatId: string,
+    @Query('messageId') messageId: string,
+  ) {
+    try {
+      this.tgbotService.onInviteReply(userId, chatId, messageId);
+      return true;
+    } catch (error) {
+      this.logger.error(error);
+      return false;
+    }
+  }
 }
