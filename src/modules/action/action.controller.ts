@@ -1,5 +1,12 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import {
+  Body,
+  Controller,
+  Get,
+  Logger,
+  Param,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ApiBody,
   ApiExtraModels,
@@ -23,11 +30,10 @@ import { JwtAuthGuard } from '../auth/jwtAuth.guard';
 @ApiExtraModels(ActionMetadata)
 @Controller('actions')
 export class ActionController extends BaseController {
-  constructor(
-    private readonly actionService: ActionService,
-    private readonly configService: ConfigService,
-  ) {
+  private readonly logger: Logger;
+  constructor(private readonly actionService: ActionService) {
     super();
+    this.logger = new Logger(ActionController.name);
   }
 
   @Get()
@@ -52,7 +58,7 @@ export class ActionController extends BaseController {
   @OptionLogin()
   @UseGuards(JwtAuthGuard)
   async findAll(
-    @GetCreator() creator: { address: string },
+    @GetCreator() creator: { address?: string },
   ): Promise<ResponseDto<ActionResponseDto[]>> {
     const actions = await this.actionService.getAllActionMetadata(
       creator.address,
@@ -123,8 +129,13 @@ export class ActionController extends BaseController {
     @Body()
     body: ValidateFormData,
   ): Promise<ResponseDto<string>> {
-    const actionStore = await this.actionService.getActionStore(id);
-    const response = await actionStore.validateFormData(body);
-    return this.success(response);
+    try {
+      const actionStore = await this.actionService.getActionStore(id);
+      const response = await actionStore.validateFormData(body);
+      return this.success(response);
+    } catch (error) {
+      this.logger.error(error, `validateTransaction failed`);
+      throw new Error('validateTransaction failed');
+    }
   }
 }

@@ -34,7 +34,7 @@ export class FilesModule implements OnModuleInit {
         this.logger.log(`Uploaded ${folder} files:`, urls);
       }
     } catch (error) {
-      this.logger.error('Error uploading folders:', error);
+      this.logger.error(error, 'Error uploading folders');
     }
   }
 }
