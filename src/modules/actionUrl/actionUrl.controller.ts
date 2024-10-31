@@ -544,19 +544,24 @@ export class ActionUrlController extends BaseController {
     @Body()
     body: TransactionBody,
   ): Promise<ResponseDto<GenerateTransactionResponse>> {
-    const { params, account, referrer, chainId, commissionRate } = body;
-    const data = {
-      additionalData: {
-        code,
-        account: account,
-        chainId: parseInt(chainId),
-        referrer,
-        commissionRate,
-      },
-      formData: params,
-    };
-    const response = await this.actionUrlService.generateTransaction(data);
-    return this.success(response);
+    try {
+      const { params, account, referrer, chainId, commissionRate } = body;
+      const data = {
+        additionalData: {
+          code,
+          account: account,
+          chainId: parseInt(chainId),
+          referrer,
+          commissionRate,
+        },
+        formData: params,
+      };
+      const response = await this.actionUrlService.generateTransaction(data);
+      return this.success(response);
+    } catch (error) {
+      this.logger.error(error, JSON.stringify({ body, code }));
+      throw new InternalServerErrorException('Generate transaction failed');
+    }
   }
 
   // generateManagementInfo
