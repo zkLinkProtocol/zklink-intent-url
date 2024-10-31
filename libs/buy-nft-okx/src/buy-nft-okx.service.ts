@@ -113,6 +113,9 @@ export class BuyNftOKXService extends ActionDto<FieldTypes> {
       collection,
       quantity,
     );
+    if (offers.length < quantity) {
+      throw new Error("Don't have enough items for sale at the moment");
+    }
     this.nftHtmlInfo = nftHtmlInfo;
     const txs = await this.okxService.buyNFT(
       (okxChainAlias as any)[additionalData.chainId],
