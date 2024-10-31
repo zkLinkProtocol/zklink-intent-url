@@ -2,6 +2,7 @@ import { Body, Controller, Get, Logger, Post, Query } from '@nestjs/common';
 
 import { BaseController } from 'src/common/base.controller';
 
+import { SendNewsOriginRequestDto } from './tgbot.dto';
 import { TgbotService } from './tgbot.service';
 
 @Controller('tgbot')
@@ -19,6 +20,24 @@ export class TgbotController extends BaseController {
     } catch (error) {
       this.logger.error(error);
       return false;
+    }
+  }
+
+  @Post('sendNewsOrigin')
+  async sendNewsOrigin(@Body() body: SendNewsOriginRequestDto) {
+    try {
+      await this.tgbotService.sendNewsOrigin(
+        body.title,
+        body.description,
+        body.metadata,
+        body.fromTokenAddress,
+        body.toTokenAddress,
+        body.settings,
+      );
+      return this.success(true);
+    } catch (error) {
+      this.logger.error(error);
+      return this.error(error.message);
     }
   }
 
