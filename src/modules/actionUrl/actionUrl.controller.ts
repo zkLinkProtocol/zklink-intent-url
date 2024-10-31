@@ -463,15 +463,15 @@ export class ActionUrlController extends BaseController {
         intention.actionVersion,
       );
 
-      const metadata = await actionStore.getMetadata();
-      if (metadata.maxCommission) {
-        await this.commissionService.handleCommissionTransaction(
-          intention.action,
-          intention,
-          txHashes[0].chainId,
-          txHashes[0].hash,
-        );
-      }
+      // const metadata = await actionStore.getMetadata();
+      // if (metadata.maxCommission) {
+      //   await this.commissionService.handleCommissionTransaction(
+      //     intention.action,
+      //     intention,
+      //     txHashes[0].chainId,
+      //     txHashes[0].hash,
+      //   );
+      // }
       const data = {
         additionalData: {
           code,
