@@ -787,10 +787,6 @@ ${this.formatMarkdownV2(content).replaceAll(
           const options = { reply_markup, parse_mode, caption };
           res = await this.bot.sendPhoto(tgGroupId, photo, options);
         }
-        await this.bot.setMessageReaction(res.chat.id, res.message_id, {
-          reaction: [{ type: 'emoji ', emoji: '👍' }],
-          is_big: true,
-        });
         const data = {
           messageId: res.message_id.toString(),
           chatId: res.chat.id.toString(),
