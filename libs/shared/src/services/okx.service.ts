@@ -316,15 +316,16 @@ export class OKXService {
     const timestamp = new Date().toISOString();
     const buyUrl = `${nftBaseUrl}markets/buy`;
     const toSignUrl = buyUrl.replace('https://www.okx.com', '');
-    const headers = this.getHeaders(timestamp, toSignUrl);
+    const body = JSON.stringify({
+      chain: chainAlias,
+      items: offers,
+      walletAddress: account,
+    });
+    const headers = this.getHeaders(timestamp, toSignUrl, body);
     const resp = await fetch(buyUrl, {
       method: 'post',
       headers,
-      body: JSON.stringify({
-        chain: chainAlias,
-        items: offers,
-        walletAddress: account,
-      }),
+      body,
     });
     const steps = (await resp.json()).data.steps;
     const txs = [];
