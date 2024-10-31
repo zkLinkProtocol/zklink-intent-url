@@ -11,12 +11,14 @@ import { ChainService } from '@core/shared';
 import { NetworkDto } from 'src/common/dto';
 import configFactory from 'src/config';
 import { Chains } from 'src/constants';
+import { BusinessException } from 'src/exception/business.exception';
 import {
   CreatorRepository,
   IntentionRepository,
   TgGroupAndChannelRepository,
   TgMessageRepository,
 } from 'src/repositories';
+import { Settings } from 'src/types';
 
 import { ActionUrlService } from '../actionUrl/actionUrl.service';
 import { BlinkService } from '../actionUrl/blink.service';
@@ -804,6 +806,178 @@ ${this.formatMarkdownV2(content).replaceAll(
     }
   }
 
+  async sendNewsOrigin(
+    title: string,
+    description: string,
+    metadata: string,
+    fromTokenAddress: string,
+    toTokenAddress: string,
+    settings: Settings,
+  ) {
+    const config = await configFactory();
+    const userMiniApp = config.tgbot.userMiniApp;
+    const newsChannelIdCn = config.tgbot.newsChannelIdCn;
+    const newsChannelIdEn = config.tgbot.newsChannelIdEn;
+    let newsChannelId = '';
+    const tgbot = `https://t.me/${config.tgbot.tgbot}`;
+    const photo = metadata;
+    description = html2md(description.replaceAll(/<img[^>]*>/g, ''));
+    // eslint-disable-next-line no-useless-escape
+    const markdownLinkPattern = /\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g;
+    const links: string[] = [];
+    const content = description.replaceAll(markdownLinkPattern, (match) => {
+      links.push(match);
+      return '<<LINK<<';
+    });
+    const network = settings.intentInfo.network.name;
+    const chainId = settings.intentInfo.network.chainId;
+    let fromObj = await this.getTokenInfo(Number(chainId), fromTokenAddress);
+    if (!fromObj) {
+      this.logger.error(
+        `sendNews error : fromToken not exists. fromTokenAddress:${fromTokenAddress}`,
+      );
+      fromObj = { symbol: fromTokenAddress, usdPrice: '-' };
+    }
+    let toObj = await this.getTokenInfo(Number(chainId), toTokenAddress);
+    if (!toObj) {
+      this.logger.error(
+        `sendNews error : toToken not exists. toTokenAddress:${toTokenAddress}`,
+      );
+      toObj = { symbol: toTokenAddress, usdPrice: '-' };
+    }
+    // const participants = await this.intentionRecordService.countByCode(code);
+    let captionTemplate = '';
+    let linkIndex = 0;
+    let lang = 'cn';
+    if (this.containsChineseCharacters(content)) {
+      newsChannelId = newsChannelIdCn;
+      captionTemplate = `
+      🟢*${this.formatMarkdownV2(title)}*🟢
+      ${this.formatMarkdownV2(content).replaceAll(
+        '<<LINK<<',
+        () => links[linkIndex++],
+      )}
+
+👨‍🍳交易策略:
+
+📍 ${this.formatMarkdownV2(network)}
+➡️Token From: ${fromObj?.symbol.toUpperCase()} \\(*$${this.formatMarkdownV2(fromObj?.usdPrice.toString())}*\\)
+⬅️Token To: ${toObj?.symbol.toUpperCase()} \\(*$${this.formatMarkdownV2(toObj?.usdPrice.toString())}*\\)
+
+🌈在您的群中推送 magicNews 邀请 [@magicLink](${tgbot}?startgroup=join_cn) 到您的群中
+`;
+    } else {
+      lang = 'en';
+      newsChannelId = newsChannelIdEn;
+      captionTemplate = `
+🟢*${this.formatMarkdownV2(title)}*🟢
+${this.formatMarkdownV2(content).replaceAll(
+  '<<LINK<<',
+  () => links[linkIndex++],
+)}
+
+👨‍🍳Trading Strategy:
+
+📍 ${this.formatMarkdownV2(network)}
+➡️Token From: ${fromObj?.symbol.toUpperCase()} \\(*$${this.formatMarkdownV2(fromObj?.usdPrice.toString())}*\\)
+⬅️Token To: ${toObj?.symbol.toUpperCase()} \\(*$${this.formatMarkdownV2(toObj?.usdPrice.toString())}*\\)
+
+🌈Push Magic News Alerts in group? Invite [@magicLink](${tgbot}?startgroup=join_en) in your group
+`;
+    }
+    const caption = captionTemplate;
+    const parse_mode: ParseMode = 'MarkdownV2';
+
+    const inlineKeyboard = [];
+    const newsType = settings.newsType ?? '';
+    let typeActions = [];
+    if (newsType == 'poll') {
+      typeActions = [
+        {
+          text: '👍Pump(0)',
+          callback_data: `long_0_0_poll`,
+        },
+        {
+          text: '👎Dump(0)',
+          callback_data: `short_0_0_poll`,
+        },
+      ];
+    } else {
+      typeActions = [
+        {
+          text: '👍Support(0)',
+          callback_data: `long_0_0_intent`,
+        },
+        {
+          text: '👎Oppose(0)',
+          callback_data: `short_0_0_intent`,
+        },
+      ];
+    }
+    inlineKeyboard.push(typeActions);
+    const actions = settings.intentList;
+    for (let i = 0; i < actions.length; i++) {
+      const lineButtons = [];
+      for (let j = 0; j < actions[i].length; j++) {
+        const action = actions[i][j];
+        if (
+          /^(https:\/\/|tg:\/\/)[^\s/$.?#].[^\s]*$/.test(action.value) == false
+        ) {
+          throw new BusinessException('Invalid action value, must be a url');
+        }
+        let url = '';
+        if (
+          action.value.includes('magic.zklink.io') ||
+          action.value.includes('magic-test.zklink.io')
+        ) {
+          const urlTmp = new URL(action.value);
+          const pathSegments = urlTmp.pathname.split('/');
+          const code = pathSegments[pathSegments.length - 1];
+          url = `${userMiniApp}?startapp=${code}_${action.btnIndex ?? ''}`;
+        } else {
+          url = action.value;
+        }
+
+        lineButtons.push({
+          text: action.title,
+          url: url,
+        });
+      }
+      inlineKeyboard.push(lineButtons);
+    }
+    const reply_markup = {
+      inline_keyboard: inlineKeyboard,
+    };
+    let res = null;
+    const tgGroups = await this.tgGroupAndChannelRepository.find({
+      select: ['chatId'],
+      where: { lang },
+      order: { inviteDate: 'ASC' },
+    });
+    const tgGroupIds = tgGroups.map((tgGroup) => tgGroup.chatId);
+    tgGroupIds.push(newsChannelId);
+    for (const tgGroupId of tgGroupIds) {
+      try {
+        if (photo === '') {
+          const options = {
+            reply_markup,
+            parse_mode,
+          };
+          res = await this.bot.sendMessage(tgGroupId, caption, options);
+        } else {
+          const options = { reply_markup, parse_mode, caption };
+          res = await this.bot.sendPhoto(tgGroupId, photo, options);
+        }
+        this.logger.log('sendNewsOrigin success', JSON.stringify(res));
+      } catch (error) {
+        this.logger.error(
+          `sendNewsOrigin error,caption:${caption}, newsChannelId:${newsChannelId},error:`,
+          error.stack,
+        );
+      }
+    }
+  }
+
   async sendMemeRedPacketMsg(inviteLink: string, tgUserId: string) {
     const caption = `
     ✅Your Meme Red Packet Already claimed\\.  Check your fortune\\!
@@ -822,7 +996,6 @@ ${this.formatMarkdownV2(content).replaceAll(
     const reply_markup = {
       inline_keyboard: inlineKeyboard,
     };
-    // caption = this.formatMarkdownV2(caption);
     try {
       const options = { reply_markup, parse_mode };
       const res = await this.bot.sendMessage(tgUserId, caption, options);
