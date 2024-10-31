@@ -1,13 +1,13 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import html2md from 'html-to-md';
 import { LRUCache } from 'lru-cache';
-import { MoreThanOrEqual } from 'typeorm';
-
-import { ChainService } from '@core/shared';
 import TelegramBot, {
   ChatMemberUpdated,
   ParseMode,
 } from 'node-telegram-bot-api';
+import { MoreThanOrEqual } from 'typeorm';
+
+import { ChainService } from '@core/shared';
 import { NetworkDto } from 'src/common/dto';
 import configFactory from 'src/config';
 import { Chains } from 'src/constants';
