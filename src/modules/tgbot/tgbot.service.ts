@@ -223,7 +223,6 @@ export class TgbotService implements OnModuleInit {
 🫂 [*__Invite__*](${userMiniApp}?startapp=invite) your friends to magicLink to get part of their transaction fees and earn extra rewards\\.
 
 ⛓ Manage magicLinks you create before\\.`;
-    // caption = this.formatMarkdownV2(caption);
     const parse_mode: ParseMode = 'MarkdownV2';
     const reply_markup = {
       is_persistent: true,
