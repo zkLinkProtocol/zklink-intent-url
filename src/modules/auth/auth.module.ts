@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 
-import { CreatorRepository } from 'src/repositories/creator.repository';
+import { CreatorRepository } from 'src/repositories';
 import { UnitOfWorkModule } from 'src/unitOfWork';
 
 import { AuthController } from './auth.controller';

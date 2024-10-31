@@ -466,7 +466,7 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
     data: GenerateTransactionParams<FieldTypes>,
   ): Promise<GenerateTransactionResponse> {
     const { additionalData } = data;
-    const { code, account, inviter } = additionalData;
+    const { code, account, referrer } = additionalData;
     if (!code) {
       throw new Error('missing code');
     }
@@ -480,12 +480,12 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
     const signature = await this.genClaimSignature({
       id: packetId,
       expiry,
-      inviter: inviter ?? ethers.ZeroAddress,
+      inviter: referrer ?? ethers.ZeroAddress,
       recipient: account,
     });
     const tx = await this.redPacketContract.claimRedPacket.populateTransaction(
       packetId,
-      inviter ?? ethers.ZeroAddress,
+      referrer ?? ethers.ZeroAddress,
       expiry,
       signature,
     );

@@ -6,7 +6,7 @@ import { TransactionInfo } from './transaction.dto';
 export type BasicAdditionalParams = {
   code?: string;
   account?: string;
-  inviter?: string;
+  referrer?: string;
   commissionRate?: number;
 };
 
