@@ -996,7 +996,6 @@ ${this.formatMarkdownV2(content).replaceAll(
     const reply_markup = {
       inline_keyboard: inlineKeyboard,
     };
-    // caption = this.formatMarkdownV2(caption);
     try {
       const options = { reply_markup, parse_mode };
       const res = await this.bot.sendMessage(tgUserId, caption, options);
