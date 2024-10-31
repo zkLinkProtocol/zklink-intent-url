@@ -59,7 +59,7 @@ import { JwtAuthGuard } from '../auth/jwtAuth.guard';
 interface TransactionBody {
   account: string;
   chainId: string;
-  inviter?: string;
+  referrer?: string;
   commissionRate?: number;
   params: { [key: string]: string };
 }
@@ -544,24 +544,19 @@ export class ActionUrlController extends BaseController {
     @Body()
     body: TransactionBody,
   ): Promise<ResponseDto<GenerateTransactionResponse>> {
-    try {
-      const { params, account, inviter, chainId, commissionRate } = body;
-      const data = {
-        additionalData: {
-          code,
-          account: account,
-          chainId: parseInt(chainId),
-          inviter,
-          commissionRate,
-        },
-        formData: params,
-      };
-      const response = await this.actionUrlService.generateTransaction(data);
-      return this.success(response);
-    } catch (error) {
-      this.logger.error(error, JSON.stringify({ body, code }));
-      throw new InternalServerErrorException('Generate transaction failed');
-    }
+    const { params, account, referrer, chainId, commissionRate } = body;
+    const data = {
+      additionalData: {
+        code,
+        account: account,
+        chainId: parseInt(chainId),
+        referrer,
+        commissionRate,
+      },
+      formData: params,
+    };
+    const response = await this.actionUrlService.generateTransaction(data);
+    return this.success(response);
   }
 
   // generateManagementInfo

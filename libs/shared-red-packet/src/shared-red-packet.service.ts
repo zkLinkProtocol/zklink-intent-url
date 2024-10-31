@@ -466,7 +466,7 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
     data: GenerateTransactionParams<FieldTypes>,
   ): Promise<GenerateTransactionResponse> {
     const { additionalData } = data;
-    const { code, account, inviter } = additionalData;
+    const { code, account, referrer: inviter } = additionalData;
     if (!code) {
       throw new Error('missing code');
     }
