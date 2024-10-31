@@ -105,7 +105,7 @@ export class TgbotService implements OnModuleInit {
     );
 
     this.bot.on('callback_query', (callbackQuery: any) => {
-      this.logger.log(`callback_query:`, JSON.stringify(callbackQuery));
+      this.logger.log(`callback_query`, JSON.stringify(callbackQuery));
       const chatId = callbackQuery.message.chat.id;
       const messageId = callbackQuery.message.message_id;
       const userId = callbackQuery.from.id;
