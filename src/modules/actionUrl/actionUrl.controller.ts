@@ -59,7 +59,7 @@ import { JwtAuthGuard } from '../auth/jwtAuth.guard';
 interface TransactionBody {
   account: string;
   chainId: string;
-  inviter?: string;
+  referrer?: string;
   commissionRate?: number;
   params: { [key: string]: string };
 }
@@ -463,15 +463,15 @@ export class ActionUrlController extends BaseController {
         intention.actionVersion,
       );
 
-      const metadata = await actionStore.getMetadata();
-      if (metadata.maxCommission) {
-        await this.commissionService.handleCommissionTransaction(
-          intention.action,
-          intention,
-          txHashes[0].chainId,
-          txHashes[0].hash,
-        );
-      }
+      // const metadata = await actionStore.getMetadata();
+      // if (metadata.maxCommission) {
+      //   await this.commissionService.handleCommissionTransaction(
+      //     intention.action,
+      //     intention,
+      //     txHashes[0].chainId,
+      //     txHashes[0].hash,
+      //   );
+      // }
       const data = {
         additionalData: {
           code,
@@ -545,13 +545,13 @@ export class ActionUrlController extends BaseController {
     body: TransactionBody,
   ): Promise<ResponseDto<GenerateTransactionResponse>> {
     try {
-      const { params, account, inviter, chainId, commissionRate } = body;
+      const { params, account, referrer, chainId, commissionRate } = body;
       const data = {
         additionalData: {
           code,
           account: account,
           chainId: parseInt(chainId),
-          inviter,
+          referrer,
           commissionRate,
         },
         formData: params,

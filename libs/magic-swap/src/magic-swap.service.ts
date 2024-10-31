@@ -1,5 +1,10 @@
 import { RegistryPlug } from '@action/registry';
-import { ChainService, HelperService, OKXService } from '@core/shared';
+import {
+  ChainService,
+  DataService,
+  HelperService,
+  OKXService,
+} from '@core/shared';
 import { getERC20SymbolAndDecimals } from '@core/utils';
 import { Injectable } from '@nestjs/common';
 import { ethers } from 'ethers';
@@ -22,6 +27,7 @@ export class MagicSwapService extends ActionDto<FieldTypes> {
     private readonly okxService: OKXService,
     private readonly helperService: HelperService,
     private readonly chainService: ChainService,
+    private readonly dataService: DataService,
   ) {
     super();
   }
@@ -79,7 +85,13 @@ export class MagicSwapService extends ActionDto<FieldTypes> {
     data: GenerateTransactionParams<FieldTypes>,
   ): Promise<GenerateTransactionResponse> {
     const { additionalData, formData } = data;
-    const { code, chainId, account, commissionRate = 0.001 } = additionalData;
+    const {
+      code,
+      chainId,
+      account,
+      commissionRate = 0.001,
+      referrer,
+    } = additionalData;
 
     if (!code) {
       throw Error('Missing code');
@@ -107,14 +119,33 @@ export class MagicSwapService extends ActionDto<FieldTypes> {
       };
     }
 
-    const commissionTx = await this.helperService.parseCommissionTx({
+    // commission to creator of code
+    const creator = await this.dataService.getMagicLinkCreatorInfoByCode(code);
+    if (!creator) {
+      throw new Error(`account not found on magicLink ${code}`);
+    }
+    const commissionToCreatorTx = await this.helperService.parseCommissionTx({
       code,
       chainId,
+      to: creator.address,
       amount: Number(formData.amountToBuy),
       token:
         formData.tokenFrom === ethers.ZeroAddress ? '' : formData.tokenFrom,
       commissionRate,
     });
+
+    let commissionToReferrerTx;
+    if (referrer) {
+      commissionToReferrerTx = await this.helperService.parseCommissionTx({
+        code,
+        chainId,
+        to: referrer,
+        amount: Number(formData.amountToBuy),
+        token:
+          formData.tokenFrom === ethers.ZeroAddress ? '' : formData.tokenFrom,
+        commissionRate: 0.005,
+      });
+    }
 
     const provider = this.chainService.getProvider(chainId);
 
@@ -166,9 +197,14 @@ export class MagicSwapService extends ActionDto<FieldTypes> {
       );
 
       swapTx.requiredTokenAmount = tokens;
+
+      const transactions = [commissionToCreatorTx, swapTx];
+      if (commissionToReferrerTx) {
+        transactions.push(commissionToReferrerTx);
+      }
       return {
         displayInfo: { tokens: swapTx.tokens },
-        transactions: [commissionTx, swapTx],
+        transactions,
       };
     } else {
       //buy
@@ -187,9 +223,13 @@ export class MagicSwapService extends ActionDto<FieldTypes> {
       );
 
       swapTx.requiredTokenAmount = tokens;
+      const transactions = [commissionToCreatorTx, approveTx, swapTx];
+      if (commissionToReferrerTx) {
+        transactions.push(commissionToReferrerTx);
+      }
       return {
         displayInfo: { tokens: swapTx.tokens },
-        transactions: [commissionTx, approveTx, swapTx],
+        transactions,
       };
     }
   }
