@@ -17,7 +17,7 @@ import { IntentionRecordRepository } from 'src/repositories/intentionRecord.repo
 import { IntentionRecordTxRepository } from 'src/repositories/intentionRecordTx.repository';
 
 import { ActionUrlService } from './actionUrl.service';
-import { IntentionRecordAddRequestDto } from './intentionRecord.dto';
+import { IntentionRecordAddRequestDto } from './dto';
 
 @Injectable()
 export class IntentionRecordService {

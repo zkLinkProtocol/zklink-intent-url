@@ -14,12 +14,12 @@ export class DataService {
     private readonly creatorRepository: CreatorRepository,
   ) {}
   public async getMagicLinkCreatorInfoByCode(code: string) {
-    const intention = await this.intentionRepository.queryIntentionByCode(code);
+    const intention = await this.intentionRepository.getIntentionByCode(code);
     return intention?.creator;
   }
 
   public async getMagicLinkInfoByCode(code: string) {
-    const intention = await this.intentionRepository.queryIntentionByCode(code);
+    const intention = await this.intentionRepository.getIntentionByCode(code);
     return intention?.settings.intentInfo;
   }
 

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import CryptoJS from 'crypto-js';
-import { ethers } from 'ethers';
+import { ethers, formatEther } from 'ethers';
 import { LRUCache } from 'lru-cache';
 import fetch from 'node-fetch';
 
@@ -17,6 +17,7 @@ type HeadersParams = {
   'OK-ACCESS-PASSPHRASE': string;
 };
 const apiBaseUrl = 'https://www.okx.com/api/v5/dex/aggregator/';
+const nftBaseUrl = 'https://www.okx.com/api/v5/mktplace/nft/';
 
 type TokenType = {
   decimals: string;
@@ -253,19 +254,114 @@ export class OKXService {
     return tokens.data;
   }
 
+  public async getNFTCollectionAddress(slug: string, fullChainName: string) {
+    const timestamp = new Date().toISOString();
+    const slugUrl = `${nftBaseUrl}collection/detail?slug=${slug}`;
+    const toSignUrl = slugUrl.replace('https://www.okx.com', '');
+    const headers = this.getHeaders(timestamp, toSignUrl);
+    const resp = await fetch(slugUrl, {
+      method: 'get',
+      headers,
+    });
+    const resData = await resp.json();
+    const contract = resData.data.assetContracts.filter(
+      (contract: any) => contract.chain == fullChainName,
+    );
+    return contract[0].contractAddress;
+  }
+
+  public async getNFTListing(
+    chain: string,
+    collectionAddress: string,
+    quantity: number,
+  ) {
+    const timestamp = new Date().toISOString();
+    const listingParams = {
+      chain,
+      collectionAddress,
+      status: 'active',
+      sort: 'price_asc',
+      limit: quantity,
+    };
+    const listingUrl = this.getNFTRequestUrl('markets/listings', listingParams);
+    const toSignUrl = listingUrl.replace('https://www.okx.com', '');
+    const headers = this.getHeaders(timestamp, toSignUrl);
+    const resp = await fetch(listingUrl, {
+      method: 'get',
+      headers,
+    });
+    const resData = await resp.json();
+    const offers = [];
+    const nftHtmlInfo = [];
+    for (const offer of resData.data.data) {
+      offers.push({
+        orderId: offer.orderId,
+        takeCount: 1, // ERC721 always use 1
+      });
+      nftHtmlInfo.push(
+        `<p>${offer.name}<br>Price: ${formatEther(offer.price)}</p><img src="${offer.image}">`,
+      );
+    }
+    return {
+      offers: offers,
+      nftHtmlInfo: nftHtmlInfo,
+    };
+  }
+
+  public async buyNFT(
+    chainAlias: string,
+    offers: any,
+    account: string,
+  ): Promise<TransactionInfo[]> {
+    const timestamp = new Date().toISOString();
+    const buyUrl = `${nftBaseUrl}markets/buy`;
+    const toSignUrl = buyUrl.replace('https://www.okx.com', '');
+    const body = JSON.stringify({
+      chain: chainAlias,
+      items: offers,
+      walletAddress: account,
+    });
+    const headers = this.getHeaders(timestamp, toSignUrl, body);
+    const resp = await fetch(buyUrl, {
+      method: 'post',
+      headers,
+      body,
+    });
+    const steps = (await resp.json()).data.steps;
+    const txs = [];
+    for (const step of steps) {
+      for (const item of step.items) {
+        txs.push({
+          chainId: item.chain,
+          to: item.contractAddress,
+          value: item.value,
+          data: item.input,
+          shouldPublishToChain: true,
+        });
+      }
+    }
+    return txs;
+  }
+
   private getAccessSign(
     timestamp: string,
     url: string,
     secret_key: string,
+    body: string = '',
   ): string {
+    const method = body ? 'POST' : 'GET';
     return CryptoJS.enc.Base64.stringify(
       // The field order of headersParams should be consistent with the order of quoteParams.
       // example : quote  ==>   cryptoJS.HmacSHA256(timestamp + 'GET' + '/api/v5/dex/aggregator/quote?amount=1000000&chainId=1&toTokenAddress=0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE&fromTokenAddress=0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', secretKey)
-      CryptoJS.HmacSHA256(timestamp + 'GET' + url, secret_key),
+      CryptoJS.HmacSHA256(timestamp + method + url + body, secret_key),
     );
   }
 
-  private getHeaders(timestamp: string, toSignUrl: string): HeadersParams {
+  private getHeaders(
+    timestamp: string,
+    toSignUrl: string,
+    body: string = '',
+  ): HeadersParams {
     return {
       'Content-Type': 'application/json',
       // The api Key obtained from the previous application
@@ -274,6 +370,7 @@ export class OKXService {
         timestamp,
         toSignUrl,
         this.okxConfig.secretKey,
+        body,
       ),
       // Convert the current time to the desired format
       'OK-ACCESS-TIMESTAMP': timestamp,
@@ -288,6 +385,12 @@ export class OKXService {
       methodName +
       '?' +
       new URLSearchParams(queryParams).toString()
+    );
+  }
+
+  private getNFTRequestUrl(entry: string, queryParams: any) {
+    return (
+      nftBaseUrl + entry + '?' + new URLSearchParams(queryParams).toString()
     );
   }
 }

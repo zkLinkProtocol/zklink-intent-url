@@ -17,17 +17,15 @@ export class HelperService {
   public async parseCommissionTx(params: {
     code: string;
     chainId: number;
+    to: string;
     amount: number;
     token: string;
     commissionRate: number;
   }): Promise<TransactionInfo> {
-    const { code, chainId, amount, token, commissionRate } = params;
-    const account = await this.dataService.getMagicLinkCreatorInfoByCode(code);
-    if (!account) {
-      throw new Error(`account not found on magicLink ${code}`);
-    }
+    const { chainId, amount, token, commissionRate, to: toAddress } = params;
+
     const provider = this.chainService.getProvider(chainId);
-    let transferTx = { to: account.address, data: '0x' };
+    let transferTx = { to: toAddress, data: '0x' };
 
     if (token !== '') {
       const contract = new ethers.Contract(
@@ -41,7 +39,7 @@ export class HelperService {
         decimals,
       );
       transferTx = await contract.transfer.populateTransaction(
-        account.address,
+        toAddress,
         amountToSend,
       );
     }
@@ -57,7 +55,7 @@ export class HelperService {
           : '0',
       data: transferTx.data,
       shouldPublishToChain: true,
-      isCommission: true,
+      optional: true,
     };
   }
 }

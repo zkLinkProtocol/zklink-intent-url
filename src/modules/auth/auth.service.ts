@@ -1,4 +1,10 @@
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { TSignedRequest } from '@turnkey/sdk-server';
@@ -21,46 +27,57 @@ export class AuthService {
   }
 
   async getTurnKeyInfo(params: TSignedRequest) {
-    const response = await fetch(params.url, {
-      method: 'post',
-      headers: {
-        [params.stamp.stampHeaderName]: params.stamp.stampHeaderValue,
-      },
-      body: params.body,
-    });
-    const res = await response.json();
+    try {
+      const response = await fetch(params.url, {
+        method: 'post',
+        headers: {
+          [params.stamp.stampHeaderName]: params.stamp.stampHeaderValue,
+        },
+        body: params.body,
+      });
+      const res = await response.json();
 
-    if (!response.ok) {
-      throw new BusinessException(res.message);
+      if (!response.ok) {
+        this.logger.error(res.message);
+        throw new InternalServerErrorException(`getTurnKeyInfo error`);
+      }
+
+      const turnKeyInfo = await this.checkTurnkey(res.activity.organizationId);
+
+      if (!turnKeyInfo) {
+        throw new NotFoundException(
+          `turnKeyInfo not found with organizationId: ${res.activity.organizationId}`,
+        );
+      }
+
+      return turnKeyInfo;
+    } catch (error) {
+      this.logger.error(error);
+      throw new InternalServerErrorException('get turnkey info error');
     }
-
-    const turnKeyInfo = await this.checkTurnkey(res.activity.organizationId);
-
-    if (!turnKeyInfo) {
-      throw new BusinessException(
-        `turnKeyInfo not found with organizationId: ${res.activity.organizationId}`,
-      );
-    }
-
-    return turnKeyInfo;
   }
 
   async checkTurnkey(subOrgId: string) {
-    const turnkeyApi = this.configService.get('turnkeyApi', { infer: true })!;
-    const response = await fetch(
-      `${turnkeyApi}/deposit/checkTurnkey?subOrgId=${subOrgId}`,
-      {
-        method: 'GET',
-      },
-    );
-    if (!response.ok) {
-      throw new BusinessException(
-        `Contract binding information query failed with subOrgId: ${subOrgId}`,
+    try {
+      const turnkeyApi = this.configService.get('turnkeyApi', { infer: true })!;
+      const response = await fetch(
+        `${turnkeyApi}/deposit/checkTurnkey?subOrgId=${subOrgId}`,
+        {
+          method: 'GET',
+        },
       );
-    }
-    const { result } = await response.json();
+      if (!response.ok) {
+        throw new BusinessException(
+          `Contract binding information query failed with subOrgId: ${subOrgId}`,
+        );
+      }
+      const { result } = await response.json();
 
-    return result;
+      return result;
+    } catch (error) {
+      this.logger.error(error);
+      throw new InternalServerErrorException('check turnkey info error');
+    }
   }
 
   async loginByAddress(
@@ -70,30 +87,40 @@ export class AuthService {
     tgUserId: string,
     tgUserName: string,
   ) {
-    const validateStatus = await this.validatePrivatekey(
-      address,
-      message,
-      signature,
-    );
-    if (!validateStatus) {
-      throw new BusinessException('Invalid signature');
+    try {
+      const validateStatus = await this.validatePrivatekey(
+        address,
+        message,
+        signature,
+      );
+      if (!validateStatus) {
+        throw new BusinessException('Invalid signature');
+      }
+
+      await this.updateCreator(address, tgUserId, tgUserName);
+
+      return this.signJwtToken(address);
+    } catch (error) {
+      this.logger.error(error);
+      throw new InternalServerErrorException('login by address failed');
     }
-
-    await this.updateCreator(address, tgUserId, tgUserName);
-
-    return this.signJwtToken(address);
   }
 
   public signJwtToken(address: string) {
-    const payload = { address: address };
-    const jwt = this.configService.get('jwt');
-    return {
-      accessToken: this.jwtService.sign(payload, {
+    try {
+      const payload = { address: address };
+      const jwt = this.configService.get('jwt');
+      return {
+        accessToken: this.jwtService.sign(payload, {
+          expiresIn: jwt.expirationTime,
+          secret: jwt.secret,
+        }),
         expiresIn: jwt.expirationTime,
-        secret: jwt.secret,
-      }),
-      expiresIn: jwt.expirationTime,
-    };
+      };
+    } catch (error) {
+      this.logger.error(error);
+      throw new InternalServerErrorException('sign jwt token failed');
+    }
   }
 
   public async updateCreator(
@@ -101,42 +128,55 @@ export class AuthService {
     tgUserId?: string,
     tgUserName?: string,
   ) {
-    const creator = await this.creatorRepository.findByAddress(address);
-    if (!creator) {
-      const creator =
-        tgUserId != ''
-          ? ({
-              address: address,
-              status: CreatorStatus.ACTIVE,
-              tgUserId: tgUserId,
-              tgUserName: tgUserName,
-            } as Creator)
-          : ({
-              address: address,
-              status: CreatorStatus.ACTIVE,
-            } as Creator);
-      try {
-        await this.creatorRepository.add(creator);
-      } catch (err) {
-        throw new BusinessException(`create creator ${address} failed`);
-      }
-    } else {
-      if (tgUserName && tgUserId) {
-        if ('' == creator.tgUserId || null == creator.tgUserId) {
-          creator.tgUserId = tgUserId ?? '';
+    try {
+      const creator = await this.creatorRepository.findByAddress(address);
+      if (!creator) {
+        const creator =
+          tgUserId != ''
+            ? ({
+                address: address,
+                status: CreatorStatus.ACTIVE,
+                tgUserId: tgUserId,
+                tgUserName: tgUserName,
+              } as Creator)
+            : ({
+                address: address,
+                status: CreatorStatus.ACTIVE,
+              } as Creator);
+        try {
+          await this.creatorRepository.add(creator);
+        } catch (err) {
+          throw new BusinessException(`create creator ${address} failed`);
         }
-        creator.tgUserName = tgUserName ?? '';
-        await this.creatorRepository.update(creator, { id: creator.id });
+      } else {
+        if (tgUserName && tgUserId) {
+          if ('' == creator.tgUserId || null == creator.tgUserId) {
+            creator.tgUserId = tgUserId ?? '';
+          }
+          creator.tgUserName = tgUserName ?? '';
+          await this.creatorRepository.update(creator, { id: creator.id });
+        }
       }
+    } catch (error) {
+      this.logger.error(
+        error,
+        JSON.stringify({ address, tgUserId, tgUserName }),
+      );
+      throw new InternalServerErrorException('update creator failed');
     }
   }
 
   async validateCreator(payload: any): Promise<any> {
-    const user = await this.creatorRepository.findByAddress(payload.address);
-    if (!user) {
-      throw new BusinessException('Invalid token');
+    try {
+      const user = await this.creatorRepository.findByAddress(payload.address);
+      if (!user) {
+        throw new UnauthorizedException('Invalid token');
+      }
+      return user;
+    } catch (error) {
+      this.logger.error(error, JSON.stringify({ payload }));
+      throw new InternalServerErrorException('validate creator failed');
     }
-    return user;
   }
 
   async validatePasskey(
@@ -153,15 +193,20 @@ export class AuthService {
     message: string,
     signature: string,
   ): Promise<boolean> {
-    this.logger.log(`validatePrivatekey: ${address} ${message} ${signature}`);
     try {
-      const recoveredAddress = verifyMessage(message, signature);
-      this.logger.log(
-        `address: ${address}, recoveredAddress: ${recoveredAddress}`,
-      );
-      return recoveredAddress.toLowerCase() === address.toLowerCase();
+      this.logger.log(`validatePrivatekey: ${address} ${message} ${signature}`);
+      try {
+        const recoveredAddress = verifyMessage(message, signature);
+        this.logger.log(
+          `address: ${address}, recoveredAddress: ${recoveredAddress}`,
+        );
+        return recoveredAddress.toLowerCase() === address.toLowerCase();
+      } catch (error) {
+        return false;
+      }
     } catch (error) {
-      return false;
+      this.logger.error(error);
+      throw new InternalServerErrorException('validate private key failed');
     }
   }
 }
