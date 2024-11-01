@@ -195,7 +195,7 @@ export class TgbotService implements OnModuleInit {
 
     // 💫 [*__Create__*](https://magic.zklink.io/dashboard/intent) magicLink & unlock potential to grab even more strategies with fun\\!
 
-    // 🗞 [*__Follow__*](https://t.me/${config.tgbot.newsChannelIdEn}) up with Magic News to know the first\\-hand crypto message\\!
+    // 🗞 [*__Follow__*](https://t.me/${config.tgbot.newsChannelIdEn}) up with flashNews to know the first\\-hand crypto message\\!
 
     // 💳 [*__Check__*](${userMiniApp}?startapp=portfolio) your Portfolio & Magic Account
 
@@ -212,7 +212,7 @@ export class TgbotService implements OnModuleInit {
     
 💫 [*__Create__*](https://magic.zklink.io/dashboard/intent) magicLink & unlock potential to grab even more strategies with fun\\! 
 
-🗞 [*__Follow__*](https://t.me/${config.tgbot.newsChannelIdEn}) up with Magic News to know the first\\-hand crypto message\\!
+🗞 [*__Follow__*](https://t.me/${config.tgbot.newsChannelIdEn}) up with flashNews to know the first\\-hand crypto message\\!
 
 💳 Check your Portfolio & Magic Account 
 
@@ -358,18 +358,18 @@ export class TgbotService implements OnModuleInit {
     const config = await configFactory();
     const channelLink = `https://t.me/${config.tgbot.newsChannelIdEn}`;
     const channelLinkCn = `https://t.me/${config.tgbot.newsChannelIdCn}`;
-    const text = `Want to know first hand Crypto News? Follow up with our Magic News Channel\\!`;
+    const text = `Want to know first hand Crypto News? Follow up with our flashNews Channel\\!`;
     // text = this.formatMarkdownV2(text);
     const parse_mode: ParseMode = 'MarkdownV2';
     const reply_markup = {
       inline_keyboard: [
         [
           {
-            text: 'Magic News Channel',
+            text: 'flashNews Channel',
             url: channelLink,
           },
           {
-            text: 'Magic News中文频道',
+            text: 'flashNews中文频道',
             url: channelLinkCn,
           },
         ],
@@ -703,7 +703,7 @@ ${this.formatMarkdownV2(content).replaceAll(
 
 🔥More details Click here to 👉magicLink TG \\([Go to mini app](${userMiniApp}?startapp=${news.code})\\)
 
-🌈Push Magic News Alerts in group? Invite [@magicLink](${tgbot}?startgroup=join_en) in your group
+🌈Push flashNews Alerts in group? Invite [@magicLink](${tgbot}?startgroup=join_en) in your group
 `;
     }
 
@@ -879,7 +879,7 @@ ${this.formatMarkdownV2(content).replaceAll(
 ➡️Token From: ${fromObj?.symbol.toUpperCase()} \\(*$${this.formatMarkdownV2(fromObj?.usdPrice.toString())}*\\)
 ⬅️Token To: ${toObj?.symbol.toUpperCase()} \\(*$${this.formatMarkdownV2(toObj?.usdPrice.toString())}*\\)
 
-🌈Push Magic News Alerts in group? Invite [@magicLink](${tgbot}?startgroup=join_en) in your group
+🌈Push flashNews Alerts in group? Invite [@magicLink](${tgbot}?startgroup=join_en) in your group
 `;
     }
     const caption = captionTemplate;
@@ -1094,7 +1094,7 @@ ${this.formatMarkdownV2(content).replaceAll(
   }
 
   async updateMagicNews() {
-    // update magic news participants which was sended in 24 hours
+    // update flashNews participants which was sended in 24 hours
     const tgMessages = await this.tgMessageRepository.find({
       where: {
         createdAt: MoreThanOrEqual(new Date(Date.now() - 24 * 60 * 60 * 1000)),
