@@ -66,9 +66,9 @@ export class TgbotService implements OnModuleInit {
     const loop = true;
     while (loop) {
       try {
-        this.logger.log('start updateMagicNews');
+        this.logger.log('start updateMagicNews.');
         await this.updateMagicNews();
-        this.logger.log('end updateMagicNews');
+        this.logger.log('end updateMagicNews.');
       } catch (error) {
         this.logger.error(error);
       }
