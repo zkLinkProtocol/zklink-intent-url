@@ -1,13 +1,13 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import html2md from 'html-to-md';
 import { LRUCache } from 'lru-cache';
-import { MoreThanOrEqual } from 'typeorm';
-
-import { ChainService } from '@core/shared';
 import TelegramBot, {
   ChatMemberUpdated,
   ParseMode,
 } from 'node-telegram-bot-api';
+import { MoreThanOrEqual } from 'typeorm';
+
+import { ChainService } from '@core/shared';
 import { NetworkDto } from 'src/common/dto';
 import configFactory from 'src/config';
 import { Chains } from 'src/constants';
@@ -996,7 +996,6 @@ ${this.formatMarkdownV2(content).replaceAll(
     const reply_markup = {
       inline_keyboard: inlineKeyboard,
     };
-    // caption = this.formatMarkdownV2(caption);
     try {
       const options = { reply_markup, parse_mode };
       const res = await this.bot.sendMessage(tgUserId, caption, options);

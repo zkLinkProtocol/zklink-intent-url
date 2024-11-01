@@ -36,6 +36,9 @@ export class NewsService extends ActionDto<FieldTypes> {
     this.chains = this.configService.get('chains', { infer: true })!;
   }
   async getMetadata(): Promise<ActionMetadata<FieldTypes>> {
+    const whiteListConfig =
+      this.configService.get<string>('NEWS_WHITE_ADDRESS');
+    const whiteList = whiteListConfig ? whiteListConfig.split(',') : [];
     return {
       title: 'Magic News',
       description:
@@ -53,10 +56,7 @@ export class NewsService extends ActionDto<FieldTypes> {
         github: 'https://github.com/zkLinkProtocol',
       },
       magicLinkMetadata: {},
-      whiteList: this.configService
-        .get<string>('NEWS_WHITE_ADDRESS')
-        ?.split(',')
-        .map((address) => address.toLowerCase()),
+      whiteList: whiteList,
       intent: {
         binding: 'amountToBuy',
         components: [
@@ -294,12 +294,11 @@ export class NewsService extends ActionDto<FieldTypes> {
       tokenSymbol = symbol;
     }
     const amount = ethers.formatUnits(formData.amountToBuy, tokenFromDecimal);
-    const chainInfo = this.chains.find((chain) => chain.chainId === chainId);
     return {
       tip: `Buy ${amount} worthed ${tokenSymbol} successfully`,
       sharedContent: {
-        en: `Hey!😎 I’ve been trading with magicNews! it's an 🤖AI-Powered 7 ✖️ 24 Real-time Crypto News🗞 & One-click Flash Trading. I’ve just bought ${amount} worth of ${tokenSymbol} in {chain_name}, don't loss the chance to earn, 🎯trade smarter here!👇`,
-        zh: `嘿！我一直在用新闻做交易！这是一个由人工智能驱动的实时加密新闻与一键交易平台。我刚刚在 ${chainInfo?.name} 中购买了价值 ${amount} 的 ${tokenSymbol}，不要错过赚取利润的机会，快来这里更聪明地交易吧！👇！`,
+        en: `🤖AI Strategy on Flash News\n ⏩️⏩️⏩️Long 🔥${tokenSymbol}🔥\n\n🤩I’ve just bought ${amount} of ${tokenSymbol}\n\nStart your Action now! 📈👇`,
+        zh: `🤖AI 交易策略基于Flash News\n⏩️⏩️⏩️看涨 🔥${tokenSymbol}🔥\n\n🤩我刚刚购买了${amount}个${tokenSymbol}\n\n现在开始行动吧！ 📈👇`,
       },
     };
   }
@@ -323,10 +322,9 @@ export class NewsService extends ActionDto<FieldTypes> {
       );
       tokenSymbol = symbol;
     }
-    const chainInfo = this.chains.find((chain) => chain.chainId === chainId);
     return {
-      en: `Based on real-time news 🗞, our AI 🤖 has automatically generated a one-click trading strategy 🎯—go long on ${tokenSymbol} on the ${chainInfo?.name} 🤩 Don’t miss this easy opportunity to make a profit! Come here to start a smarter trade! 📈👇`,
-      zh: `基于实时新闻🗞，我们的AI🤖自动生成了一键完成的交易策略🎯—-在${chainInfo?.name}平台上 做多 ${tokenSymbol} 🤩别错过这个轻松赚取利润的时刻！快来这里，开启更聪明的交易体验吧！📈👇`,
+      en: `🤖AI Strategy on Flash News\n⏩️⏩️⏩️Long 🔥${tokenSymbol}🔥\n\nStart your Action now! 📈👇`,
+      zh: `🤖AI 交易策略基于Flash News\n⏩️⏩️⏩️看涨 🔥${tokenSymbol}🔥\n\n现在开始行动吧！ 📈👇`,
     };
   }
 }

@@ -1,4 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { ethers } from 'ethers';
 
 import { ChainService } from '@core/shared';
@@ -8,10 +13,13 @@ import { CommissionRepository } from 'src/repositories';
 
 @Injectable()
 export class CommissionService {
+  private readonly logger: Logger;
   constructor(
     private readonly commissionRepository: CommissionRepository,
     private readonly chainService: ChainService,
-  ) {}
+  ) {
+    this.logger = new Logger(CommissionService.name);
+  }
   async handleCommissionTransaction(
     action: Action,
     intention: Intention,
@@ -24,7 +32,7 @@ export class CommissionService {
       // Get the transaction details
       const tx = await provider.getTransaction(txHash);
       if (!tx) {
-        throw new Error('Transaction not found');
+        throw new NotFoundException('Transaction not found');
       }
 
       // Parse transaction information
@@ -58,7 +66,8 @@ export class CommissionService {
         txHash,
       });
     } catch (error) {
-      console.error('Error handling commission transaction:', error);
+      this.logger.error(error);
+      throw new InternalServerErrorException('handle commission error');
     }
   }
 }

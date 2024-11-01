@@ -2,7 +2,10 @@ import {
   Body,
   Controller,
   Delete,
+  ForbiddenException,
   Get,
+  HttpStatus,
+  InternalServerErrorException,
   Logger,
   Param,
   Post,
@@ -36,20 +39,18 @@ import { PagingMetaDto, ResponseDto } from 'src/common/response.dto';
 import { BusinessException } from 'src/exception/business.exception';
 import { ErrorMessage } from 'src/types';
 
+import { ActionUrlService } from './actionUrl.service';
+import { BlinkService } from './blink.service';
+import { CommissionService } from './commission.service';
 import {
   ActionUrlAddRequestDto,
   ActionUrlFindOneResponseDto,
   ActionUrlResponseDto,
   ActionUrlUpdateRequestDto,
-} from './actionUrl.dto';
-import { ActionUrlService } from './actionUrl.service';
-import { BlinkService } from './blink.service';
-import { CommissionService } from './commission.service';
-import {
   IntentionRecordAddRequestDto,
   IntentionRecordFindOneResponseDto,
   IntentionRecordListItemResponseDto,
-} from './intentionRecord.dto';
+} from './dto';
 import { IntentionRecordService } from './intentionRecord.service';
 import { ActionService } from '../action/action.service';
 import { GetCreator } from '../auth/creator.decorators';
@@ -58,7 +59,7 @@ import { JwtAuthGuard } from '../auth/jwtAuth.guard';
 interface TransactionBody {
   account: string;
   chainId: string;
-  inviter?: string;
+  referrer?: string;
   commissionRate?: number;
   params: { [key: string]: string };
 }
@@ -136,27 +137,37 @@ export class ActionUrlController extends BaseController {
     @Body()
     request: { sender: string; params: ActionTransactionParams },
   ): Promise<ResponseDto<TransactionInfo[]>> {
-    const { sender, params } = request;
-    const intention = await this.actionUrlService.findOneByCode(code);
+    try {
+      const { sender, params } = request;
+      const intention = await this.actionUrlService.findOneByCode(code);
 
-    const actionStore = await this.actionService.getActionVersionStore(
-      intention.action.id,
-      intention.actionVersion,
-    );
-    if (!actionStore.onMagicLinkCreated) {
-      throw new BusinessException('No post transactions!');
+      const actionStore = await this.actionService.getActionVersionStore(
+        intention.action.id,
+        intention.actionVersion,
+      );
+
+      if (!actionStore.onMagicLinkCreated) {
+        this.logger.error(
+          `onMagicLinkCreated not implement on action ${intention.action.id}`,
+          JSON.stringify(request),
+        );
+        throw new BusinessException('No post transactions!');
+      }
+
+      const data = await actionStore.onMagicLinkCreated({
+        additionalData: {
+          chainId: params.chainId,
+          account: sender,
+          code,
+        },
+        formData: params,
+      });
+
+      return this.success(data);
+    } catch (error) {
+      this.logger.error(error, JSON.stringify({ code, request }));
+      throw new Error('error in post-transactions');
     }
-
-    const data = await actionStore.onMagicLinkCreated({
-      additionalData: {
-        chainId: params.chainId,
-        account: sender,
-        code,
-      },
-      formData: params,
-    });
-
-    return this.success(data);
   }
 
   @Get(':code/real-time-data')
@@ -172,19 +183,27 @@ export class ActionUrlController extends BaseController {
       content: string;
     } | null>
   > {
-    const result = await this.actionUrlService.findOneByCode(code);
-    const actionStore = await this.actionService.getActionVersionStore(
-      result.action.id,
-      result.actionVersion,
-    );
-    if (!actionStore.reloadAdvancedInfo) {
-      return this.success(null);
+    try {
+      const result = await this.actionUrlService.findOneByCode(code);
+      const actionStore = await this.actionService.getActionVersionStore(
+        result.action.id,
+        result.actionVersion,
+      );
+      if (!actionStore.reloadAdvancedInfo) {
+        return this.success(null);
+      }
+      const data = await actionStore.reloadAdvancedInfo({
+        code,
+        account: account,
+      });
+      return this.success(data);
+    } catch (error) {
+      this.logger.error(
+        `real-time-data error on ${code}`,
+        JSON.stringify({ error, code, account }),
+      );
+      throw new Error(`real-time-data error on ${code}`);
     }
-    const data = await actionStore.reloadAdvancedInfo({
-      code,
-      account: account,
-    });
-    return this.success(data);
   }
 
   @Get('auth/list')
@@ -218,7 +237,7 @@ export class ActionUrlController extends BaseController {
   ): Promise<ResponseDto<ActionUrlFindOneResponseDto>> {
     const result = await this.actionUrlService.findOneByCode(code);
     if ((result?.creator.id ?? '') !== creator.id) {
-      throw new BusinessException('ActionUrl not found');
+      throw new ForbiddenException('ActionUrl not found');
     }
     const response = {
       code: result.code,
@@ -246,14 +265,19 @@ export class ActionUrlController extends BaseController {
       request.actionId,
     );
     if (!actionStore) {
-      return this.error('Action not found');
+      this.logger.log(`'Action ${request.actionId} not found'`);
+      throw new BusinessException('Action not found', HttpStatus.NOT_FOUND);
     }
     const whiteListPermission = await this.actionService.checkActionWhitelist(
       request.actionId,
       creator.address,
     );
     if (!whiteListPermission) {
-      return this.error('No permission to create');
+      this.logger.log(`${creator.address} has no permission to create`);
+      throw new BusinessException(
+        'No permission to create',
+        HttpStatus.FORBIDDEN,
+      );
     }
     const active = actionStore.onMagicLinkCreated ? false : true;
     const requestData = { ...request, active };
@@ -274,7 +298,11 @@ export class ActionUrlController extends BaseController {
       creator.address,
     );
     if (!whiteListPermission) {
-      return this.error('No permission to edit');
+      this.logger.log(`${creator.address} has no permission to update`);
+      throw new BusinessException(
+        'No permission to update',
+        HttpStatus.FORBIDDEN,
+      );
     }
 
     const result = await this.actionUrlService.updateByCode(
@@ -425,40 +453,45 @@ export class ActionUrlController extends BaseController {
       txHashes: Array<{ hash: string; chainId: number }>;
     },
   ): Promise<ResponseDto<ReporterResponse>> {
-    const { params, account, chainId, txHashes } = body;
+    try {
+      const { params, account, chainId, txHashes } = body;
 
-    const intention = await this.actionUrlService.findOneByCode(code);
+      const intention = await this.actionUrlService.findOneByCode(code);
 
-    const actionStore = await this.actionService.getActionVersionStore(
-      intention.action.id,
-      intention.actionVersion,
-    );
-
-    const metadata = await actionStore.getMetadata();
-    if (metadata.maxCommission) {
-      await this.commissionService.handleCommissionTransaction(
-        intention.action,
-        intention,
-        txHashes[0].chainId,
-        txHashes[0].hash,
+      const actionStore = await this.actionService.getActionVersionStore(
+        intention.action.id,
+        intention.actionVersion,
       );
-    }
-    const data = {
-      additionalData: {
-        code,
-        account: account,
-        chainId: parseInt(chainId),
-      },
-      formData: params,
-    };
-    const responseData = await actionStore.reportTransaction(data, txHashes);
-    if (responseData.sharedContent) {
-      responseData.sharedContent = this.actionUrlService.encodeSharedContent(
-        responseData.sharedContent,
-      );
-    }
 
-    return this.success(responseData);
+      // const metadata = await actionStore.getMetadata();
+      // if (metadata.maxCommission) {
+      //   await this.commissionService.handleCommissionTransaction(
+      //     intention.action,
+      //     intention,
+      //     txHashes[0].chainId,
+      //     txHashes[0].hash,
+      //   );
+      // }
+      const data = {
+        additionalData: {
+          code,
+          account: account,
+          chainId: parseInt(chainId),
+        },
+        formData: params,
+      };
+      const responseData = await actionStore.reportTransaction(data, txHashes);
+      if (responseData.sharedContent) {
+        responseData.sharedContent = this.actionUrlService.encodeSharedContent(
+          responseData.sharedContent,
+        );
+      }
+
+      return this.success(responseData);
+    } catch (error) {
+      this.logger.error(error, JSON.stringify({ body, code }));
+      throw new InternalServerErrorException('reportTransactions failed');
+    }
   }
 
   @Post(':code/transaction')
@@ -511,19 +544,24 @@ export class ActionUrlController extends BaseController {
     @Body()
     body: TransactionBody,
   ): Promise<ResponseDto<GenerateTransactionResponse>> {
-    const { params, account, inviter, chainId, commissionRate } = body;
-    const data = {
-      additionalData: {
-        code,
-        account: account,
-        chainId: parseInt(chainId),
-        inviter,
-        commissionRate,
-      },
-      formData: params,
-    };
-    const response = await this.actionUrlService.generateTransaction(data);
-    return this.success(response);
+    try {
+      const { params, account, referrer, chainId, commissionRate } = body;
+      const data = {
+        additionalData: {
+          code,
+          account: account,
+          chainId: parseInt(chainId),
+          referrer,
+          commissionRate,
+        },
+        formData: params,
+      };
+      const response = await this.actionUrlService.generateTransaction(data);
+      return this.success(response);
+    } catch (error) {
+      this.logger.error(error, JSON.stringify({ body, code }));
+      throw new InternalServerErrorException('Generate transaction failed');
+    }
   }
 
   // generateManagementInfo
