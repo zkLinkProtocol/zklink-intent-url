@@ -31,4 +31,7 @@ export class TgGroupAndChannel extends BaseEntity {
 
   @Column({ type: 'varchar' })
   public lang: string;
+
+  @Column({ type: 'varchar' })
+  public commissionAddress: string;
 }

@@ -41,7 +41,6 @@ export class MagicSwapService extends ActionDto<FieldTypes> {
         Chains.EthereumMainnet,
         Chains.ArbitrumOne,
         Chains.OpMainnet,
-        Chains.Mantle,
         Chains.Base,
       ]),
       author: {
