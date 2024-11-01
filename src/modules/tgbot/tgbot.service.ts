@@ -10,7 +10,6 @@ import { MoreThanOrEqual } from 'typeorm';
 import { ChainService } from '@core/shared';
 import { NetworkDto } from 'src/common/dto';
 import configFactory from 'src/config';
-import { Chains } from 'src/constants';
 import { BusinessException } from 'src/exception/business.exception';
 import {
   CreatorRepository,
@@ -265,8 +264,6 @@ export class TgbotService implements OnModuleInit {
   }
 
   async onCreate(tgUserId: string) {
-    const config = await configFactory();
-    const miniapp = config.tgbot.miniApp;
     const text = `It's the start for your Magic Journey\\, choose a Topic and Create your own magicLink here\\!`;
     // text = this.formatMarkdownV2(text);
     const parse_mode: ParseMode = 'MarkdownV2';
@@ -290,20 +287,19 @@ export class TgbotService implements OnModuleInit {
   }
 
   async onPortfolio(tgUserId: string) {
-    const config = await configFactory();
-    const userMiniApp = config.tgbot.userMiniApp;
-    const creator = await this.creatorRepository.findOneBy({ tgUserId });
-    let walletAddress = '';
-    let ethBalance = BigInt(0);
-    if (creator) {
-      walletAddress = creator.address;
-      try {
-        const novaProvider = this.chainService.getProvider(Chains.ZkLinkNova);
-        ethBalance = await novaProvider.getBalance(walletAddress);
-      } catch (error) {
-        this.logger.error(`onStart error`, error.stack);
-      }
-    }
+    // const config = await configFactory();
+    // const creator = await this.creatorRepository.findOneBy({ tgUserId });
+    // let walletAddress = '';
+    // let ethBalance = BigInt(0);
+    // if (creator) {
+    //   walletAddress = creator.address;
+    //   try {
+    //     const novaProvider = this.chainService.getProvider(Chains.ZkLinkNova);
+    //     ethBalance = await novaProvider.getBalance(walletAddress);
+    //   } catch (error) {
+    //     this.logger.error(`onStart error`, error.stack);
+    //   }
+    // }
     //     const text = `Manage and review your trading portfolio 💼
 
     // 💰 *My Wallet Address: \`${walletAddress ? walletAddress : 'You have not yet bind your Smart Account'}\`*
@@ -685,7 +681,7 @@ export class TgbotService implements OnModuleInit {
 
 🔥更多信息请到 👉magicLink TG \\([Go to mini app](${userMiniApp}?startapp=${news.code})\\)
 
-🌈在您的群中推送 magicNews 邀请 [@magicLink](${tgbot}?startgroup=join_cn) 到您的群中
+🌈在您的群中推送 flashNews 邀请 [@magicLink](${tgbot}?startgroup=join_cn) 到您的群中
 `;
     } else {
       lang = 'en';
@@ -864,7 +860,7 @@ ${this.formatMarkdownV2(content).replaceAll(
 ➡️Token From: ${fromObj?.symbol.toUpperCase()} \\(*$${this.formatMarkdownV2(fromObj?.usdPrice.toString())}*\\)
 ⬅️Token To: ${toObj?.symbol.toUpperCase()} \\(*$${this.formatMarkdownV2(toObj?.usdPrice.toString())}*\\)
 
-🌈在您的群中推送 magicNews 邀请 [@magicLink](${tgbot}?startgroup=join_cn) 到您的群中
+🌈在您的群中推送 flashNews 邀请 [@magicLink](${tgbot}?startgroup=join_cn) 到您的群中
 `;
     } else {
       lang = 'en';
