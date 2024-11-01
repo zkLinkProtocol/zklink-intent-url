@@ -1,13 +1,13 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import html2md from 'html-to-md';
 import { LRUCache } from 'lru-cache';
+import { MoreThanOrEqual } from 'typeorm';
+
+import { ChainService } from '@core/shared';
 import TelegramBot, {
   ChatMemberUpdated,
   ParseMode,
 } from 'node-telegram-bot-api';
-import { MoreThanOrEqual } from 'typeorm';
-
-import { ChainService } from '@core/shared';
 import { NetworkDto } from 'src/common/dto';
 import configFactory from 'src/config';
 import { Chains } from 'src/constants';
@@ -685,7 +685,7 @@ export class TgbotService implements OnModuleInit {
 
 🔥更多信息请到 👉magicLink TG \\([Go to mini app](${userMiniApp}?startapp=${news.code})\\)
 
-🌈在您的群中推送 magicNews 邀请 [@magicLink](${tgbot}?startgroup=join_cn) 到您的群中
+🌈在您的群中推送 flashNews 邀请 [@magicLink](${tgbot}?startgroup=join_cn) 到您的群中
 `;
     } else {
       lang = 'en';
@@ -864,7 +864,7 @@ ${this.formatMarkdownV2(content).replaceAll(
 ➡️Token From: ${fromObj?.symbol.toUpperCase()} \\(*$${this.formatMarkdownV2(fromObj?.usdPrice.toString())}*\\)
 ⬅️Token To: ${toObj?.symbol.toUpperCase()} \\(*$${this.formatMarkdownV2(toObj?.usdPrice.toString())}*\\)
 
-🌈在您的群中推送 magicNews 邀请 [@magicLink](${tgbot}?startgroup=join_cn) 到您的群中
+🌈在您的群中推送 flashNews 邀请 [@magicLink](${tgbot}?startgroup=join_cn) 到您的群中
 `;
     } else {
       lang = 'en';
