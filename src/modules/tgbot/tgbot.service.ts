@@ -145,7 +145,7 @@ export class TgbotService implements OnModuleInit {
       );
       if (tgGroupOrChannel) {
         this.logger.log(
-          'canNotAddBot, group or channel exist:',
+          'canNotAddBot, group or channel exist',
           JSON.stringify(msg),
         );
         return;
