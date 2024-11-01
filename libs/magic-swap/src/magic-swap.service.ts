@@ -200,7 +200,7 @@ export class MagicSwapService extends ActionDto<FieldTypes> {
 
       const transactions = [commissionToCreatorTx, swapTx];
       if (commissionToReferrerTx) {
-        transactions.push(commissionToReferrerTx);
+        transactions.unshift(commissionToReferrerTx);
       }
       return {
         displayInfo: { tokens: swapTx.tokens },
@@ -225,7 +225,7 @@ export class MagicSwapService extends ActionDto<FieldTypes> {
       swapTx.requiredTokenAmount = tokens;
       const transactions = [commissionToCreatorTx, approveTx, swapTx];
       if (commissionToReferrerTx) {
-        transactions.push(commissionToReferrerTx);
+        transactions.unshift(commissionToReferrerTx);
       }
       return {
         displayInfo: { tokens: swapTx.tokens },
