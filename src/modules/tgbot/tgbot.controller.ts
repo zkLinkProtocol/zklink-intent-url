@@ -1,14 +1,28 @@
-import { Body, Controller, Get, Logger, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Logger,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 
 import { BaseController } from 'src/common/base.controller';
 
 import { SendNewsOriginRequestDto } from './tgbot.dto';
 import { TgbotService } from './tgbot.service';
+import { ActionService } from '../action/action.service';
+import { GetCreator } from '../auth/creator.decorators';
+import { JwtAuthGuard } from '../auth/jwtAuth.guard';
 
 @Controller('tgbot')
 export class TgbotController extends BaseController {
   logger: Logger = new Logger('TgbotController');
-  constructor(private readonly tgbotService: TgbotService) {
+  constructor(
+    private readonly tgbotService: TgbotService,
+    private readonly actionService: ActionService,
+  ) {
     super();
   }
 
@@ -24,7 +38,18 @@ export class TgbotController extends BaseController {
   }
 
   @Post('sendNewsOrigin')
-  async sendNewsOrigin(@Body() body: SendNewsOriginRequestDto) {
+  @UseGuards(JwtAuthGuard)
+  async sendNewsOrigin(
+    @Body() body: SendNewsOriginRequestDto,
+    @GetCreator() creator: { id: bigint; address: string },
+  ) {
+    const whiteListPermission = await this.actionService.checkActionWhitelist(
+      'news',
+      creator.address,
+    );
+    if (!whiteListPermission) {
+      return this.error('Permission denied');
+    }
     try {
       await this.tgbotService.sendNewsOrigin(
         body.title,
