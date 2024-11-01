@@ -19,6 +19,6 @@ export type Settings = {
   intentList: {
     title: string;
     value: string;
-    btnIndex?: number;
+    btnIndex?: string;
   }[][];
 };

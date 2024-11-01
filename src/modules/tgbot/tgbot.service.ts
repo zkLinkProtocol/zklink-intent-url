@@ -10,6 +10,7 @@ import { MoreThanOrEqual } from 'typeorm';
 import { ChainService } from '@core/shared';
 import { NetworkDto } from 'src/common/dto';
 import configFactory from 'src/config';
+import { TgGroupAndChannel } from 'src/entities/tgGroupAndChannel.entity';
 import { BusinessException } from 'src/exception/business.exception';
 import {
   CreatorRepository,
@@ -929,7 +930,12 @@ ${this.formatMarkdownV2(content).replaceAll(
           const urlTmp = new URL(action.value);
           const pathSegments = urlTmp.pathname.split('/');
           const code = pathSegments[pathSegments.length - 1];
-          url = `${userMiniApp}?startapp=${code}_${action.btnIndex ?? ''}`;
+          const btnIndex = action.btnIndex ?? '';
+          const btnIndexStr =
+            btnIndex === ''
+              ? ''
+              : Math.max(parseInt(btnIndex) - 1, 0).toString();
+          url = `${userMiniApp}?startapp=${code}_${btnIndexStr}`;
         } else {
           url = action.value;
         }
@@ -946,23 +952,42 @@ ${this.formatMarkdownV2(content).replaceAll(
     };
     let res = null;
     const tgGroups = await this.tgGroupAndChannelRepository.find({
-      select: ['chatId'],
+      select: ['chatId', 'commissionAddress'],
       where: { lang },
       order: { inviteDate: 'ASC' },
     });
-    const tgGroupIds = tgGroups.map((tgGroup) => tgGroup.chatId);
-    tgGroupIds.push(newsChannelId);
-    for (const tgGroupId of tgGroupIds) {
+    tgGroups.push({
+      chatId: newsChannelId,
+      commissionAddress: '',
+    } as TgGroupAndChannel);
+    for (const tgGroup of tgGroups) {
+      const inlineKeyboardTmp = JSON.parse(
+        JSON.stringify(reply_markup.inline_keyboard),
+      );
+      if (tgGroup.commissionAddress) {
+        for (let i = 0; i < inlineKeyboardTmp.length; i++) {
+          for (let j = 0; j < inlineKeyboardTmp[i].length; j++) {
+            const inlineBtn = inlineKeyboardTmp[i][j];
+            if ('url' in inlineBtn && inlineBtn.url.includes(userMiniApp)) {
+              inlineBtn.url += `_${tgGroup.commissionAddress}`;
+            }
+          }
+        }
+      }
       try {
         if (photo === '') {
           const options = {
-            reply_markup,
+            reply_markup: { inline_keyboard: inlineKeyboardTmp },
             parse_mode,
           };
-          res = await this.bot.sendMessage(tgGroupId, caption, options);
+          res = await this.bot.sendMessage(tgGroup.chatId, caption, options);
         } else {
-          const options = { reply_markup, parse_mode, caption };
-          res = await this.bot.sendPhoto(tgGroupId, photo, options);
+          const options = {
+            reply_markup: { inline_keyboard: inlineKeyboardTmp },
+            parse_mode,
+            caption,
+          };
+          res = await this.bot.sendPhoto(tgGroup.chatId, photo, options);
         }
         this.logger.log('sendNewsOrigin success', JSON.stringify(res));
       } catch (error) {
