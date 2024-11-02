@@ -153,6 +153,15 @@
       "compilerOptions": {
         "tsConfigPath": "libs/magic-swap/tsconfig.lib.json"
       }
+    },
+    "agx": {
+      "type": "library",
+      "root": "libs/agx",
+      "entryFile": "index",
+      "sourceRoot": "libs/agx/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/agx/tsconfig.lib.json"
+      }
     }
   }
 }

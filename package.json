@@ -141,7 +141,8 @@
       "^@core/shared(|/.*)$": "<rootDir>/libs/data/src/$1",
       "^@action/shared-red-packet(|/.*)$": "<rootDir>/libs/shared-red-packet/src/$1",
       "^@action/pre-sale(|/.*)$": "<rootDir>/libs/pre-sale/src/$1",
-      "^@action/magic-swap(|/.*)$": "<rootDir>/libs/magic-swap/src/$1"
+      "^@action/magic-swap(|/.*)$": "<rootDir>/libs/magic-swap/src/$1",
+      "^@action/agx(|/.*)$": "<rootDir>/libs/agx/src/$1"
     }
   }
 }

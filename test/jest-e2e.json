@@ -38,6 +38,8 @@
     "@action/pre-sale/(.*)": "<rootDir>/../libs/pre-sale/src/$1",
     "@action/pre-sale": "<rootDir>/../libs/pre-sale/src",
     "@action/magic-swap/(.*)": "<rootDir>/../libs/magic-swap/src/$1",
-    "@action/magic-swap": "<rootDir>/../libs/magic-swap/src"
+    "@action/magic-swap": "<rootDir>/../libs/magic-swap/src",
+    "@action/agx/(.*)": "<rootDir>/../libs/agx/src/$1",
+    "@action/agx": "<rootDir>/../libs/agx/src"
   }
 }
