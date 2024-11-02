@@ -45,7 +45,7 @@ export class TransactionInfo {
   @ApiPropertyOptional({
     description: '',
   })
-  isCommission?: boolean = false;
+  optional?: boolean = false;
 }
 
 export class TokenAmount {

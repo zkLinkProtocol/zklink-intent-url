@@ -1,16 +1,16 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import html2md from 'html-to-md';
 import { LRUCache } from 'lru-cache';
-import { MoreThanOrEqual } from 'typeorm';
-
-import { ChainService } from '@core/shared';
 import TelegramBot, {
   ChatMemberUpdated,
   ParseMode,
 } from 'node-telegram-bot-api';
+import { MoreThanOrEqual } from 'typeorm';
+
+import { ChainService } from '@core/shared';
 import { NetworkDto } from 'src/common/dto';
 import configFactory from 'src/config';
-import { Chains } from 'src/constants';
+import { TgGroupAndChannel } from 'src/entities/tgGroupAndChannel.entity';
 import { BusinessException } from 'src/exception/business.exception';
 import {
   CreatorRepository,
@@ -67,9 +67,9 @@ export class TgbotService implements OnModuleInit {
     const loop = true;
     while (loop) {
       try {
-        this.logger.log('start updateMagicNews');
+        this.logger.log('start updateMagicNews.');
         await this.updateMagicNews();
-        this.logger.log('end updateMagicNews');
+        this.logger.log('end updateMagicNews.');
       } catch (error) {
         this.logger.error(error);
       }
@@ -146,7 +146,7 @@ export class TgbotService implements OnModuleInit {
       );
       if (tgGroupOrChannel) {
         this.logger.log(
-          'canNotAddBot, group or channel exist:',
+          'canNotAddBot, group or channel exist',
           JSON.stringify(msg),
         );
         return;
@@ -195,7 +195,7 @@ export class TgbotService implements OnModuleInit {
 
     // 💫 [*__Create__*](https://magic.zklink.io/dashboard/intent) magicLink & unlock potential to grab even more strategies with fun\\!
 
-    // 🗞 [*__Follow__*](https://t.me/${config.tgbot.newsChannelIdEn}) up with Magic News to know the first\\-hand crypto message\\!
+    // 🗞 [*__Follow__*](https://t.me/${config.tgbot.newsChannelIdEn}) up with flashNews to know the first\\-hand crypto message\\!
 
     // 💳 [*__Check__*](${userMiniApp}?startapp=portfolio) your Portfolio & Magic Account
 
@@ -212,7 +212,7 @@ export class TgbotService implements OnModuleInit {
     
 💫 [*__Create__*](https://magic.zklink.io/dashboard/intent) magicLink & unlock potential to grab even more strategies with fun\\! 
 
-🗞 [*__Follow__*](https://t.me/${config.tgbot.newsChannelIdEn}) up with Magic News to know the first\\-hand crypto message\\!
+🗞 [*__Follow__*](https://t.me/${config.tgbot.newsChannelIdEn}) up with flashNews to know the first\\-hand crypto message\\!
 
 💳 Check your Portfolio & Magic Account 
 
@@ -264,8 +264,6 @@ export class TgbotService implements OnModuleInit {
   }
 
   async onCreate(tgUserId: string) {
-    const config = await configFactory();
-    const miniapp = config.tgbot.miniApp;
     const text = `It's the start for your Magic Journey\\, choose a Topic and Create your own magicLink here\\!`;
     // text = this.formatMarkdownV2(text);
     const parse_mode: ParseMode = 'MarkdownV2';
@@ -289,20 +287,19 @@ export class TgbotService implements OnModuleInit {
   }
 
   async onPortfolio(tgUserId: string) {
-    const config = await configFactory();
-    const userMiniApp = config.tgbot.userMiniApp;
-    const creator = await this.creatorRepository.findOneBy({ tgUserId });
-    let walletAddress = '';
-    let ethBalance = BigInt(0);
-    if (creator) {
-      walletAddress = creator.address;
-      try {
-        const novaProvider = this.chainService.getProvider(Chains.ZkLinkNova);
-        ethBalance = await novaProvider.getBalance(walletAddress);
-      } catch (error) {
-        this.logger.error(`onStart error`, error.stack);
-      }
-    }
+    // const config = await configFactory();
+    // const creator = await this.creatorRepository.findOneBy({ tgUserId });
+    // let walletAddress = '';
+    // let ethBalance = BigInt(0);
+    // if (creator) {
+    //   walletAddress = creator.address;
+    //   try {
+    //     const novaProvider = this.chainService.getProvider(Chains.ZkLinkNova);
+    //     ethBalance = await novaProvider.getBalance(walletAddress);
+    //   } catch (error) {
+    //     this.logger.error(`onStart error`, error.stack);
+    //   }
+    // }
     //     const text = `Manage and review your trading portfolio 💼
 
     // 💰 *My Wallet Address: \`${walletAddress ? walletAddress : 'You have not yet bind your Smart Account'}\`*
@@ -360,18 +357,18 @@ export class TgbotService implements OnModuleInit {
     const config = await configFactory();
     const channelLink = `https://t.me/${config.tgbot.newsChannelIdEn}`;
     const channelLinkCn = `https://t.me/${config.tgbot.newsChannelIdCn}`;
-    const text = `Want to know first hand Crypto News? Follow up with our Magic News Channel\\!`;
+    const text = `Want to know first hand Crypto News? Follow up with our flashNews Channel\\!`;
     // text = this.formatMarkdownV2(text);
     const parse_mode: ParseMode = 'MarkdownV2';
     const reply_markup = {
       inline_keyboard: [
         [
           {
-            text: 'Magic News Channel',
+            text: 'flashNews Channel',
             url: channelLink,
           },
           {
-            text: 'Magic News中文频道',
+            text: 'flashNews中文频道',
             url: channelLinkCn,
           },
         ],
@@ -684,7 +681,7 @@ export class TgbotService implements OnModuleInit {
 
 🔥更多信息请到 👉magicLink TG \\([Go to mini app](${userMiniApp}?startapp=${news.code})\\)
 
-🌈在您的群中推送 magicNews 邀请 [@magicLink](${tgbot}?startgroup=join_cn) 到您的群中
+🌈在您的群中推送 flashNews 邀请 [@magicLink](${tgbot}?startgroup=join_cn) 到您的群中
 `;
     } else {
       lang = 'en';
@@ -705,7 +702,7 @@ ${this.formatMarkdownV2(content).replaceAll(
 
 🔥More details Click here to 👉magicLink TG \\([Go to mini app](${userMiniApp}?startapp=${news.code})\\)
 
-🌈Push Magic News Alerts in group? Invite [@magicLink](${tgbot}?startgroup=join_en) in your group
+🌈Push flashNews Alerts in group? Invite [@magicLink](${tgbot}?startgroup=join_en) in your group
 `;
     }
 
@@ -863,7 +860,7 @@ ${this.formatMarkdownV2(content).replaceAll(
 ➡️Token From: ${fromObj?.symbol.toUpperCase()} \\(*$${this.formatMarkdownV2(fromObj?.usdPrice.toString())}*\\)
 ⬅️Token To: ${toObj?.symbol.toUpperCase()} \\(*$${this.formatMarkdownV2(toObj?.usdPrice.toString())}*\\)
 
-🌈在您的群中推送 magicNews 邀请 [@magicLink](${tgbot}?startgroup=join_cn) 到您的群中
+🌈在您的群中推送 flashNews 邀请 [@magicLink](${tgbot}?startgroup=join_cn) 到您的群中
 `;
     } else {
       lang = 'en';
@@ -881,7 +878,7 @@ ${this.formatMarkdownV2(content).replaceAll(
 ➡️Token From: ${fromObj?.symbol.toUpperCase()} \\(*$${this.formatMarkdownV2(fromObj?.usdPrice.toString())}*\\)
 ⬅️Token To: ${toObj?.symbol.toUpperCase()} \\(*$${this.formatMarkdownV2(toObj?.usdPrice.toString())}*\\)
 
-🌈Push Magic News Alerts in group? Invite [@magicLink](${tgbot}?startgroup=join_en) in your group
+🌈Push flashNews Alerts in group? Invite [@magicLink](${tgbot}?startgroup=join_en) in your group
 `;
     }
     const caption = captionTemplate;
@@ -932,7 +929,12 @@ ${this.formatMarkdownV2(content).replaceAll(
           const urlTmp = new URL(action.value);
           const pathSegments = urlTmp.pathname.split('/');
           const code = pathSegments[pathSegments.length - 1];
-          url = `${userMiniApp}?startapp=${code}_${action.btnIndex ?? ''}`;
+          const btnIndex = action.btnIndex ?? '';
+          const btnIndexStr =
+            btnIndex === ''
+              ? ''
+              : Math.max(parseInt(btnIndex) - 1, 0).toString();
+          url = `${userMiniApp}?startapp=${code}_${btnIndexStr}`;
         } else {
           url = action.value;
         }
@@ -949,23 +951,42 @@ ${this.formatMarkdownV2(content).replaceAll(
     };
     let res = null;
     const tgGroups = await this.tgGroupAndChannelRepository.find({
-      select: ['chatId'],
+      select: ['chatId', 'commissionAddress'],
       where: { lang },
       order: { inviteDate: 'ASC' },
     });
-    const tgGroupIds = tgGroups.map((tgGroup) => tgGroup.chatId);
-    tgGroupIds.push(newsChannelId);
-    for (const tgGroupId of tgGroupIds) {
+    tgGroups.push({
+      chatId: newsChannelId,
+      commissionAddress: '',
+    } as TgGroupAndChannel);
+    for (const tgGroup of tgGroups) {
+      const inlineKeyboardTmp = JSON.parse(
+        JSON.stringify(reply_markup.inline_keyboard),
+      );
+      if (tgGroup.commissionAddress) {
+        for (let i = 0; i < inlineKeyboardTmp.length; i++) {
+          for (let j = 0; j < inlineKeyboardTmp[i].length; j++) {
+            const inlineBtn = inlineKeyboardTmp[i][j];
+            if ('url' in inlineBtn && inlineBtn.url.includes(userMiniApp)) {
+              inlineBtn.url += `_${tgGroup.commissionAddress}`;
+            }
+          }
+        }
+      }
       try {
         if (photo === '') {
           const options = {
-            reply_markup,
+            reply_markup: { inline_keyboard: inlineKeyboardTmp },
             parse_mode,
           };
-          res = await this.bot.sendMessage(tgGroupId, caption, options);
+          res = await this.bot.sendMessage(tgGroup.chatId, caption, options);
         } else {
-          const options = { reply_markup, parse_mode, caption };
-          res = await this.bot.sendPhoto(tgGroupId, photo, options);
+          const options = {
+            reply_markup: { inline_keyboard: inlineKeyboardTmp },
+            parse_mode,
+            caption,
+          };
+          res = await this.bot.sendPhoto(tgGroup.chatId, photo, options);
         }
         this.logger.log('sendNewsOrigin success', JSON.stringify(res));
       } catch (error) {
@@ -995,7 +1016,6 @@ ${this.formatMarkdownV2(content).replaceAll(
     const reply_markup = {
       inline_keyboard: inlineKeyboard,
     };
-    // caption = this.formatMarkdownV2(caption);
     try {
       const options = { reply_markup, parse_mode };
       const res = await this.bot.sendMessage(tgUserId, caption, options);
@@ -1073,7 +1093,7 @@ ${this.formatMarkdownV2(content).replaceAll(
   }
 
   async updateMagicNews() {
-    // update magic news participants which was sended in 24 hours
+    // update flashNews participants which was sended in 24 hours
     const tgMessages = await this.tgMessageRepository.find({
       where: {
         createdAt: MoreThanOrEqual(new Date(Date.now() - 24 * 60 * 60 * 1000)),

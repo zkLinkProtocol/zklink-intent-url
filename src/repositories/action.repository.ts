@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 
 import { Action } from 'src/entities/action.entity';
 
@@ -13,12 +13,32 @@ type ActionsData = Action & {
 
 @Injectable()
 export class ActionRepository extends BaseRepository<Action> {
+  private readonly logger: Logger;
   public constructor(unitOfWork: UnitOfWork) {
     super(Action, unitOfWork);
+    this.logger = new Logger(ActionRepository.name);
   }
 
   async initAction(updateData: Partial<Action>): Promise<void> {
-    return this.upsert(updateData, true, ['id']);
+    try {
+      return this.upsert(updateData, true, ['id']);
+    } catch (error) {
+      this.logger.error(error, `initAction failed`);
+      throw new Error(`initAction failed`);
+    }
+  }
+
+  async getActionById(id: string) {
+    try {
+      const actionMetadata = await this.findOne({
+        where: { id },
+      });
+
+      return actionMetadata;
+    } catch (error) {
+      this.logger.error(error, `getAction failed`);
+      throw new Error(`getAction failed`);
+    }
   }
 
   async getAllActions() {
@@ -48,7 +68,8 @@ export class ActionRepository extends BaseRepository<Action> {
 
       return allActionMetadataRaw as ActionsData[];
     } catch (error) {
-      throw new Error(`getAllActions failed: ${error.message}`);
+      this.logger.error(error, `getAllActions failed`);
+      throw new Error(`getAllActions failed`);
     }
   }
 }

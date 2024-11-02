@@ -43,7 +43,7 @@ export class ActionModule implements OnModuleInit {
         },
         {
           provide: APP_INTERCEPTOR,
-          useClass: BigIntInterceptor,
+          useClass: BigIntInterceptor, // can it be removed ?
         },
         ActionService,
       ],

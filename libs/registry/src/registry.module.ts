@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common';
 
 import { BuyMeACoffeeModule } from '@action/buy-me-a-coffee';
-import { BuyNftModule } from '@action/buy-nft';
+import { BuyNftMagicEdenModule } from '@action/buy-nft-magic-eden';
+import { BuyNftOKXModule } from '@action/buy-nft-okx';
 import { CrossChainSwapModule } from '@action/cross-chain-swap';
 import { MagicSwapModule } from '@action/magic-swap';
 import { MintNftModule } from '@action/mint-nft';
@@ -25,7 +26,8 @@ import { RegistryService } from './registry.service';
     NovaswapModule,
     PumpFunModule,
     NewsModule,
-    BuyNftModule,
+    BuyNftMagicEdenModule,
+    BuyNftOKXModule,
     MintNftModule,
     MintNovaNftModule,
     SharedRedPacketModule,
