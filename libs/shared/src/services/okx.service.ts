@@ -35,19 +35,6 @@ const options = {
 };
 const cacheToken = new LRUCache<number, TokenType[]>(options);
 
-const ERC20_TRANSFER_ABI = [
-  {
-    constant: false,
-    inputs: [
-      { name: '_to', type: 'address' },
-      { name: '_value', type: 'uint256' },
-    ],
-    name: 'transfer',
-    outputs: [{ name: '', type: 'bool' }],
-    type: 'function',
-  },
-];
-
 @Injectable()
 export class OKXService {
   private readonly okxConfig: ConfigType['okx'];
