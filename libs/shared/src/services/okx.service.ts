@@ -35,19 +35,6 @@ const options = {
 };
 const cacheToken = new LRUCache<number, TokenType[]>(options);
 
-const ERC20_TRANSFER_ABI = [
-  {
-    constant: false,
-    inputs: [
-      { name: '_to', type: 'address' },
-      { name: '_value', type: 'uint256' },
-    ],
-    name: 'transfer',
-    outputs: [{ name: '', type: 'bool' }],
-    type: 'function',
-  },
-];
-
 @Injectable()
 export class OKXService {
   private readonly okxConfig: ConfigType['okx'];
@@ -96,8 +83,25 @@ export class OKXService {
     tokenOutAddress: string,
     amount: bigint,
   ): Promise<bigint> {
+    const resData = (
+      await this.getSwapQuote(
+        chainId,
+        tokenInAddress,
+        tokenOutAddress,
+        ethers.parseEther('1'),
+      )
+    ).data[0];
+    return (amount * BigInt(resData.toTokenAmount)) / ethers.parseEther('1');
+  }
+
+  public async getSwapQuote(
+    chainId: number,
+    tokenInAddress: string,
+    tokenOutAddress: string,
+    amount: bigint,
+  ) {
     const quoteParams = {
-      amount: ethers.parseEther('1'),
+      amount,
       chainId,
       toTokenAddress: tokenOutAddress,
       fromTokenAddress: tokenInAddress,
@@ -113,8 +117,11 @@ export class OKXService {
       method: 'get',
       headers,
     });
-    const resData = (await quoteRes.json()).data[0];
-    return (amount * BigInt(resData.toTokenAmount)) / ethers.parseEther('1');
+    const resData: {
+      code: string;
+      data: Record<string, any>[];
+    } = await quoteRes.json();
+    return resData;
   }
 
   public async getSwapData(

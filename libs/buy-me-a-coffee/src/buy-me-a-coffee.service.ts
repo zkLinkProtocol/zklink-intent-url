@@ -121,7 +121,7 @@ export class BuyMeACoffeeService extends ActionDto<FieldTypes> {
         chainId: Chains.ScrollMainnet,
       },
       {
-        label: 'ETH',
+        label: 'BNB',
         value: '',
         chainId: Chains.BSCMainnet,
       },
@@ -178,7 +178,7 @@ export class BuyMeACoffeeService extends ActionDto<FieldTypes> {
           chainId: Chains.ArbitrumSepolia,
         },
         {
-          label: 'ETH',
+          label: 'BNB',
           value: '',
           chainId: Chains.BSCTestnet,
         },
