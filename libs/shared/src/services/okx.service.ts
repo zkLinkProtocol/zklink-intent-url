@@ -83,8 +83,25 @@ export class OKXService {
     tokenOutAddress: string,
     amount: bigint,
   ): Promise<bigint> {
+    const resData = (
+      await this.getSwapQuote(
+        chainId,
+        tokenInAddress,
+        tokenOutAddress,
+        ethers.parseEther('1'),
+      )
+    ).data[0];
+    return (amount * BigInt(resData.toTokenAmount)) / ethers.parseEther('1');
+  }
+
+  public async getSwapQuote(
+    chainId: number,
+    tokenInAddress: string,
+    tokenOutAddress: string,
+    amount: bigint,
+  ) {
     const quoteParams = {
-      amount: ethers.parseEther('1'),
+      amount,
       chainId,
       toTokenAddress: tokenOutAddress,
       fromTokenAddress: tokenInAddress,
@@ -100,8 +117,11 @@ export class OKXService {
       method: 'get',
       headers,
     });
-    const resData = (await quoteRes.json()).data[0];
-    return (amount * BigInt(resData.toTokenAmount)) / ethers.parseEther('1');
+    const resData: {
+      code: string;
+      data: Record<string, any>[];
+    } = await quoteRes.json();
+    return resData;
   }
 
   public async getSwapData(
