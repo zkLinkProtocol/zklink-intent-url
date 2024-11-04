@@ -117,6 +117,9 @@ It will be valid in 24H\\. Other group member can send \`@${flashnewsbot} 0xx\\.
             const humanized = this.humanizeTimeDifference(differenceInSeconds);
             text = `Sorry\\! Commission address is not expired\\! Please wait for ${humanized}\\.
 [@${this.formatMarkdownV2(msg.from.username)}](tg://user?id=${msg.from.id})`;
+          } else {
+            const flashNewsBotLink = `https://t.me/${flashnewsbot}`;
+            text = `Sorry\\! Commission address update failed\\! Ask the [@flashNewsBotLink](${flashNewsBotLink}) for help\\.`;
           }
           await this.bot.sendMessage(msg.chat.id, text, {
             reply_to_message_id: msg.message_id,
