@@ -233,7 +233,7 @@ It will be valid in 24H\\. Other group member can send \`@${this.formatMarkdownV
           reply_to_message_id: msg.message_id,
           parse_mode: 'MarkdownV2',
         });
-        cache.set(`isSend_${chatId}_${fromId}`, '1');
+        cache.set(`isSend_${chatId}_${fromId}`, '1', { ttl: 5 * 1000 });
       }
       await this.tgGroupAndChannelRepository.upsert(tgGroupAndChannel, true, [
         'chatId',
