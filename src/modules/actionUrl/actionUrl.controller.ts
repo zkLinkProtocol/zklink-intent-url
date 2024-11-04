@@ -106,6 +106,7 @@ export class ActionUrlController extends BaseController {
       creator: {
         address: result.creator.address,
       },
+      active: result.active,
     } as ActionUrlResponseDto;
 
     const settingValue = result.settings.intentInfo.components.reduce(
