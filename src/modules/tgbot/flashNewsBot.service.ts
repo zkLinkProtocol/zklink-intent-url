@@ -95,6 +95,11 @@ export class FlashNewsBotService implements OnModuleInit {
             this.logger.log(
               `updateCommissionAddress error, chatId:${msg.chat.id}, fromId:${msg.from.id}, Invalid address: ${address}`,
             );
+            const errorText = `Invalid address: ${address}`;
+            await this.bot.sendMessage(msg.chat.id, errorText, {
+              reply_to_message_id: msg.message_id,
+              parse_mode: 'MarkdownV2',
+            });
             return;
           }
           const res = await this.updateCommissionAddress(
@@ -106,7 +111,7 @@ export class FlashNewsBotService implements OnModuleInit {
           let text = '';
           if (res.code == 2) {
             text = `👏Congrats\\! Your address already been added! 
-It will be valid in 24H\\. Other group member can send \`@${flashnewsbot} 0xx\\.\\.xxx\` to be new inviter after 24H\\.
+It will be valid in 24H\\. Other group member can send \`@${this.formatMarkdownV2(flashnewsbot)} 0xx\\.\\.xxx\` to be new inviter after 24H\\.
 [@${this.formatMarkdownV2(msg.from.username)}](tg://user?id=${msg.from.id})`;
           } else if (res.code == 1) {
             // faild, address time is not expired
@@ -115,7 +120,7 @@ It will be valid in 24H\\. Other group member can send \`@${flashnewsbot} 0xx\\.
               (Number(res.data) - now) / 1000,
             );
             const humanized = this.humanizeTimeDifference(differenceInSeconds);
-            text = `Sorry\\! Commission address is not expired\\! Please wait for ${humanized}\\.
+            text = `Sorry\\! Commission address is not expired\\! Please wait for ${humanized.humanized}\\.
 [@${this.formatMarkdownV2(msg.from.username)}](tg://user?id=${msg.from.id})`;
           } else {
             const flashNewsBotLink = `https://t.me/${flashnewsbot}`;
@@ -218,20 +223,20 @@ It will be valid in 24H\\. Other group member can send \`@${flashnewsbot} 0xx\\.
           chatId: msg.chat.id.toString(),
         },
       );
-      await this.tgGroupAndChannelRepository.upsert(tgGroupAndChannel, true, [
-        'chatId',
-      ]);
       if (!tgGroupOrChannel) {
         const config = await configFactory();
         const bot = config.tgbot.flashnewsbot;
         const text = `👏 Congrads\\! Now your the new inviter of this Group
-👇Send your Wallet Address and mention @${bot} to receive Trade Commission from members in this group\\!
+👇Send your Wallet Address and mention @${this.formatMarkdownV2(bot)} to receive Trade Commission from members in this group\\!
 [@${this.formatMarkdownV2(fromUsername)}](tg://user?id=${fromId})`;
         await this.bot.sendMessage(chatId, text, {
           reply_to_message_id: msg.message_id,
           parse_mode: 'MarkdownV2',
         });
       }
+      await this.tgGroupAndChannelRepository.upsert(tgGroupAndChannel, true, [
+        'chatId',
+      ]);
     } catch (error) {
       this.logger.error('onJoin error', error.stack);
     }
