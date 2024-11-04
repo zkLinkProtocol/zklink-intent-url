@@ -10,6 +10,7 @@ import {
 
 import { BaseController } from 'src/common/base.controller';
 
+import { FlashNewsBotService } from './flashNewsBot.service';
 import { SendNewsOriginRequestDto } from './tgbot.dto';
 import { TgbotService } from './tgbot.service';
 import { ActionService } from '../action/action.service';
@@ -21,6 +22,7 @@ export class TgbotController extends BaseController {
   logger: Logger = new Logger('TgbotController');
   constructor(
     private readonly tgbotService: TgbotService,
+    private readonly flashNewsBotService: FlashNewsBotService,
     private readonly actionService: ActionService,
   ) {
     super();
@@ -30,6 +32,17 @@ export class TgbotController extends BaseController {
   async update(@Body() body: any) {
     try {
       this.tgbotService.update(body);
+      return true;
+    } catch (error) {
+      this.logger.error(error);
+      return false;
+    }
+  }
+
+  @Post('flashnewsbot/update')
+  async flashnewsbotUpdate(@Body() body: any) {
+    try {
+      this.flashNewsBotService.update(body);
       return true;
     } catch (error) {
       this.logger.error(error);
@@ -51,7 +64,7 @@ export class TgbotController extends BaseController {
       return this.error('Permission denied');
     }
     try {
-      await this.tgbotService.sendNewsOrigin(
+      await this.flashNewsBotService.sendNewsOrigin(
         body.title,
         body.description,
         body.metadata,
@@ -77,7 +90,7 @@ export class TgbotController extends BaseController {
     @Query('short') short: number,
   ) {
     try {
-      this.tgbotService.editMessageReplyMarkupPollText(
+      this.flashNewsBotService.editMessageReplyMarkupPollText(
         chatId,
         messageId,
         longOrShort,
@@ -99,6 +112,9 @@ export class TgbotController extends BaseController {
     const tgUserId = '1352553794';
     try {
       switch (action) {
+        case 'flashStart':
+          this.flashNewsBotService.onStart(tgUserId);
+          break;
         case 'start':
           this.tgbotService.onStart(tgUserId);
           break;
@@ -153,7 +169,7 @@ export class TgbotController extends BaseController {
   @Get('testSendNews')
   async testSendNews(@Query('code') code: string) {
     try {
-      this.tgbotService.sendNews(code);
+      this.flashNewsBotService.sendNews(code);
       return true;
     } catch (error) {
       this.logger.error(error);
@@ -178,7 +194,7 @@ export class TgbotController extends BaseController {
   @Post('testOnJoin')
   async testOnJoin(@Body('data') data: any, @Query('lang') lang: string) {
     try {
-      this.tgbotService.onJoin(data, lang);
+      this.flashNewsBotService.onJoin(data, lang);
       return true;
     } catch (error) {
       this.logger.error(error);
@@ -189,7 +205,7 @@ export class TgbotController extends BaseController {
   @Post('onMyChatMember')
   async onMyChatMember(@Body('data') data: any) {
     try {
-      this.tgbotService.onMyChatMember(data);
+      this.flashNewsBotService.onMyChatMember(data);
       return true;
     } catch (error) {
       this.logger.error(error);
@@ -204,7 +220,7 @@ export class TgbotController extends BaseController {
     @Query('messageId') messageId: string,
   ) {
     try {
-      this.tgbotService.onInviteReply(userId, chatId, messageId);
+      this.flashNewsBotService.onInviteReply(userId, chatId, messageId);
       return true;
     } catch (error) {
       this.logger.error(error);

@@ -15,7 +15,7 @@ import {
 } from 'src/common/dto';
 import { ConfigType } from 'src/config';
 import { Chains } from 'src/constants';
-import { TgbotService } from 'src/modules/tgbot/tgbot.service';
+import { FlashNewsBotService } from 'src/modules/tgbot/flashNewsBot.service';
 import { Address, ErrorMessage } from 'src/types';
 
 import { FieldTypes } from './types';
@@ -27,7 +27,7 @@ export class NewsService extends ActionDto<FieldTypes> {
   private logger = new Logger(NewsService.name);
   private readonly chains: ConfigType['chains'];
   constructor(
-    private readonly tgbotService: TgbotService,
+    private readonly flashNewsBotService: FlashNewsBotService,
     private readonly okxService: OKXService,
     private readonly chainService: ChainService,
     private readonly configService: ConfigService,
@@ -266,7 +266,7 @@ export class NewsService extends ActionDto<FieldTypes> {
   public async onMagicLinkCreated(
     data: GenerateTransactionParams<FieldTypes>,
   ): Promise<TransactionInfo[]> {
-    await this.tgbotService.sendNews(data.additionalData.code!);
+    await this.flashNewsBotService.sendNews(data.additionalData.code!);
     return [];
   }
 
