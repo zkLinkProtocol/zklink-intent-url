@@ -81,6 +81,14 @@ export class FlashNewsBotService implements OnModuleInit {
     this.bot.onText(/join_en/, (msg: any) => this.onJoin(msg, 'en'));
     this.bot.onText(/join_cn/, (msg: any) => this.onJoin(msg, 'cn'));
 
+    this.bot.on('text', (msg: any) => {
+      switch (msg.text) {
+        case '/start':
+          this.onStart(msg.from.id);
+          break;
+      }
+    });
+
     this.bot.on('my_chat_member', (msg: ChatMemberUpdated) =>
       this.onMyChatMember(msg),
     );
@@ -109,6 +117,10 @@ export class FlashNewsBotService implements OnModuleInit {
         userId,
       );
     });
+  }
+
+  async onStart(tgUserId: string) {
+    await this.onInvite(tgUserId);
   }
 
   async onMyChatMember(msg: ChatMemberUpdated) {
@@ -158,6 +170,12 @@ export class FlashNewsBotService implements OnModuleInit {
       await this.tgGroupAndChannelRepository.upsert(tgGroupAndChannel, true, [
         'chatId',
       ]);
+      await this.bot.sendMessage(
+        chatId,
+        `👏 Congrads! Now your the new inviter of this Group
+👇Send your Wallet Address to receive Trade Commission from members in this group! @[${fromUsername}](tg://user?id=${fromId})`,
+        { reply_to_message_id: msg.message_id },
+      );
     } catch (error) {
       this.logger.error('onJoin error', error.stack);
     }
@@ -166,18 +184,30 @@ export class FlashNewsBotService implements OnModuleInit {
   async onInvite(tgUserId: string) {
     const config = await configFactory();
     const botLink = `https://t.me/${config.tgbot.flashnewsbot}`;
-    const text = `Would you like to add the flashNews bot to your group or channel \\?`;
+    const text = `🤩Welcome to FlashNews Invite Bot
+
+ •  Invite @flashnewsBot enter groups
+ •  Send your Wallet Address to receive Trade Commission`;
     const parse_mode: ParseMode = 'MarkdownV2';
     const reply_markup = {
       inline_keyboard: [
         [
           {
-            text: 'Group',
+            text: 'Add Bot to Group',
             callback_data: `addbot_group`,
           },
           {
-            text: 'Channel',
+            text: 'Add Bot to Channel',
             url: `${botLink}?startchannel=join&admin=post_messages`,
+          },
+        ],
+      ],
+      is_persistent: true,
+      resize_keyboard: true,
+      keyboard: [
+        [
+          {
+            text: '✅Invite',
           },
         ],
       ],

@@ -112,6 +112,9 @@ export class TgbotController extends BaseController {
     const tgUserId = '1352553794';
     try {
       switch (action) {
+        case 'flashStart':
+          this.flashNewsBotService.onStart(tgUserId);
+          break;
         case 'start':
           this.tgbotService.onStart(tgUserId);
           break;
