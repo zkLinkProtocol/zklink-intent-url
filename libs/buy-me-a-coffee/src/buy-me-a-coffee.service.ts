@@ -263,27 +263,29 @@ export class BuyMeACoffeeService extends ActionDto<FieldTypes> {
     if (!code) {
       throw Error('Missing code');
     }
-
+    let amountToSend: bigint;
     if (token !== '') {
       const contract = new Contract(token.toString(), ERC20ABI, provider);
       const decimals = await contract.decimals();
-      const amountToSend = parseUnits(value.toString(), decimals);
+      amountToSend = parseUnits(value.toString(), decimals);
       transferTx = await contract.transfer.populateTransaction(
         recipient,
         amountToSend,
       );
+    } else {
+      amountToSend = parseUnits(value.toString(), 18);
     }
 
     const tx: TransactionInfo = {
       chainId: chainId,
       to: transferTx.to,
-      value: token === '' ? parseUnits(value.toString(), 18).toString() : '0',
+      value: token === '' ? amountToSend.toString() : '0',
       data: transferTx.data,
       shouldPublishToChain: true,
       requiredTokenAmount: [
         {
           token: token as Address,
-          amount: value,
+          amount: amountToSend.toString(),
         },
       ],
     };
