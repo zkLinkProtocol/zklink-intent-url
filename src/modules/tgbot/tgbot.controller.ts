@@ -227,4 +227,20 @@ export class TgbotController extends BaseController {
       return false;
     }
   }
+
+  @Post('onUpdateCommissionAddress')
+  async onUpdateCommissionAddress(@Body('data') data: any) {
+    try {
+      const res = await this.flashNewsBotService.updateCommissionAddress(
+        data.chatId,
+        data.commissionAddress,
+        data.commissionTgUserId,
+        data.commissionTgUserName,
+      );
+      return this.success(res);
+    } catch (error) {
+      this.logger.error(error);
+      return false;
+    }
+  }
 }
