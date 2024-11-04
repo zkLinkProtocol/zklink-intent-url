@@ -25,7 +25,7 @@ const configFactory = async () => {
       webHookUrl: process.env.TGBOT_WEBHOOK_URL || '',
       flashnewsbot: process.env.FLASHNEWS_BOT || '',
       flashnewsbotToken: process.env.FLASHNEWS_BOT_TOKEN || '',
-      flashnewsbotWebHookUrl: process.env.TGBOT_WEBHOOK_URL || '',
+      flashnewsbotWebHookUrl: process.env.FLASHNEWS_BOT_WEBHOOK_URL || '',
       pollApi: process.env.TGBOT_POLL_API || '',
       miniApp: process.env.TGBOT_MINI_APP || '',
       supportLink: process.env.SUPPORT_LINK || '',
