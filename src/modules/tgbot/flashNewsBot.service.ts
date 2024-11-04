@@ -1,4 +1,5 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { ethers } from 'ethers';
 import html2md from 'html-to-md';
 import { LRUCache } from 'lru-cache';
 import TelegramBot, {
@@ -43,7 +44,7 @@ export class FlashNewsBotService implements OnModuleInit {
   ) {}
 
   async update(body: any) {
-    this.logger.log('new messages:', JSON.stringify(body));
+    this.logger.log('new flashnews messages:', JSON.stringify(body));
     this.bot.processUpdate(body);
   }
 
@@ -81,11 +82,42 @@ export class FlashNewsBotService implements OnModuleInit {
     this.bot.onText(/join_en/, (msg: any) => this.onJoin(msg, 'en'));
     this.bot.onText(/join_cn/, (msg: any) => this.onJoin(msg, 'cn'));
 
-    this.bot.on('text', (msg: any) => {
-      switch (msg.text) {
-        case '/start':
-          this.onStart(msg.from.id);
-          break;
+    this.bot.on('text', async (msg: any) => {
+      const config = await configFactory();
+      const flashnewsbot = config.tgbot.flashnewsbot;
+      if (msg.text == '/start') {
+        this.onStart(msg.from.id);
+      } else if (msg.text.includes(`@${flashnewsbot}`)) {
+        const params = msg.text.split(' ');
+        if (params.length == 2 && params[0] == `@${flashnewsbot}`) {
+          const address = params[1];
+          if (!ethers.isAddress(address)) {
+            this.logger.log(
+              `updateCommissionAddress error, chatId:${msg.chat.id}, fromId:${msg.from.id}, Invalid address: ${address}`,
+            );
+            return;
+          }
+          const res = await this.updateCommissionAddress(
+            msg.chat.id.toString(),
+            address,
+            msg.from.id.toString(),
+            msg.from.username,
+          );
+          let text = '';
+          if (res) {
+            text = `👏Congrats\\! Your address already been added! 
+It will be valid in 24H\\. Other group member can send \`@${flashnewsbot} 0xx\\.\\.xxx\` to be new inviter after 24H\\.
+[@${this.formatMarkdownV2(msg.from.username)}](tg://user?id=${msg.from.id})`;
+          } else {
+            // faild, address time is not expired
+            text = `Sorry\\! Commission address is not expired\\!
+[@${this.formatMarkdownV2(msg.from.username)}](tg://user?id=${msg.from.id})`;
+          }
+          await this.bot.sendMessage(msg.chat.id, text, {
+            reply_to_message_id: msg.message_id,
+            parse_mode: 'MarkdownV2',
+          });
+        }
       }
     });
 
@@ -149,6 +181,12 @@ export class FlashNewsBotService implements OnModuleInit {
   }
 
   async onJoin(msg: any, lang: string) {
+    if (!msg.chat || !msg.from || !msg.date) {
+      this.logger.error(
+        'onJoin error : msg.chat or msg.from or msg.date is undefined',
+      );
+      return;
+    }
     const chatId = msg.chat.id;
     const chatTitle = msg.chat.title ?? '';
     const chatType = msg.chat.type ?? '';
@@ -170,14 +208,60 @@ export class FlashNewsBotService implements OnModuleInit {
       await this.tgGroupAndChannelRepository.upsert(tgGroupAndChannel, true, [
         'chatId',
       ]);
-      await this.bot.sendMessage(
-        chatId,
-        `👏 Congrads! Now your the new inviter of this Group
-👇Send your Wallet Address to receive Trade Commission from members in this group! @[${fromUsername}](tg://user?id=${fromId})`,
-        { reply_to_message_id: msg.message_id },
-      );
+      const text = `👏 Congrads\\! Now your the new inviter of this Group
+👇Send your Wallet Address to receive Trade Commission from members in this group\\!
+[@${this.formatMarkdownV2(fromUsername)}](tg://user?id=${fromId})`;
+      await this.bot.sendMessage(chatId, text, {
+        reply_to_message_id: msg.message_id,
+        parse_mode: 'MarkdownV2',
+      });
     } catch (error) {
       this.logger.error('onJoin error', error.stack);
+    }
+  }
+
+  async updateCommissionAddress(
+    chatId: string,
+    commissionAddress: string,
+    commissionTgUserId: string,
+    commissionTgUserName: string,
+  ) {
+    if (!commissionAddress || ethers.isAddress(commissionAddress) == false) {
+      this.logger.log(
+        `updateCommissionAddress error : commissionAddress is empty. chatId:${chatId}, commissionAddress:${commissionAddress}`,
+      );
+      return false;
+    }
+    const addressExpireAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    try {
+      const tgGroupAndChannel =
+        await this.tgGroupAndChannelRepository.findOneBy({
+          chatId,
+        });
+      if (!tgGroupAndChannel) {
+        this.logger.log(
+          `updateCommissionAddress error : tgGroupAndChannel not exists. chatId:${chatId}`,
+        );
+        return false;
+      }
+      if (tgGroupAndChannel.addressExpireAt > new Date()) {
+        this.logger.log(
+          `updateCommissionAddress error : addressExpireAt not expired. tgGroupAndChannel:${JSON.stringify(tgGroupAndChannel)}, commissionAddress:${commissionAddress}`,
+        );
+        return false;
+      }
+      return await this.tgGroupAndChannelRepository.update(
+        {
+          commissionAddress,
+          addressExpireAt,
+          commissionTgUserId,
+          commissionTgUserName,
+        },
+        { chatId },
+      );
+    } catch (error) {
+      this.logger.error('updateCommissionAddress error', error.stack);
+      return false;
     }
   }
 
@@ -186,7 +270,7 @@ export class FlashNewsBotService implements OnModuleInit {
     const botLink = `https://t.me/${config.tgbot.flashnewsbot}`;
     const text = `🤩Welcome to FlashNews Invite Bot
 
- •  Invite @flashnewsBot enter groups
+ •  Invite [@flashnewsBot](${botLink}) enter groups
  •  Send your Wallet Address to receive Trade Commission`;
     const parse_mode: ParseMode = 'MarkdownV2';
     const reply_markup = {
@@ -199,15 +283,6 @@ export class FlashNewsBotService implements OnModuleInit {
           {
             text: 'Add Bot to Channel',
             url: `${botLink}?startchannel=join&admin=post_messages`,
-          },
-        ],
-      ],
-      is_persistent: true,
-      resize_keyboard: true,
-      keyboard: [
-        [
-          {
-            text: '✅Invite',
           },
         ],
       ],
@@ -224,7 +299,7 @@ export class FlashNewsBotService implements OnModuleInit {
   async onInviteReply(tgUserId: string, chatId: string, messageId: string) {
     const config = await configFactory();
     const botLink = `https://t.me/${config.tgbot.flashnewsbot}`;
-    const text = `Choose Language you want [@flashNews](${botLink}) Bot Speak\\!`;
+    const text = `Choose Language you want [@flashnewsBot](${botLink}) Bot Speak\\!`;
     const parse_mode: ParseMode = 'MarkdownV2';
     const reply_markup = {
       inline_keyboard: [
@@ -765,6 +840,7 @@ ${this.formatMarkdownV2(content).replaceAll(
       ? ''
       : text
           .replaceAll('.', '\\.')
+          .replaceAll('_', '\\_')
           .replaceAll('-', '\\-')
           .replaceAll('*', '\\*')
           .replaceAll('[', '\\[')
