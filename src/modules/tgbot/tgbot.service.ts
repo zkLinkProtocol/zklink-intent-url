@@ -254,7 +254,7 @@ export class TgbotService implements OnModuleInit {
   }
 
   async onInvite(tgUserId: string) {
-    const config = await configFactory();
+    // const config = await configFactory();
     // const botLink = `https://t.me/${config.tgbot.tgbot}`;
     // const url = encodeURIComponent(botLink);
 

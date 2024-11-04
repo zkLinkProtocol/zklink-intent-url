@@ -53,8 +53,6 @@ export class FlashNewsBotService implements OnModuleInit {
     const config = await configFactory();
     const token = config.tgbot.flashnewsbotToken as string;
     const webHookUrl = config.tgbot.flashnewsbotWebHookUrl;
-    console.log('flashnewsbotToken:', token);
-    console.log('flashnewsbotWebHookUrl:', webHookUrl);
     this.bot = new TelegramBot(token);
     this.bot.setWebHook(webHookUrl);
     await this.eventInit();
@@ -106,13 +104,18 @@ export class FlashNewsBotService implements OnModuleInit {
             msg.from.username,
           );
           let text = '';
-          if (res) {
+          if (res.code == 2) {
             text = `👏Congrats\\! Your address already been added! 
 It will be valid in 24H\\. Other group member can send \`@${flashnewsbot} 0xx\\.\\.xxx\` to be new inviter after 24H\\.
 [@${this.formatMarkdownV2(msg.from.username)}](tg://user?id=${msg.from.id})`;
-          } else {
+          } else if (res.code == 1) {
             // faild, address time is not expired
-            text = `Sorry\\! Commission address is not expired\\!
+            const now = Date.now();
+            const differenceInSeconds = Math.floor(
+              (Number(res.data) - now) / 1000,
+            );
+            const humanized = this.humanizeTimeDifference(differenceInSeconds);
+            text = `Sorry\\! Commission address is not expired\\! Please wait for ${humanized}\\.
 [@${this.formatMarkdownV2(msg.from.username)}](tg://user?id=${msg.from.id})`;
           }
           await this.bot.sendMessage(msg.chat.id, text, {
@@ -207,16 +210,25 @@ It will be valid in 24H\\. Other group member can send \`@${flashnewsbot} 0xx\\.
       lang,
     };
     try {
+      const tgGroupOrChannel = await this.tgGroupAndChannelRepository.findOneBy(
+        {
+          chatId: msg.chat.id.toString(),
+        },
+      );
       await this.tgGroupAndChannelRepository.upsert(tgGroupAndChannel, true, [
         'chatId',
       ]);
-      const text = `👏 Congrads\\! Now your the new inviter of this Group
-👇Send your Wallet Address to receive Trade Commission from members in this group\\!
+      if (!tgGroupOrChannel) {
+        const config = await configFactory();
+        const bot = config.tgbot.flashnewsbot;
+        const text = `👏 Congrads\\! Now your the new inviter of this Group
+👇Send your Wallet Address and mention @${bot} to receive Trade Commission from members in this group\\!
 [@${this.formatMarkdownV2(fromUsername)}](tg://user?id=${fromId})`;
-      await this.bot.sendMessage(chatId, text, {
-        reply_to_message_id: msg.message_id,
-        parse_mode: 'MarkdownV2',
-      });
+        await this.bot.sendMessage(chatId, text, {
+          reply_to_message_id: msg.message_id,
+          parse_mode: 'MarkdownV2',
+        });
+      }
     } catch (error) {
       this.logger.error('onJoin error', error.stack);
     }
@@ -227,13 +239,7 @@ It will be valid in 24H\\. Other group member can send \`@${flashnewsbot} 0xx\\.
     commissionAddress: string,
     commissionTgUserId: string,
     commissionTgUserName: string,
-  ) {
-    if (!commissionAddress || ethers.isAddress(commissionAddress) == false) {
-      this.logger.log(
-        `updateCommissionAddress error : commissionAddress is empty. chatId:${chatId}, commissionAddress:${commissionAddress}`,
-      );
-      return false;
-    }
+  ): Promise<{ code: number; data?: string }> {
     const addressExpireAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
     try {
       const tgGroupAndChannel =
@@ -244,15 +250,18 @@ It will be valid in 24H\\. Other group member can send \`@${flashnewsbot} 0xx\\.
         this.logger.log(
           `updateCommissionAddress error : tgGroupAndChannel not exists. chatId:${chatId}`,
         );
-        return false;
+        return { code: 0 };
       }
       if (tgGroupAndChannel.addressExpireAt > new Date()) {
         this.logger.log(
           `updateCommissionAddress error : addressExpireAt not expired. tgGroupAndChannel:${JSON.stringify(tgGroupAndChannel)}, commissionAddress:${commissionAddress}`,
         );
-        return false;
+        return {
+          code: 1,
+          data: tgGroupAndChannel.addressExpireAt.getTime().toString(),
+        };
       }
-      return await this.tgGroupAndChannelRepository.update(
+      await this.tgGroupAndChannelRepository.update(
         {
           commissionAddress,
           addressExpireAt,
@@ -261,9 +270,10 @@ It will be valid in 24H\\. Other group member can send \`@${flashnewsbot} 0xx\\.
         },
         { chatId },
       );
+      return { code: 2 };
     } catch (error) {
       this.logger.error('updateCommissionAddress error', error.stack);
-      return false;
+      return { code: 3, data: error.message };
     }
   }
 
@@ -896,5 +906,26 @@ ${this.formatMarkdownV2(content).replaceAll(
           usdPrice: tokenInfo.market_data.current_price.usd,
         }
       : null;
+  }
+
+  humanizeTimeDifference(differenceInSeconds: number) {
+    let humanized;
+    if (differenceInSeconds < 60) {
+      humanized = `${differenceInSeconds}s`;
+    } else if (differenceInSeconds < 3600) {
+      const minutes = Math.floor(differenceInSeconds / 60);
+      humanized = `${minutes}mins`;
+    } else if (differenceInSeconds < 86400) {
+      const hours = Math.floor(differenceInSeconds / 3600);
+      humanized = `${hours}h`;
+    } else {
+      const days = Math.floor(differenceInSeconds / 86400);
+      humanized = `${days}d`;
+    }
+
+    return {
+      seconds: differenceInSeconds,
+      humanized: humanized,
+    };
   }
 }
