@@ -88,49 +88,7 @@ export class FlashNewsBotService implements OnModuleInit {
       if (msg.text == '/start') {
         this.onStart(msg.from.id);
       } else if (msg.text.includes(`@${flashnewsbot}`)) {
-        const params = msg.text.split(' ');
-        if (params.length == 2 && params[0] == `@${flashnewsbot}`) {
-          const address = params[1];
-          if (!ethers.isAddress(address)) {
-            this.logger.log(
-              `updateCommissionAddress error, chatId:${msg.chat.id}, fromId:${msg.from.id}, Invalid address: ${address}`,
-            );
-            const errorText = `Invalid address: ${address}`;
-            await this.bot.sendMessage(msg.chat.id, errorText, {
-              reply_to_message_id: msg.message_id,
-              parse_mode: 'MarkdownV2',
-            });
-            return;
-          }
-          const res = await this.updateCommissionAddress(
-            msg.chat.id.toString(),
-            address,
-            msg.from.id.toString(),
-            msg.from.username,
-          );
-          let text = '';
-          if (res.code == 2) {
-            text = `👏Congrats\\! Your address already been added! 
-It will be valid in 24H\\. Other group member can send \`@${this.formatMarkdownV2(flashnewsbot)} 0xx\\.\\.xxx\` to be new inviter after 24H\\.
-[@${this.formatMarkdownV2(msg.from.username)}](tg://user?id=${msg.from.id})`;
-          } else if (res.code == 1) {
-            // faild, address time is not expired
-            const now = Date.now();
-            const differenceInSeconds = Math.floor(
-              (Number(res.data) - now) / 1000,
-            );
-            const humanized = this.humanizeTimeDifference(differenceInSeconds);
-            text = `Sorry\\! Commission address is not expired\\! Please wait for ${humanized.humanized}\\.
-[@${this.formatMarkdownV2(msg.from.username)}](tg://user?id=${msg.from.id})`;
-          } else {
-            const flashNewsBotLink = `https://t.me/${flashnewsbot}`;
-            text = `Sorry\\! Commission address update failed\\! Ask the [@flashNewsBotLink](${flashNewsBotLink}) for help\\.`;
-          }
-          await this.bot.sendMessage(msg.chat.id, text, {
-            reply_to_message_id: msg.message_id,
-            parse_mode: 'MarkdownV2',
-          });
-        }
+        await this.onGroupChat(msg);
       }
     });
 
@@ -162,6 +120,52 @@ It will be valid in 24H\\. Other group member can send \`@${this.formatMarkdownV
         userId,
       );
     });
+  }
+
+  async onGroupChat(msg: any) {
+    const config = await configFactory();
+    const flashnewsbot = config.tgbot.flashnewsbot;
+    const params = msg.text.split(' ');
+    if (params.length == 2 && params[0] == `@${flashnewsbot}`) {
+      const address = params[1];
+      if (!ethers.isAddress(address)) {
+        this.logger.log(
+          `updateCommissionAddress error, chatId:${msg.chat.id}, fromId:${msg.from.id}, Invalid address: ${address}`,
+        );
+        const errorText = `Invalid address: ${address}`;
+        await this.bot.sendMessage(msg.chat.id, errorText, {
+          reply_to_message_id: msg.message_id,
+          parse_mode: 'MarkdownV2',
+        });
+        return;
+      }
+      const res = await this.updateCommissionAddress(
+        msg.chat.id.toString(),
+        address,
+        msg.from.id.toString(),
+        msg.from.username,
+      );
+      let text = '';
+      if (res.code == 2) {
+        text = `👏Congrats\\! Your address already been added\\! 
+It will be valid in 24H\\. Other group member can send \`@${this.formatMarkdownV2(flashnewsbot)} 0xx\\.\\.xxx\` to be new inviter after 24H\\.
+[@${this.formatMarkdownV2(msg.from.username)}](tg://user?id=${msg.from.id})`;
+      } else if (res.code == 1) {
+        // faild, address time is not expired
+        const now = Date.now();
+        const differenceInSeconds = Math.floor((Number(res.data) - now) / 1000);
+        const humanized = this.humanizeTimeDifference(differenceInSeconds);
+        text = `Sorry\\! Commission address is not expired\\! Please wait for ${humanized.humanized}\\.
+[@${this.formatMarkdownV2(msg.from.username)}](tg://user?id=${msg.from.id})`;
+      } else {
+        const flashNewsBotLink = `https://t.me/${flashnewsbot}`;
+        text = `Sorry\\! Commission address update failed\\! Ask the [@flashNewsBotLink](${flashNewsBotLink}) for help\\.`;
+      }
+      await this.bot.sendMessage(msg.chat.id, text, {
+        reply_to_message_id: msg.message_id,
+        parse_mode: 'MarkdownV2',
+      });
+    }
   }
 
   async onStart(tgUserId: string) {
@@ -218,12 +222,8 @@ It will be valid in 24H\\. Other group member can send \`@${this.formatMarkdownV
       lang,
     };
     try {
-      const tgGroupOrChannel = await this.tgGroupAndChannelRepository.findOneBy(
-        {
-          chatId: msg.chat.id.toString(),
-        },
-      );
-      if (!tgGroupOrChannel) {
+      const isSend = cache.get(`isSend_${chatId}_${fromId}`);
+      if (!isSend) {
         const config = await configFactory();
         const bot = config.tgbot.flashnewsbot;
         const text = `👏 Congrads\\! Now your the new inviter of this Group
@@ -233,6 +233,7 @@ It will be valid in 24H\\. Other group member can send \`@${this.formatMarkdownV
           reply_to_message_id: msg.message_id,
           parse_mode: 'MarkdownV2',
         });
+        cache.set(`isSend_${chatId}_${fromId}`, '1');
       }
       await this.tgGroupAndChannelRepository.upsert(tgGroupAndChannel, true, [
         'chatId',
