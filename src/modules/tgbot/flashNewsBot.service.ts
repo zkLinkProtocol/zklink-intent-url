@@ -53,6 +53,8 @@ export class FlashNewsBotService implements OnModuleInit {
     const config = await configFactory();
     const token = config.tgbot.flashnewsbotToken as string;
     const webHookUrl = config.tgbot.flashnewsbotWebHookUrl;
+    console.log('flashnewsbotToken:', token);
+    console.log('flashnewsbotWebHookUrl:', webHookUrl);
     this.bot = new TelegramBot(token);
     this.bot.setWebHook(webHookUrl);
     await this.eventInit();
