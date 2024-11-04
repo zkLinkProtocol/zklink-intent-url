@@ -25,6 +25,7 @@ import {
   IntentionRecordTx,
   IntentionRecordTxStatus,
 } from 'src/entities/intentionRecordTx.entity';
+import { Address } from 'src/types';
 
 import ERC20ABI from './abis/ERC20.json';
 import { FieldTypes, TransactionResult } from './types';
@@ -279,6 +280,12 @@ export class BuyMeACoffeeService extends ActionDto<FieldTypes> {
       value: token === '' ? parseUnits(value.toString(), 18).toString() : '0',
       data: transferTx.data,
       shouldPublishToChain: true,
+      requiredTokenAmount: [
+        {
+          token: token as Address,
+          amount: value,
+        },
+      ],
     };
     return { transactions: [tx] };
   }
