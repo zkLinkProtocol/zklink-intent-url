@@ -556,16 +556,14 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
       await this.redPacketContract.getRedPacketInfo(packetId);
 
     const claimRecords = await this.getClaimedRecords(code, account);
-    const claimRecordsHtml = await this.generateHTML(claimRecords);
+    const claimRecordsHtml = this.generateHTML(claimRecords);
     return {
       title: 'Recipients',
       content: `${totalCount - unClaimedCount}/${totalCount} red packet(s) opened ${claimRecordsHtml}`,
     };
   }
 
-  private async generateHTML(
-    transactions: TransactionResult[],
-  ): Promise<string> {
+  generateHTML(transactions: TransactionResult[]): string {
     return transactions
       .map((tx) => {
         const explorerUrl = this.chainService.buildTransactionExplorerLink(
