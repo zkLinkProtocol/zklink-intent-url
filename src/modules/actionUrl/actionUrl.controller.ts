@@ -293,8 +293,9 @@ export class ActionUrlController extends BaseController {
     @Body() request: ActionUrlUpdateRequestDto,
     @GetCreator() creator: { id: bigint; address: string },
   ): Promise<ResponseDto<string>> {
+    const intention = await this.actionUrlService.findOneByCode(code);
     const whiteListPermission = await this.actionService.checkActionWhitelist(
-      code,
+      intention.action.id,
       creator.address,
     );
     if (!whiteListPermission) {
