@@ -282,13 +282,15 @@ export class BuyMeACoffeeService extends ActionDto<FieldTypes> {
       value: token === '' ? amountToSend.toString() : '0',
       data: transferTx.data,
       shouldPublishToChain: true,
-      requiredTokenAmount: [
+    };
+    if (token !== '') {
+      tx.requiredTokenAmount = [
         {
           token: token as Address,
           amount: amountToSend.toString(),
         },
-      ],
-    };
+      ];
+    }
     return { transactions: [tx] };
   }
 
