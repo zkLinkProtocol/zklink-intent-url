@@ -278,4 +278,15 @@ export class TgbotController extends BaseController {
       return false;
     }
   }
+
+  @Post('aibot/testReceiveNews')
+  async testReceiveNews(@Body('data') data: any) {
+    try {
+      const res = await this.aibotService.receiveMessage(data);
+      return this.success(res);
+    } catch (error) {
+      this.logger.error(error);
+      return false;
+    }
+  }
 }
