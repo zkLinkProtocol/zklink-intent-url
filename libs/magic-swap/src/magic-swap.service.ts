@@ -88,16 +88,12 @@ export class MagicSwapService extends ActionDto<FieldTypes> {
       code,
       chainId,
       account,
-      commissionRate = 0.001,
+      commissionRate = 0,
       referrer,
     } = additionalData;
 
     if (!code) {
       throw Error('Missing code');
-    }
-
-    if (isNaN(commissionRate)) {
-      throw Error('Missing commissionRate');
     }
 
     if (!account) {
