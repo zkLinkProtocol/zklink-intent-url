@@ -1,25 +1,13 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import TelegramBot, { ParseMode } from 'node-telegram-bot-api';
 
-import { CreatorRepository, IntentionRepository } from 'src/repositories';
-
-import { ActionUrlService } from '../actionUrl/actionUrl.service';
-import { BlinkService } from '../actionUrl/blink.service';
-
 @Injectable()
 export class AibotService implements OnModuleInit {
   private logger: Logger = new Logger(AibotService.name);
   private bot: TelegramBot;
 
-  constructor(
-    private readonly intentionRepository: IntentionRepository,
-    private readonly creatorRepository: CreatorRepository,
-    private readonly actionUrlService: ActionUrlService,
-    private readonly blinkService: BlinkService,
-  ) {}
-
   async update(body: any) {
-    this.logger.log('new messages:', JSON.stringify(body));
+    this.logger.log('new aibotMessages:', JSON.stringify(body));
     this.bot.processUpdate(body);
   }
 
