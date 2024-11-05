@@ -1,25 +1,13 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import TelegramBot, { ParseMode } from 'node-telegram-bot-api';
 
-import { CreatorRepository, IntentionRepository } from 'src/repositories';
-
-import { ActionUrlService } from '../actionUrl/actionUrl.service';
-import { BlinkService } from '../actionUrl/blink.service';
-
 @Injectable()
 export class AibotService implements OnModuleInit {
   private logger: Logger = new Logger(AibotService.name);
   private bot: TelegramBot;
 
-  constructor(
-    private readonly intentionRepository: IntentionRepository,
-    private readonly creatorRepository: CreatorRepository,
-    private readonly actionUrlService: ActionUrlService,
-    private readonly blinkService: BlinkService,
-  ) {}
-
   async update(body: any) {
-    this.logger.log('new messages:', JSON.stringify(body));
+    this.logger.log('new aibotMessages:', JSON.stringify(body));
     this.bot.processUpdate(body);
   }
 
@@ -40,6 +28,44 @@ export class AibotService implements OnModuleInit {
 
   async receiveMessage(message: any) {
     this.logger.log('receiveMessage', JSON.stringify(message));
+    const body = {
+      message: message.text,
+      agent_id: 'magicLinkAgent',
+      stream: false,
+      monitor: false,
+      session_id: message.from.id.toString(),
+      user_id: message.from.id.toString(),
+    };
+    try {
+      const response = await fetch(
+        'https://gruesome-coffin-wr7qq5p99r9ph9pwv-7777.app.github.dev/v1/playground/agent/run',
+        {
+          method: 'post',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(body),
+        },
+      );
+      const resStr = await response.json();
+      const res = JSON.parse(resStr);
+      if (res.content) {
+        const text = res.content;
+        await this.sendMessage(message.from.id, text);
+      } else {
+        await this.sendMessage(
+          message.from.id,
+          'I am sorry, I cannot understand you',
+        );
+      }
+    } catch (error) {
+      this.logger.error(message.text, error.stack);
+      await this.sendMessage(
+        message.from.id,
+        'I am sorry, something went wrong',
+      );
+    }
+    return true;
   }
 
   async sendMessage(tgUserId: string, text: string) {
