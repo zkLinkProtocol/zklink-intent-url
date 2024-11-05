@@ -21,8 +21,11 @@ export class HelperService {
     amount: number;
     token: string;
     commissionRate: number;
-  }): Promise<TransactionInfo> {
+  }): Promise<TransactionInfo | null> {
     const { chainId, amount, token, commissionRate, to: toAddress } = params;
+    if (commissionRate === 0) {
+      return null;
+    }
 
     const provider = this.chainService.getProvider(chainId);
     let transferTx = { to: toAddress, data: '0x' };
