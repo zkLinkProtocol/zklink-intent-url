@@ -10,6 +10,7 @@ import {
 
 import { BaseController } from 'src/common/base.controller';
 
+import { AibotService } from './aibot.service';
 import { FlashNewsBotService } from './flashNewsBot.service';
 import { SendNewsOriginRequestDto } from './tgbot.dto';
 import { TgbotService } from './tgbot.service';
@@ -24,6 +25,7 @@ export class TgbotController extends BaseController {
     private readonly tgbotService: TgbotService,
     private readonly flashNewsBotService: FlashNewsBotService,
     private readonly actionService: ActionService,
+    private readonly aibotService: AibotService,
   ) {
     super();
   }
@@ -43,6 +45,28 @@ export class TgbotController extends BaseController {
   async flashnewsbotUpdate(@Body() body: any) {
     try {
       this.flashNewsBotService.update(body);
+      return true;
+    } catch (error) {
+      this.logger.error(error);
+      return false;
+    }
+  }
+
+  @Post('aibot/update')
+  async aibotUpdate(@Body() body: any) {
+    try {
+      this.aibotService.update(body);
+      return true;
+    } catch (error) {
+      this.logger.error(error);
+      return false;
+    }
+  }
+
+  @Post('aibot/sendMessage')
+  async aibotSendMessage(@Body() data: any) {
+    try {
+      this.aibotService.sendMessage(data.tgUserId, data.text);
       return true;
     } catch (error) {
       this.logger.error(error);
@@ -248,6 +272,17 @@ export class TgbotController extends BaseController {
   async onGroupChat(@Body('data') data: any) {
     try {
       const res = await this.flashNewsBotService.onGroupChat(data);
+      return this.success(res);
+    } catch (error) {
+      this.logger.error(error);
+      return false;
+    }
+  }
+
+  @Post('aibot/testReceiveNews')
+  async testReceiveNews(@Body('data') data: any) {
+    try {
+      const res = await this.aibotService.receiveMessage(data);
       return this.success(res);
     } catch (error) {
       this.logger.error(error);
