@@ -17,6 +17,7 @@ type HeadersParams = {
   'OK-ACCESS-PASSPHRASE': string;
 };
 const apiBaseUrl = 'https://www.okx.com/api/v5/dex/aggregator/';
+const CROSS_CHAIN_BASE_URL = 'https://www.okx.com/api/v5/dex/cross-chain/';
 const nftBaseUrl = 'https://www.okx.com/api/v5/mktplace/nft/';
 
 type TokenType = {
@@ -83,8 +84,25 @@ export class OKXService {
     tokenOutAddress: string,
     amount: bigint,
   ): Promise<bigint> {
+    const resData = (
+      await this.getSwapQuote(
+        chainId,
+        tokenInAddress,
+        tokenOutAddress,
+        ethers.parseEther('1'),
+      )
+    ).data[0];
+    return (amount * BigInt(resData.toTokenAmount)) / ethers.parseEther('1');
+  }
+
+  public async getSwapQuote(
+    chainId: number,
+    tokenInAddress: string,
+    tokenOutAddress: string,
+    amount: bigint,
+  ) {
     const quoteParams = {
-      amount: ethers.parseEther('1'),
+      amount,
       chainId,
       toTokenAddress: tokenOutAddress,
       fromTokenAddress: tokenInAddress,
@@ -100,8 +118,11 @@ export class OKXService {
       method: 'get',
       headers,
     });
-    const resData = (await quoteRes.json()).data[0];
-    return (amount * BigInt(resData.toTokenAmount)) / ethers.parseEther('1');
+    const resData: {
+      code: string;
+      data: Record<string, any>[];
+    } = await quoteRes.json();
+    return resData;
   }
 
   public async getSwapData(
@@ -187,6 +208,131 @@ export class OKXService {
         },
       ],
     };
+  }
+
+  public async getBridgeData(
+    fromChainId: number,
+    toChainId: number,
+    userAddress: string,
+    fromTokenAddress: string,
+    toTokenAddress: string,
+    amount: bigint,
+  ): Promise<
+    TransactionInfo & {
+      estimateGasFee: string;
+    } & {
+      tokens: Array<{
+        tokenAddress: string;
+        amount: string; // raw data, with decimals
+        direction?: 'from' | 'to';
+      }>;
+    }
+  > {
+    const bridgeParams = {
+      amount,
+      fromChainId,
+      toChainId,
+      fromTokenAddress,
+      toTokenAddress,
+      slippage: '0.005',
+      userWalletAddress: userAddress,
+    };
+    const bridgeURL = this.getCrossChainRequestUrl('build-tx', bridgeParams);
+
+    const bridgeToSignUrl = bridgeURL.replace('https://www.okx.com', '');
+
+    const timestamp = new Date().toISOString();
+    const headers = this.getHeaders(timestamp, bridgeToSignUrl);
+    const bridgeRes = await fetch(bridgeURL, {
+      method: 'get',
+      headers,
+    });
+    const result: {
+      code: number;
+      data: {
+        fromTokenAmount: string;
+        toTokenAmount: string;
+        router: {
+          bridgeId: number;
+          bridgeName: string;
+          otherNativeFee: string;
+          crossChainFee: string;
+          crossChainFeeTokenAddress: string;
+        };
+        tx: { from: string; to: string; value: string; data: any };
+      }[];
+      msg: string;
+    } = await bridgeRes.json();
+    logger.log('bridgeresult:', JSON.stringify(result));
+
+    if (result.code !== 0) {
+      throw new BusinessException(
+        `okx cross-chain bridge failed: ${result.msg}`,
+      );
+    }
+    const resData = result.data[0];
+    const estimateGasFee = '';
+    return {
+      chainId: fromChainId,
+      to: resData.tx.to,
+      value: resData.tx.value,
+      data: resData.tx.data,
+
+      shouldPublishToChain: true,
+      estimateGasFee: estimateGasFee,
+      tokens: [
+        {
+          tokenAddress:
+            fromTokenAddress === '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
+              ? ethers.ZeroAddress
+              : fromTokenAddress,
+          amount: resData.fromTokenAmount.toString(),
+          direction: 'from',
+        },
+        {
+          tokenAddress:
+            toTokenAddress === '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
+              ? ethers.ZeroAddress
+              : toTokenAddress,
+          amount: resData.toTokenAmount.toString(),
+          direction: 'to',
+        },
+      ],
+    };
+  }
+
+  public async getBridgeTxReceipt(hash: string, chainId: number) {
+    const txReceiptParams = {
+      hash,
+      chainId,
+    };
+    const receiptURL = this.getCrossChainRequestUrl('status', txReceiptParams);
+
+    const receiptToSignUrl = receiptURL.replace('https://www.okx.com', '');
+
+    const timestamp = new Date().toISOString();
+    const headers = this.getHeaders(timestamp, receiptToSignUrl);
+    const receiptRes = await fetch(receiptURL, {
+      method: 'get',
+      headers,
+    });
+    const result: {
+      code: number;
+      data: {
+        fromChainId: number;
+        toChainId: number;
+        fromTxHash: string;
+        toTxHash: string;
+        fromAmount: string;
+        fromTokenAddress: string;
+        toAmount: string;
+        toTokenAddress: string;
+        errorMsg: string;
+        bridgeHash: string;
+      }[];
+      msg: string;
+    } = await receiptRes.json();
+    return result;
   }
 
   public async getSupportedChain() {
@@ -369,6 +515,15 @@ export class OKXService {
   private getAggregatorRequestUrl(methodName: string, queryParams: any) {
     return (
       apiBaseUrl +
+      methodName +
+      '?' +
+      new URLSearchParams(queryParams).toString()
+    );
+  }
+
+  private getCrossChainRequestUrl(methodName: string, queryParams: any) {
+    return (
+      CROSS_CHAIN_BASE_URL +
       methodName +
       '?' +
       new URLSearchParams(queryParams).toString()

@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JsonRpcProvider } from 'ethers';
 
+import { OptionDto } from 'src/common/dto';
 import { ConfigType } from 'src/config';
 import { Chains } from 'src/constants';
 
@@ -25,6 +26,15 @@ export class ChainService {
     }
 
     return `${chainConfig.explorer}/tx/${hash}`;
+  }
+
+  public buildChainOptions(chains: Chains[]): OptionDto[] {
+    return this.chains
+      .filter((chain) => chains.includes(chain.chainId))
+      .map((chain) => ({
+        label: chain.name,
+        value: chain.chainId.toString(),
+      }));
   }
 
   public buildSupportedNetworks(chains: Chains[]) {
