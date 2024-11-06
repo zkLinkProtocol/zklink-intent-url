@@ -248,7 +248,7 @@ export class OKXService {
       headers,
     });
     const result: {
-      code: number;
+      code: string;
       data: {
         fromTokenAmount: string;
         toTokenAmount: string;
@@ -265,7 +265,7 @@ export class OKXService {
     } = await bridgeRes.json();
     logger.log('bridgeresult:', JSON.stringify(result));
 
-    if (result.code !== 0) {
+    if (result.code !== '0') {
       throw new BusinessException(
         `okx cross-chain bridge failed: ${result.msg}`,
       );
