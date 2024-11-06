@@ -55,7 +55,10 @@ export class OkxBridgeService extends ActionDto<FieldTypes> {
         name: 'zkLink Labs',
         github: 'https://github.com/zkLinkProtocol',
       },
-      magicLinkMetadata: {},
+      magicLinkMetadata: {
+        title: 'Bridge Now!',
+        description: 'Bridge your cryptocurrency between different networks.',
+      },
       whiteList: whiteList,
       intent: {
         binding: 'bridgeAmount',
