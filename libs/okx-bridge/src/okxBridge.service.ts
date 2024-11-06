@@ -82,10 +82,6 @@ export class OkxBridgeService extends ActionDto<FieldTypes> {
                 value: 'ETH',
               },
               {
-                label: 'WBTC',
-                value: 'wbtc',
-              },
-              {
                 label: 'USDT',
                 value: 'usdt',
               },
@@ -125,10 +121,6 @@ export class OkxBridgeService extends ActionDto<FieldTypes> {
               {
                 label: 'ETH',
                 value: 'ETH',
-              },
-              {
-                label: 'WBTC',
-                value: 'wbtc',
               },
               {
                 label: 'USDT',
