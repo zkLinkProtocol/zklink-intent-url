@@ -1,4 +1,3 @@
-import { RegistryPlug } from '@action/registry';
 import { ChainService, OKXService } from '@core/shared';
 import { getERC20SymbolAndDecimals } from '@core/utils';
 import { Injectable, Logger } from '@nestjs/common';
@@ -20,7 +19,7 @@ import { Address, ErrorMessage } from 'src/types';
 
 import { FieldTypes } from './types';
 
-@RegistryPlug('okx-bridge', 'v1')
+// @RegistryPlug('okx-bridge', 'v1')
 @Injectable()
 export class OkxBridgeService extends ActionDto<FieldTypes> {
   private logger = new Logger(OkxBridgeService.name);
