@@ -502,8 +502,8 @@ ${this.formatMarkdownV2(content).replaceAll(
       const action = actions[i];
       lineButtons.push({
         text: action.label,
-        // url: `${userMiniApp}${action.href}&startapp=${news.code}_${action.index}`,
-        url: `${userMiniApp}${action.href}&startapp=${news.code}`,
+        url: `${userMiniApp}${action.href}&startapp=${news.code}_${action.index}`,
+        // url: `${userMiniApp}${action.href}&startapp=${news.code}`,
       });
       if ((i + 1) % 3 === 0) {
         inlineKeyboard.push(lineButtons);
