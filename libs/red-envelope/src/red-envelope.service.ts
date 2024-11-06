@@ -568,11 +568,9 @@ export class RedEnvelopeService extends ActionDto<FieldTypes> {
     };
   }
 
-  private async generateHTML(
-    claimRecords: TransactionResult[],
-  ): Promise<string> {
+  private generateHTML(claimRecords: TransactionResult[]): string {
     return claimRecords
-      .map(async (record) => {
+      .map((record) => {
         const prefixedTxhash = this.chainService.buildTransactionExplorerLink(
           record.txhash,
           record.chainId,
@@ -644,7 +642,7 @@ export class RedEnvelopeService extends ActionDto<FieldTypes> {
       await this.envelopContract.getRedPacketInfo(packetId);
 
     const claimRecords = await this.getClaimedRecords(code, account);
-    const claimRecordsHtml = await this.generateHTML(claimRecords);
+    const claimRecordsHtml = this.generateHTML(claimRecords);
     return {
       title: 'Recipients',
       content: `${totalCount - unClaimedCount}/${totalCount} red packet(s) opened ${claimRecordsHtml}`,
