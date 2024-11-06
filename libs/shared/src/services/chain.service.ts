@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JsonRpcProvider } from 'ethers';
 
-import { OptionDto } from 'src/common/dto';
+import { NetworkDto, OptionDto } from 'src/common/dto';
 import { ConfigType } from 'src/config';
 import { Chains } from 'src/constants';
 
@@ -29,21 +29,32 @@ export class ChainService {
   }
 
   public buildChainOptions(chains: Chains[]): OptionDto[] {
-    return this.chains
-      .filter((chain) => chains.includes(chain.chainId))
-      .map((chain) => ({
-        label: chain.name,
-        value: chain.chainId.toString(),
-      }));
+    return chains.map((chain) => {
+      const chainInfo = this.chainsMapping.get(chain);
+      if (!chainInfo) {
+        throw new Error(`chain config: ${chain} not found`);
+      }
+      return {
+        label: chainInfo.name,
+        value: chainInfo.chainId.toString(),
+      };
+    });
   }
 
-  public buildSupportedNetworks(chains: Chains[]) {
-    return this.chains
-      .filter((chain) => chains.includes(chain.chainId))
-      .map((chain) => ({
-        name: chain.name,
-        chainId: chain.chainId,
-      }));
+  /**
+   * 根据action里面的配置顺序返回
+   */
+  public buildSupportedNetworks(chains: Chains[]): NetworkDto[] {
+    return chains.map((chain) => {
+      const chainInfo = this.chainsMapping.get(chain);
+      if (!chainInfo) {
+        throw new Error(`chain config: ${chain} not found`);
+      }
+      return {
+        name: chainInfo.name,
+        chainId: chainInfo.chainId,
+      };
+    });
   }
 
   public getProvider(chainId: number) {
