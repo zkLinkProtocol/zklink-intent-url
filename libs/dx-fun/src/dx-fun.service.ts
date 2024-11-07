@@ -94,8 +94,8 @@ export class DxFunService extends ActionDto<FieldTypes> {
         coinName,
         coinSymbol,
         metadata,
-        1000000000000000000000000000, //_totalSupply
-        100000000000000, //_liquidityETHAmount
+        1000000000000000000000000000n, //_totalSupply
+        100000000000000n, //_liquidityETHAmount
         '0x4200000000000000000000000000000000000006', //_baseToken
         '0x4752ba5DBc23f44D87826276BF6Fd6b1C372aD24', //_router
         false, //_antiSnipe
