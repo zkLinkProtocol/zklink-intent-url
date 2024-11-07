@@ -107,7 +107,7 @@ export class DxFunService extends ActionDto<FieldTypes> {
         {
           chainId: additionalData.chainId,
           to: DX_FUN_FACTORY_ADDRESS,
-          value: '0',
+          value: '0x5af31112d680', // 0.00010000001 ETH fee
           data: coinTrasaction.data,
           shouldPublishToChain: true,
         },
