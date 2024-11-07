@@ -141,7 +141,9 @@
       "^@core/shared(|/.*)$": "<rootDir>/libs/data/src/$1",
       "^@action/shared-red-packet(|/.*)$": "<rootDir>/libs/shared-red-packet/src/$1",
       "^@action/pre-sale(|/.*)$": "<rootDir>/libs/pre-sale/src/$1",
-      "^@action/magic-swap(|/.*)$": "<rootDir>/libs/magic-swap/src/$1"
+      "^@action/magic-swap(|/.*)$": "<rootDir>/libs/magic-swap/src/$1",
+      "^@action/okx-bridge(|/.*)$": "<rootDir>/libs/okx-bridge/src/$1",
+      "^@action/dx-fun(|/.*)$": "<rootDir>/libs/dx-fun/src/$1"
     }
   }
 }
