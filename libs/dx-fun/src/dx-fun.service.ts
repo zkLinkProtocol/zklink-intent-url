@@ -9,7 +9,6 @@ import {
   GenerateTransactionResponse,
 } from 'src/common/dto';
 import { Chains } from 'src/constants';
-import { IntentionRepository } from 'src/repositories';
 
 import DxFunFactoryABI from './abis/DxFunFactory.json';
 import { DX_FUN_FACTORY_ADDRESS } from './config';
@@ -20,10 +19,7 @@ import { FieldTypes } from './types';
 export class DxFunService extends ActionDto<FieldTypes> {
   private dxFunFactory: ethers.Contract;
   private provider: ethers.Provider;
-  constructor(
-    private readonly intentionRepository: IntentionRepository,
-    private readonly chainService: ChainService,
-  ) {
+  constructor(private readonly chainService: ChainService) {
     super();
     this.provider = chainService.getProvider(Chains.Base);
     this.dxFunFactory = new ethers.Contract(
