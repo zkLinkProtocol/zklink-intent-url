@@ -122,6 +122,7 @@ export class IntentionRecordRepository extends BaseRepository<IntentionRecord> {
       const queryBuilder = this.unitOfWork
         .getTransactionManager()
         .createQueryBuilder(IntentionRecord, 'intentionrecord')
+        .withDeleted()
         .leftJoinAndSelect('intentionrecord.intention', 'intention')
         .select([
           'intentionrecord.id as id',
@@ -142,6 +143,7 @@ export class IntentionRecordRepository extends BaseRepository<IntentionRecord> {
             }
           }),
         )
+        .andWhere('intentionrecord.deletedAt IS NULL')
         .orderBy('intentionrecord.createdAt', 'DESC')
         .skip((page - 1) * limit)
         .take(limit);
