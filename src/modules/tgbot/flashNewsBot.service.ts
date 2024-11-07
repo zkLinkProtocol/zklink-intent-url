@@ -44,7 +44,7 @@ export class FlashNewsBotService implements OnModuleInit {
   ) {}
 
   async update(body: any) {
-    this.logger.log('new flashnews messages:', JSON.stringify(body));
+    this.logger.log('new magicnews messages:', JSON.stringify(body));
     this.bot.processUpdate(body);
   }
 
@@ -62,9 +62,9 @@ export class FlashNewsBotService implements OnModuleInit {
     const loop = true;
     while (loop) {
       try {
-        this.logger.log('start updateFlashNews.');
+        this.logger.log('start updatemagicNews.');
         await this.updateFlashNews();
-        this.logger.log('end updateFlashNews.');
+        this.logger.log('end updatemagicNews.');
       } catch (error) {
         this.logger.error(error);
       }
@@ -159,7 +159,7 @@ It will be valid in 24H\\. Other group member can send \`@${this.formatMarkdownV
 [@${this.formatMarkdownV2(msg.from.username)}](tg://user?id=${msg.from.id})`;
       } else {
         const flashNewsBotLink = `https://t.me/${flashnewsbot}`;
-        text = `Sorry\\! Commission address update failed\\! Ask the [@flashNewsBotLink](${flashNewsBotLink}) for help\\.`;
+        text = `Sorry\\! Commission address update failed\\! Ask the [@magicNewsBotLink](${flashNewsBotLink}) for help\\.`;
       }
       await this.bot.sendMessage(msg.chat.id, text, {
         reply_to_message_id: msg.message_id,
@@ -289,9 +289,9 @@ It will be valid in 24H\\. Other group member can send \`@${this.formatMarkdownV
   async onInvite(tgUserId: string) {
     const config = await configFactory();
     const botLink = `https://t.me/${config.tgbot.flashnewsbot}`;
-    const text = `🤩Welcome to FlashNews Invite Bot
+    const text = `🤩Welcome to magicNews Invite Bot
 
- •  Invite [@flashnewsBot](${botLink}) enter groups
+ •  Invite [@magicnewsBot](${botLink}) enter groups
  •  Send your Wallet Address to receive Trade Commission`;
     const parse_mode: ParseMode = 'MarkdownV2';
     const reply_markup = {
@@ -320,7 +320,7 @@ It will be valid in 24H\\. Other group member can send \`@${this.formatMarkdownV
   async onInviteReply(tgUserId: string, chatId: string, messageId: string) {
     const config = await configFactory();
     const botLink = `https://t.me/${config.tgbot.flashnewsbot}`;
-    const text = `Choose Language you want [@flashnewsBot](${botLink}) Bot Speak\\!`;
+    const text = `Choose Language you want [@magicnewsBot](${botLink}) Bot Speak\\!`;
     const parse_mode: ParseMode = 'MarkdownV2';
     const reply_markup = {
       inline_keyboard: [
@@ -432,9 +432,9 @@ It will be valid in 24H\\. Other group member can send \`@${this.formatMarkdownV
 ⬅️Token To: ${toObj?.symbol.toUpperCase()} \\(*$${this.formatMarkdownV2(toObj?.usdPrice.toString())}*\\)
 👥参与人数: $participants
 
-🔥更多信息请到 👉flashNews TG \\([Go to mini app](${userMiniApp}?startapp=${news.code})\\)
+🔥更多信息请到 👉magicNews TG \\([Go to mini app](${userMiniApp}?startapp=${news.code})\\)
 
-🌈在您的群中推送 flashNews 邀请 [@flashNews](${tgbot}?startgroup=join_cn) 到您的群中
+🌈在您的群中推送 magicNews 邀请 [@magicNews](${tgbot}?startgroup=join_cn) 到您的群中
 `;
     } else {
       lang = 'en';
@@ -453,9 +453,9 @@ ${this.formatMarkdownV2(content).replaceAll(
 ⬅️Token To: ${toObj?.symbol.toUpperCase()} \\(*$${this.formatMarkdownV2(toObj?.usdPrice.toString())}*\\)
 👥Participants: $participants
 
-🔥More details Click here to 👉flashNews TG \\([Go to mini app](${userMiniApp}?startapp=${news.code})\\)
+🔥More details Click here to 👉magicNews TG \\([Go to mini app](${userMiniApp}?startapp=${news.code})\\)
 
-🌈Push flashNews Alerts in group? Invite [@flashNews](${tgbot}?startgroup=join_en) in your group
+🌈Push magicNews Alerts in group? Invite [@magicNews](${tgbot}?startgroup=join_en) in your group
 `;
     }
 
@@ -613,7 +613,7 @@ ${this.formatMarkdownV2(content).replaceAll(
 ➡️Token From: ${fromObj?.symbol.toUpperCase()} \\(*$${this.formatMarkdownV2(fromObj?.usdPrice.toString())}*\\)
 ⬅️Token To: ${toObj?.symbol.toUpperCase()} \\(*$${this.formatMarkdownV2(toObj?.usdPrice.toString())}*\\)
 
-🌈在您的群中推送 flashNews 邀请 [@flashNews](${tgbot}?startgroup=join_cn) 到您的群中
+🌈在您的群中推送 magicNews 邀请 [@magicNews](${tgbot}?startgroup=join_cn) 到您的群中
 `;
     } else {
       lang = 'en';
@@ -631,7 +631,7 @@ ${this.formatMarkdownV2(content).replaceAll(
 ➡️Token From: ${fromObj?.symbol.toUpperCase()} \\(*$${this.formatMarkdownV2(fromObj?.usdPrice.toString())}*\\)
 ⬅️Token To: ${toObj?.symbol.toUpperCase()} \\(*$${this.formatMarkdownV2(toObj?.usdPrice.toString())}*\\)
 
-🌈Push flashNews Alerts in group? Invite [@flashNews](${tgbot}?startgroup=join_en) in your group
+🌈Push magicNews Alerts in group? Invite [@magicNews](${tgbot}?startgroup=join_en) in your group
 `;
     }
     const caption = captionTemplate;
@@ -848,7 +848,7 @@ ${this.formatMarkdownV2(content).replaceAll(
         }
       } catch (error) {
         this.logger.log(
-          `updateFlashNews error, chatId:${tgMessage.chatId}, messageId:${tgMessage.messageId}, error:`,
+          `updatemagicNews error, chatId:${tgMessage.chatId}, messageId:${tgMessage.messageId}, error:`,
           error.message,
         );
       }
