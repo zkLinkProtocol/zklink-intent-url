@@ -14,6 +14,7 @@ import { PumpFunModule } from '@action/pump-fun';
 import { RedEnvelopeModule } from '@action/red-envelope';
 import { SharedRedPacketModule } from '@action/shared-red-packet';
 import { SplitBillModule } from '@action/slipt-bill';
+import { DxFunModule } from 'libs/dx-fun/src';
 import { OkxBridgeModule } from 'libs/okx-bridge/src';
 
 import { RegistryService } from './registry.service';
@@ -26,6 +27,7 @@ import { RegistryService } from './registry.service';
     CrossChainSwapModule,
     NovaswapModule,
     PumpFunModule,
+    DxFunModule,
     NewsModule,
     OkxBridgeModule,
     BuyNftMagicEdenModule,
