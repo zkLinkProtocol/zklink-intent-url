@@ -244,7 +244,7 @@ export class TgbotController extends BaseController {
     @Query('messageId') messageId: string,
   ) {
     try {
-      this.flashNewsBotService.onInviteReply(userId, chatId, messageId);
+      this.tgbotService.onInviteReply(userId, chatId, messageId);
       return true;
     } catch (error) {
       this.logger.error(error);
