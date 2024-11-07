@@ -30,7 +30,7 @@ import { UnitOfWorkModule } from './unitOfWork';
   imports: [
     ClsModule.forRoot({
       global: true,
-      interceptor: {
+      middleware: {
         mount: true,
         generateId: true,
         idGenerator: () => nanoid(),

@@ -38,7 +38,7 @@ export class AibotService implements OnModuleInit {
     };
     try {
       const response = await fetch(
-        'https://gruesome-coffin-wr7qq5p99r9ph9pwv-7777.app.github.dev/v1/playground/agent/run',
+        'https://magic-agent-dev.zklink.io/v1/playground/agent/run',
         {
           method: 'post',
           headers: {
