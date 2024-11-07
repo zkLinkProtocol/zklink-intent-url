@@ -35,7 +35,6 @@ export class TgbotService implements OnModuleInit {
   }
 
   private async eventInit() {
-    // this.bot.onText(/\/start/, (msg: any) => this.onStart(msg.from.id));
     this.bot.onText(/\/my/, (msg: any) => this.onMyMagicLink(msg.from.id));
     this.bot.onText(/Create/, (msg: any) => this.onCreate(msg.from.id));
     this.bot.onText(/Portfolio/, (msg: any) => this.onPortfolio(msg.from.id));
@@ -50,6 +49,47 @@ export class TgbotService implements OnModuleInit {
           break;
       }
     });
+
+    this.bot.on('callback_query', (callbackQuery: any) => {
+      this.logger.log(`callback_query`, JSON.stringify(callbackQuery));
+      const chatId = callbackQuery.message.chat.id;
+      const messageId = callbackQuery.message.message_id;
+      const userId = callbackQuery.from.id;
+      const data = callbackQuery.data;
+      if (data == 'addbot_group') {
+        this.onInviteReply(userId, chatId, messageId);
+        return;
+      }
+    });
+  }
+
+  async onInviteReply(tgUserId: string, chatId: string, messageId: string) {
+    const config = await configFactory();
+    const botLink = `https://t.me/${config.tgbot.flashnewsbot}`;
+    const text = `Choose Language you want [@flashnewsBot](${botLink}) Bot Speak\\!`;
+    const parse_mode: ParseMode = 'MarkdownV2';
+    const reply_markup = {
+      inline_keyboard: [
+        [
+          {
+            text: 'English',
+            url: `${botLink}?startgroup=join_en`,
+          },
+          {
+            text: '中文',
+            url: `${botLink}?startgroup=join_cn`,
+          },
+        ],
+      ],
+    };
+    const options = { reply_markup: reply_markup, parse_mode };
+    try {
+      await this.bot.deleteMessage(chatId, Number(messageId));
+      const res = await this.bot.sendMessage(tgUserId, text, options);
+      this.logger.log(`onInviteReply success : `, JSON.stringify(res));
+    } catch (error) {
+      this.logger.error(`onInviteReply error`, error.stack);
+    }
   }
 
   async onStart(tgUserId: string) {
@@ -58,41 +98,23 @@ export class TgbotService implements OnModuleInit {
     const aws3url = config.aws.s3Url;
 
     const photo = `${aws3url}/dev/tg/onstart.png`;
-    // const photo = 'https://pic.imgdb.cn/item/66bb2b02d9c307b7e9c8ec19.png';
-    //     const caption = `Welcome to magicLink\\! The magicLink TG Mini APP is a dedicated application under magicLink\\, specifically designed for the TG ecosystem\\.
+    const caption = `Welcome to magicLink\\! The magicLink TG Mini APP is a dedicated application under magicLink\\, specifically designed for the TG ecosystem\\.
 
-    // 🔮 The app supports users in creating and managing magicLinks while providing essential interaction capabilities\\, enabling seamless connections with other magicLinks\\.
+    🔮 The app supports users in creating and managing magicLinks while providing essential interaction capabilities\\, enabling seamless connections with other magicLinks\\.
 
-    // 💫 [*__Create__*](https://magic.zklink.io/dashboard/intent) magicLink & unlock potential to grab even more strategies with fun\\!
+    💫 [*__Create__*](https://magic.zklink.io/dashboard/intent) magicLink & unlock potential to grab even more strategies with fun\\!
 
-    // 🗞 [*__Follow__*](https://t.me/${config.tgbot.newsChannelIdEn}) up with flashNews to know the first\\-hand crypto message\\!
+    🗞 [*__Follow__*](https://t.me/${config.tgbot.newsChannelIdEn}) up with flashNews to know the first\\-hand crypto message\\!
 
-    // 💳 [*__Check__*](${userMiniApp}?startapp=portfolio) your Portfolio & Magic Account
+    💳 [*__Check__*](${userMiniApp}?startapp=portfolio) your Portfolio & Magic Account
 
-    // 💰 [*__Deposit__*](${userMiniApp}?startapp=deposit) Crypto Assets to your Magic Account in multiple Chains including all EVM Chain\\, Solana\\, SUI and so on\\.
+    💰 [*__Deposit__*](${userMiniApp}?startapp=deposit) Crypto Assets to your Magic Account in multiple Chains including all EVM Chain\\, Solana\\, SUI and so on\\.
 
-    // 🧠 Learn about magicLink with Magic Academy\\.
+    🧠 Learn about magicLink with Magic Academy\\.
 
-    // 🫂 [*__Invite__*](${userMiniApp}?startapp=invite) your friends to magicLink to get part of their transaction fees and earn extra rewards\\.
+    🫂 [*__Invite__*](${userMiniApp}?startapp=invite) your friends to magicLink to get part of their transaction fees and earn extra rewards\\.
 
-    // ⛓ Manage magicLinks you create before\\.`;
-    const caption = `Welcome to magicLink\\! The magicLink TG Mini APP is a dedicated application under magicLink\\, specifically designed for the TG ecosystem\\. 
-
-🔮 The app supports users in creating and managing magicLinks while providing essential interaction capabilities\\, enabling seamless connections with other magicLinks\\.
-    
-💫 [*__Create__*](https://magic.zklink.io/dashboard/intent) magicLink & unlock potential to grab even more strategies with fun\\! 
-
-🗞 [*__Follow__*](https://t.me/${config.tgbot.newsChannelIdEn}) up with flashNews to know the first\\-hand crypto message\\!
-
-💳 Check your Portfolio & Magic Account 
-
-💰 Deposit Crypto Assets to your Magic Account in multiple Chains including all EVM Chain\\, Solana\\, SUI and so on\\.
-
-🧠 Learn about magicLink with Magic Academy\\.
-
-🫂 [*__Invite__*](${userMiniApp}?startapp=invite) your friends to magicLink to get part of their transaction fees and earn extra rewards\\.
-
-⛓ Manage magicLinks you create before\\.`;
+    ⛓ Manage magicLinks you create before\\.`;
     const parse_mode: ParseMode = 'MarkdownV2';
     const reply_markup = {
       is_persistent: true,
@@ -135,7 +157,6 @@ export class TgbotService implements OnModuleInit {
 
   async onCreate(tgUserId: string) {
     const text = `It's the start for your Magic Journey\\, choose a Topic and Create your own magicLink here\\!`;
-    // text = this.formatMarkdownV2(text);
     const parse_mode: ParseMode = 'MarkdownV2';
     const reply_markup = {
       inline_keyboard: [
@@ -202,7 +223,6 @@ export class TgbotService implements OnModuleInit {
     const config = await configFactory();
     const supportLink = config.tgbot.supportLink;
     const text = `Need a hand? Open a ticket in our Support Bot 🤝`;
-    // text = this.formatMarkdownV2(text);
     const parse_mode: ParseMode = 'MarkdownV2';
     const reply_markup = {
       inline_keyboard: [
@@ -228,7 +248,6 @@ export class TgbotService implements OnModuleInit {
     const channelLink = `https://t.me/${config.tgbot.newsChannelIdEn}`;
     const channelLinkCn = `https://t.me/${config.tgbot.newsChannelIdCn}`;
     const text = `Want to know first hand Crypto News? Follow up with our flashNews Channel\\!`;
-    // text = this.formatMarkdownV2(text);
     const parse_mode: ParseMode = 'MarkdownV2';
     const reply_markup = {
       inline_keyboard: [
@@ -254,40 +273,36 @@ export class TgbotService implements OnModuleInit {
   }
 
   async onInvite(tgUserId: string) {
-    // const config = await configFactory();
-    // const botLink = `https://t.me/${config.tgbot.tgbot}`;
+    const config = await configFactory();
+    const botLink = `https://t.me/${config.tgbot.tgbot}`;
     // const url = encodeURIComponent(botLink);
 
-    //     const tgShareUrl = `https://t.me/share/url?url=${url}&text=💫 Join magicLink Telegram and enjoy lower transaction fees with my referral code.
+    // const tgShareUrl = `https://t.me/share/url?url=${url}&text=💫 Join magicLink Telegram and enjoy lower transaction fees with my referral code.
 
     // 🔮The magicLink TG Mini APP is a dedicated application under magicLink, specifically designed for the TG ecosystem.
 
     // 🔮magicLink offers multi-chain wallet and asset management features, allowing users to quickly create and manage magicLinks across multiple chains, simplifying asset transfers and interactions.`;
-    //     const text = `Invite your friends to magicLink to get part of their transaction fees and earn extra rewards\\.
+    // const text = `Invite your friends to magicLink to get part of their transaction fees and earn extra rewards\\.
 
     // Current Invitee: 0
     // Share to More friends and groups here\\!`;
-    // const text = `Would you like to add the MagicLink bot to your group or channel \\?`;
-    // const parse_mode: ParseMode = 'MarkdownV2';
-    // const reply_markup = {
-    //   inline_keyboard: [
-    //     [
-    //       {
-    //         text: 'Group',
-    //         callback_data: `addbot_group`,
-    //       },
-    //       {
-    //         text: 'Channel',
-    //         url: `${botLink}?startchannel=join&admin=post_messages`,
-    //       },
-    //     ],
-    //   ],
-    // };
-    // const options = { reply_markup: reply_markup, parse_mode };
-
-    const text = `Coming soon\\!`;
+    const text = `Would you like to add the MagicLink bot to your group or channel \\?`;
     const parse_mode: ParseMode = 'MarkdownV2';
-    const options = { parse_mode };
+    const reply_markup = {
+      inline_keyboard: [
+        [
+          {
+            text: 'Group',
+            callback_data: `addbot_group`,
+          },
+          {
+            text: 'Channel',
+            url: `${botLink}?startchannel=join&admin=post_messages`,
+          },
+        ],
+      ],
+    };
+    const options = { reply_markup: reply_markup, parse_mode };
     try {
       const res = await this.bot.sendMessage(tgUserId, text, options);
       this.logger.log(`onInvite success : `, JSON.stringify(res));
