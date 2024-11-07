@@ -36,6 +36,7 @@ import {
 } from 'src/common/dto';
 import { PagingOptionsDto } from 'src/common/pagingOptionsDto.param';
 import { PagingMetaDto, ResponseDto } from 'src/common/response.dto';
+import { IntentionRecordStatus } from 'src/entities/intentionRecord.entity';
 import { BusinessException } from 'src/exception/business.exception';
 import { ErrorMessage } from 'src/types';
 
@@ -588,18 +589,19 @@ export class ActionUrlController extends BaseController {
   @Get(':address/intention-record')
   @CommonApiOperation('Get intention record list with txs.')
   @ApiQuery({
-    name: 'status',
-    example: 'pending|success|failed or empty',
+    name: 'statuses',
+    example: 'Array<pending | success | failed> or empty',
   })
   async getIntentionRecordList(
     @Param('address') address: string,
     @Query() pagingOptions: PagingOptionsDto,
-    @Query('status') status?: string,
+    @Query('statuses') statuses: string | undefined,
   ): Promise<ResponseDto<IntentionRecordListItemResponseDto[]>> {
+    const statusList = statuses ? statuses.split(',') : undefined;
     const { page = 1, limit = 20 } = pagingOptions;
     const result = await this.intentionRecordService.findListAndPublickey(
       address,
-      status,
+      statusList as [IntentionRecordStatus],
       page,
       limit,
     );

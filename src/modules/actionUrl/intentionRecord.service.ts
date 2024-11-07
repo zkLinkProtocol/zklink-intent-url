@@ -79,14 +79,14 @@ export class IntentionRecordService {
 
   async findListAndPublickey(
     address: string,
-    status: string | undefined,
+    statuses: [IntentionRecordStatus] | undefined,
     page: number = 1,
     limit: number = 10,
   ) {
     const { data, total } =
       await this.intentionRecordRepository.getPagingIntentionRecordListWithTxsByCodeAndPublickey(
         address,
-        status,
+        statuses,
         page,
         limit,
       );
