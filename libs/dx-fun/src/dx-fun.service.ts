@@ -72,7 +72,7 @@ export class DxFunService extends ActionDto<FieldTypes> {
             label: 'Coin description',
             desc: 'The description of the coin',
             type: 'input',
-            regex: '^[a-zA-Z0-9]+$',
+            regex: '',
             regexDesc: 'Coin description',
           },
         ],
@@ -99,7 +99,7 @@ export class DxFunService extends ActionDto<FieldTypes> {
         '0x4200000000000000000000000000000000000006', //_baseToken
         '0x4752ba5DBc23f44D87826276BF6Fd6b1C372aD24', //_router
         false, //_antiSnipe
-        0, //_amountAntiSnipe
+        0n, //_amountAntiSnipe
       );
 
     return {
