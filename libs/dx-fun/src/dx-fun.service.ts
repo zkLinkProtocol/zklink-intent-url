@@ -90,7 +90,7 @@ export class DxFunService extends ActionDto<FieldTypes> {
 
     const metadata = `${coinIconUrl}@@@@@@@@@@@@@@@@@@@@${coinDescription}`;
     const coinTrasaction =
-      await this.dxFunFactory.createFun.populateTransaction(
+      await this.dxFunFactory.CreateFun.populateTransaction(
         coinName,
         coinSymbol,
         metadata,
