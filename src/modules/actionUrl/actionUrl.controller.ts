@@ -25,6 +25,7 @@ import {
   getSchemaPath,
 } from '@nestjs/swagger';
 import { Cache } from 'cache-manager';
+import { ethers } from 'ethers';
 import { Response } from 'express';
 import { nanoid } from 'nanoid';
 
@@ -39,6 +40,7 @@ import {
 } from 'src/common/dto';
 import { PagingOptionsDto } from 'src/common/pagingOptionsDto.param';
 import { PagingMetaDto, ResponseDto } from 'src/common/response.dto';
+import { IntentionRecordStatus } from 'src/entities/intentionRecord.entity';
 import { BusinessException } from 'src/exception/business.exception';
 import { ErrorMessage } from 'src/types';
 
@@ -313,8 +315,9 @@ export class ActionUrlController extends BaseController {
     @Body() request: ActionUrlUpdateRequestDto,
     @GetCreator() creator: { id: bigint; address: string },
   ): Promise<ResponseDto<string>> {
+    const intention = await this.actionUrlService.findOneByCode(code);
     const whiteListPermission = await this.actionService.checkActionWhitelist(
-      code,
+      intention.action.id,
       creator.address,
     );
     if (!whiteListPermission) {
@@ -607,18 +610,19 @@ export class ActionUrlController extends BaseController {
   @Get(':address/intention-record')
   @CommonApiOperation('Get intention record list with txs.')
   @ApiQuery({
-    name: 'status',
-    example: 'pending|success|failed or empty',
+    name: 'statuses',
+    example: 'Array<pending | success | failed> or empty',
   })
   async getIntentionRecordList(
     @Param('address') address: string,
     @Query() pagingOptions: PagingOptionsDto,
-    @Query('status') status?: string,
+    @Query('statuses') statuses: string | undefined,
   ): Promise<ResponseDto<IntentionRecordListItemResponseDto[]>> {
+    const statusList = statuses ? statuses.split(',') : undefined;
     const { page = 1, limit = 20 } = pagingOptions;
     const result = await this.intentionRecordService.findListAndPublickey(
       address,
-      status,
+      statusList as [IntentionRecordStatus],
       page,
       limit,
     );
@@ -729,15 +733,33 @@ export class ActionUrlController extends BaseController {
     return response;
   }
 
-  // should be removed after refactor
-  // it can be obtained from front-end
   @Get('/magicnews/support/tokens')
   public async getTokens(@Query('chainId') chainId: number) {
     const supportTokens = await this.okxService.getAllTokens(Number(chainId));
     return supportTokens.map((token) => ({
       lable: token.tokenSymbol,
-      address: token.tokenContractAddress,
+      address:
+        token.tokenContractAddress.toLowerCase() ===
+        '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
+          ? ethers.ZeroAddress
+          : token.tokenContractAddress,
       decimals: token.decimals,
     }));
+  }
+
+  @Get('/okxswap/quote')
+  public async swapQuote(
+    @Query('chainId') chainId: string,
+    @Query('tokenInAddress') tokenInAddress: string,
+    @Query('tokenOutAddress') tokenOutAddress: string,
+    @Query('amount') amount: string,
+  ) {
+    const result = await this.okxService.getSwapQuote(
+      Number(chainId),
+      tokenInAddress,
+      tokenOutAddress,
+      BigInt(amount),
+    );
+    return result;
   }
 }

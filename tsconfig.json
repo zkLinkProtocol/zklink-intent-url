@@ -120,6 +120,18 @@
       "@action/pre-sale/*": [
         "libs/pre-sale/src/*"
       ],
+      "@action/okx-bridge": [
+        "libs/okx-bridge/src"
+      ],
+      "@action/okx-bridge/*": [
+        "libs/okx-bridge/src/*"
+      ],
+      "@action/dx-fun": [
+        "libs/dx-fun/src"
+      ],
+      "@action/dx-fun/*": [
+        "libs/dx-fun/src/*"
+      ],
       "@action/magic-swap": [
         "libs/magic-swap/src"
       ],

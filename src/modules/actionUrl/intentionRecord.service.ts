@@ -18,11 +18,13 @@ import { IntentionRecordTxRepository } from 'src/repositories/intentionRecordTx.
 
 import { ActionUrlService } from './actionUrl.service';
 import { IntentionRecordAddRequestDto } from './dto';
+import { ActionService } from '../action/action.service';
 
 @Injectable()
 export class IntentionRecordService {
   logger: Logger;
   constructor(
+    private readonly actionService: ActionService,
     private readonly configService: ConfigService,
     private readonly intentionRepository: IntentionRepository,
     public readonly intentionRecordRepository: IntentionRecordRepository,
@@ -33,7 +35,7 @@ export class IntentionRecordService {
     this.logger = new Logger(IntentionRecordService.name);
   }
 
-  async findOneById(id: bigint): Promise<IntentionRecord> {
+  async findOneById(id: bigint) {
     const intentionRecord =
       await this.intentionRecordRepository.getIntentionRecordWithTxsById(id);
     if (!intentionRecord) {
@@ -47,23 +49,44 @@ export class IntentionRecordService {
         `Intention ${intentionRecord.intention.code} not found`,
       );
     }
-    intentionRecord.intention = {
+    const actionStore = this.actionService.getActionVersionStore(
+      intentionTmp.action.id,
+      intentionTmp.actionVersion,
+    );
+    const settingValue =
+      intentionRecord.intention.settings.intentInfo.components.reduce(
+        (res, cur) => {
+          res[cur.name] = cur.value;
+          return res;
+        },
+        {} as { [key: string]: any },
+      );
+
+    const sharedContent = await actionStore.generateSharedContent({
+      additionalData: {
+        chainId: intentionRecord.intention.settings.intentInfo.network.chainId,
+      },
+      formData: settingValue,
+    });
+    const intention = {
       ...intentionRecord.intention,
       creator: intentionTmp.creator,
+      sharedContent,
     };
-    return intentionRecord;
+
+    return { ...intentionRecord, intention };
   }
 
   async findListAndPublickey(
     address: string,
-    status: string | undefined,
+    statuses: [IntentionRecordStatus] | undefined,
     page: number = 1,
     limit: number = 10,
   ) {
     const { data, total } =
       await this.intentionRecordRepository.getPagingIntentionRecordListWithTxsByCodeAndPublickey(
         address,
-        status,
+        statuses,
         page,
         limit,
       );

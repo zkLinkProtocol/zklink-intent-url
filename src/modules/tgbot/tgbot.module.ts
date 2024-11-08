@@ -12,6 +12,8 @@ import {
 } from 'src/repositories';
 import { UnitOfWorkModule } from 'src/unitOfWork';
 
+import { AibotService } from './aibot.service';
+import { FlashNewsBotService } from './flashNewsBot.service';
 import { TgbotController } from './tgbot.controller';
 import { TgbotService } from './tgbot.service';
 import { ActionService } from '../action/action.service';
@@ -36,8 +38,10 @@ import { CoingeckoService } from '../coingecko/coingecko.service';
     CoingeckoService,
     TgMessageRepository,
     TgGroupAndChannelRepository,
+    FlashNewsBotService,
+    AibotService,
   ],
-  exports: [TgbotService],
+  exports: [TgbotService, FlashNewsBotService],
   controllers: [TgbotController],
 })
 export class TgbotModule {}

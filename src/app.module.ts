@@ -54,7 +54,7 @@ import { UnitOfWorkModule } from './unitOfWork';
     }),
     ClsModule.forRoot({
       global: true,
-      interceptor: {
+      middleware: {
         mount: true,
         generateId: true,
         idGenerator: () => nanoid(),

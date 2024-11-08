@@ -20,11 +20,10 @@ import { Address, ErrorMessage } from 'src/types';
 
 import { FieldTypes } from './types';
 
-//magic news
-@RegistryPlug('news', 'v1')
+@RegistryPlug('okx-bridge', 'v1')
 @Injectable()
-export class NewsService extends ActionDto<FieldTypes> {
-  private logger = new Logger(NewsService.name);
+export class OkxBridgeService extends ActionDto<FieldTypes> {
+  private logger = new Logger(OkxBridgeService.name);
   private readonly chains: ConfigType['chains'];
   constructor(
     private readonly flashNewsBotService: FlashNewsBotService,
@@ -36,47 +35,47 @@ export class NewsService extends ActionDto<FieldTypes> {
     this.chains = this.configService.get('chains', { infer: true })!;
   }
   async getMetadata(): Promise<ActionMetadata<FieldTypes>> {
-    const whiteListConfig =
-      this.configService.get<string>('NEWS_WHITE_ADDRESS');
-    const whiteList = whiteListConfig ? whiteListConfig.split(',') : [];
     return {
-      title: 'Magic News',
+      title: 'Bridge via OKX Bridge',
       description:
-        '<div>Perform news seamlessly across multiple networks</div>',
+        '<div>This action allows you to bridge cryptocurrency between networks</div>',
       networks: this.chainService.buildSupportedNetworks([
-        Chains.EthereumMainnet,
         Chains.ArbitrumOne,
+        Chains.EthereumMainnet,
         Chains.OpMainnet,
         Chains.Linea,
         Chains.Base,
         Chains.MantaPacificMainnet,
+        Chains.BSCMainnet,
       ]),
       author: {
         name: 'zkLink Labs',
         github: 'https://github.com/zkLinkProtocol',
       },
-      magicLinkMetadata: {},
-      whiteList: whiteList,
+      magicLinkMetadata: {
+        title: 'Bridge Now!',
+        description: 'Bridge your cryptocurrency between different networks.',
+      },
       intent: {
-        binding: 'amountToBuy',
+        binding: 'bridgeAmount',
         components: [
           {
-            name: 'amountToBuy',
-            label: 'Amount to Buy',
-            desc: 'The amount of input tokens used to buy output tokens',
+            name: 'bridgeAmount',
+            label: 'Bridge Amount',
+            desc: 'The amount of input tokens used to swap output tokens in target network',
             type: 'input',
             regex: '^[0-9]+(.[0-9]+)?$',
             regexDesc: 'Positive number',
           },
           {
             name: 'tokenFrom',
-            label: 'Token From ',
-            desc: 'The token you want to swap',
+            label: 'Pay Token',
+            desc: 'The token you want to cross chain',
             type: 'inputSelect',
             options: [
               {
-                label: 'WBTC',
-                value: 'wbtc',
+                label: 'ETH',
+                value: 'ETH',
               },
               {
                 label: 'USDT',
@@ -89,24 +88,35 @@ export class NewsService extends ActionDto<FieldTypes> {
               {
                 label: 'WETH',
                 value: 'WETH',
-              },
-              {
-                label: 'ETH',
-                value: 'ETH',
               },
             ],
             regex: '^0x[a-fA-F0-9]{40}$',
             regexDesc: 'Invalid Address',
           },
           {
+            name: 'toChainId',
+            label: 'Select Receive Token Network',
+            desc: 'Receive Token Network',
+            type: 'searchSelect',
+            options: this.chainService.buildChainOptions([
+              Chains.Base,
+              Chains.ArbitrumOne,
+              Chains.EthereumMainnet,
+              Chains.OpMainnet,
+              Chains.Linea,
+              Chains.MantaPacificMainnet,
+              Chains.BSCMainnet,
+            ]),
+          },
+          {
             name: 'tokenTo',
-            label: 'Token To',
-            desc: 'The address of the token you want to receive',
+            label: 'Receive Token',
+            desc: 'The address of the token you want to receive in target network',
             type: 'inputSelect',
             options: [
               {
-                label: 'WBTC',
-                value: 'wbtc',
+                label: 'ETH',
+                value: 'ETH',
               },
               {
                 label: 'USDT',
@@ -119,10 +129,6 @@ export class NewsService extends ActionDto<FieldTypes> {
               {
                 label: 'WETH',
                 value: 'WETH',
-              },
-              {
-                label: 'ETH',
-                value: 'ETH',
               },
             ],
             regex: '^0x[a-fA-F0-9]{40}$',
@@ -137,12 +143,12 @@ export class NewsService extends ActionDto<FieldTypes> {
     data: GenerateTransactionParams<FieldTypes>,
   ): Promise<GenerateTransactionResponse> {
     const { additionalData, formData } = data;
-    const { chainId, account } = additionalData;
+    const { chainId: fromChainId, account } = additionalData;
     if (!account) {
       throw new Error('Missing account!');
     }
-    const { amountToBuy, ...restParams } = formData;
-    const provider = this.chainService.getProvider(chainId);
+    const { bridgeAmount, toChainId, ...restParams } = formData;
+    const provider = this.chainService.getProvider(fromChainId);
 
     let tokenFromDecimal;
     let tokenInAddress = formData.tokenFrom.toLowerCase() as Address;
@@ -161,11 +167,11 @@ export class NewsService extends ActionDto<FieldTypes> {
 
     const params = {
       ...restParams,
-      amountToBuy: ethers.parseUnits(amountToBuy, tokenFromDecimal),
+      amountToBuy: ethers.parseUnits(bridgeAmount, tokenFromDecimal),
     };
 
     let approveTx: TransactionInfo;
-    let swapTx: TransactionInfo & {
+    let bridgeTx: TransactionInfo & {
       tokens: Array<{
         tokenAddress: string;
         amount: string;
@@ -180,61 +186,70 @@ export class NewsService extends ActionDto<FieldTypes> {
       },
     ];
 
-    if (tokenInAddress === '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee') {
-      swapTx = await this.okxService.getSwapData(
+    if (
+      tokenInAddress.toLowerCase() ===
+      '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
+    ) {
+      bridgeTx = await this.okxService.getBridgeData(
+        fromChainId,
+        toChainId,
         account,
-        chainId,
         tokenInAddress,
         params.tokenTo,
         params.amountToBuy,
       );
 
-      swapTx.requiredTokenAmount = tokens;
-      return { displayInfo: { tokens: swapTx.tokens }, transactions: [swapTx] };
+      bridgeTx.requiredTokenAmount = tokens;
+      return {
+        displayInfo: { tokens: bridgeTx.tokens },
+        transactions: [bridgeTx],
+      };
     } else {
       //buy
       approveTx = await this.okxService.getApproveData(
-        chainId,
+        fromChainId,
         tokenInAddress,
         ethers.MaxUint256,
       );
 
-      swapTx = await this.okxService.getSwapData(
+      bridgeTx = await this.okxService.getBridgeData(
+        fromChainId,
+        toChainId,
         account,
-        chainId,
         tokenInAddress,
         params.tokenTo,
         params.amountToBuy,
       );
 
-      swapTx.requiredTokenAmount = tokens;
+      bridgeTx.requiredTokenAmount = tokens;
       return {
-        displayInfo: { tokens: swapTx.tokens },
-        transactions: [approveTx, swapTx],
+        displayInfo: { tokens: bridgeTx.tokens },
+        transactions: [approveTx, bridgeTx],
       };
     }
   }
 
   async validateFormData(
-    formData: UpdateFieldType<FieldTypes, 'amountToBuy'>,
+    formData: UpdateFieldType<FieldTypes, 'bridgeAmount'>,
   ): Promise<ErrorMessage> {
-    const chainId = formData.chainId;
-    if (!chainId) {
-      return 'Missing chainId';
+    const { chainId: fromChainId, toChainId } = formData;
+    if (!fromChainId || !toChainId) {
+      return 'Missing fromChainId or toChainId';
     }
-    for (const amount of formData.amountToBuy) {
+    for (const amount of formData.bridgeAmount) {
       if (!this.isNumeric(amount)) return 'Amount must be a number';
 
       const checkParasm: GenerateTransactionParams<FieldTypes> = {
         additionalData: {
-          chainId,
+          chainId: fromChainId,
           // just for pre-check swap conditions,it can be any address
           account: '0xA510dbc9aC79a686EBB78cDaE791d91F3f45b3a9',
         },
         formData: {
-          amountToBuy: amount,
+          bridgeAmount: amount,
           tokenFrom: formData.tokenFrom,
           tokenTo: formData.tokenTo,
+          toChainId: formData.toChainId,
         },
       };
       try {
@@ -249,7 +264,7 @@ export class NewsService extends ActionDto<FieldTypes> {
   async preCheckTransaction(
     params: GenerateTransactionParams<FieldTypes>,
   ): Promise<ErrorMessage> {
-    if (!this.isNumeric(params.formData.amountToBuy))
+    if (!this.isNumeric(params.formData.bridgeAmount))
       return 'Amount must be a number';
     return '';
   }
@@ -286,7 +301,7 @@ export class NewsService extends ActionDto<FieldTypes> {
       tokenFromDecimal = decimals;
       tokenSymbol = symbol;
     }
-    const amount = ethers.formatUnits(formData.amountToBuy, tokenFromDecimal);
+    const amount = ethers.formatUnits(formData.bridgeAmount, tokenFromDecimal);
     return {
       tip: `Buy ${amount} worthed ${tokenSymbol} successfully`,
       sharedContent: {

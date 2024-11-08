@@ -7,6 +7,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
+import { ClsServiceManager } from 'nestjs-cls';
 
 import { BusinessException } from './business.exception';
 
@@ -43,9 +44,11 @@ export class ExceptionsFilter implements ExceptionFilter {
         exception.stack,
       );
 
+      const traceId = ClsServiceManager.getClsService().getId();
       response.status(status).json({
         code: status,
-        message: message,
+        message: 'System exception, please try again later',
+        traceId,
         data: null,
       });
     }

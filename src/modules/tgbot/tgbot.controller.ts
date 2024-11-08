@@ -10,6 +10,8 @@ import {
 
 import { BaseController } from 'src/common/base.controller';
 
+import { AibotService } from './aibot.service';
+import { FlashNewsBotService } from './flashNewsBot.service';
 import { SendNewsOriginRequestDto } from './tgbot.dto';
 import { TgbotService } from './tgbot.service';
 import { ActionService } from '../action/action.service';
@@ -21,7 +23,9 @@ export class TgbotController extends BaseController {
   logger: Logger = new Logger('TgbotController');
   constructor(
     private readonly tgbotService: TgbotService,
+    private readonly flashNewsBotService: FlashNewsBotService,
     private readonly actionService: ActionService,
+    private readonly aibotService: AibotService,
   ) {
     super();
   }
@@ -30,6 +34,39 @@ export class TgbotController extends BaseController {
   async update(@Body() body: any) {
     try {
       this.tgbotService.update(body);
+      return true;
+    } catch (error) {
+      this.logger.error(error);
+      return false;
+    }
+  }
+
+  @Post('flashnewsbot/update')
+  async flashnewsbotUpdate(@Body() body: any) {
+    try {
+      this.flashNewsBotService.update(body);
+      return true;
+    } catch (error) {
+      this.logger.error(error);
+      return false;
+    }
+  }
+
+  @Post('aibot/update')
+  async aibotUpdate(@Body() body: any) {
+    try {
+      this.aibotService.update(body);
+      return true;
+    } catch (error) {
+      this.logger.error(error);
+      return false;
+    }
+  }
+
+  @Post('aibot/sendMessage')
+  async aibotSendMessage(@Body() data: any) {
+    try {
+      this.aibotService.sendMessage(data.tgUserId, data.text);
       return true;
     } catch (error) {
       this.logger.error(error);
@@ -51,7 +88,7 @@ export class TgbotController extends BaseController {
       return this.error('Permission denied');
     }
     try {
-      await this.tgbotService.sendNewsOrigin(
+      await this.flashNewsBotService.sendNewsOrigin(
         body.title,
         body.description,
         body.metadata,
@@ -77,7 +114,7 @@ export class TgbotController extends BaseController {
     @Query('short') short: number,
   ) {
     try {
-      this.tgbotService.editMessageReplyMarkupPollText(
+      this.flashNewsBotService.editMessageReplyMarkupPollText(
         chatId,
         messageId,
         longOrShort,
@@ -99,6 +136,9 @@ export class TgbotController extends BaseController {
     const tgUserId = '1352553794';
     try {
       switch (action) {
+        case 'flashStart':
+          this.flashNewsBotService.onStart(tgUserId);
+          break;
         case 'start':
           this.tgbotService.onStart(tgUserId);
           break;
@@ -153,7 +193,7 @@ export class TgbotController extends BaseController {
   @Get('testSendNews')
   async testSendNews(@Query('code') code: string) {
     try {
-      this.tgbotService.sendNews(code);
+      this.flashNewsBotService.sendNews(code);
       return true;
     } catch (error) {
       this.logger.error(error);
@@ -178,7 +218,7 @@ export class TgbotController extends BaseController {
   @Post('testOnJoin')
   async testOnJoin(@Body('data') data: any, @Query('lang') lang: string) {
     try {
-      this.tgbotService.onJoin(data, lang);
+      this.flashNewsBotService.onJoin(data, lang);
       return true;
     } catch (error) {
       this.logger.error(error);
@@ -189,7 +229,7 @@ export class TgbotController extends BaseController {
   @Post('onMyChatMember')
   async onMyChatMember(@Body('data') data: any) {
     try {
-      this.tgbotService.onMyChatMember(data);
+      this.flashNewsBotService.onMyChatMember(data);
       return true;
     } catch (error) {
       this.logger.error(error);
@@ -206,6 +246,47 @@ export class TgbotController extends BaseController {
     try {
       this.tgbotService.onInviteReply(userId, chatId, messageId);
       return true;
+    } catch (error) {
+      this.logger.error(error);
+      return false;
+    }
+  }
+
+  @Post('onUpdateCommissionAddress')
+  async onUpdateCommissionAddress(@Body('data') data: any) {
+    try {
+      const res = await this.flashNewsBotService.updateCommissionAddress(
+        data.chatId,
+        data.commissionAddress,
+        data.commissionTgUserId,
+        data.commissionTgUserName,
+      );
+      return this.success(res);
+    } catch (error) {
+      this.logger.error(error);
+      return false;
+    }
+  }
+
+  @Post('onGroupChat')
+  async onGroupChat(
+    @Body('data') data: any,
+    @Query('address') address: string,
+  ) {
+    try {
+      const res = await this.flashNewsBotService.onGroupChat(data, address);
+      return this.success(res);
+    } catch (error) {
+      this.logger.error(error);
+      return false;
+    }
+  }
+
+  @Post('aibot/testReceiveNews')
+  async testReceiveNews(@Body('data') data: any) {
+    try {
+      const res = await this.aibotService.receiveMessage(data);
+      return this.success(res);
     } catch (error) {
       this.logger.error(error);
       return false;

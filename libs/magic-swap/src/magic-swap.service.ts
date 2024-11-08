@@ -96,7 +96,7 @@ export class MagicSwapService extends ActionDto<FieldTypes> {
       throw Error('Missing code');
     }
 
-    if (!commissionRate) {
+    if (isNaN(commissionRate)) {
       throw Error('Missing commissionRate');
     }
 
@@ -197,7 +197,7 @@ export class MagicSwapService extends ActionDto<FieldTypes> {
 
       swapTx.requiredTokenAmount = tokens;
 
-      const transactions = [commissionToCreatorTx, swapTx];
+      const transactions = [commissionToCreatorTx, swapTx].filter((i) => !!i);
       if (commissionToReferrerTx) {
         transactions.unshift(commissionToReferrerTx);
       }
@@ -222,7 +222,9 @@ export class MagicSwapService extends ActionDto<FieldTypes> {
       );
 
       swapTx.requiredTokenAmount = tokens;
-      const transactions = [commissionToCreatorTx, approveTx, swapTx];
+      const transactions = [commissionToCreatorTx, approveTx, swapTx].filter(
+        (i) => !!i,
+      );
       if (commissionToReferrerTx) {
         transactions.unshift(commissionToReferrerTx);
       }
