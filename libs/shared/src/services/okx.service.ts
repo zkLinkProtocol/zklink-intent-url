@@ -151,10 +151,12 @@ export class OKXService {
       userWalletAddress: userAddress,
     };
     logger.log(
-      'swapparams',
-      swapParams.amount,
-      swapParams.toTokenAddress,
-      swapParams.fromTokenAddress,
+      `swapparams amount:
+      ${swapParams.amount}, to:
+      ${swapParams.toTokenAddress},
+      from:
+      ${swapParams.fromTokenAddress}
+      `,
     );
     const swapURL = this.getAggregatorRequestUrl('swap', swapParams);
 
