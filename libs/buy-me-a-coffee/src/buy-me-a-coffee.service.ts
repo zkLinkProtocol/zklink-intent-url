@@ -291,7 +291,18 @@ export class BuyMeACoffeeService extends ActionDto<FieldTypes> {
         },
       ];
     }
-    return { transactions: [tx] };
+    return {
+      transactions: [tx],
+      displayInfo: {
+        tokens: [
+          {
+            tokenAddress: token,
+            amount: value,
+            direction: 'from',
+          },
+        ],
+      },
+    };
   }
 
   public async reloadAdvancedInfo(

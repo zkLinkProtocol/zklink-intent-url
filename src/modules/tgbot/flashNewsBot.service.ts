@@ -6,7 +6,7 @@ import TelegramBot, {
   ChatMemberUpdated,
   ParseMode,
 } from 'node-telegram-bot-api';
-import { MoreThanOrEqual } from 'typeorm';
+import { LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
 
 import { NetworkDto } from 'src/common/dto';
 import configFactory from 'src/config';
@@ -44,12 +44,13 @@ export class FlashNewsBotService implements OnModuleInit {
   ) {}
 
   async update(body: any) {
-    this.logger.log('new flashnews messages:', JSON.stringify(body));
+    this.logger.log('new magicnews messages:', JSON.stringify(body));
     this.bot.processUpdate(body);
   }
 
   async onModuleInit() {
     this.handleUpdateFlashNews();
+    this.handleWarningCommissionAddressExpired();
     const config = await configFactory();
     const token = config.tgbot.flashnewsbotToken as string;
     const webHookUrl = config.tgbot.flashnewsbotWebHookUrl;
@@ -62,13 +63,27 @@ export class FlashNewsBotService implements OnModuleInit {
     const loop = true;
     while (loop) {
       try {
-        this.logger.log('start updateFlashNews.');
+        this.logger.log('start updatemagicNews.');
         await this.updateFlashNews();
-        this.logger.log('end updateFlashNews.');
+        this.logger.log('end updatemagicNews.');
       } catch (error) {
         this.logger.error(error);
       }
       await this.delay(60 * 1000);
+    }
+  }
+
+  async handleWarningCommissionAddressExpired() {
+    const loop = true;
+    while (loop) {
+      try {
+        this.logger.log('start waring commissionAddress.');
+        await this.warningCommissionAddressExpired();
+        this.logger.log('end waring commissionAddress.');
+      } catch (error) {
+        this.logger.error(error);
+      }
+      await this.delay(60 * 60 * 1000);
     }
   }
 
@@ -88,7 +103,14 @@ export class FlashNewsBotService implements OnModuleInit {
       if (msg.text == '/start') {
         this.onStart(msg.from.id);
       } else if (msg.text.includes(`@${flashnewsbot}`)) {
-        await this.onGroupChat(msg);
+        const params = msg.text.split(' ');
+        if (params.length == 2 && params[0] == `@${flashnewsbot}`) {
+          await this.onGroupChat(msg, params[1]);
+        }
+      } else if (msg.reply_to_message?.from?.username ?? '' == flashnewsbot) {
+        if (msg.text != '') {
+          await this.onGroupChat(msg, msg.text);
+        }
       }
     });
 
@@ -122,50 +144,46 @@ export class FlashNewsBotService implements OnModuleInit {
     });
   }
 
-  async onGroupChat(msg: any) {
+  async onGroupChat(msg: any, address: string) {
     const config = await configFactory();
     const flashnewsbot = config.tgbot.flashnewsbot;
-    const params = msg.text.split(' ');
-    if (params.length == 2 && params[0] == `@${flashnewsbot}`) {
-      const address = params[1];
-      if (!ethers.isAddress(address)) {
-        this.logger.log(
-          `updateCommissionAddress error, chatId:${msg.chat.id}, fromId:${msg.from.id}, Invalid address: ${address}`,
-        );
-        const errorText = `Invalid address: ${address}`;
-        await this.bot.sendMessage(msg.chat.id, errorText, {
-          reply_to_message_id: msg.message_id,
-          parse_mode: 'MarkdownV2',
-        });
-        return;
-      }
-      const res = await this.updateCommissionAddress(
-        msg.chat.id.toString(),
-        address,
-        msg.from.id.toString(),
-        msg.from.username,
+    if (!ethers.isAddress(address)) {
+      this.logger.log(
+        `updateCommissionAddress error, chatId:${msg.chat.id}, fromId:${msg.from.id}, Invalid address: ${address}`,
       );
-      let text = '';
-      if (res.code == 2) {
-        text = `👏Congrats\\! Your address already been added\\! 
-It will be valid in 24H\\. Other group member can send \`@${this.formatMarkdownV2(flashnewsbot)} 0xx\\.\\.xxx\` to be new inviter after 24H\\.
-[@${this.formatMarkdownV2(msg.from.username)}](tg://user?id=${msg.from.id})`;
-      } else if (res.code == 1) {
-        // faild, address time is not expired
-        const now = Date.now();
-        const differenceInSeconds = Math.floor((Number(res.data) - now) / 1000);
-        const humanized = this.humanizeTimeDifference(differenceInSeconds);
-        text = `Sorry\\! Commission address is not expired\\! Please wait for ${humanized.humanized}\\.
-[@${this.formatMarkdownV2(msg.from.username)}](tg://user?id=${msg.from.id})`;
-      } else {
-        const flashNewsBotLink = `https://t.me/${flashnewsbot}`;
-        text = `Sorry\\! Commission address update failed\\! Ask the [@flashNewsBotLink](${flashNewsBotLink}) for help\\.`;
-      }
-      await this.bot.sendMessage(msg.chat.id, text, {
+      const errorText = `Invalid address: ${address}`;
+      await this.bot.sendMessage(msg.chat.id, errorText, {
         reply_to_message_id: msg.message_id,
         parse_mode: 'MarkdownV2',
       });
+      return;
     }
+    const res = await this.updateCommissionAddress(
+      msg.chat.id.toString(),
+      address,
+      msg.from.id.toString(),
+      msg.from.username,
+    );
+    let text = '';
+    if (res.code == 2) {
+      text = `👏Congrats\\! Your address already been added\\! 
+It will be valid in 24H\\. Other group member can send \`@${this.formatMarkdownV2(flashnewsbot)} 0xx\\.\\.xxx\` to be new inviter after 24H\\.
+[@${this.formatMarkdownV2(msg.from.username)}](tg://user?id=${msg.from.id})`;
+    } else if (res.code == 1) {
+      // faild, address time is not expired
+      const now = Date.now();
+      const differenceInSeconds = Math.floor((Number(res.data) - now) / 1000);
+      const humanized = this.humanizeTimeDifference(differenceInSeconds);
+      text = `Sorry\\! Commission address is not expired\\! Please wait for ${humanized.humanized}\\.
+[@${this.formatMarkdownV2(msg.from.username)}](tg://user?id=${msg.from.id})`;
+    } else {
+      const flashNewsBotLink = `https://t.me/${flashnewsbot}`;
+      text = `Sorry\\! Commission address update failed\\! Ask the [@flashNewsBotLink](${flashNewsBotLink}) for help\\.`;
+    }
+    await this.bot.sendMessage(msg.chat.id, text, {
+      reply_to_message_id: msg.message_id,
+      parse_mode: 'MarkdownV2',
+    });
   }
 
   async onStart(tgUserId: string) {
@@ -227,7 +245,7 @@ It will be valid in 24H\\. Other group member can send \`@${this.formatMarkdownV
         const config = await configFactory();
         const bot = config.tgbot.flashnewsbot;
         const text = `👏 Congrads\\! Now your the new inviter of this Group
-👇Send your Wallet Address and mention @${this.formatMarkdownV2(bot)} to receive Trade Commission from members in this group\\!
+👇Send your Wallet Address and mention @${this.formatMarkdownV2(bot)} or reply this message to receive Trade Commission from members in this group\\!
 [@${this.formatMarkdownV2(fromUsername)}](tg://user?id=${fromId})`;
         await this.bot.sendMessage(chatId, text, {
           reply_to_message_id: msg.message_id,
@@ -289,9 +307,9 @@ It will be valid in 24H\\. Other group member can send \`@${this.formatMarkdownV
   async onInvite(tgUserId: string) {
     const config = await configFactory();
     const botLink = `https://t.me/${config.tgbot.flashnewsbot}`;
-    const text = `🤩Welcome to FlashNews Invite Bot
+    const text = `🤩Welcome to magicNews Invite Bot
 
- •  Invite [@flashnewsBot](${botLink}) enter groups
+ •  Invite [@magicnewsBot](${botLink}) enter groups
  •  Send your Wallet Address to receive Trade Commission`;
     const parse_mode: ParseMode = 'MarkdownV2';
     const reply_markup = {
@@ -320,7 +338,7 @@ It will be valid in 24H\\. Other group member can send \`@${this.formatMarkdownV
   async onInviteReply(tgUserId: string, chatId: string, messageId: string) {
     const config = await configFactory();
     const botLink = `https://t.me/${config.tgbot.flashnewsbot}`;
-    const text = `Choose Language you want [@flashnewsBot](${botLink}) Bot Speak\\!`;
+    const text = `Choose Language you want [@magicnewsBot](${botLink}) Bot Speak\\!`;
     const parse_mode: ParseMode = 'MarkdownV2';
     const reply_markup = {
       inline_keyboard: [
@@ -428,13 +446,13 @@ It will be valid in 24H\\. Other group member can send \`@${this.formatMarkdownV
 👨‍🍳交易策略:
 
 📍 ${this.formatMarkdownV2(network)}
-➡️Token From: ${fromObj?.symbol.toUpperCase()} \\(*$${this.formatMarkdownV2(fromObj?.usdPrice.toString())}*\\)
-⬅️Token To: ${toObj?.symbol.toUpperCase()} \\(*$${this.formatMarkdownV2(toObj?.usdPrice.toString())}*\\)
+➡️Token From: ${fromObj?.symbol?.toUpperCase()} \\(*$${this.formatMarkdownV2(fromObj?.usdPrice.toString())}*\\)
+⬅️Token To: ${toObj?.symbol?.toUpperCase()} \\(*$${this.formatMarkdownV2(toObj?.usdPrice.toString())}*\\)
 👥参与人数: $participants
 
-🔥更多信息请到 👉flashNews TG \\([Go to mini app](${userMiniApp}?startapp=${news.code})\\)
+🔥更多信息请到 👉magicNews TG \\([Go to mini app](${userMiniApp}?startapp=${news.code})\\)
 
-🌈在您的群中推送 flashNews 邀请 [@flashNews](${tgbot}?startgroup=join_cn) 到您的群中
+🌈在您的群中推送 magicNews 邀请 [@magicNews](${tgbot}?startgroup=join_cn) 到您的群中
 `;
     } else {
       lang = 'en';
@@ -449,13 +467,13 @@ ${this.formatMarkdownV2(content).replaceAll(
 👨‍🍳Trading Strategy:
 
 📍 ${this.formatMarkdownV2(network)}
-➡️Token From: ${fromObj?.symbol.toUpperCase()} \\(*$${this.formatMarkdownV2(fromObj?.usdPrice.toString())}*\\)
-⬅️Token To: ${toObj?.symbol.toUpperCase()} \\(*$${this.formatMarkdownV2(toObj?.usdPrice.toString())}*\\)
+➡️Token From: ${fromObj?.symbol?.toUpperCase()} \\(*$${this.formatMarkdownV2(fromObj?.usdPrice.toString())}*\\)
+⬅️Token To: ${toObj?.symbol?.toUpperCase()} \\(*$${this.formatMarkdownV2(toObj?.usdPrice.toString())}*\\)
 👥Participants: $participants
 
-🔥More details Click here to 👉flashNews TG \\([Go to mini app](${userMiniApp}?startapp=${news.code})\\)
+🔥More details Click here to 👉magicNews TG \\([Go to mini app](${userMiniApp}?startapp=${news.code})\\)
 
-🌈Push flashNews Alerts in group? Invite [@flashNews](${tgbot}?startgroup=join_en) in your group
+🌈Push magicNews Alerts in group? Invite [@magicNews](${tgbot}?startgroup=join_en) in your group
 `;
     }
 
@@ -610,10 +628,10 @@ ${this.formatMarkdownV2(content).replaceAll(
 👨‍🍳交易策略:
 
 📍 ${this.formatMarkdownV2(network)}
-➡️Token From: ${fromObj?.symbol.toUpperCase()} \\(*$${this.formatMarkdownV2(fromObj?.usdPrice.toString())}*\\)
-⬅️Token To: ${toObj?.symbol.toUpperCase()} \\(*$${this.formatMarkdownV2(toObj?.usdPrice.toString())}*\\)
+➡️Token From: ${fromObj?.symbol?.toUpperCase()} \\(*$${this.formatMarkdownV2(fromObj?.usdPrice.toString())}*\\)
+⬅️Token To: ${toObj?.symbol?.toUpperCase()} \\(*$${this.formatMarkdownV2(toObj?.usdPrice.toString())}*\\)
 
-🌈在您的群中推送 flashNews 邀请 [@flashNews](${tgbot}?startgroup=join_cn) 到您的群中
+🌈在您的群中推送 magicNews 邀请 [@magicNews](${tgbot}?startgroup=join_cn) 到您的群中
 `;
     } else {
       lang = 'en';
@@ -628,10 +646,10 @@ ${this.formatMarkdownV2(content).replaceAll(
 👨‍🍳Trading Strategy:
 
 📍 ${this.formatMarkdownV2(network)}
-➡️Token From: ${fromObj?.symbol.toUpperCase()} \\(*$${this.formatMarkdownV2(fromObj?.usdPrice.toString())}*\\)
-⬅️Token To: ${toObj?.symbol.toUpperCase()} \\(*$${this.formatMarkdownV2(toObj?.usdPrice.toString())}*\\)
+➡️Token From: ${fromObj?.symbol?.toUpperCase()} \\(*$${this.formatMarkdownV2(fromObj?.usdPrice.toString())}*\\)
+⬅️Token To: ${toObj?.symbol?.toUpperCase()} \\(*$${this.formatMarkdownV2(toObj?.usdPrice.toString())}*\\)
 
-🌈Push flashNews Alerts in group? Invite [@flashNews](${tgbot}?startgroup=join_en) in your group
+🌈Push magicNews Alerts in group? Invite [@magicNews](${tgbot}?startgroup=join_en) in your group
 `;
     }
     const caption = captionTemplate;
@@ -848,11 +866,39 @@ ${this.formatMarkdownV2(content).replaceAll(
         }
       } catch (error) {
         this.logger.log(
-          `updateFlashNews error, chatId:${tgMessage.chatId}, messageId:${tgMessage.messageId}, error:`,
+          `updatemagicNews error, chatId:${tgMessage.chatId}, messageId:${tgMessage.messageId}, error:`,
           error.message,
         );
       }
     });
+  }
+
+  async warningCommissionAddressExpired() {
+    const expiredGroups = await this.tgGroupAndChannelRepository.find({
+      where: {
+        addressExpireAt: LessThanOrEqual(new Date(Date.now())),
+      },
+    });
+    if (expiredGroups.length == 0) {
+      return;
+    }
+    const config = await configFactory();
+    const bot = config.tgbot.flashnewsbot;
+    for (const expiredGroup of expiredGroups) {
+      const text = `👏 The commission address for this group has expired, and others can now set it up again\\.
+👇Send your Wallet Address and mention @${this.formatMarkdownV2(bot)} or reply this message to receive Trade Commission from members in this group\\!
+`;
+      try {
+        await this.bot.sendMessage(expiredGroup.chatId, text, {
+          parse_mode: 'MarkdownV2',
+        });
+      } catch (error) {
+        this.logger.error(
+          `warningFlashNewsExpired error, chatId:${expiredGroup.chatId}, error:`,
+          error.message,
+        );
+      }
+    }
   }
 
   formatMarkdownV2(text: string) {

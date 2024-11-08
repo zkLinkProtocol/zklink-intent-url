@@ -269,9 +269,12 @@ export class TgbotController extends BaseController {
   }
 
   @Post('onGroupChat')
-  async onGroupChat(@Body('data') data: any) {
+  async onGroupChat(
+    @Body('data') data: any,
+    @Query('address') address: string,
+  ) {
     try {
-      const res = await this.flashNewsBotService.onGroupChat(data);
+      const res = await this.flashNewsBotService.onGroupChat(data, address);
       return this.success(res);
     } catch (error) {
       this.logger.error(error);

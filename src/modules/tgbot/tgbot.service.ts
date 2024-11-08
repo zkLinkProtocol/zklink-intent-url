@@ -66,7 +66,7 @@ export class TgbotService implements OnModuleInit {
   async onInviteReply(tgUserId: string, chatId: string, messageId: string) {
     const config = await configFactory();
     const botLink = `https://t.me/${config.tgbot.flashnewsbot}`;
-    const text = `Choose Language you want [@flashnewsBot](${botLink}) Bot Speak\\!`;
+    const text = `Choose Language you want [@magicnewsBot](${botLink}) Bot Speak\\!`;
     const parse_mode: ParseMode = 'MarkdownV2';
     const reply_markup = {
       inline_keyboard: [
@@ -104,7 +104,7 @@ export class TgbotService implements OnModuleInit {
 
     💫 [*__Create__*](https://magic.zklink.io/dashboard/intent) magicLink & unlock potential to grab even more strategies with fun\\!
 
-    🗞 [*__Follow__*](https://t.me/${config.tgbot.newsChannelIdEn}) up with flashNews to know the first\\-hand crypto message\\!
+    🗞 [*__Follow__*](https://t.me/${config.tgbot.newsChannelIdEn}) up with magicNews to know the first\\-hand crypto message\\!
 
     💳 [*__Check__*](${userMiniApp}?startapp=portfolio) your Portfolio & Magic Account
 
@@ -247,17 +247,17 @@ export class TgbotService implements OnModuleInit {
     const config = await configFactory();
     const channelLink = `https://t.me/${config.tgbot.newsChannelIdEn}`;
     const channelLinkCn = `https://t.me/${config.tgbot.newsChannelIdCn}`;
-    const text = `Want to know first hand Crypto News? Follow up with our flashNews Channel\\!`;
+    const text = `Want to know first hand Crypto News? Follow up with our magicNews Channel\\!`;
     const parse_mode: ParseMode = 'MarkdownV2';
     const reply_markup = {
       inline_keyboard: [
         [
           {
-            text: 'flashNews Channel',
+            text: 'magicNews Channel',
             url: channelLink,
           },
           {
-            text: 'flashNews中文频道',
+            text: 'magicNews中文频道',
             url: channelLinkCn,
           },
         ],
