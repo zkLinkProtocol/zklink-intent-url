@@ -260,11 +260,6 @@ export class MagicSwapService extends ActionDto<FieldTypes> {
         .decimals;
     }
 
-    formData.tokenTo =
-      formData.tokenTo.toLowerCase() === ethers.ZeroAddress
-        ? '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
-        : formData.tokenTo;
-
     try {
       for (const amountToBuy of formData.amountToBuy) {
         await this.okxService.getSwapData(
