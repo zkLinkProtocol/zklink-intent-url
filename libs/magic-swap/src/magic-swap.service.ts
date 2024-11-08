@@ -168,6 +168,10 @@ export class MagicSwapService extends ActionDto<FieldTypes> {
         ),
         decimals,
       ),
+      tokenTo:
+        formData.tokenTo.toLowerCase() === ethers.ZeroAddress
+          ? '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
+          : formData.tokenTo,
     };
 
     let approveTx: TransactionInfo;

@@ -35,9 +35,6 @@ export class OkxBridgeService extends ActionDto<FieldTypes> {
     this.chains = this.configService.get('chains', { infer: true })!;
   }
   async getMetadata(): Promise<ActionMetadata<FieldTypes>> {
-    const whiteListConfig =
-      this.configService.get<string>('NEWS_WHITE_ADDRESS');
-    const whiteList = whiteListConfig ? whiteListConfig.split(',') : [];
     return {
       title: 'Bridge via OKX Bridge',
       description:
@@ -59,7 +56,6 @@ export class OkxBridgeService extends ActionDto<FieldTypes> {
         title: 'Bridge Now!',
         description: 'Bridge your cryptocurrency between different networks.',
       },
-      whiteList: whiteList,
       intent: {
         binding: 'bridgeAmount',
         components: [
@@ -172,6 +168,10 @@ export class OkxBridgeService extends ActionDto<FieldTypes> {
     const params = {
       ...restParams,
       amountToBuy: ethers.parseUnits(bridgeAmount, tokenFromDecimal),
+      tokenTo:
+        formData.tokenTo.toLowerCase() === ethers.ZeroAddress
+          ? '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
+          : formData.tokenTo,
     };
 
     let approveTx: TransactionInfo;
