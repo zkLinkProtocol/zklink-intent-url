@@ -2,6 +2,7 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ethers } from 'ethers';
 import html2md from 'html-to-md';
 import { LRUCache } from 'lru-cache';
+import { customAlphabet } from 'nanoid';
 import TelegramBot, {
   ChatMemberUpdated,
   ParseMode,
@@ -10,9 +11,11 @@ import { LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
 
 import { NetworkDto } from 'src/common/dto';
 import configFactory from 'src/config';
+import { ScSession } from 'src/entities/scSession.entity';
 import { TgGroupAndChannel } from 'src/entities/tgGroupAndChannel.entity';
 import { BusinessException } from 'src/exception/business.exception';
 import {
+  ScSessionRepository,
   TgGroupAndChannelRepository,
   TgMessageRepository,
 } from 'src/repositories';
@@ -41,6 +44,7 @@ export class FlashNewsBotService implements OnModuleInit {
     private readonly coingeckoService: CoingeckoService,
     private readonly tgMessageRepository: TgMessageRepository,
     private readonly tgGroupAndChannelRepository: TgGroupAndChannelRepository,
+    private readonly scSessionRepository: ScSessionRepository,
   ) {}
 
   async update(body: any) {
@@ -580,7 +584,9 @@ ${this.formatMarkdownV2(content).replaceAll(
     fromTokenAddress: string,
     toTokenAddress: string,
     settings: Settings,
+    sc?: string,
   ) {
+    let shareText = '';
     const config = await configFactory();
     const userMiniApp = config.tgbot.userMiniApp;
     const newsChannelIdCn = config.tgbot.newsChannelIdCn;
@@ -617,6 +623,11 @@ ${this.formatMarkdownV2(content).replaceAll(
     let linkIndex = 0;
     let lang = 'cn';
     if (this.containsChineseCharacters(content)) {
+      shareText = sc
+        ? sc
+        : `嘿😎，这是可以自定义你一键操作的 magicLink🎯
+
+现在通过我的邀请链接开始行动吧！`;
       newsChannelId = newsChannelIdCn;
       captionTemplate = `
       🟢*${this.formatMarkdownV2(title)}*🟢
@@ -634,6 +645,11 @@ ${this.formatMarkdownV2(content).replaceAll(
 🌈在您的群中推送 magicNews 邀请 [@magicNews](${tgbot}?startgroup=join_cn) 到您的群中
 `;
     } else {
+      shareText = sc
+        ? sc
+        : `Hey😎, here's the magicLink that can customize your one-click action🎯
+
+Start ACTION from my invite link now!`;
       lang = 'en';
       newsChannelId = newsChannelIdEn;
       captionTemplate = `
@@ -682,6 +698,12 @@ ${this.formatMarkdownV2(content).replaceAll(
       ];
     }
     inlineKeyboard.push(typeActions);
+
+    const nanoid = customAlphabet(
+      '1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
+      8,
+    );
+    const shareTextArr: ScSession[] = [];
     const actions = settings.intentList;
     for (let i = 0; i < actions.length; i++) {
       const lineButtons = [];
@@ -699,13 +721,20 @@ ${this.formatMarkdownV2(content).replaceAll(
         ) {
           const urlTmp = new URL(action.value);
           const pathSegments = urlTmp.pathname.split('/');
+          const scOfUrl = urlTmp.searchParams.get('sc');
+          const shareTextLink = scOfUrl ? scOfUrl : shareText;
+          const sessionId = nanoid(20);
+          shareTextArr.push({
+            sessionId,
+            data: shareTextLink,
+          } as ScSession);
           const code = pathSegments[pathSegments.length - 1];
           const btnIndex = action.btnIndex ?? '';
           const btnIndexStr =
             btnIndex === ''
               ? ''
               : Math.max(parseInt(btnIndex) - 1, 0).toString();
-          url = `${userMiniApp}?startapp=${code}_${btnIndexStr}`;
+          url = `${userMiniApp}?startapp=${code}_${btnIndexStr}___${sessionId}`;
         } else {
           url = action.value;
         }
@@ -716,6 +745,13 @@ ${this.formatMarkdownV2(content).replaceAll(
         });
       }
       inlineKeyboard.push(lineButtons);
+    }
+    if (shareTextArr.length > 0) {
+      try {
+        await this.scSessionRepository.addMany(shareTextArr);
+      } catch (error) {
+        this.logger.error('sendNewsOrigin error', error.stack);
+      }
     }
     const reply_markup = {
       inline_keyboard: inlineKeyboard,
@@ -767,6 +803,10 @@ ${this.formatMarkdownV2(content).replaceAll(
         );
       }
     }
+  }
+
+  async getScBySessionId(sessionId: string) {
+    return await this.scSessionRepository.getData(sessionId);
   }
 
   async editMessageReplyMarkupPollText(
