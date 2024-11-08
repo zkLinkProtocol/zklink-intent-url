@@ -150,7 +150,7 @@ export class OKXService {
       slippage: '0.005',
       userWalletAddress: userAddress,
     };
-    logger.log('swapparams', swapParams.amount);
+    logger.log('swapparams', JSON.stringify(swapParams));
     const swapURL = this.getAggregatorRequestUrl('swap', swapParams);
 
     const swapToSignUrl = swapURL.replace('https://www.okx.com', '');
