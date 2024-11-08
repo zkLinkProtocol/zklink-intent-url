@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 
+import { AgxModule } from '@action/agx';
 import { BuyMeACoffeeModule } from '@action/buy-me-a-coffee';
 import { BuyNftMagicEdenModule } from '@action/buy-nft-magic-eden';
 import { BuyNftOKXModule } from '@action/buy-nft-okx';
@@ -33,6 +34,7 @@ import { RegistryService } from './registry.service';
     SharedRedPacketModule,
     PreSaleModule,
     MagicSwapModule,
+    AgxModule,
   ],
   providers: [RegistryService],
   exports: [RegistryService],

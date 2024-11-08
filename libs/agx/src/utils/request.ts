@@ -131,22 +131,23 @@ export const fetchLockedParams = async (pair: string, leverage: number) => {
   return output;
 };
 
-export const executeSendQuoteMarket = async (
-  chainId: number,
+export const getPrice = async (
   marketId: number,
   subAccount: string,
-  positionType: PositionType,
-  orderType: OrderType, //OrderType.Market
-  quantity: string,
+  chainId: number,
   slippage: 'auto' | number,
-  leverage: number,
-) => {
+  positionType: PositionType,
+  orderType: OrderType,
+  typedPriceBNStr: string,
+): Promise<bigint> => {
   const { markets } = await fetchMarketSymbolId(marketId);
-  const lockedParams = await fetchLockedParams(markets[0].name, leverage);
   const autoSlippage = markets[0].autoSlippage;
 
   const signatureResult = await getMuonSign(subAccount, chainId, marketId);
-  let adjustedPrice = BigInt(signatureResult.price); //Getting Price from the Muon Signature, place 18 decimals
+  let adjustedPrice =
+    orderType === OrderType.MARKET
+      ? BigInt(signatureResult.price)
+      : BigInt(typedPriceBNStr);
   let numericSlippage;
 
   if (slippage === 'auto') {
@@ -159,8 +160,7 @@ export const executeSendQuoteMarket = async (
   } else {
     numericSlippage = Number(slippage);
     if (isNaN(numericSlippage)) {
-      console.error("Slippage must be a number or 'auto'");
-      return;
+      throw new Error("Slippage must be a number or 'auto'");
     }
     const spSigned =
       positionType === PositionType.SHORT ? numericSlippage : -numericSlippage;
@@ -169,7 +169,40 @@ export const executeSendQuoteMarket = async (
     adjustedPrice = (adjustedPrice * slippageFactorBigInt) / BigInt(100);
   }
 
-  const requestedPrice = adjustedPrice;
+  return adjustedPrice;
+};
+
+export const getDeadline = (orderType: OrderType) => {
+  const deadline =
+    orderType === OrderType.MARKET
+      ? Math.floor(Date.now() / 1000) + MARKET_ORDER_DEADLINE
+      : Math.floor(Date.now() / 1000) + LIMIT_ORDER_DEADLINE;
+
+  return deadline;
+};
+
+export const executeSendQuoteMarket = async (
+  chainId: number,
+  marketId: number,
+  subAccount: string,
+  positionType: PositionType,
+  orderType: OrderType, //OrderType.Market
+  quantity: string,
+  slippage: 'auto' | number,
+  leverage: number,
+) => {
+  const { markets } = await fetchMarketSymbolId(marketId);
+  const lockedParams = await fetchLockedParams(markets[0].name, leverage);
+  const signatureResult = await getMuonSign(subAccount, chainId, marketId);
+  const requestedPrice = await getPrice(
+    marketId,
+    subAccount,
+    chainId,
+    slippage,
+    positionType,
+    orderType,
+    '0', // only supported marked order
+  );
 
   const { reqId, timestamp, upnl, price, gatewaySignature, sigs } =
     signatureResult;
@@ -206,7 +239,7 @@ export const executeSendQuoteMarket = async (
     .parseUnits(quantity.toString(), 18)
     .toString();
   console.log('requestedQuantityWei:', requestedQuantityWei);
-  const adjustedPriceStr = adjustedPrice.toString();
+  const adjustedPriceStr = requestedPrice.toString();
   const notionalValue = toBN(requestedQuantityWei).multipliedBy(
     toBN(adjustedPriceStr),
   );
@@ -240,10 +273,7 @@ export const executeSendQuoteMarket = async (
 
   // Finally, set the maxFundingRate and deadline:
   const maxFundingRate = markets[0].maxFundingRate;
-  const deadline =
-    orderType === OrderType.MARKET
-      ? Math.floor(Date.now() / 1000) + MARKET_ORDER_DEADLINE
-      : Math.floor(Date.now() / 1000) + LIMIT_ORDER_DEADLINE;
+  const deadline = getDeadline(orderType);
   const sendQuoteParameters = [
     partyBsWhiteList,
     symbolId,
@@ -258,7 +288,7 @@ export const executeSendQuoteMarket = async (
     maxFundingRate.toString(),
     deadline.toString(),
     upnlSigFormatted,
-  ];
+  ] as const;
 
   return sendQuoteParameters;
 };

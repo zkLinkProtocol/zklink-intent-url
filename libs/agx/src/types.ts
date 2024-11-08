@@ -1,13 +1,6 @@
 export type FieldTypes = {
-  amount: string;
-  slippage: 'auto' | number;
-  marketId: number;
-  positionType: PositionType;
-  orderType: OrderType;
-  quantity: string;
-  leverage: number;
-  accountName: string;
-  txType: 'addAccount' | 'sendQuote';
+  token: string;
+  name: string;
 };
 
 export type TransactionResult = {
