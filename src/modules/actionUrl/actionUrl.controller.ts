@@ -23,6 +23,7 @@ import {
   ApiTags,
   getSchemaPath,
 } from '@nestjs/swagger';
+import { ethers } from 'ethers';
 import { Response } from 'express';
 
 import { OKXService } from '@core/shared';
@@ -717,7 +718,11 @@ export class ActionUrlController extends BaseController {
     const supportTokens = await this.okxService.getAllTokens(Number(chainId));
     return supportTokens.map((token) => ({
       lable: token.tokenSymbol,
-      address: token.tokenContractAddress,
+      address:
+        token.tokenContractAddress.toLowerCase() ===
+        '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
+          ? ethers.ZeroAddress
+          : token.tokenContractAddress,
       decimals: token.decimals,
     }));
   }

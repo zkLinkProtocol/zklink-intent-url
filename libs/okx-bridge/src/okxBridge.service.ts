@@ -155,10 +155,10 @@ export class OkxBridgeService extends ActionDto<FieldTypes> {
     const provider = this.chainService.getProvider(fromChainId);
 
     let tokenFromDecimal;
-    if (
-      formData.tokenFrom.toLocaleLowerCase() ===
-      '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
-    ) {
+    let tokenInAddress = formData.tokenFrom.toLowerCase() as Address;
+
+    if (tokenInAddress === ethers.ZeroAddress) {
+      tokenInAddress = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
       tokenFromDecimal = 18;
     } else {
       const tokenFromContract = await new Contract(
@@ -182,7 +182,6 @@ export class OkxBridgeService extends ActionDto<FieldTypes> {
         direction?: 'from' | 'to';
       }>;
     };
-    const tokenInAddress = formData.tokenFrom.toLowerCase() as Address;
 
     const tokens: TransactionInfo['requiredTokenAmount'] = [
       {
@@ -192,7 +191,7 @@ export class OkxBridgeService extends ActionDto<FieldTypes> {
     ];
 
     if (
-      tokenInAddress.toLocaleLowerCase() ===
+      tokenInAddress.toLowerCase() ===
       '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
     ) {
       bridgeTx = await this.okxService.getBridgeData(
@@ -295,10 +294,7 @@ export class OkxBridgeService extends ActionDto<FieldTypes> {
     let tokenFromDecimal: bigint;
     let tokenSymbol: string;
     const provider = this.chainService.getProvider(chainId);
-    if (
-      formData.tokenFrom.toLocaleLowerCase() ===
-      '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
-    ) {
+    if (formData.tokenFrom.toLowerCase() === ethers.ZeroAddress) {
       tokenFromDecimal = 18n;
       tokenSymbol = 'ETH';
     } else {
@@ -326,10 +322,7 @@ export class OkxBridgeService extends ActionDto<FieldTypes> {
     const { chainId } = additionalData;
     let tokenSymbol: string;
     const provider = this.chainService.getProvider(chainId);
-    if (
-      formData.tokenFrom.toLocaleLowerCase() ===
-      '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
-    ) {
+    if (formData.tokenFrom.toLowerCase() === ethers.ZeroAddress) {
       tokenSymbol = 'ETH';
     } else {
       const { symbol } = await getERC20SymbolAndDecimals(

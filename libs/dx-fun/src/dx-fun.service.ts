@@ -72,7 +72,7 @@ export class DxFunService extends ActionDto<FieldTypes> {
             label: 'Coin description',
             desc: 'The description of the coin',
             type: 'input',
-            regex: '',
+            regex: '.{5,}',
             regexDesc: 'Coin description',
           },
         ],
