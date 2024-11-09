@@ -1,5 +1,6 @@
 import { RegistryPlug } from '@action/registry';
 import { ChainService, OKXService } from '@core/shared';
+import { getERC20SymbolAndDecimals } from '@core/utils';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Contract, ethers } from 'ethers';
@@ -8,6 +9,7 @@ import {
   ActionMetadata,
   GenerateTransactionParams,
   GenerateTransactionResponse,
+  ReporterResponse,
   TransactionInfo,
   UpdateFieldType,
 } from 'src/common/dto';
@@ -266,5 +268,57 @@ export class NewsService extends ActionDto<FieldTypes> {
   ): Promise<TransactionInfo[]> {
     await this.flashNewsBotService.sendNews(data.additionalData.code!);
     return [];
+  }
+
+  public async reportTransaction(
+    data: GenerateTransactionParams<FieldTypes>,
+    _txHashes: Array<{ hash: string; chainId: number }>,
+  ): Promise<ReporterResponse> {
+    const { formData, additionalData } = data;
+    const { chainId } = additionalData;
+    let tokenFromDecimal: bigint;
+    let tokenSymbol: string;
+    const provider = this.chainService.getProvider(chainId);
+    if (formData.tokenFrom.toLowerCase() === ethers.ZeroAddress) {
+      tokenFromDecimal = 18n;
+      tokenSymbol = 'ETH';
+    } else {
+      const { symbol, decimals } = await getERC20SymbolAndDecimals(
+        provider,
+        formData.tokenFrom,
+      );
+      tokenFromDecimal = decimals;
+      tokenSymbol = symbol;
+    }
+    const amount = ethers.formatUnits(formData.amountToBuy, tokenFromDecimal);
+    return {
+      tip: `Buy ${amount} worthed ${tokenSymbol} successfully`,
+      sharedContent: {
+        en: `🤖AI Strategy on Flash News\n ⏩️⏩️⏩️Long 🔥${tokenSymbol}🔥\n\n🤩I’ve just bought ${amount} of ${tokenSymbol}\n\nStart your Action now! 📈👇`,
+        zh: `🤖AI 交易策略基于Flash News\n⏩️⏩️⏩️看涨 🔥${tokenSymbol}🔥\n\n🤩我刚刚购买了${amount}个${tokenSymbol}\n\n现在开始行动吧！ 📈👇`,
+      },
+    };
+  }
+
+  public async generateSharedContent(
+    data: GenerateTransactionParams<FieldTypes>,
+  ) {
+    const { formData, additionalData } = data;
+    const { chainId } = additionalData;
+    let tokenSymbol: string;
+    const provider = this.chainService.getProvider(chainId);
+    if (formData.tokenFrom.toLowerCase() === ethers.ZeroAddress) {
+      tokenSymbol = 'ETH';
+    } else {
+      const { symbol } = await getERC20SymbolAndDecimals(
+        provider,
+        formData.tokenFrom,
+      );
+      tokenSymbol = symbol;
+    }
+    return {
+      en: `🤖AI Strategy on Flash News\n⏩️⏩️⏩️Long 🔥${tokenSymbol}🔥\n\nStart your Action now! 📈👇`,
+      zh: `🤖AI 交易策略基于Flash News\n⏩️⏩️⏩️看涨 🔥${tokenSymbol}🔥\n\n现在开始行动吧！ 📈👇`,
+    };
   }
 }
