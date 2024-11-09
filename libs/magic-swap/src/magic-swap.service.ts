@@ -168,6 +168,10 @@ export class MagicSwapService extends ActionDto<FieldTypes> {
         ),
         decimals,
       ),
+      tokenTo:
+        formData.tokenTo.toLowerCase() === ethers.ZeroAddress
+          ? '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
+          : formData.tokenTo,
     };
 
     let approveTx: TransactionInfo;
@@ -255,6 +259,11 @@ export class MagicSwapService extends ActionDto<FieldTypes> {
       decimals = (await getERC20SymbolAndDecimals(provider, tokenInAddress))
         .decimals;
     }
+
+    formData.tokenTo =
+      formData.tokenTo.toLowerCase() === ethers.ZeroAddress
+        ? '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
+        : formData.tokenTo;
 
     try {
       for (const amountToBuy of formData.amountToBuy) {

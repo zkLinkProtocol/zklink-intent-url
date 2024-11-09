@@ -95,8 +95,20 @@ export class TgbotController extends BaseController {
         body.fromTokenAddress,
         body.toTokenAddress,
         body.settings,
+        body.sc,
       );
       return this.success(true);
+    } catch (error) {
+      this.logger.error(error);
+      return this.error(error.message);
+    }
+  }
+
+  @Get('getSc')
+  async getSc(@Query('sessionId') sessionId: string) {
+    try {
+      const res = await this.flashNewsBotService.getScBySessionId(sessionId);
+      return this.success(res);
     } catch (error) {
       this.logger.error(error);
       return this.error(error.message);

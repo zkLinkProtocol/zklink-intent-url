@@ -15,6 +15,7 @@ import { Creator } from './entities/creator.entity';
 import { Intention } from './entities/intention.entity';
 import { IntentionRecord } from './entities/intentionRecord.entity';
 import { IntentionRecordTx } from './entities/intentionRecordTx.entity';
+import { ScSession } from './entities/scSession.entity';
 import { TgGroupAndChannel } from './entities/tgGroupAndChannel.entity';
 import { TgMessage } from './entities/tgMessage.entity';
 import { MetricsModule } from './metrics';
@@ -85,6 +86,7 @@ import { UnitOfWorkModule } from './unitOfWork';
       IntentionRecordTx,
       TgMessage,
       TgGroupAndChannel,
+      ScSession,
     ]),
     ActionModule.forRoot(),
     MetricsModule,

@@ -183,6 +183,11 @@ export class ActionUrlService {
         `generateTransaction failed`,
         JSON.stringify({ data, error }),
       );
+
+      if (error instanceof BusinessException) {
+        throw error;
+      }
+
       throw new Error('Failed to generate transaction');
     }
   }
