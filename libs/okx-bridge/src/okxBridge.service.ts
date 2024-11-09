@@ -278,13 +278,6 @@ export class OkxBridgeService extends ActionDto<FieldTypes> {
     return !isNaN(num);
   }
 
-  public async onMagicLinkCreated(
-    data: GenerateTransactionParams<FieldTypes>,
-  ): Promise<TransactionInfo[]> {
-    await this.flashNewsBotService.sendNews(data.additionalData.code!);
-    return [];
-  }
-
   public async reportTransaction(
     data: GenerateTransactionParams<FieldTypes>,
     _txHashes: Array<{ hash: string; chainId: number }>,
