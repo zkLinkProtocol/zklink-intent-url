@@ -97,6 +97,10 @@ export class CrossChainSwapService extends ActionDto<FieldTypes> {
     const params = {
       ...restParams,
       amountToBuy: ethers.parseUnits(amountToBuy, tokenFrom.decimal),
+      tokenTo:
+        formData.tokenTo.toLowerCase() === ethers.ZeroAddress
+          ? '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
+          : formData.tokenTo,
     };
 
     let approveTx: TransactionInfo;

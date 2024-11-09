@@ -168,6 +168,10 @@ export class MagicSwapService extends ActionDto<FieldTypes> {
         ),
         decimals,
       ),
+      tokenTo:
+        formData.tokenTo.toLowerCase() === ethers.ZeroAddress
+          ? '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
+          : formData.tokenTo,
     };
 
     let approveTx: TransactionInfo;
@@ -256,6 +260,11 @@ export class MagicSwapService extends ActionDto<FieldTypes> {
         .decimals;
     }
 
+    formData.tokenTo =
+      formData.tokenTo.toLowerCase() === ethers.ZeroAddress
+        ? '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
+        : formData.tokenTo;
+
     try {
       for (const amountToBuy of formData.amountToBuy) {
         await this.okxService.getSwapData(
@@ -282,6 +291,7 @@ export class MagicSwapService extends ActionDto<FieldTypes> {
       return 'Amount must be a number';
     return '';
   }
+
   isNumeric(value: string): boolean {
     const num = Number(value);
     return !isNaN(num);

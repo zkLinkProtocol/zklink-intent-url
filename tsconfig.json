@@ -137,6 +137,12 @@
       ],
       "@action/magic-swap/*": [
         "libs/magic-swap/src/*"
+      ],
+      "@action/agx": [
+        "libs/agx/src"
+      ],
+      "@action/agx/*": [
+        "libs/agx/src/*"
       ]
     }
   }

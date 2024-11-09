@@ -7,6 +7,7 @@ import {
   IntentionRecordRepository,
   IntentionRecordTxRepository,
   IntentionRepository,
+  ScSessionRepository,
   TgGroupAndChannelRepository,
   TgMessageRepository,
 } from 'src/repositories';
@@ -40,6 +41,7 @@ import { CoingeckoService } from '../coingecko/coingecko.service';
     TgGroupAndChannelRepository,
     FlashNewsBotService,
     AibotService,
+    ScSessionRepository,
   ],
   exports: [TgbotService, FlashNewsBotService],
   controllers: [TgbotController],

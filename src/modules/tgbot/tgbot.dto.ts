@@ -31,6 +31,15 @@ export class SendNewsOriginRequestDto {
   metadata: string;
 
   @ApiProperty({
+    name: 'sc',
+    description: 'sc.',
+    required: true,
+  })
+  @IsString()
+  @IsNotEmpty()
+  sc: string;
+
+  @ApiProperty({
     name: 'fromTokenAddress',
     description: 'Address of from token.',
     required: true,

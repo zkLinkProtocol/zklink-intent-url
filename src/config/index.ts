@@ -4,6 +4,11 @@ const configFactory = async () => {
   return {
     env: (process.env.ENV || 'dev') as 'dev' | 'prod',
     port: parseInt(process.env.PORT || '3010', 10),
+    redis: {
+      host: process.env.REDIS_HOST || '127.0.0.2',
+      port: Number(process.env.REDIS_PORT) || 6379,
+      db: Number(process.env.REDIS_DB) || 0,
+    },
     jwt: {
       secret: process.env.JWT_SECRET || '',
       expirationTime: process.env.JWT_EXPIRATION_TIME || '3600s',
