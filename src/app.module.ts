@@ -1,12 +1,14 @@
+import { CacheModule, CacheStore } from '@nestjs/cache-manager';
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { redisStore } from 'cache-manager-ioredis-yet';
 import { nanoid } from 'nanoid';
 import { ClsModule } from 'nestjs-cls';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import configFactory from './config';
+import configFactory, { ConfigType } from './config';
 import { Action } from './entities/action.entity';
 import { Commission } from './entities/commission.entity';
 import { Creator } from './entities/creator.entity';
@@ -29,6 +31,28 @@ import { UnitOfWorkModule } from './unitOfWork';
 
 @Module({
   imports: [
+    CacheModule.registerAsync({
+      isGlobal: true,
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => {
+        const redisConfig = configService.get('redis', {
+          infer: true,
+        }) as ConfigType['redis'];
+
+        const store = await redisStore({
+          host: redisConfig.host,
+          port: redisConfig.port,
+          db: redisConfig.db,
+          ttl: 5 * 60 * 1000, // default 5 minutes
+          keyPrefix: 'magicLink:',
+        });
+
+        return {
+          store: store as unknown as CacheStore,
+        };
+      },
+    }),
     ClsModule.forRoot({
       global: true,
       middleware: {

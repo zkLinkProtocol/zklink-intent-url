@@ -291,6 +291,7 @@ export class MagicSwapService extends ActionDto<FieldTypes> {
       return 'Amount must be a number';
     return '';
   }
+
   isNumeric(value: string): boolean {
     const num = Number(value);
     return !isNaN(num);

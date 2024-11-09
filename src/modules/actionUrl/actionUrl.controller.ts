@@ -1,3 +1,4 @@
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import {
   Body,
   Controller,
@@ -5,6 +6,7 @@ import {
   ForbiddenException,
   Get,
   HttpStatus,
+  Inject,
   InternalServerErrorException,
   Logger,
   Param,
@@ -14,7 +16,6 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import {
   ApiBody,
   ApiParam,
@@ -23,8 +24,10 @@ import {
   ApiTags,
   getSchemaPath,
 } from '@nestjs/swagger';
+import { Cache } from 'cache-manager';
 import { ethers } from 'ethers';
 import { Response } from 'express';
+import { nanoid } from 'nanoid';
 
 import { OKXService } from '@core/shared';
 import { BaseController } from 'src/common/base.controller';
@@ -52,6 +55,7 @@ import {
   IntentionRecordAddRequestDto,
   IntentionRecordFindOneResponseDto,
   IntentionRecordListItemResponseDto,
+  TransactionInfoDto,
 } from './dto';
 import { IntentionRecordService } from './intentionRecord.service';
 import { ActionService } from '../action/action.service';
@@ -71,15 +75,30 @@ interface TransactionBody {
 export class ActionUrlController extends BaseController {
   private logger = new Logger(ActionUrlController.name);
   constructor(
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private readonly actionUrlService: ActionUrlService,
     private readonly commissionService: CommissionService,
     private readonly actionService: ActionService,
     private readonly intentionRecordService: IntentionRecordService,
     private readonly blinkService: BlinkService,
-    private readonly configService: ConfigService,
     private readonly okxService: OKXService,
   ) {
     super();
+  }
+
+  @Post('transactions')
+  @CommonApiOperation('Return transactions')
+  async postTransactions(@Body() body: TransactionInfoDto[]) {
+    const token = nanoid(8);
+    await this.cacheManager.set(token, body);
+    return this.success(token);
+  }
+
+  @Get('transactions/:token')
+  @CommonApiOperation('Return transactions')
+  async getTransactions(@Param('token') token: string) {
+    const result = await this.cacheManager.get(`${token}:hashes`);
+    return this.success(result);
   }
 
   @Get(':code')
@@ -108,6 +127,7 @@ export class ActionUrlController extends BaseController {
       creator: {
         address: result.creator.address,
       },
+      active: result.active,
     } as ActionUrlResponseDto;
 
     const settingValue = result.settings.intentInfo.components.reduce(
