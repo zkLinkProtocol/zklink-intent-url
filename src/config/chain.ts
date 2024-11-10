@@ -21,7 +21,7 @@ export const chainConfig: Array<{
   {
     chainId: Chains.Base,
     name: 'Base',
-    rpc: ['https://base.llamarpc.com'],
+    rpc: ['wss://base-rpc.publicnode.com'],
     explorer: 'https://basescan.org',
   },
   {
