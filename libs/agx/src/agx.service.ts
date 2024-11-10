@@ -25,6 +25,7 @@ export class AgxService extends ActionDto<FieldTypes> {
 
   async getMetadata(): Promise<ActionMetadata<FieldTypes>> {
     return {
+      whiteList: ['0x78854850E7Afed5D0Bda68A56FAC24FF9347B7bD'],
       title: 'AGX - One-Click Perpetual Trading',
       description:
         '<div>This action allows you to create a magicLink to receive donations</div>',
