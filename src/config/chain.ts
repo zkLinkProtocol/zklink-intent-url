@@ -21,7 +21,7 @@ export const chainConfig: Array<{
   {
     chainId: Chains.Base,
     name: 'Base',
-    rpc: ['https://base.llamarpc.com'],
+    rpc: ['https://base-mainnet.infura.io/v3/f6c9c3549f6d44db9a13160669776a0d'],
     explorer: 'https://basescan.org',
   },
   {
