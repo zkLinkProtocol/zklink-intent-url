@@ -56,7 +56,7 @@ export class ActionService implements OnApplicationBootstrap {
           const fileName = path.basename(file, path.extname(file));
           return fileName === id;
         });
-        metadata.logo = `${this.awsConfig.s3Url}/${this.awsConfig.keyPrefix}/logos/${logoWithExt ?? 'zklink.png'}`;
+        metadata.logo = `${this.awsConfig.s3Url}/${this.awsConfig.keyPrefix}/logos/${logoWithExt ?? 'magicLink.png'}`;
       }
 
       if (!metadata.magicLinkMetadata?.gallery) {
