@@ -63,8 +63,8 @@ export class ActionController extends BaseController {
     const actions = await this.actionService.getAllActionMetadata(
       creator.address,
     );
-
-    return this.success(actions);
+    const filteredActions = actions.filter((i) => i.id !== 'novaswap');
+    return this.success(filteredActions);
   }
 
   @Get(':id')
