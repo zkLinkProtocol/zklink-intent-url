@@ -274,30 +274,44 @@ export class MagicSwapService extends ActionDto<FieldTypes> {
   async validateFormData(
     formData: UpdateFieldType<FieldTypes, 'amountToBuy'>,
   ): Promise<ErrorMessage> {
-    const chainId = formData.chainId;
-    if (!chainId) {
-      return 'Missing chainId';
+    for (const amountToBuy of formData.amountToBuy) {
+      if (!this.isNumeric(amountToBuy)) return 'Amount must be a number';
     }
-    for (const amount of formData.amountToBuy) {
-      if (!this.isNumeric(amount)) return 'Amount must be a number';
+    const chainId = formData.chainId;
+    const mockAccount = '0xA510dbc9aC79a686EBB78cDaE791d91F3f45b3a9';
 
-      const checkParasm: GenerateTransactionParams<FieldTypes> = {
-        additionalData: {
+    let decimals;
+    let tokenInAddress = formData.tokenFrom;
+
+    const provider = this.chainService.getProvider(chainId);
+    if (formData.tokenFrom === ethers.ZeroAddress) {
+      tokenInAddress = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
+      decimals = 18;
+    } else {
+      decimals = (await getERC20SymbolAndDecimals(provider, tokenInAddress))
+        .decimals;
+    }
+
+    formData.tokenTo =
+      formData.tokenTo.toLowerCase() === ethers.ZeroAddress
+        ? '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
+        : formData.tokenTo;
+
+    try {
+      for (const amountToBuy of formData.amountToBuy) {
+        await this.okxService.getSwapData(
+          mockAccount,
           chainId,
-          // just for pre-check swap conditions,it can be any address
-          account: '0xA510dbc9aC79a686EBB78cDaE791d91F3f45b3a9',
-        },
-        formData: {
-          amountToBuy: amount,
-          tokenFrom: formData.tokenFrom,
-          tokenTo: formData.tokenTo,
-        },
-      };
-      try {
-        await this.generateTransaction(checkParasm);
-      } catch (err) {
-        return err.toString();
+          tokenInAddress,
+          formData.tokenTo,
+          ethers.parseUnits(
+            Number(amountToBuy).toFixed(Number(decimals)),
+            decimals,
+          ),
+        );
       }
+    } catch (err) {
+      return err.toString();
     }
     return '';
   }
