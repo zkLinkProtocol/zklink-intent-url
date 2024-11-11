@@ -49,6 +49,7 @@ export class NewsService extends ActionDto<FieldTypes> {
         Chains.OpMainnet,
         Chains.Linea,
         Chains.Base,
+        Chains.BSCMainnet,
         Chains.MantaPacificMainnet,
       ]),
       author: {
