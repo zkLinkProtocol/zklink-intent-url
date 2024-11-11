@@ -41,7 +41,10 @@ export class MagicSwapService extends ActionDto<FieldTypes> {
         Chains.EthereumMainnet,
         Chains.ArbitrumOne,
         Chains.OpMainnet,
+        Chains.Linea,
         Chains.Base,
+        Chains.BSCMainnet,
+        Chains.MantaPacificMainnet,
       ]),
       author: {
         name: 'zkLink Labs',
@@ -103,21 +106,6 @@ export class MagicSwapService extends ActionDto<FieldTypes> {
     if (!account) {
       throw new Error('Missing account!');
     }
-
-    if (chainId === 51) {
-      return {
-        transactions: [
-          await this.okxService.getSwapData(
-            '93AikG5NnncNRMFzHRRUYtmxDpkStwvZSwnmRLgn4Tmt',
-            chainId,
-            formData.tokenFrom,
-            formData.tokenTo,
-            BigInt(formData.amountToBuy),
-          ),
-        ],
-      };
-    }
-
     // commission to creator of code
     const creator = await this.dataService.getMagicLinkCreatorInfoByCode(code);
     if (!creator) {
@@ -242,44 +230,30 @@ export class MagicSwapService extends ActionDto<FieldTypes> {
   async validateFormData(
     formData: UpdateFieldType<FieldTypes, 'amountToBuy'>,
   ): Promise<ErrorMessage> {
-    for (const amountToBuy of formData.amountToBuy) {
-      if (!this.isNumeric(amountToBuy)) return 'Amount must be a number';
-    }
     const chainId = formData.chainId;
-    const mockAccount = '0xA510dbc9aC79a686EBB78cDaE791d91F3f45b3a9';
-
-    let decimals;
-    let tokenInAddress = formData.tokenFrom;
-
-    const provider = this.chainService.getProvider(chainId);
-    if (formData.tokenFrom === ethers.ZeroAddress) {
-      tokenInAddress = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
-      decimals = 18;
-    } else {
-      decimals = (await getERC20SymbolAndDecimals(provider, tokenInAddress))
-        .decimals;
+    if (!chainId) {
+      return 'Missing chainId';
     }
+    for (const amount of formData.amountToBuy) {
+      if (!this.isNumeric(amount)) return 'Amount must be a number';
 
-    formData.tokenTo =
-      formData.tokenTo.toLowerCase() === ethers.ZeroAddress
-        ? '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
-        : formData.tokenTo;
-
-    try {
-      for (const amountToBuy of formData.amountToBuy) {
-        await this.okxService.getSwapData(
-          mockAccount,
+      const checkParasm: GenerateTransactionParams<FieldTypes> = {
+        additionalData: {
           chainId,
-          tokenInAddress,
-          formData.tokenTo,
-          ethers.parseUnits(
-            Number(amountToBuy).toFixed(Number(decimals)),
-            decimals,
-          ),
-        );
+          // just for pre-check swap conditions,it can be any address
+          account: '0xA510dbc9aC79a686EBB78cDaE791d91F3f45b3a9',
+        },
+        formData: {
+          amountToBuy: amount,
+          tokenFrom: formData.tokenFrom,
+          tokenTo: formData.tokenTo,
+        },
+      };
+      try {
+        await this.generateTransaction(checkParasm);
+      } catch (err) {
+        return err.toString();
       }
-    } catch (err) {
-      return err.toString();
     }
     return '';
   }
