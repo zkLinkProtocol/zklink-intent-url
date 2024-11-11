@@ -65,16 +65,60 @@ export class MagicSwapService extends ActionDto<FieldTypes> {
             name: 'tokenFrom',
             label: 'Token From ',
             desc: 'The token you want to swap',
-            type: 'input',
-            regex: '^.*$',
+            type: 'inputSelect',
+            options: [
+              {
+                label: 'WBTC',
+                value: 'wbtc',
+              },
+              {
+                label: 'USDT',
+                value: 'usdt',
+              },
+              {
+                label: 'USDC',
+                value: 'usdc',
+              },
+              {
+                label: 'WETH',
+                value: 'WETH',
+              },
+              {
+                label: 'ETH',
+                value: 'ETH',
+              },
+            ],
+            regex: '^0x[a-fA-F0-9]{40}$',
             regexDesc: 'Invalid Address',
           },
           {
             name: 'tokenTo',
             label: 'Token To',
             desc: 'The address of the token you want to receive',
-            type: 'input',
-            regex: '^.*$',
+            type: 'inputSelect',
+            options: [
+              {
+                label: 'WBTC',
+                value: 'wbtc',
+              },
+              {
+                label: 'USDT',
+                value: 'usdt',
+              },
+              {
+                label: 'USDC',
+                value: 'usdc',
+              },
+              {
+                label: 'WETH',
+                value: 'WETH',
+              },
+              {
+                label: 'ETH',
+                value: 'ETH',
+              },
+            ],
+            regex: '^0x[a-fA-F0-9]{40}$',
             regexDesc: 'Invalid Address',
           },
         ],
