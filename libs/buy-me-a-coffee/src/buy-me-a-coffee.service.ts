@@ -297,7 +297,7 @@ export class BuyMeACoffeeService extends ActionDto<FieldTypes> {
         tokens: [
           {
             tokenAddress: token,
-            amount: value,
+            amount: amountToSend.toString(),
             direction: 'from',
           },
         ],
