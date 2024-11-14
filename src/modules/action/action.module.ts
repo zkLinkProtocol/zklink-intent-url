@@ -13,7 +13,7 @@ import { UnitOfWorkModule } from 'src/unitOfWork';
 import { ActionController } from './action.controller';
 import { ActionService } from './action.service';
 import { BigIntInterceptor } from './interceptor';
-import { RegistryAction } from './model';
+import { RegistryAction } from './interface';
 
 @Global()
 @Module({ imports: [DiscoveryModule, UnitOfWorkModule, RegistryModule] })

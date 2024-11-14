@@ -3,6 +3,7 @@ import { Type } from 'class-transformer';
 import {
   IsArray,
   IsBoolean,
+  IsEnum,
   IsNotEmpty,
   IsNumber,
   IsOptional,
@@ -108,4 +109,19 @@ export class GenerateTransactionDto {
   @ValidateNested({ each: true })
   @Type(() => TransactionInfoDto)
   transactions: TransactionInfoDto[];
+}
+
+export class SetTransactionStatusDto {
+  @IsEnum(['success', 'failure', 'rejected'], {
+    message: 'Status must be success, failure, or rejected',
+  })
+  status: 'success' | 'failure' | 'rejected';
+
+  @IsOptional()
+  @IsString({ message: 'Hash must be a string' })
+  hash?: string;
+
+  @IsOptional()
+  @IsString({ message: 'Reason must be a string' })
+  reason?: string;
 }
