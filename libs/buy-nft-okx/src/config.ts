@@ -10,6 +10,7 @@ export const okxChainAlias: { [key in Chains]?: string } = {
   [Chains.MantaPacificMainnet]: 'manta-pacific',
   [Chains.ScrollMainnet]: 'scroll',
   [Chains.ZkSync]: 'zksync-era',
+  [Chains.ZkLinkNova]: 'zkLink-Nova',
 };
 
 export const okxChainName: { [key in Chains]?: string } = {
@@ -22,4 +23,5 @@ export const okxChainName: { [key in Chains]?: string } = {
   [Chains.MantaPacificMainnet]: 'Manta Pacific',
   [Chains.ScrollMainnet]: 'Scroll',
   [Chains.ZkSync]: 'zkSync Era',
+  [Chains.ZkLinkNova]: 'zkLink Nova',
 };
