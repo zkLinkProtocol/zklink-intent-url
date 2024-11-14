@@ -127,7 +127,7 @@ export class BuyNftMagicEdenService extends ActionDto<FieldTypes> {
       const floorPrice = floorAsk['price']['amount']['decimal'];
       const priceSymbol = floorAsk['price']['currency']['symbol'];
       this.nftHtmlInfo.push(
-        `<p>${info['token']['name']}<br>Price: ${floorPrice} ${priceSymbol}</p><img src="${info['token']['imageSmall']}">`,
+        `<p>${info['token']['name']}<br>Price: ${floorPrice} ${priceSymbol}</p><img src="${info['token']['imageSmall']}" />`,
       );
       return {
         orderId: floorOrderId,

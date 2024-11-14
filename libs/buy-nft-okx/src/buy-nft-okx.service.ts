@@ -39,6 +39,7 @@ export class BuyNftOKXService extends ActionDto<FieldTypes> {
         Chains.Linea,
         Chains.ScrollMainnet,
         Chains.ZkSync,
+        Chains.ZkLinkNova,
       ]),
       author: {
         name: 'zkLink Labs',
