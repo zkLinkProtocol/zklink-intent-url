@@ -93,7 +93,7 @@ export class ActionUrlController extends BaseController {
   @CommonApiOperation('Return transactions')
   async postTransactions(@Body() body: GenerateTransactionDto) {
     const token = nanoid(8);
-    await this.cacheManager.set(token, body);
+    await this.cacheManager.set(token, body, 1000 * 60 * 60);
     return this.success(token);
   }
 
