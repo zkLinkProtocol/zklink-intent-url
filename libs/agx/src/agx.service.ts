@@ -1,7 +1,12 @@
 import { RegistryPlug } from '@action/registry';
 import { ChainService } from '@core/shared';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  GoneException,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { Cache } from 'cache-manager';
 import {
   Action as ActionDto,
@@ -231,7 +236,11 @@ export class AgxService extends ActionDto<FieldTypes> {
 
     const transactions = (await this.cacheManager.get(
       callbackId,
-    )) as GenerateTransactionResponse;
+    )) as GenerateTransactionResponse | null;
+
+    if (!transactions) {
+      throw new GoneException('transactions not accessible');
+    }
 
     return transactions;
   }
