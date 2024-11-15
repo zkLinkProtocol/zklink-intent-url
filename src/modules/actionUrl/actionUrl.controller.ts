@@ -606,13 +606,15 @@ export class ActionUrlController extends BaseController {
     body: TransactionBody,
   ): Promise<ResponseDto<GenerateTransactionResponse>> {
     try {
-      const { params, account, referrer, chainId, commissionRate } = body;
+      const { params, account, referrer, chainId, callbackId, commissionRate } =
+        body;
       const data = {
         additionalData: {
           code,
           account: account,
           chainId: parseInt(chainId),
           referrer,
+          callbackId,
           commissionRate,
         },
         formData: params,
