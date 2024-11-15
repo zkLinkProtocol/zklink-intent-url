@@ -94,6 +94,11 @@ export class ActionUrlController extends BaseController {
   async postTransactions(@Body() body: GenerateTransactionDto) {
     const token = nanoid(8);
     await this.cacheManager.set(token, body, 1000 * 60 * 60);
+    await this.cacheManager.set(
+      `${token}_status`,
+      { status: 'pending', reason: 'Transaction not processed' },
+      1000 * 60 * 60,
+    );
     return this.success(token);
   }
 
@@ -103,7 +108,7 @@ export class ActionUrlController extends BaseController {
     @Param('token') token: string,
   ): Promise<ResponseDto<TransactionResponse>> {
     const result = (await this.cacheManager.get(
-      `${token}:return`,
+      `${token}_status`,
     )) as TransactionResponse;
 
     return this.success(
@@ -134,7 +139,7 @@ export class ActionUrlController extends BaseController {
         throw new Error('Invalid status');
     }
     await this.cacheManager.del(token);
-    await this.cacheManager.set(`${token}:return`, result);
+    await this.cacheManager.set(`${token}_status`, result);
 
     return this.success(result);
   }
