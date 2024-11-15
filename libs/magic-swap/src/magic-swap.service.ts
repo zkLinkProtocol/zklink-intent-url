@@ -41,7 +41,10 @@ export class MagicSwapService extends ActionDto<FieldTypes> {
         Chains.EthereumMainnet,
         Chains.ArbitrumOne,
         Chains.OpMainnet,
+        Chains.Linea,
         Chains.Base,
+        Chains.BSCMainnet,
+        Chains.MantaPacificMainnet,
       ]),
       author: {
         name: 'zkLink Labs',
@@ -62,16 +65,60 @@ export class MagicSwapService extends ActionDto<FieldTypes> {
             name: 'tokenFrom',
             label: 'Token From ',
             desc: 'The token you want to swap',
-            type: 'input',
-            regex: '^.*$',
+            type: 'inputSelect',
+            options: [
+              {
+                label: 'WBTC',
+                value: 'wbtc',
+              },
+              {
+                label: 'USDT',
+                value: 'usdt',
+              },
+              {
+                label: 'USDC',
+                value: 'usdc',
+              },
+              {
+                label: 'WETH',
+                value: 'WETH',
+              },
+              {
+                label: 'ETH',
+                value: 'ETH',
+              },
+            ],
+            regex: '^0x[a-fA-F0-9]{40}$',
             regexDesc: 'Invalid Address',
           },
           {
             name: 'tokenTo',
             label: 'Token To',
             desc: 'The address of the token you want to receive',
-            type: 'input',
-            regex: '^.*$',
+            type: 'inputSelect',
+            options: [
+              {
+                label: 'WBTC',
+                value: 'wbtc',
+              },
+              {
+                label: 'USDT',
+                value: 'usdt',
+              },
+              {
+                label: 'USDC',
+                value: 'usdc',
+              },
+              {
+                label: 'WETH',
+                value: 'WETH',
+              },
+              {
+                label: 'ETH',
+                value: 'ETH',
+              },
+            ],
+            regex: '^0x[a-fA-F0-9]{40}$',
             regexDesc: 'Invalid Address',
           },
         ],
@@ -103,21 +150,6 @@ export class MagicSwapService extends ActionDto<FieldTypes> {
     if (!account) {
       throw new Error('Missing account!');
     }
-
-    if (chainId === 51) {
-      return {
-        transactions: [
-          await this.okxService.getSwapData(
-            '93AikG5NnncNRMFzHRRUYtmxDpkStwvZSwnmRLgn4Tmt',
-            chainId,
-            formData.tokenFrom,
-            formData.tokenTo,
-            BigInt(formData.amountToBuy),
-          ),
-        ],
-      };
-    }
-
     // commission to creator of code
     const creator = await this.dataService.getMagicLinkCreatorInfoByCode(code);
     if (!creator) {
