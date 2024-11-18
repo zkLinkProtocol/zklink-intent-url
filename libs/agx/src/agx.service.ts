@@ -1,7 +1,12 @@
 import { RegistryPlug } from '@action/registry';
 import { ChainService } from '@core/shared';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  GoneException,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { Cache } from 'cache-manager';
 import {
   Action as ActionDto,
@@ -9,7 +14,6 @@ import {
   GenerateTransactionParams,
   GenerateTransactionResponse,
   ReporterResponse,
-  TransactionInfo,
 } from 'src/common/dto';
 import { Chains } from 'src/constants';
 
@@ -223,13 +227,21 @@ export class AgxService extends ActionDto<FieldTypes> {
   async generateTransaction(
     data: GenerateTransactionParams<FieldTypes>,
   ): Promise<GenerateTransactionResponse> {
-    const { formData } = data;
-    const { token } = formData;
+    const { additionalData } = data;
+    const { callbackId } = additionalData;
+
+    if (!callbackId) {
+      throw new BadRequestException('missing callbackId');
+    }
 
     const transactions = (await this.cacheManager.get(
-      token,
-    )) as TransactionInfo[];
+      callbackId,
+    )) as GenerateTransactionResponse | null;
 
-    return { transactions };
+    if (!transactions) {
+      throw new GoneException('transactions not accessible');
+    }
+
+    return transactions;
   }
 }

@@ -439,7 +439,7 @@ export class OKXService {
         takeCount: 1, // ERC721 always use 1
       });
       nftHtmlInfo.push(
-        `<p>${offer.name}<br>Price: ${formatEther(offer.price)}</p><img src="${offer.image}">`,
+        `<p>${offer.name}<br>Price: ${formatEther(offer.price)}</p><img src="${offer.image}" />`,
       );
     }
     return {

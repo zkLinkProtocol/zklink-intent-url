@@ -238,7 +238,15 @@ export class MagicSwapService extends ActionDto<FieldTypes> {
         transactions.unshift(commissionToReferrerTx);
       }
       return {
-        displayInfo: { tokens: swapTx.tokens },
+        displayInfo: {
+          tokens: swapTx.tokens.map((t) => {
+            if (t.direction === 'from') {
+              return { ...t, amount: formData.amountToBuy };
+            } else {
+              return { ...t };
+            }
+          }),
+        },
         transactions,
       };
     } else {
@@ -265,7 +273,15 @@ export class MagicSwapService extends ActionDto<FieldTypes> {
         transactions.unshift(commissionToReferrerTx);
       }
       return {
-        displayInfo: { tokens: swapTx.tokens },
+        displayInfo: {
+          tokens: swapTx.tokens.map((t) => {
+            if (t.direction === 'from') {
+              return { ...t, amount: formData.amountToBuy };
+            } else {
+              return { ...t };
+            }
+          }),
+        },
         transactions,
       };
     }

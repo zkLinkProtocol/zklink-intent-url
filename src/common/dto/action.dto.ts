@@ -7,6 +7,7 @@ export type BasicAdditionalParams = {
   code?: string;
   account?: string;
   referrer?: string;
+  callbackId?: string;
   commissionRate?: number;
 };
 

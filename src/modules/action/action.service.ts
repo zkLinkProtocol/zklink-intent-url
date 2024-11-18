@@ -16,7 +16,7 @@ import { BusinessException } from 'src/exception/business.exception';
 import { ActionRepository } from 'src/repositories/action.repository';
 import { ActionId } from 'src/types';
 
-import { RegistryAction } from './model';
+import { RegistryAction } from './interface';
 
 @Injectable()
 export class ActionService implements OnApplicationBootstrap {

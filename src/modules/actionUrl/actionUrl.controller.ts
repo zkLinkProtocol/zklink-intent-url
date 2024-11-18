@@ -46,18 +46,20 @@ import { ErrorMessage } from 'src/types';
 
 import { ActionUrlService } from './actionUrl.service';
 import { BlinkService } from './blink.service';
-import { CommissionService } from './commission.service';
+// import { CommissionService } from './commission.service';
 import {
   ActionUrlAddRequestDto,
   ActionUrlFindOneResponseDto,
   ActionUrlResponseDto,
   ActionUrlUpdateRequestDto,
+  GenerateTransactionDto,
   IntentionRecordAddRequestDto,
   IntentionRecordFindOneResponseDto,
   IntentionRecordListItemResponseDto,
-  TransactionInfoDto,
+  SetTransactionStatusDto,
 } from './dto';
 import { IntentionRecordService } from './intentionRecord.service';
+import { TransactionResponse } from './interfaces';
 import { ActionService } from '../action/action.service';
 import { GetCreator } from '../auth/creator.decorators';
 import { JwtAuthGuard } from '../auth/jwtAuth.guard';
@@ -66,6 +68,7 @@ interface TransactionBody {
   account: string;
   chainId: string;
   referrer?: string;
+  callbackId?: string;
   commissionRate?: number;
   params: { [key: string]: string };
 }
@@ -77,7 +80,7 @@ export class ActionUrlController extends BaseController {
   constructor(
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private readonly actionUrlService: ActionUrlService,
-    private readonly commissionService: CommissionService,
+    // private readonly commissionService: CommissionService,
     private readonly actionService: ActionService,
     private readonly intentionRecordService: IntentionRecordService,
     private readonly blinkService: BlinkService,
@@ -88,16 +91,56 @@ export class ActionUrlController extends BaseController {
 
   @Post('transactions')
   @CommonApiOperation('Return transactions')
-  async postTransactions(@Body() body: TransactionInfoDto[]) {
+  async postTransactions(@Body() body: GenerateTransactionDto) {
     const token = nanoid(8);
-    await this.cacheManager.set(token, body);
+    await this.cacheManager.set(token, body, 1000 * 60 * 60);
+    await this.cacheManager.set(
+      `${token}_status`,
+      { status: 'pending', reason: 'Transaction not processed' },
+      1000 * 60 * 60,
+    );
     return this.success(token);
   }
 
   @Get('transactions/:token')
   @CommonApiOperation('Return transactions')
-  async getTransactions(@Param('token') token: string) {
-    const result = await this.cacheManager.get(`${token}:hashes`);
+  async getTransactionsStatus(
+    @Param('token') token: string,
+  ): Promise<ResponseDto<TransactionResponse>> {
+    const result = (await this.cacheManager.get(
+      `${token}_status`,
+    )) as TransactionResponse;
+
+    return this.success(
+      result
+        ? result
+        : { status: 'failure', reason: 'Transaction has expired' },
+    );
+  }
+
+  @Post('transactions/:token')
+  @CommonApiOperation('Return transactions')
+  async setTransactionsStatus(
+    @Param('token') token: string,
+    @Body() { status, hash, reason }: SetTransactionStatusDto,
+  ): Promise<ResponseDto<TransactionResponse>> {
+    let result: TransactionResponse;
+    switch (status) {
+      case 'success':
+        result = { status: 'success', hash };
+        break;
+      case 'failure':
+        result = { status: 'failure', reason };
+        break;
+      case 'rejected':
+        result = { status: 'rejected' };
+        break;
+      default:
+        throw new Error('Invalid status');
+    }
+    await this.cacheManager.del(token);
+    await this.cacheManager.set(`${token}_status`, result);
+
     return this.success(result);
   }
 
@@ -568,6 +611,78 @@ export class ActionUrlController extends BaseController {
     body: TransactionBody,
   ): Promise<ResponseDto<GenerateTransactionResponse>> {
     try {
+      const { params, account, referrer, chainId, callbackId, commissionRate } =
+        body;
+      const data = {
+        additionalData: {
+          code,
+          account: account,
+          chainId: parseInt(chainId),
+          referrer,
+          callbackId,
+          commissionRate,
+        },
+        formData: params,
+      };
+      const response = await this.actionUrlService.generateTransaction(data);
+      return this.success(response);
+    } catch (error) {
+      this.logger.error(error, JSON.stringify({ body, code }));
+      throw new InternalServerErrorException('Generate transaction failed');
+    }
+  }
+
+  @Post(':code/transactions')
+  @CommonApiOperation('Generate transaction by action Id.')
+  @ApiParam({
+    name: 'code',
+    example: '9sf92k3i',
+  })
+  @ApiBody({
+    description: 'parameters to generate transaction',
+    schema: {
+      type: 'object',
+      additionalProperties: {
+        type: 'any',
+      },
+    },
+    examples: {
+      a: {
+        summary: 'NovaSwap',
+        description: 'Generate tranasction for NovaSwap',
+        value: {
+          tokenInAddress: '0x6e42d10eB474a17b14f3cfeAC2590bfa604313C7',
+          tokenOutAddress: '0x461fE851Cd66e82A274570ED5767c873bE9Ae1ff',
+          amountIn: '1',
+          recipient: '0xE592427A0AEce92De3Edee1F18E0157C05861564',
+          deadlineDurationInSec: '3600',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Return generated transaction',
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ResponseDto) },
+        {
+          properties: {
+            data: {
+              type: 'string',
+              items: { $ref: getSchemaPath(TransactionInfo) },
+            },
+          },
+        },
+      ],
+    },
+  })
+  async generateTransactions(
+    @Param('code') code: string,
+    @Body()
+    body: TransactionBody,
+  ): Promise<ResponseDto<string>> {
+    try {
       const { params, account, referrer, chainId, commissionRate } = body;
       const data = {
         additionalData: {
@@ -580,7 +695,9 @@ export class ActionUrlController extends BaseController {
         formData: params,
       };
       const response = await this.actionUrlService.generateTransaction(data);
-      return this.success(response);
+      const token = nanoid(8);
+      await this.cacheManager.set(token, response);
+      return this.success(token);
     } catch (error) {
       this.logger.error(error, JSON.stringify({ body, code }));
       throw new InternalServerErrorException('Generate transaction failed');
