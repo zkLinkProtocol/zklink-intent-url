@@ -781,24 +781,26 @@ export class ActionUrlController extends BaseController {
       icon: '',
       title: '',
       description: '',
-      label: '',
+      label: 'trade',
       disable: false,
-      error: {
-        message: '',
-      },
       links: {
         actions: [],
       },
     };
     const intention = await this.actionUrlService.findOneByCode(code);
     if (!intention) {
-      metadata.error.message = 'Action not found';
       // res.json(metadata);
-      return metadata;
+      return {
+        ...metadata,
+        error: {
+          message: 'Action not found',
+        },
+      };
     }
     const chainId =
       (intention.settings as any)?.intentInfo?.network?.chainId ?? 0;
     res.setHeader('X-Blockchain-Ids', `eip155:${chainId}`);
+    res.setHeader('X-Action-Version', '2.1.3');
     metadata.icon = intention.metadata
       ? intention.metadata
       : 'https://zklink-intent.s3.ap-northeast-1.amazonaws.com/dev/tg/magicnewsconver.jpeg';
@@ -839,6 +841,7 @@ export class ActionUrlController extends BaseController {
     const chainId =
       (intention.settings as any)?.intentInfo?.network?.chainId ?? 0;
     res.setHeader('X-Blockchain-Ids', `eip155:${chainId}`);
+    res.setHeader('X-Action-Version', '2.1.3');
     const allParams = { ...Params, ...body, ...query };
     try {
       const transaction = await this.blinkService.buildTransactions(
