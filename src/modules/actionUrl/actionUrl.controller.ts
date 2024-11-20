@@ -773,7 +773,10 @@ export class ActionUrlController extends BaseController {
     @Param('code') code: string,
     @Res({ passthrough: true }) res: Response,
   ) {
-    res.setHeader('Access-Control-Expose-Headers', 'X-Blockchain-Ids');
+    res.setHeader(
+      'Access-Control-Expose-Headers',
+      'X-Action-Version,X-Blockchain-Ids',
+    );
     const metadata = {
       icon: '',
       title: '',
@@ -796,6 +799,7 @@ export class ActionUrlController extends BaseController {
     const chainId =
       (intention.settings as any)?.intentInfo?.network?.chainId ?? 0;
     res.setHeader('X-Blockchain-Ids', `eip155:${chainId}`);
+    res.setHeader('X-Action-Version', `2.2.1`);
     metadata.icon = intention.metadata
       ? intention.metadata
       : 'https://zklink-intent.s3.ap-northeast-1.amazonaws.com/dev/tg/magicnewsconver.jpeg';
@@ -820,7 +824,10 @@ export class ActionUrlController extends BaseController {
     @Query() query: any,
     @Res({ passthrough: true }) res: Response,
   ) {
-    res.setHeader('Access-Control-Expose-Headers', 'X-Blockchain-Ids');
+    res.setHeader(
+      'Access-Control-Expose-Headers',
+      'X-Action-Version,X-Blockchain-Ids',
+    );
     const response = {
       transaction: '',
     };
@@ -833,6 +840,7 @@ export class ActionUrlController extends BaseController {
     const chainId =
       (intention.settings as any)?.intentInfo?.network?.chainId ?? 0;
     res.setHeader('X-Blockchain-Ids', `eip155:${chainId}`);
+    res.setHeader('X-Action-Version', `2.2.1`);
     const allParams = { ...Params, ...body, ...query };
     try {
       const transaction = await this.blinkService.buildTransactions(
