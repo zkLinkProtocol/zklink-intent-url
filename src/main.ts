@@ -15,8 +15,8 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, { logger });
   app.enableCors({
     origin: '*',
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    allowedHeaders: 'Content-Type,Authorization,SessionId',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    allowedHeaders: 'Content-Type,Authorization,SessionId,Accept-Encoding',
     credentials: true,
   });
 
