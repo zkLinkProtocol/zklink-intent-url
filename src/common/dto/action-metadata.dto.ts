@@ -138,11 +138,11 @@ export class AgnosticComponentDto<
 > extends BaseComponentDto<R> {
   @ApiProperty({
     type: String,
-    enum: ['text', 'switch'],
+    enum: ['text', 'switch', 'password'],
     description: 'Component type',
   })
-  @IsEnum(['text', 'switch'])
-  type: 'text' | 'switch';
+  @IsEnum(['text', 'switch', 'password'])
+  type: 'text' | 'switch' | 'password';
 }
 
 export class InputComponentDto<

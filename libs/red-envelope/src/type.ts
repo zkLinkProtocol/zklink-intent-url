@@ -29,11 +29,13 @@ export interface CreateRedPacketParams {
   isRandom: boolean;
   isGasfree: boolean;
   expiry: number;
+  password: string;
 }
 
 export interface ClaimRedPacketParams {
   id: bigint;
   recipient: string;
+  password: string;
   expiry: number;
 }
 
@@ -43,4 +45,5 @@ export type FieldTypes = {
   distributionToken: string;
   amountOfRedEnvelopes: string;
   gasToken: string;
+  password: string;
 };

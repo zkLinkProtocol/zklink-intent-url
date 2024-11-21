@@ -22,12 +22,14 @@ export interface CreateRedPacketParams {
   // isGasfree: boolean;
   isInvitable: boolean;
   expiry: number;
+  password: string;
 }
 
 export interface ClaimRedPacketParams {
   id: bigint;
   recipient: string;
   expiry: number;
+  password: string;
   inviter?: string;
 }
 
@@ -38,4 +40,5 @@ export type FieldTypes = {
   amountOfRedEnvelopes: string;
   gasToken: string;
   isInvitable: boolean;
+  password: string;
 };
