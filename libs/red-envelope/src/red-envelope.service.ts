@@ -146,6 +146,14 @@ export class RedEnvelopeService extends ActionDto<FieldTypes> {
             regexDesc: 'It should be a positive integer.',
           },
           {
+            name: 'password',
+            label: 'Red Packet Password',
+            desc: 'Input your red packets password, like: i love btc',
+            type: 'input',
+            regex: '',
+            regexDesc: 'It should be a positive integer.',
+          },
+          {
             name: 'gasToken',
             label: 'Who should pay for the claiming gas fee',
             desc: 'Gas can be deducted from distributed amount, allowing recipient to grab red envelope with 0 gas',
@@ -185,6 +193,7 @@ export class RedEnvelopeService extends ActionDto<FieldTypes> {
         { name: 'packetHash', type: 'bytes32' },
         { name: 'isRandom', type: 'bool' },
         { name: 'isGasfree', type: 'bool' },
+        { name: 'password', type: 'bytes32' },
         { name: 'expiry', type: 'uint256' },
       ],
     };
@@ -200,6 +209,7 @@ export class RedEnvelopeService extends ActionDto<FieldTypes> {
       isRandom: params.isRandom,
       isGasfree: params.isGasfree,
       expiry: params.expiry,
+      password: params.password,
     };
     const signature = await this.wallet.signTypedData(
       domain,
@@ -222,6 +232,7 @@ export class RedEnvelopeService extends ActionDto<FieldTypes> {
       RedPacketClaim: [
         { name: 'id', type: 'uint256' },
         { name: 'recipient', type: 'address' },
+        { name: 'password', type: 'bytes32' },
         { name: 'expiry', type: 'uint256' },
       ],
     };
@@ -229,6 +240,7 @@ export class RedEnvelopeService extends ActionDto<FieldTypes> {
     const signMessage = {
       id: params.id,
       recipient: params.recipient,
+      password: params.password,
       expiry: params.expiry,
     };
 
@@ -251,11 +263,13 @@ export class RedEnvelopeService extends ActionDto<FieldTypes> {
     const signature = await this.genClaimSignature({
       id,
       expiry,
+      password: keccak256(ethers.toUtf8Bytes('1')),
       recipient: this.wallet.address,
     });
 
     const gasEstimate = await this.envelopContract.claimRedPacket.estimateGas(
       id,
+      ethers.keccak256(ethers.toUtf8Bytes('1')),
       expiry,
       signature,
     );
@@ -334,14 +348,16 @@ export class RedEnvelopeService extends ActionDto<FieldTypes> {
       distributionToken,
       amountOfRedEnvelopes,
       gasToken,
+      password: rawPassword,
     } = formData;
-
+    const password = ethers.keccak256(ethers.toUtf8Bytes(rawPassword));
     const totalShare = this.genTotalShare(parseInt(amountOfRedEnvelopes));
     const packetHash = PACKET_HASH;
     const isRandom =
       distributionMode === DistributionModeValue.RandomAmountPerAddress;
     const isGasfree = gasToken === GasTokenValue.DistributedToken;
-    const payForGas = await this.claimRedEnvelopeMinGas(formData);
+    // const payForGas = await this.claimRedEnvelopeMinGas(formData); //
+    const payForGas = 0n;
 
     const decimals = await this.getDecimals(distributionToken);
     const totalDistributionAmountBn = parseUnits(
@@ -361,6 +377,7 @@ export class RedEnvelopeService extends ActionDto<FieldTypes> {
       isRandom: isRandom,
       isGasfree: isGasfree,
       expiry: expiry,
+      password,
     });
 
     const totalValue = totalDistributionAmountBn + payForGas;
@@ -376,6 +393,7 @@ export class RedEnvelopeService extends ActionDto<FieldTypes> {
         packetHash,
         isRandom,
         isGasfree,
+        password,
         expiry,
         signature,
       );
@@ -519,7 +537,7 @@ export class RedEnvelopeService extends ActionDto<FieldTypes> {
     data: GenerateTransactionParams<FieldTypes>,
   ): Promise<GenerateTransactionResponse> {
     const { additionalData, formData } = data;
-    const { gasToken } = formData;
+    const { gasToken, password } = formData;
     const isGasfree = gasToken === GasTokenValue.DistributedToken;
     const { code, account } = additionalData;
     if (!code) {
@@ -542,10 +560,12 @@ export class RedEnvelopeService extends ActionDto<FieldTypes> {
     const signature = await this.genClaimSignature({
       id: packetId,
       expiry,
+      password: ethers.keccak256(ethers.toUtf8Bytes(password)),
       recipient: account,
     });
     const tx = await this.envelopContract.claimRedPacket.populateTransaction(
       packetId,
+      ethers.keccak256(ethers.toUtf8Bytes(password)),
       expiry,
       signature,
     );

@@ -147,6 +147,68 @@
     "inputs": [
       {
         "indexed": true,
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "recipient",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "RedPacketGasCollected",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "recipient",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "RedPacketWithdraw",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
         "internalType": "bytes32",
         "name": "role",
         "type": "bytes32"
@@ -290,6 +352,11 @@
         "type": "uint256"
       },
       {
+        "internalType": "bytes32",
+        "name": "password",
+        "type": "bytes32"
+      },
+      {
         "internalType": "uint256",
         "name": "expiry",
         "type": "uint256"
@@ -366,6 +433,11 @@
         "type": "bool"
       },
       {
+        "internalType": "bytes32",
+        "name": "password",
+        "type": "bytes32"
+      },
+      {
         "internalType": "uint256",
         "name": "expiry",
         "type": "uint256"
@@ -378,7 +450,7 @@
     ],
     "name": "createRedPacket",
     "outputs": [],
-    "stateMutability": "nonpayable",
+    "stateMutability": "payable",
     "type": "function"
   },
   {
@@ -531,6 +603,11 @@
             "internalType": "bool",
             "name": "isGasfree",
             "type": "bool"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "password",
+            "type": "bytes32"
           }
         ],
         "internalType": "struct RedPacket.RedPacketInfo",
@@ -676,6 +753,11 @@
         "type": "address"
       },
       {
+        "internalType": "bytes32",
+        "name": "password",
+        "type": "bytes32"
+      },
+      {
         "internalType": "uint256",
         "name": "expiry",
         "type": "uint256"
@@ -767,6 +849,11 @@
         "internalType": "bool",
         "name": "isGasfree",
         "type": "bool"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "password",
+        "type": "bytes32"
       },
       {
         "internalType": "uint256",
@@ -933,6 +1020,11 @@
         "internalType": "bool",
         "name": "isGasfree",
         "type": "bool"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "password",
+        "type": "bytes32"
       }
     ],
     "stateMutability": "view",
@@ -1049,5 +1141,9 @@
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
+  },
+  {
+    "stateMutability": "payable",
+    "type": "receive"
   }
 ]

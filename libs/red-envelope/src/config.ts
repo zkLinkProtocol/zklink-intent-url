@@ -7,8 +7,8 @@ export const configuration = {
     chainId: Chains.ZkLinkNovaSepolia,
     wethAddress: '0x8280a4e7D5B3B658ec4580d3Bc30f5e50454F169',
     quoterContractAddress: '0x86Fc6ab84CFc6a506d51FC722D3aDe959599A98A',
-    redPacketContractAddress: '0x2f7821161C6c11a473A6DC03896ea6BB5ac5Cb2F',
-    paymasterContractAddress: '0x0a7f97fbF3cf238aAD21119CE70aB157CE11ce01',
+    redPacketContractAddress: '0x2897AB1D7DEbc60feAA1535F3Cb623f1D3579dB1',
+    paymasterContractAddress: '0x8b030151d249fD6Df6cc31a7aB63B912130b84f4',
     tokens: [
       {
         label: 'ETH',

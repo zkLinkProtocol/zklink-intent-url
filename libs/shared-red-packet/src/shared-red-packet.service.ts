@@ -135,6 +135,12 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
             regexDesc: 'It should be a positive integer.',
           },
           {
+            name: 'password',
+            label: 'Red Packet Password',
+            desc: 'Input your red packets password, like: i love btc',
+            type: 'password',
+          },
+          {
             name: 'gasToken',
             label: 'Who should pay for the claiming gas fee',
             desc: 'Gas Token',
@@ -187,6 +193,7 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
         { name: 'isRandom', type: 'bool' },
         { name: 'isInvitable', type: 'bool' },
         { name: 'expiry', type: 'uint256' },
+        { name: 'password', type: 'bytes32' },
       ],
     };
 
@@ -200,6 +207,7 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
       isRandom: params.isRandom,
       isInvitable: params.isInvitable,
       expiry: params.expiry,
+      password: params.password,
     };
     const signature = await this.wallet.signTypedData(
       domain,
@@ -224,6 +232,7 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
         { name: 'recipient', type: 'address' },
         { name: 'inviter', type: 'address' },
         { name: 'expiry', type: 'uint256' },
+        { name: 'password', type: 'bytes32' },
       ],
     };
 
@@ -232,6 +241,7 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
       recipient: params.recipient,
       inviter: params.inviter,
       expiry: params.expiry,
+      password: params.password,
     };
 
     const signature = await this.wallet.signTypedData(
@@ -283,8 +293,9 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
       distributionToken,
       amountOfRedEnvelopes,
       isInvitable,
+      password: rawPassword,
     } = formData;
-
+    const password = ethers.keccak256(ethers.toUtf8Bytes(rawPassword));
     const totalShare = this.genTotalShare(parseInt(amountOfRedEnvelopes));
     const packetHash = PACKET_HASH;
     const isRandom =
@@ -316,6 +327,7 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
       packetHash: packetHash,
       isRandom: isRandom,
       isInvitable: isInvitable,
+      password,
       expiry: expiry,
     });
 
@@ -329,6 +341,7 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
         packetHash,
         isRandom,
         isInvitable,
+        password,
         expiry,
         signature,
       );
@@ -465,7 +478,7 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
   public async generateTransaction(
     data: GenerateTransactionParams<FieldTypes>,
   ): Promise<GenerateTransactionResponse> {
-    const { additionalData } = data;
+    const { additionalData, formData } = data;
     const { code, account, referrer } = additionalData;
     if (!code) {
       throw new Error('missing code');
@@ -474,19 +487,22 @@ export class SharedRedPacketService extends ActionDto<FieldTypes> {
     if (!account) {
       throw new Error('missing account');
     }
-
+    const { password: rawPassword } = formData;
+    const password = ethers.keccak256(ethers.toUtf8Bytes(rawPassword));
     const packetId = this.getPacketIDByCode(code);
     const expiry = Math.floor(Date.now() / 1000) + 60 * 60;
     const signature = await this.genClaimSignature({
       id: packetId,
       expiry,
       inviter: referrer ?? ethers.ZeroAddress,
+      password,
       recipient: account,
     });
     const tx = await this.redPacketContract.claimRedPacket.populateTransaction(
       packetId,
       referrer ?? ethers.ZeroAddress,
       expiry,
+      password,
       signature,
     );
     return {

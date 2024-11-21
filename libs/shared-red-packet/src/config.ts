@@ -3,7 +3,7 @@ import { Chains } from 'src/constants';
 export const configuration = {
   dev: {
     chainId: Chains.ZkLinkNovaSepolia,
-    redPacketContractAddress: '0x70E17f5A10f88e8F40F602338a979635699EE5e5',
+    redPacketContractAddress: '0xDD7F313c278fD66B5626D997582e24E1b1e36cAC',
     magicLinkUrl: 'https://magic-test.zklink.io/intent',
   },
   prod: {
