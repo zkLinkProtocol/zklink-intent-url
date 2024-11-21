@@ -149,9 +149,7 @@ export class RedEnvelopeService extends ActionDto<FieldTypes> {
             name: 'password',
             label: 'Red Packet Password',
             desc: 'Input your red packets password, like: i love btc',
-            type: 'input',
-            regex: '',
-            regexDesc: 'It should be a positive integer.',
+            type: 'password',
           },
           {
             name: 'gasToken',
