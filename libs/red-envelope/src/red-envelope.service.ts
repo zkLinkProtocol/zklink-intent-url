@@ -440,16 +440,24 @@ export class RedEnvelopeService extends ActionDto<FieldTypes> {
   public async preCheckTransaction(
     data: GenerateTransactionParams<FieldTypes>,
   ) {
-    const { additionalData } = data;
+    const { additionalData, formData } = data;
+    const { password } = formData;
     const { code, account } = additionalData;
     if (!code) {
       throw new Error('missing code');
     }
     const packetId = this.getPacketIDByCode(code);
+    const packetInfo = await this.envelopContract.redPackets(packetId);
+    const passwordHash = ethers.keccak256(ethers.toUtf8Bytes(password));
     const hasClaimed = await this.envelopContract.isClaimed(packetId, account);
     if (hasClaimed) {
       return 'User has already received';
     }
+
+    if ([...packetInfo].pop() !== passwordHash) {
+      return 'Wrong Password';
+    }
+
     const hasUnclaimedPacket =
       await this.envelopContract.getRedPacketBalance(packetId);
     if (hasUnclaimedPacket.unClaimedCount === 0n) {
