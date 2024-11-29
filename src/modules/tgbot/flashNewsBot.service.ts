@@ -567,10 +567,13 @@ ${this.formatMarkdownV2(content).replaceAll(
           metadata: photo,
         };
         await this.tgMessageRepository.add(data);
-        this.logger.log('sendNews success', JSON.stringify(res));
+        this.logger.log(
+          `sendNews success:, tgGroupId:${tgGroupId}`,
+          JSON.stringify(res),
+        );
       } catch (error) {
         this.logger.error(
-          `sendNews error,caption:${caption}, newsChannelId:${newsChannelId},error:`,
+          `sendNews error,caption:${caption}, tgGroupId:${tgGroupId},error:`,
           error.stack,
         );
       }
@@ -795,10 +798,13 @@ ${this.formatMarkdownV2(content).replaceAll(
           };
           res = await this.bot.sendPhoto(tgGroup.chatId, photo, options);
         }
-        this.logger.log('sendNewsOrigin success', JSON.stringify(res));
+        this.logger.log(
+          `sendNewsOrigin success,, tgGroup:${tgGroup}`,
+          JSON.stringify(res),
+        );
       } catch (error) {
         this.logger.error(
-          `sendNewsOrigin error,caption:${caption}, newsChannelId:${newsChannelId},error:`,
+          `sendNewsOrigin error,caption:${caption}, tgGroup:${tgGroup},error:`,
           error.stack,
         );
       }
