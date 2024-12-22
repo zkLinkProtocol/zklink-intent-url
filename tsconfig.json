@@ -143,6 +143,12 @@
       ],
       "@action/agx/*": [
         "libs/agx/src/*"
+      ],
+      "@action/mint-intract": [
+        "libs/mint-intract/src"
+      ],
+      "@action/mint-intract/*": [
+        "libs/mint-intract/src/*"
       ]
     }
   }

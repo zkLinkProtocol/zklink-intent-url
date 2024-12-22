@@ -40,6 +40,8 @@
     "@action/magic-swap/(.*)": "<rootDir>/../libs/magic-swap/src/$1",
     "@action/magic-swap": "<rootDir>/../libs/magic-swap/src",
     "@action/agx/(.*)": "<rootDir>/../libs/agx/src/$1",
-    "@action/agx": "<rootDir>/../libs/agx/src"
+    "@action/agx": "<rootDir>/../libs/agx/src",
+    "@action/mint-intract/(.*)": "<rootDir>/../libs/mint-intract/src/$1",
+    "@action/mint-intract": "<rootDir>/../libs/mint-intract/src"
   }
 }

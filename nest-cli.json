@@ -162,6 +162,15 @@
       "compilerOptions": {
         "tsConfigPath": "libs/agx/tsconfig.lib.json"
       }
+    },
+    "mint-intract": {
+      "type": "library",
+      "root": "libs/mint-intract",
+      "entryFile": "index",
+      "sourceRoot": "libs/mint-intract/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/mint-intract/tsconfig.lib.json"
+      }
     }
   }
 }
