@@ -147,7 +147,8 @@
       "^@action/magic-swap(|/.*)$": "<rootDir>/libs/magic-swap/src/$1",
       "^@action/agx(|/.*)$": "<rootDir>/libs/agx/src/$1",
       "^@action/okx-bridge(|/.*)$": "<rootDir>/libs/okx-bridge/src/$1",
-      "^@action/dx-fun(|/.*)$": "<rootDir>/libs/dx-fun/src/$1"
+      "^@action/dx-fun(|/.*)$": "<rootDir>/libs/dx-fun/src/$1",
+      "^@action/mint-intract(|/.*)$": "<rootDir>/libs/mint-intract/src/$1"
     }
   }
 }
