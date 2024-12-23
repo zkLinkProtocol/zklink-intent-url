@@ -2,7 +2,7 @@ import { RegistryPlug } from '@action/registry';
 import { ChainService } from '@core/shared';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Contract, Interface, ethers } from 'ethers';
+import { ethers } from 'ethers';
 import {
   Action as ActionDto,
   ActionMetadata,
@@ -89,64 +89,65 @@ export class MintIntractService extends ActionDto<FieldTypes> {
     const { additionalData, formData } = data;
     const { chainId } = additionalData;
     const provider = this.chainService.getProvider(chainId);
-
-    const payable = ' payable';
-    const abiParams = [];
-    const funcParams = [];
-    const txParams = [];
+    const abi = [
+      {
+        inputs: [
+          { internalType: 'address', name: '_receiver', type: 'address' },
+          { internalType: 'uint256', name: '_quantity', type: 'uint256' },
+          { internalType: 'address', name: '_currency', type: 'address' },
+          { internalType: 'uint256', name: '_pricePerToken', type: 'uint256' },
+          {
+            components: [
+              { internalType: 'bytes32[]', name: 'proof', type: 'bytes32[]' },
+              {
+                internalType: 'uint256',
+                name: 'quantityLimitPerWallet',
+                type: 'uint256',
+              },
+              {
+                internalType: 'uint256',
+                name: 'pricePerToken',
+                type: 'uint256',
+              },
+              { internalType: 'address', name: 'currency', type: 'address' },
+            ],
+            internalType: 'struct IDrop.AllowlistProof',
+            name: '_allowlistProof',
+            type: 'tuple',
+          },
+          { internalType: 'bytes', name: '_data', type: 'bytes' },
+        ],
+        name: 'claim',
+        outputs: [],
+        stateMutability: 'payable',
+        type: 'function',
+      },
+    ];
     const recipient = additionalData.account;
-    abiParams.push('address _receiver');
-    funcParams.push('address');
-    txParams.push(recipient);
-    abiParams.push('uint256 _quantity');
-    funcParams.push('uint256');
-    txParams.push(1);
-    abiParams.push('address _currency');
-    funcParams.push('address');
-    txParams.push('0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE');
-    abiParams.push('uint256 _pricePerToken');
-    funcParams.push('uint256');
-    txParams.push(Number(formData.price));
-    abiParams.push('tuple _allowlistProof');
-    funcParams.push('tuple');
-    txParams.push([
-      [],
+
+    const contract = new ethers.Contract(
+      formData.contract.toString(),
+      abi,
+      provider,
+    );
+
+    const mintTx = await contract.claim(
+      recipient,
       1,
-      Number(formData.price),
       '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
-    ]);
-    abiParams.push('bytes _data');
-    funcParams.push('bytes');
-    txParams.push([]);
+      ethers.parseUnits(formData.price, 'ether'),
+      {
+        proof: [], // Example proof (replace with real proof data)
+        quantityLimitPerWallet: 1,
+        pricePerToken: formData.price,
+        currency: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
+      },
+      '0x',
+      {
+        value: formData.price, // Sending ETH equivalent to total price
+      },
+    );
 
-    // if (formData.recipient != 'none') {
-    //   abiParams.push('address recipient');
-    //   funcParams.push('address');
-    //   if (formData.recipient == 'sender') {
-    //     txParams.push(additionalData.account);
-    //   } else {
-    //     txParams.push(formData.recipient);
-    //   }
-    // }
-    // if (Number(formData.quantity) > 0) {
-    //   abiParams.push('uint quantity');
-    //   funcParams.push('uint');
-    //   txParams.push(Number(formData.quantity));
-    // }
-    // if (formData.ext != 'none') {
-    //   abiParams.push('string ext');
-    //   funcParams.push('string');
-    //   txParams.push(formData.ext);
-    // }
-    const entrypoint = 'claim';
-    const abi = new Interface([
-      `function ${entrypoint}(${abiParams.join(',')})${payable}`,
-    ]);
-
-    const contract = new Contract(formData.contract.toString(), abi, provider);
-    const mintTx = await contract[
-      `${entrypoint}(${funcParams.join(',')})`
-    ].populateTransaction.apply(this, txParams);
     const tx: TransactionInfo = {
       chainId: chainId,
       to: mintTx.to,
