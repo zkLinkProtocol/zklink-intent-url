@@ -139,12 +139,12 @@ export class MintIntractService extends ActionDto<FieldTypes> {
       {
         proof: [], // Example proof (replace with real proof data)
         quantityLimitPerWallet: 1,
-        pricePerToken: formData.price,
+        pricePerToken: ethers.parseUnits(formData.price, 'ether'),
         currency: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
       },
       '0x',
       {
-        value: formData.price, // Sending ETH equivalent to total price
+        value: ethers.parseUnits(formData.price, 'ether'), // Sending ETH equivalent to total price
       },
     );
 
