@@ -133,7 +133,7 @@ export class MintIntractService extends ActionDto<FieldTypes> {
     );
     console.log('Contract Object : ', contract);
 
-    const mintTx = await contract.claim(
+    const mintTx = await contract.claim.populateTransaction(
       recipient,
       1,
       '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
