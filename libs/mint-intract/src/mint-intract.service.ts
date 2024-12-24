@@ -70,8 +70,26 @@ export class MintIntractService extends ActionDto<FieldTypes> {
     data: GenerateTransactionParams<FieldTypes>,
   ): Promise<GenerateTransactionResponse> {
     const { additionalData, formData } = data;
-    const { chainId } = additionalData;
+    console.log(
+      'Input data, additionalData : ',
+      additionalData.account,
+      ' ',
+      additionalData.chainId,
+    );
+    console.log(
+      'Input data, Form data  : ',
+      formData.price,
+      ' ',
+      formData.contract,
+    );
+    console.log(
+      'Price per token : ',
+      ethers.parseUnits(formData.price, 'ether'),
+    );
+    const chainId = additionalData.chainId;
+    console.log('Chain ID : ', chainId);
     const provider = this.chainService.getProvider(chainId);
+    console.log('Provider : ', provider);
     const abi = [
       {
         inputs: [
@@ -107,12 +125,13 @@ export class MintIntractService extends ActionDto<FieldTypes> {
       },
     ];
     const recipient = additionalData.account;
-
+    console.log('Recipient : ', recipient);
     const contract = new ethers.Contract(
       formData.contract.toString(),
       abi,
       provider,
     );
+    console.log('Contract Object : ', contract);
 
     const mintTx = await contract.claim(
       recipient,
@@ -130,6 +149,7 @@ export class MintIntractService extends ActionDto<FieldTypes> {
         value: ethers.parseUnits(formData.price, 'ether'), // Sending ETH equivalent to total price
       },
     );
+    console.log('This is the minTx Object: ', mintTx);
 
     const tx: TransactionInfo = {
       chainId: chainId,
@@ -138,6 +158,7 @@ export class MintIntractService extends ActionDto<FieldTypes> {
       data: mintTx.data,
       shouldPublishToChain: true,
     };
+    console.log('This is the tx Object: ', tx);
     return { transactions: [tx] };
   }
 }
