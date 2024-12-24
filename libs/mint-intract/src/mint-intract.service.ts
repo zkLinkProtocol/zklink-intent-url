@@ -27,25 +27,8 @@ export class MintIntractService extends ActionDto<FieldTypes> {
   }
 
   async getMetadata(): Promise<ActionMetadata<FieldTypes>> {
-    const supportedNetwork = [
-      Chains.ZkLinkNova,
-      Chains.ArbitrumOne,
-      Chains.EthereumMainnet,
-      Chains.Base,
-      Chains.Linea,
-      Chains.MantaPacificMainnet,
-      Chains.OpMainnet,
-      Chains.ScrollMainnet,
-      Chains.BSCMainnet,
-    ];
-    if (this.isDev) {
-      supportedNetwork.push(
-        Chains.ZkLinkNovaSepolia,
-        Chains.ArbitrumSepolia,
-        Chains.BaseSepolia,
-        Chains.BSCTestnet,
-      );
-    }
+    const supportedNetwork = [Chains.Base];
+
     return {
       title: 'Mint Intract NFT',
       description: '<div>This action allows you to mint Intract NFTs</div>',
