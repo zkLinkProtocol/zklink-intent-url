@@ -559,6 +559,89 @@ Our framework will register your Action implementation into the routing system. 
   ```
   The above reportTransaction function politely informs the user of the successful outcome after they have successfully claimed the red envelope through the magicLink
 
+- `generateSharedContent` is used to create custom message content for sharing to X/Telegram channels. If you want to share the magiclink to a Telegram channel and customize the content, please use this function
+  ```ts
+
+  public async generateSharedContent(
+    data: GenerateTransactionParams<FieldTypes>,
+  ) {
+    const { formData, additionalData } = data;
+    const { chainId } = additionalData;
+    let tokenSymbol: string;
+    const provider = this.chainService.getProvider(chainId);
+    if (formData.tokenFrom.toLowerCase() === ethers.ZeroAddress) {
+      tokenSymbol = 'ETH';
+    } else {
+      const { symbol } = await getERC20SymbolAndDecimals(
+        provider,
+        formData.tokenFrom,
+      );
+      tokenSymbol = symbol;
+    }
+    return {
+      en: `🤖AI Strategy on Flash News\n⏩️⏩️⏩️Long 🔥${tokenSymbol}🔥\n\nStart your Action now! 📈👇`,
+      zh: `🤖AI 交易策略基于Flash News\n⏩️⏩️⏩️看涨 🔥${tokenSymbol}🔥\n\n现在开始行动吧！ 📈👇`,
+    };
+  }
+  ```
+  Use `\n` for line breaks. `en` represents the English channel, `zh` represents the Chinese channel. The above code will be rendered like this on the UI in en channel.
+
+  <div align="center">
+    <img src="./img/share-content.png" width="300">
+  </div>
+
+- `generateManagementInfo` After creating the magicLink, we want to provide the creator with a place to display on-chain information and perform on-chain transactions. This function provides that capability. You may want the creator to read some on-chain information to understand the usage of the magic links they created or to initiate a transaction that changes the status of the created magicLink
+  ```ts
+
+  // refer to libs/red-envelope/red-envelope.service.ts
+  
+  public async generateSharedContent(
+    data: GenerateTransactionParams<FieldTypes>,
+  ) {
+    // ...
+
+    return {
+      form: [
+        {
+          label: 'Number of Red Packets ',
+          value: `${unClaimedCount}/${totalCount}`,
+        },
+        {
+          label: 'Number of Tokens',
+          value: `${formatUnits(unClaimedTokenAmount, decimals)}/${formatUnits(tokenAmount, decimals)} ${symbol}`,
+        },
+        {
+          label: 'Winner List',
+          value: records.map((i) => ({
+            address: i.recipient,
+            amount: `${i.amount} ${i.symbol}`,
+          })),
+        },
+      ],
+      triggers: [
+        {
+          text: 'Claim your token',
+          transactions: [
+            {
+              chainId: Number(magicLinkInfo.network.chainId),
+              to: this.config.redPacketContractAddress,
+              value: '0',
+              data: withdrawRedPacketData.data,
+              customData: null,
+              shouldPublishToChain: true,
+            },
+          ],
+        },
+      ],
+    };
+  }
+  ```
+  The above code will be rendered like this on the UI in https://magic-test.zklink.io/dashboard/intent page
+
+  <div align="center">
+    <img src="./img/management.png" width="300">
+  </div>
+
 ### 4. Switch `env`
 We offer two environment variables, `dev` and `prod`, that allow you to configure contract addresses or settings for both environments. The env variable for the **dev** branch is set to `dev`, while the env variable for the **main** branch is set to `prod`. In the **dev** branch, you can test with the test-network's magicLink, and once the code is merged into the main branch, it will read the mainnet network's contract configurations.
 
