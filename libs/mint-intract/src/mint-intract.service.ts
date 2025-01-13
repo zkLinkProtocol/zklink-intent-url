@@ -14,6 +14,7 @@ import { Chains } from 'src/constants';
 
 import { FieldTypes } from './types';
 
+// Mint Intract NFT for Base plus claim function
 @RegistryPlug('mint-intract', 'v1')
 @Injectable()
 export class MintIntractService extends ActionDto<FieldTypes> {

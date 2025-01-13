@@ -8,6 +8,7 @@ import { CrossChainSwapModule } from '@action/cross-chain-swap';
 import { DxFunModule } from '@action/dx-fun';
 import { MagicSwapModule } from '@action/magic-swap';
 import { MintIntractModule } from '@action/mint-intract';
+import { MintIntractV2Module } from '@action/mint-intract-v2';
 import { MintNftModule } from '@action/mint-nft';
 import { MintNovaNftModule } from '@action/mint-nova-nft';
 import { NewsModule } from '@action/news';
@@ -41,6 +42,7 @@ import { RegistryService } from './registry.service';
     MagicSwapModule,
     AgxModule,
     MintIntractModule,
+    MintIntractV2Module,
   ],
   providers: [RegistryService],
   exports: [RegistryService],

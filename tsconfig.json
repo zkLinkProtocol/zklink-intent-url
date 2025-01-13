@@ -149,6 +149,12 @@
       ],
       "@action/mint-intract/*": [
         "libs/mint-intract/src/*"
+      ],
+      "@action/mint-intract-v2": [
+        "libs/mint-intract-v2/src"
+      ],
+      "@action/mint-intract-v2/*": [
+        "libs/mint-intract-v2/src/*"
       ]
     }
   }
