@@ -773,6 +773,7 @@ export class ActionUrlController extends BaseController {
     @Param('code') code: string,
     @Res({ passthrough: true }) res: Response,
   ) {
+    this.logger.log(`Metadata: code ${code}`);
     res.setHeader(
       'Access-Control-Expose-Headers',
       'X-Action-Version,X-Blockchain-Ids',
@@ -788,6 +789,7 @@ export class ActionUrlController extends BaseController {
       },
     };
     const intention = await this.actionUrlService.findOneByCode(code);
+    this.logger.log(`Metadata: intention ${JSON.stringify(intention)}`);
     if (!intention) {
       // res.json(metadata);
       return {
@@ -799,6 +801,7 @@ export class ActionUrlController extends BaseController {
     }
     const chainId =
       (intention.settings as any)?.intentInfo?.network?.chainId ?? 0;
+    this.logger.log(`Metadata: chainId ${chainId}`);
     res.setHeader('X-Blockchain-Ids', `eip155:${chainId}`);
     res.setHeader('X-Action-Version', '2.1.3');
     metadata.icon = intention.metadata
@@ -811,6 +814,7 @@ export class ActionUrlController extends BaseController {
       code,
       intention.settings,
     );
+    this.logger.log(`Metadata: ${JSON.stringify(metadata)}`);
     // res.json(metadata);
     return metadata;
   }
