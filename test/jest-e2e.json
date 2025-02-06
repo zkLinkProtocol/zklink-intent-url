@@ -42,6 +42,8 @@
     "@action/agx/(.*)": "<rootDir>/../libs/agx/src/$1",
     "@action/agx": "<rootDir>/../libs/agx/src",
     "@action/mint-intract/(.*)": "<rootDir>/../libs/mint-intract/src/$1",
-    "@action/mint-intract": "<rootDir>/../libs/mint-intract/src"
+    "@action/mint-intract": "<rootDir>/../libs/mint-intract/src",
+    "@action/mint-intract-v2/(.*)": "<rootDir>/../libs/mint-intract-v2/src/$1",
+    "@action/mint-intract-v2": "<rootDir>/../libs/mint-intract-v2/src"
   }
 }
